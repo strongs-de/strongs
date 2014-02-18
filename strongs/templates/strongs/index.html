@@ -1,0 +1,97 @@
+<html>
+	<head>
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="/static/assets/css/bootstrap.min.css">
+		<link rel="stylesheet" href="/static/assets/css/bootstrap-theme.min.css">
+
+		<style type="text/css">
+	      body {
+	        padding-top: 20px;
+	        padding-bottom: 40px;
+	      }
+
+	      /* Custom container */
+	      .container-narrow {
+	        margin: 0 auto;
+	        max-width: 700px;
+	      }
+	      .container-narrow > hr {
+	        margin: 30px 0;
+	      }
+
+	      /* Main marketing message and sign up button */
+	      .jumbotron {
+	        margin: 60px 0;
+	        text-align: center;
+	      }
+	      .jumbotron h1 {
+	        font-size: 72px;
+	        line-height: 1;
+	      }
+	      .jumbotron .btn {
+	        font-size: 21px;
+	        padding: 14px 24px;
+	      }
+
+	      /* Supporting marketing content */
+	      .marketing {
+	        margin: 60px 0;
+	      }
+	      .marketing p + h4 {
+	        margin-top: 28px;
+	      }
+	      x {
+	      	color: #428bca;
+	      	cursor: pointer;
+	      }
+	      x:hover {
+	      	text-decoration: underline;
+	      }
+	    </style>
+	</head>
+	<body>
+		<div class="container-narrow" style='max-width:900px'>
+			<div class="masthead">
+				<ul class="nav nav-pills pull-right">
+					<li>
+						<form class="navbar-form" role="search" id="searchform">
+							<div class="form-group">
+								<input type="text" id="strong" class="form-control" placeholder="Strong Nummer">
+							</div>
+							<button type="submit" class="btn btn-large btn-success">Suchen</button>
+						</form>
+					</li>
+					<!--<li class="active"><a href="#">Home</a></li>
+					<li><a href="#">Über</a></li>
+					<li><a href="#">Kontakt</a></li>-->
+				</ul>
+				<h3 class="muted"><a href='{% url 'index' %}'><img src='/static/res/logo.png' width='200' /></a></h3>
+			</div>
+            <div>
+                <h1>Griechische Strong Informationen</h1>
+                Diese Seite ist aus dem Wunsch heraus entstanden, genauere Informationen über die griechischen Verben in
+                der Bibel zu erhalten. Insbesondere die Zeitform liefert interessante Informationen, welche den Inhalt
+                besser verstehen lassen.<br><br>
+                Da diese Informationen beispielsweise in dem CLeVer Bibelprogramm (auch mit der erweiterten Strong-Referenz)
+                nicht vorhanden sind, habe ich hiermit eine einfache Möglichkeit geschaffen, diese Informationen zugänglich
+                zu machen.<br><br>
+                Die Informationen zu den Wörtern entstammen folgender Quelle: <a href="http://morphgnt.org">http://morphgnt.org</a>
+                <br><br>
+                Bitte benutzen Sie einfach obiges Suchformular und geben dort die Strong-Nummer ein, oder gehen Sie direkt
+                auf die entsprechende Seite, indem Sie die Strong-Nummer der URL anfügen (z.B. <a href="{% url 'strongs' strong_id=4506%}">{% url 'strongs' strong_id=4506%}</a>)
+            </div>
+
+	    </div><!-- /.container -->
+
+
+	    <!-- Bootstrap core JavaScript
+	    ================================================== -->
+	    <!-- Placed at the end of the document so the pages load faster -->
+	    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+
+		<script src="/static/res/strongs.js"></script>
+	</body>
+</html>

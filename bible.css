@@ -1,0 +1,96 @@
+.navbar-inverse, .navbar-form, .navbar-collapse {
+	/*background-color: white;*/
+	/*background-color: #f7f4ea;*/
+	/*background-color: rgba(243,239,225,0.7);*/
+	/*background-color: rgba(247,244,234,0.5);*/
+	background-color: rgba(204,201,194,0.7);
+	border-radius:0px;
+	border-style: none;
+}
+.form-control, .btn {
+	border-color: #293a4a !important;
+	background-color: transparent !important;
+}
+.navbar-form {
+	background-color: transparent !important;
+}
+.bible1, .bible2, .bible3 {
+	border-right: 1px;
+}
+.container-full {
+  margin: 0 auto;
+  padding-left: 15px;
+  padding-right: 30px;
+  width: 100%;
+}
+.table-bible {
+	border:none;
+	border-collapse: collapse;
+}
+table.table-bible td, table.table-bible th {
+	/*border-left: 1px solid #000;*/
+	border-right: 1px solid #000;
+	vertical-align: top;
+}
+table td:last-child, table.table-bible th:last-child {
+	border-right: none;
+}
+th {
+    font-size:14pt;
+    color:rgb(91, 176, 91);
+}
+.verse {
+	padding-left:5px;
+	border-right: none !important;
+	font-size:13pt;
+}
+.versenr {
+	border-right: none !important;
+	font-size: 10pt;
+	padding-top: 3px;
+}
+body {
+	background-color: #f3efe1;
+	padding-top: 70px;
+	color: rgb(172, 168, 154);
+}
+.navbar {
+	padding-top: 10px;
+}
+.navbar-brand {
+	padding: 0px;
+}
+#searchId {
+	width: 400px;
+}
+gr:hover {
+    background-color: #dddddd;
+    cursor:pointer;
+}
+
+
+
+@media(max-width:1024px) {
+	table.table-bible td, table.table-bible th {
+		border-right: none;
+		padding: 0px 0px 0px 0px;
+	}
+	.versenr {
+		font-size: 10pt;
+		padding-top: 3px !important;
+	}
+	.verse {
+		padding-left: 5px !important;
+	}
+	.navbar-brand {
+		padding: 0px !important;
+	}
+	.navbar-form {
+		width: 100% !important;
+		margin: auto;
+	}
+	#searchId {
+		width: 100%;
+		margin: auto;
+	}
+}

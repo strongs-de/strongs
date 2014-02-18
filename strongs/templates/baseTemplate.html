@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="de" class="no-js">
+  <head>
+    <meta charset="utf-8">
+    <title>Strongs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <link href="{{ STATIC_URL }}images/iPhone5_splash.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="{{ STATIC_URL }}images/icon_iPhone5.png">
+
+    <!-- Loading Bootstrap -->
+    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" rel="stylesheet">
+
+    <!-- Loading Flat UI -->
+    <!--<link href="{{ STATIC_URL }}css/flat-ui.css" rel="stylesheet">-->
+    <link href="{{ STATIC_URL }}css/bible.css" rel="stylesheet">
+
+	<!-- MATTHIAS: Laden der Modernizr-Bibliothek. Muss im HEAD passieren -->
+	<script src="{{ STATIC_URL }}js/modernizr.custom.js"></script>
+
+    <link rel="shortcut icon" href="{{ STATIC_URL }}images/favicon.ico">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
+    <!--[if lt IE 9]>
+      <script src="{{ STATIC_URL }}js/html5shiv.js"></script>
+      <script src="{{ STATIC_URL }}js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+  	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="hidden-xs navbar-header">
+        <!--<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-02">
+          <span class="sr-only">Toggle navigation</span>
+        </button>-->
+        <a class="navbar-brand" href="#"><img src="{{ STATIC_URL }}images/logo.png" width="175" /></a>
+      </div>
+      <div class="navbar-collapse">
+        <form class="navbar-form navbar-left" id="searchform" action="#" role="search" style="width: 250px">
+          <div class="form-group">
+            <div class="input-group">
+              <input class="form-control" id="searchId" type="search" placeholder="Suchen (Bibelstelle oder Strong-Nummer)">
+              <span class="input-group-btn">
+                <button type="submit" class="btn"><span class="glyphicon glyphicon-search"></span></button>
+              </span>            
+            </div>
+          </div>               
+        </form>
+        <!-- <button data-effect="st-effect-1">Slide in on top</button> -->
+      </div>
+    </nav>
+    <div id="container-full" class="container-full">
+        <div class="col-md-3 sb-button" id="sb-button"></div> <!-- MATTHIAS: Button (rechts oben) für die SideBar -->
+		<nav id="sb-menu" class="sb-menu"></nav> <!-- MATTHIAS: NAV Container für die SideBar. Sollte in einzelne Bereich (divs) unterteilt werden -->
+
+        <div id="content">
+            {% block content %}
+            {% endblock %}
+        </div>
+
+
+
+
+
+    </div>
+    <!-- /.container -->
+
+
+    <!-- Load JS here for greater good =============================-->
+    <script src="{{ STATIC_URL }}js/jquery-1.8.3.min.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.ui.touch-punch.min.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-select.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-switch.js"></script>
+    <!--<script src="{{ STATIC_URL }}js/flatui-checkbox.js"></script>-->
+    <!--<script src="{{ STATIC_URL }}js/flatui-radio.js"></script>-->
+    <script src="{{ STATIC_URL }}js/jquery.tagsinput.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.placeholder.js"></script>
+    <script src="{{ STATIC_URL }}js/sidebarEffects.js"></script>
+    <script>
+        $('#searchform').submit(function(e) {
+            var path = '/' + $('#searchId').val();
+            location.href=path;
+            e.preventDefault();
+        });
+    </script>
+
+    {%if search %}
+        <script>
+            function highLight(substring, block) {
+               $(block).find(".search-highlight").each(function () {
+                  $(this).outerHtml($(this).html());
+               });
+               // now the block is free from previous highlights
+
+               $(block).html($(block).html().replace(/substring/g, '<span class="search-highlight">' + substring + '</span>'));
+            }
+
+            highLight("{{ search }}", "#content");
+        </script>
+    {% endif %}
+  </body>
+</html>
