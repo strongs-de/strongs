@@ -183,7 +183,7 @@ a {
 		margin: auto;
 	}
 	.sb-menu, .sb-button {
-	    visibility: hidden;
+	    /*visibility: hidden;*/
 	}
 	#searchform {
 	    padding-top:20px;
