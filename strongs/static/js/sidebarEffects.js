@@ -55,9 +55,12 @@ var SidebarMenuEffects = (function() {
 	
 	// MATTHIAS: Funktion wird aufgerufen, wenn eine Strong geklickt wurde
 	function loadStrong( strong ) {
-		// MATTHIAS: hier muss der Content vom Server nachgeladen werden
-		var menu = document.getElementById('sb-menu');
-		menu.innerHTML = strong + "<br /><br />Inhalt per AJAX vom Server noch nachladen";
+        var xhReq = new XMLHttpRequest();
+        xhReq.open("GET", "/strongs/" + strong, false);
+        xhReq.send(null);
+        var serverResponse = xhReq.responseText;
+        menu.innerHTML = "<h4>" + strong + "</h4>" + serverResponse;
+
 	}
 
 	function init() {
@@ -88,7 +91,7 @@ var SidebarMenuEffects = (function() {
 			
 			// Inhalt leeren
 			var menu = document.getElementById('sb-menu');
-			menu.innerHTML = '';
+			//menu.innerHTML = '';
 			
 			button.removeEventListener( eventtype, openSideBar );
 			button.addEventListener( eventtype, closeSideBar );

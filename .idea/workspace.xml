@@ -41,10 +41,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="baseTemplate.html" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="baseTemplate.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="42" column="85" selection-start="2126" selection-end="2126" vertical-scroll-proportion="0.16744186" vertical-offset="450" max-vertical-offset="1665">
+            <state line="42" column="85" selection-start="2126" selection-end="2126" vertical-scroll-proportion="-7.5" vertical-offset="450" max-vertical-offset="1665">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="sidebarEffects.js" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/strongs/static/js/sidebarEffects.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="93" column="14" selection-start="2469" selection-end="2469" vertical-scroll-proportion="0.59053683" vertical-offset="746" max-vertical-offset="1905">
               <folding />
             </state>
           </provider>
@@ -78,6 +87,7 @@
         <option value="$PROJECT_DIR$/strongs/urls.py" />
         <option value="$PROJECT_DIR$/strongs/views.py" />
         <option value="$PROJECT_DIR$/strongs/templates/baseTemplate.html" />
+        <option value="$PROJECT_DIR$/strongs/static/js/sidebarEffects.js" />
       </list>
     </option>
   </component>
@@ -181,6 +191,46 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Django_Strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Django_Strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="static" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Django_Strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Django_Strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="static" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="js" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -435,7 +485,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="42" column="85" selection-start="2126" selection-end="2126" vertical-scroll-proportion="0.16744186" vertical-offset="450" max-vertical-offset="1665">
+        <state line="42" column="85" selection-start="2126" selection-end="2126" vertical-scroll-proportion="-7.5" vertical-offset="450" max-vertical-offset="1665">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/static/js/sidebarEffects.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="93" column="14" selection-start="2469" selection-end="2469" vertical-scroll-proportion="0.59053683" vertical-offset="746" max-vertical-offset="1905">
           <folding />
         </state>
       </provider>
