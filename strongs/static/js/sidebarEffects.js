@@ -59,7 +59,7 @@ var SidebarMenuEffects = (function() {
         xhReq.open("GET", "/strongs/" + strong, false);
         xhReq.send(null);
         var serverResponse = xhReq.responseText;
-        menu.innerHTML = "<h4>" + strong + "</h4>" + serverResponse;
+        $('#sb-menu').html("<h4>" + strong + "</h4>" + serverResponse);
 
 	}
 
@@ -96,7 +96,19 @@ var SidebarMenuEffects = (function() {
 			button.removeEventListener( eventtype, openSideBar );
 			button.addEventListener( eventtype, closeSideBar );
 		};
+		$('.sb-strong').live('click', function(ev) {
+				ev.stopPropagation();
+				ev.preventDefault();
+				loadStrong($(this).attr('data-strong'));
+				container.className = 'container-full';
+				setTimeout( function() {
+					classie.addClass( container, 'sb-menu-open' );
+				}, 25 );
 
+				button.removeEventListener( eventtype, openSideBar );
+				button.addEventListener( eventtype, closeSideBar );
+			});
+/*
 		strongs.forEach( function( el, i ) {
 			var strong = el.getAttribute( 'data-strong' );
 
@@ -113,7 +125,7 @@ var SidebarMenuEffects = (function() {
 				button.addEventListener( eventtype, closeSideBar );
 			});
 		} );
-
+*/
 		button.addEventListener( eventtype, openSideBar );
 	}
 

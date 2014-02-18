@@ -1,5 +1,3 @@
-<ul>
-    {% for vers in verses %}
-        <li><a href="/{{ vers }}">{{ vers }}</a></li>
-    {% endfor %}
-</ul>
+{% for vers in verses %}
+<a href="/{{ vers }}">{{ vers }}</a>,
+{% endfor %}
