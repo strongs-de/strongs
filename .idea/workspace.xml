@@ -50,19 +50,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="baseTemplate.html" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="baseTemplate.html" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="8" column="107" selection-start="380" selection-end="380" vertical-scroll-proportion="-5.0" vertical-offset="0" max-vertical-offset="1680">
+            <state line="3" column="18" selection-start="74" selection-end="74" vertical-scroll-proportion="0.041860465" vertical-offset="0" max-vertical-offset="1695">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="bible.css" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="bible.css" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/static/css/bible.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="185" column="10" selection-start="3504" selection-end="3504" vertical-scroll-proportion="0.8498635" vertical-offset="1841" max-vertical-offset="2940">
+            <state line="185" column="10" selection-start="3504" selection-end="3504" vertical-scroll-proportion="0.0" vertical-offset="1841" max-vertical-offset="2940">
               <folding />
             </state>
           </provider>
@@ -106,8 +106,8 @@
         <option value="$PROJECT_DIR$/strongs/views.py" />
         <option value="$PROJECT_DIR$/strongs/static/js/sidebarEffects.js" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/strongNr.html" />
-        <option value="$PROJECT_DIR$/strongs/templates/baseTemplate.html" />
         <option value="$PROJECT_DIR$/strongs/static/css/bible.css" />
+        <option value="$PROJECT_DIR$/strongs/templates/baseTemplate.html" />
       </list>
     </option>
   </component>
@@ -524,16 +524,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate.html">
+    <entry file="file://$PROJECT_DIR$/strongs/static/css/bible.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="107" selection-start="380" selection-end="380" vertical-scroll-proportion="-5.0" vertical-offset="0" max-vertical-offset="1680">
+        <state line="185" column="10" selection-start="3504" selection-end="3504" vertical-scroll-proportion="0.0" vertical-offset="1841" max-vertical-offset="2940">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/static/css/bible.css">
+    <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="185" column="10" selection-start="3504" selection-end="3504" vertical-scroll-proportion="0.8498635" vertical-offset="1841" max-vertical-offset="2940">
+        <state line="3" column="18" selection-start="74" selection-end="74" vertical-scroll-proportion="0.041860465" vertical-offset="0" max-vertical-offset="1695">
           <folding />
         </state>
       </provider>
