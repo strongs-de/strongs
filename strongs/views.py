@@ -44,7 +44,7 @@ def bible(request, bible_book):
                     verses3 = BibleVers.objects.filter(translationIdentifier=tr3, bookNr=book, chapterNr=chapter)
                     verses4 = BibleVers.objects.filter(translationIdentifier=tr4, bookNr=book, chapterNr=chapter)
                     if verses1.count() > 0 and verses2.count() > 0 and verses3.count() > 0:
-                        return render(request, 'strongs/bible.html', {'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(verses1, verses2, verses3, verses4)})
+                        return render(request, 'strongs/bible.html', {'search': bible_book, 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(verses1, verses2, verses3, verses4)})
                     else:
                         return HttpResponse('No verses found')
                 else:
