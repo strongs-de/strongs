@@ -4,6 +4,7 @@ from strongs import views
 urlpatterns = patterns('',
     url(r'^$', views.index, name='index'),
     url(r'^strong/(?P<strong_id>\d+)/$', views.strongs, name='strongs'),
+    url(r'^initDb$', views.initDb, name='initDb'),
+    url(r'^initStrongGrammar$', views.initStrongGrammar, name='initStrongGrammar'),
     url(r'^(?P<bible_book>.+)/$', views.bible, name='bible'),
-    url(r'^initDb$', views.initDb, name='initDb')
 )

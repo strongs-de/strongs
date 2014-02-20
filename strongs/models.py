@@ -31,6 +31,9 @@ class BibleVers(models.Model):
 
 
 class StrongNr(models.Model):
-    strongNr = models.IntegerField(primary_key=True)
+    strongNr = models.IntegerField()
     bibleVers = models.ForeignKey("BibleVers")
+    grammar = models.CharField(max_length=20)
 
+    def __unicode__(self):
+        return str(self.strongNr) + ' = ' + self.grammar + ' in ' + self.bibleVers.__str__()

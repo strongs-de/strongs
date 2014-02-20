@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render
 from django.http import HttpResponse
-from models import BibleBook, BibleTranslation, BibleVers
+from models import BibleBook, BibleTranslation, BibleVers, StrongNr
 from django.db.models import Q
 import re
 import xml.etree.ElementTree as ElementTree
@@ -13,13 +13,19 @@ def index(request):
     return bible(request, 'joh1')
 
 def strongs(request, strong_id):
-    # Try to search for this strong number
-    search = "<gr str=\"" + str(strong_id) + "\""
-    search1 = BibleVers.objects.filter(versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
+    search1 = StrongNr.objects.filter(strongNr=strong_id)
     if search1.count() > 0:
         return render(request, 'strongs/strongNr.html', {'verses': search1})
     else:
         return HttpResponse('No verses found for strong nr ' + str(strong_id))
+
+    # Try to search for this strong number
+    # search = "<gr str=\"" + str(strong_id) + "\""
+    # search1 = BibleVers.objects.filter(versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
+    # if search1.count() > 0:
+    #     return render(request, 'strongs/strongNr.html', {'verses': search1})
+    # else:
+    #     return HttpResponse('No verses found for strong nr ' + str(strong_id))
 
 def bible(request, bible_book):
     # if strong-number, then forward
@@ -74,6 +80,18 @@ def element_to_string(element):
     # s = s.replace('</gr>', '</a>')
     return s
 
+def initStrongGrammar(request):
+    greekStrongVerses = BibleVers.objects.filter(versText__contains='<gr rmac=', translationIdentifier=BibleTranslation.objects.filter(identifier='GNTTR'))
+    s = 'initStrongGrammar: ' + str(greekStrongVerses.count()) + ' verses found!'
+    for vers in greekStrongVerses:
+        regex = re.compile("^.*rmac=\"(.*)\" str=\"(.*)\"", re.MULTILINE)
+        if regex is not None:
+            found = regex.findall(vers.versText)
+            for one in found:
+                strong = StrongNr(strongNr=int(one[1]), bibleVers=vers, grammar=one[0])
+                strong.save()
+    return HttpResponse(s)
+
 def initDb(request):
     s = 'Start parsing ...<br>'
 
@@ -84,7 +102,8 @@ def initDb(request):
     # FILE = './GER_ELB1905_STRONG.xml'
     # FILE = './GER_LUTH1912.xml'
     # FILE = './GER_ILGRDE.xml'
-    FILE = './GER_SCH2000.xml'
+    # FILE = './GER_SCH2000.xml'
+    FILE = './GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml'
 
     ####################################################
     # Insert bibles from zefanja xml
