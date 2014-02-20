@@ -57,7 +57,7 @@
       <file leaf-file-name="strongNr.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/strongNr.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="2" column="24" selection-start="72" selection-end="72" vertical-scroll-proportion="-1.25" vertical-offset="0" max-vertical-offset="135">
+            <state line="2" column="14" selection-start="62" selection-end="72" vertical-scroll-proportion="-1.25" vertical-offset="0" max-vertical-offset="135">
               <folding />
             </state>
           </provider>
@@ -128,9 +128,9 @@
         <option value="$PROJECT_DIR$/strongs/templates/strongs/bible.html" />
         <option value="$PROJECT_DIR$/strongs/urls.py" />
         <option value="$PROJECT_DIR$/strongs/templatetags/strongs_extras.py" />
-        <option value="$PROJECT_DIR$/strongs/templates/strongs/strongNr.html" />
         <option value="$PROJECT_DIR$/strongs/models.py" />
         <option value="$PROJECT_DIR$/strongs/views.py" />
+        <option value="$PROJECT_DIR$/strongs/templates/strongs/strongNr.html" />
         <option value="$PROJECT_DIR$/strongs/templates/baseTemplate.html" />
       </list>
     </option>
@@ -558,13 +558,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/strongNr.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="24" selection-start="72" selection-end="72" vertical-scroll-proportion="-1.25" vertical-offset="0" max-vertical-offset="135">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="26" column="45" selection-start="1088" selection-end="1088" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="660">
@@ -578,6 +571,13 @@
           <folding>
             <element signature="e#24#59#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/strongNr.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="14" selection-start="62" selection-end="72" vertical-scroll-proportion="-1.25" vertical-offset="0" max-vertical-offset="135">
+          <folding />
         </state>
       </provider>
     </entry>
