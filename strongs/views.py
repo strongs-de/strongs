@@ -13,9 +13,9 @@ def index(request):
     return bible(request, 'joh1')
 
 def strongs(request, strong_id, vers):
-    search = "<gr str=\"" + str(strong_id) + "\""
-    search1 = BibleVers.objects.filter(versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
-    # search1 = StrongNr.objects.filter(strongNr=strong_id)
+    # search = "<gr str=\"" + str(strong_id) + "\""
+    # search1 = BibleVers.objects.filter(versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
+    search1 = StrongNr.objects.filter(strongNr=strong_id)
     if search1.count() > 0:
         vers = vers.replace('_', ',')
         regex = re.compile("([0-9]?.? ?[a-zA-Z]+)\s?([0-9]+)?,?([0-9]+)?")
