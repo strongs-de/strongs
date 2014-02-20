@@ -24,14 +24,14 @@ class BibleVers(models.Model):
     bookNr = models.ForeignKey("BibleBook")
     chapterNr = models.IntegerField()
     versNr = models.IntegerField()
-    versText = models.TextField()
+    versText = models.TextField(db_index=True)
 
     def __unicode__(self):
         return str(self.bookNr.__str__()) + ' ' + str(self.chapterNr) + ',' + str(self.versNr)
 
 
 class StrongNr(models.Model):
-    strongNr = models.IntegerField()
+    strongNr = models.IntegerField(db_index=True)
     bibleVers = models.ForeignKey("BibleVers")
     grammar = models.CharField(max_length=20)
 

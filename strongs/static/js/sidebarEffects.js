@@ -56,6 +56,7 @@ var SidebarMenuEffects = (function() {
 	// MATTHIAS: Funktion wird aufgerufen, wenn eine Strong geklickt wurde
 	function loadStrong( strong, vers ) {
         var xhReq = new XMLHttpRequest();
+        xhReq.timeout = 30000;
         xhReq.open("GET", "/strong/" + strong + "/" + vers, false);
         xhReq.send(null);
         var serverResponse = xhReq.responseText;
