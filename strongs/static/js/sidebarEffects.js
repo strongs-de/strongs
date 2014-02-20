@@ -109,7 +109,7 @@ var SidebarMenuEffects = (function() {
 				button.addEventListener( eventtype, closeSideBar );
 			};
 		$('.sb-strong').live('click', clickfunc);
-		$('.sb-strong').live('touchend', clickfunc);
+		// $('.sb-strong').live('touchend', clickfunc);
 /*
 		strongs.forEach( function( el, i ) {
 			var strong = el.getAttribute( 'data-strong' );
