@@ -10,4 +10,4 @@ register = template.Library()
 @register.filter
 @stringfilter
 def correctverstext(value):
-    return value.replace("<STYLE css=", "<span style=").replace("</STYLE>", "</span>").replace("<gr str=", "<span class='sb-strong' rel='tooltip' title='test' data-placement='top' data-strong=").replace("</gr>", "</span>")
+    return value.replace("<STYLE css=", "<span style=").replace("</STYLE>", "</span>").replace("<gr str=", "<span class='sb-strong' onclick='' rel='tooltip' title='test' data-placement='top' data-strong=").replace("</gr>", "</span>")

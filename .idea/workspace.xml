@@ -66,7 +66,7 @@
       <file leaf-file-name="baseTemplate.html" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="3" column="18" selection-start="74" selection-end="74" vertical-scroll-proportion="0.041860465" vertical-offset="0" max-vertical-offset="1710">
+            <state line="3" column="17" selection-start="73" selection-end="73" vertical-scroll-proportion="0.041860465" vertical-offset="0" max-vertical-offset="1710">
               <folding />
             </state>
           </provider>
@@ -84,7 +84,7 @@
       <file leaf-file-name="strongs_extras.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templatetags/strongs_extras.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="12" column="135" selection-start="339" selection-end="339" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="270">
+            <state line="12" column="143" selection-start="347" selection-end="347" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="270">
               <folding />
             </state>
           </provider>
@@ -124,13 +124,13 @@
         <option value="$PROJECT_DIR$/strongs/templates/strongs/index.html" />
         <option value="$PROJECT_DIR$/strongs/static/js/sidebarEffects.js" />
         <option value="$PROJECT_DIR$/strongs/static/css/bible.css" />
-        <option value="$PROJECT_DIR$/strongs/templatetags/strongs_extras.py" />
         <option value="$PROJECT_DIR$/strongs/models.py" />
         <option value="$PROJECT_DIR$/strongs/admin.py" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/bible.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/strongNr.html" />
         <option value="$PROJECT_DIR$/strongs/urls.py" />
         <option value="$PROJECT_DIR$/strongs/views.py" />
+        <option value="$PROJECT_DIR$/strongs/templatetags/strongs_extras.py" />
         <option value="$PROJECT_DIR$/strongs/templates/baseTemplate.html" />
       </list>
     </option>
@@ -523,13 +523,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templatetags/strongs_extras.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="135" selection-start="339" selection-end="339" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="270">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/static/js/sidebarEffects.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="58" column="46" selection-start="1434" selection-end="1440" vertical-scroll-proportion="0.28480437" vertical-offset="557" max-vertical-offset="2085">
@@ -547,13 +540,6 @@
     <entry file="file://$PROJECT_DIR$/strongs/urls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="5" column="49" selection-start="189" selection-end="189" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="210">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bible.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="164" selection-start="619" selection-end="676" vertical-scroll-proportion="-8.125" vertical-offset="0" max-vertical-offset="405">
           <folding />
         </state>
       </provider>
@@ -581,9 +567,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bible.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="13" column="164" selection-start="619" selection-end="676" vertical-scroll-proportion="-8.125" vertical-offset="0" max-vertical-offset="405">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templatetags/strongs_extras.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="12" column="143" selection-start="347" selection-end="347" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="270">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="18" selection-start="74" selection-end="74" vertical-scroll-proportion="0.041860465" vertical-offset="0" max-vertical-offset="1710">
+        <state line="3" column="17" selection-start="73" selection-end="73" vertical-scroll-proportion="0.041860465" vertical-offset="0" max-vertical-offset="1710">
           <folding />
         </state>
       </provider>
