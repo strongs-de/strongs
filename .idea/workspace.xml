@@ -32,10 +32,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="views.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="views.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="18" column="15" selection-start="680" selection-end="680" vertical-scroll-proportion="0.24861878" vertical-offset="0" max-vertical-offset="2925">
+            <state line="18" column="15" selection-start="680" selection-end="680" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2925">
               <folding>
                 <element signature="e#24#59#0" expanded="true" />
               </folding>
@@ -63,10 +63,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="baseTemplate.html" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="baseTemplate.html" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="3" column="17" selection-start="73" selection-end="73" vertical-scroll-proportion="-1.875" vertical-offset="0" max-vertical-offset="1710">
+            <state line="3" column="18" selection-start="74" selection-end="74" vertical-scroll-proportion="0.041860465" vertical-offset="0" max-vertical-offset="1710">
               <folding />
             </state>
           </provider>
@@ -128,10 +128,10 @@
         <option value="$PROJECT_DIR$/strongs/templates/strongs/bible.html" />
         <option value="$PROJECT_DIR$/strongs/urls.py" />
         <option value="$PROJECT_DIR$/strongs/templatetags/strongs_extras.py" />
-        <option value="$PROJECT_DIR$/strongs/templates/baseTemplate.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/strongNr.html" />
         <option value="$PROJECT_DIR$/strongs/models.py" />
         <option value="$PROJECT_DIR$/strongs/views.py" />
+        <option value="$PROJECT_DIR$/strongs/templates/baseTemplate.html" />
       </list>
     </option>
   </component>
@@ -558,13 +558,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="17" selection-start="73" selection-end="73" vertical-scroll-proportion="-1.875" vertical-offset="0" max-vertical-offset="1710">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/strongNr.html">
       <provider selected="true" editor-type-id="text-editor">
         <state line="2" column="24" selection-start="72" selection-end="72" vertical-scroll-proportion="-1.25" vertical-offset="0" max-vertical-offset="135">
@@ -581,10 +574,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="15" selection-start="680" selection-end="680" vertical-scroll-proportion="0.24861878" vertical-offset="0" max-vertical-offset="2925">
+        <state line="18" column="15" selection-start="680" selection-end="680" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2925">
           <folding>
             <element signature="e#24#59#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="3" column="18" selection-start="74" selection-end="74" vertical-scroll-proportion="0.041860465" vertical-offset="0" max-vertical-offset="1710">
+          <folding />
         </state>
       </provider>
     </entry>
