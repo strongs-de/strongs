@@ -54,9 +54,9 @@ var SidebarMenuEffects = (function() {
 	}
 	
 	// MATTHIAS: Funktion wird aufgerufen, wenn eine Strong geklickt wurde
-	function loadStrong( strong ) {
+	function loadStrong( strong, vers ) {
         var xhReq = new XMLHttpRequest();
-        xhReq.open("GET", "/strongs/" + strong, false);
+        xhReq.open("GET", "/strong/" + strong + "/" + vers, false);
         xhReq.send(null);
         var serverResponse = xhReq.responseText;
         $('#sb-menu').html("<h4>" + strong + "</h4>" + serverResponse);
@@ -96,10 +96,10 @@ var SidebarMenuEffects = (function() {
 			button.removeEventListener( eventtype, openSideBar );
 			button.addEventListener( eventtype, closeSideBar );
 		};
-		$('.sb-strong').live('click', function(ev) {
+		function clickfunc(ev) {
 				ev.stopPropagation();
 				ev.preventDefault();
-				loadStrong($(this).attr('data-strong'));
+				loadStrong($(this).attr('data-strong'), $(this).parent().attr('id'));
 				container.className = 'container-full';
 				setTimeout( function() {
 					classie.addClass( container, 'sb-menu-open' );
@@ -107,7 +107,9 @@ var SidebarMenuEffects = (function() {
 
 				button.removeEventListener( eventtype, openSideBar );
 				button.addEventListener( eventtype, closeSideBar );
-			});
+			};
+		$('.sb-strong').live('click', clickfunc);
+		$('.sb-strong').live('touchend', clickfunc);
 /*
 		strongs.forEach( function( el, i ) {
 			var strong = el.getAttribute( 'data-strong' );

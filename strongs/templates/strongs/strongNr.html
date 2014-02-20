@@ -1,3 +1,4 @@
-{% for vers in verses %}
-<a href="/{{ vers.bibleVers }}">{{ vers.bibleVers }}</a>,
+<h5>Stelle: {{vers}}</h5>
+{% for v in verses %}
+<a href="/{{ v.bibleVers }}">{{ v.bibleVers }}</a>,
 {% endfor %}

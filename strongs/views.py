@@ -12,12 +12,24 @@ from itertools import izip_longest
 def index(request):
     return bible(request, 'joh1')
 
-def strongs(request, strong_id):
+def strongs(request, strong_id, vers):
     search1 = StrongNr.objects.filter(strongNr=strong_id)
     if search1.count() > 0:
-        return render(request, 'strongs/strongNr.html', {'verses': search1})
-    else:
-        return HttpResponse('No verses found for strong nr ' + str(strong_id))
+        vers = vers.replace('_', ',')
+        regex = re.compile("([0-9]?.? ?[a-zA-Z]+)\s?([0-9]+)?,?([0-9]+)?")
+        if regex is not None:
+            v = regex.search(vers)
+            if v is not None and len(v.groups()) > 0:
+                n1 = v.group(0)
+                n1 = v.group(1)
+                n1 = v.group(2)
+                book = BibleBook.objects.filter(name=v.group(1))
+                bvers = BibleVers.objects.filter(bookNr=book, chapterNr=v.group(2), versNr=v.group(3))
+                search2 = StrongNr.objects.filter(bibleVers=bvers, strongNr=strong_id)
+                if search2.count() > 0:
+                    vers = vers + ' Grammatik: ' + search2[0].grammar
+            return render(request, 'strongs/strongNr.html', {'verses': search1, 'vers': vers})
+    return HttpResponse('No verses found for strong nr ' + str(strong_id))
 
     # Try to search for this strong number
     # search = "<gr str=\"" + str(strong_id) + "\""
