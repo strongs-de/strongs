@@ -120,16 +120,16 @@ a {
 	right: -2px;
 	z-index: 1040;
 	width: 40px;
-	height: 80px;
+	height: 40px;
 	background: #48a770;
 	-webkit-transition: all 0.6s;
 	transition: all 0.6s;
-	border-top-left-radius: 40px 40px;
+	/*border-top-left-radius: 40px 40px;
 	border-bottom-left-radius: 40px 40px;
 	-webkit-border-top-left-radius: 40px 40px;
 	-webkit-border-bottom-left-radius: 40px 40px;
 	-moz-border-radius-topleft: 40px 40px;
-	-moz-border-radius-bottomleft: 40px 40px;
+	-moz-border-radius-bottomleft: 40px 40px;*/
 	background-image:url('../images/left.png');
 	background-repeat:no-repeat;
 	background-position: center center;

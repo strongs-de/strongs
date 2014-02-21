@@ -63,10 +63,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="baseTemplate.html" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="baseTemplate.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="3" column="18" selection-start="74" selection-end="74" vertical-scroll-proportion="0.041860465" vertical-offset="0" max-vertical-offset="1710">
+            <state line="3" column="18" selection-start="74" selection-end="74" vertical-scroll-proportion="-1.875" vertical-offset="0" max-vertical-offset="1710">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="settings.py" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Django_Strongs/settings.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="62" column="0" selection-start="1704" selection-end="1704" vertical-scroll-proportion="0.44040036" vertical-offset="446" max-vertical-offset="1650">
               <folding />
             </state>
           </provider>
@@ -118,7 +127,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/Django_Strongs/settings.py" />
         <option value="$PROJECT_DIR$/Django_Strongs/urls.py" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/strongs.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/index.html" />
@@ -132,6 +140,7 @@
         <option value="$PROJECT_DIR$/strongs/views.py" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/strongNr.html" />
         <option value="$PROJECT_DIR$/strongs/templates/baseTemplate.html" />
+        <option value="$PROJECT_DIR$/Django_Strongs/settings.py" />
       </list>
     </option>
   </component>
@@ -293,6 +302,20 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="css" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Django_Strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Django_Strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Django_Strongs" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -474,13 +497,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/strongs/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="63" selection-start="763" selection-end="763" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="585">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/views.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="28" column="25" selection-start="884" selection-end="884" vertical-scroll-proportion="0.0" vertical-offset="420" max-vertical-offset="960">
@@ -583,7 +599,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="18" selection-start="74" selection-end="74" vertical-scroll-proportion="0.041860465" vertical-offset="0" max-vertical-offset="1710">
+        <state line="3" column="18" selection-start="74" selection-end="74" vertical-scroll-proportion="-1.875" vertical-offset="0" max-vertical-offset="1710">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Django_Strongs/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="62" column="0" selection-start="1704" selection-end="1704" vertical-scroll-proportion="0.44040036" vertical-offset="446" max-vertical-offset="1650">
           <folding />
         </state>
       </provider>

@@ -61,6 +61,13 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
 
+        # 'ENGINE': 'django.db.backends.mysql',
+        # 'NAME': 'web65_dbstrongs',
+        # 'USER': 'web65_dbstrongs',
+        # 'PASSWORD': 'coudjesh2',
+        # 'HOST': 'fcg-weiden.de',
+        # 'PORT': '3306'
+
         # 'ENGINE': 'mysql_pymysql',
         # 'NAME': 'strongs',
         # 'HOST': 'umnn0x2ci0.database.windows.net',
