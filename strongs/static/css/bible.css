@@ -81,7 +81,7 @@ a {
 
 .sb-menu {
 	position: fixed;
-	top: 0px;
+	top: 53px;
 	right: 0;
 	z-index: 1041;
 	width: 300px;
@@ -116,7 +116,7 @@ a {
 
 .sb-button {
 	position: fixed;
-	top: 0px;
+	top: 53px;
 	right: -2px;
 	z-index: 1040;
 	width: 40px;
