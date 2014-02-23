@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from models import BibleBook, BibleTranslation, BibleVers, StrongNr
 from django.db.models import Q
+from initDb import *
 import re
 import xml.etree.ElementTree as ElementTree
 from itertools import izip_longest
@@ -22,15 +23,12 @@ def strongs(request, strong_id, vers):
         if regex is not None:
             v = regex.search(vers)
             if v is not None and len(v.groups()) > 0:
-                n1 = v.group(0)
-                n1 = v.group(1)
-                n1 = v.group(2)
                 book = BibleBook.objects.filter(name=v.group(1))
                 bvers = BibleVers.objects.filter(bookNr=book, chapterNr=v.group(2), versNr=v.group(3))
                 search2 = StrongNr.objects.filter(bibleVers=bvers, strongNr=strong_id)
                 if search2.count() > 0:
                     vers = vers + ' Grammatik: ' + search2[0].grammar
-            return render(request, 'strongs/strongNr.html', {'verses': search1, 'vers': vers})
+            return render(request, 'strongs/strongNr.html', {'verses': search1[0:100], 'vers': vers, 'count': search1.count()})
     return HttpResponse('No verses found for strong nr ' + str(strong_id))
 
     # Try to search for this strong number
@@ -50,9 +48,9 @@ def bible(request, bible_book):
     if regex is not None:
         s = regex.search(bible_book)
         if s is not None and len(s.groups()) > 0:
-            book = BibleBook.objects.filter(Q(name__iexact=s.group(1)) | Q(alternativeNames__icontains=s.group(1) + ','))
+            book = BibleBook.objects.filter(Q(name__iexact=s.group(1)) | Q(short_name__iexact=s.group(1)) | Q(alternativeNames__icontains=s.group(1) + ','))
             chapter = s.group(2) or 1
-            vers = s.group(3)
+            # vers = s.group(3)
             if book.count() > 0:
                 tr1 = BibleTranslation.objects.filter(identifier='ELB1905STR')
                 tr2 = BibleTranslation.objects.filter(identifier='SCH2000NEU')
@@ -94,97 +92,10 @@ def element_to_string(element):
     # s = s.replace('</gr>', '</a>')
     return s
 
-def initStrongGrammar(request):
-    greekStrongVerses = BibleVers.objects.filter(versText__contains='<gr rmac=', translationIdentifier=BibleTranslation.objects.filter(identifier='GNTTR'))
-    s = 'initStrongGrammar: ' + str(greekStrongVerses.count()) + ' verses found!'
-    for vers in greekStrongVerses:
-        regex = re.compile("^.*rmac=\"(.*)\" str=\"(.*)\"", re.MULTILINE)
-        if regex is not None:
-            found = regex.findall(vers.versText)
-            for one in found:
-                strong = StrongNr(strongNr=int(one[1]), bibleVers=vers, grammar=one[0])
-                strong.save()
-    return HttpResponse(s)
 
 def initDb(request):
-    s = 'Start parsing ...<br>'
-
-    ####################################################
-    # Insert book names if they does not exist
-
-    # FILE = './GER_SCH1951_STRONG.xml'
-    # FILE = './GER_ELB1905_STRONG.xml'
-    # FILE = './GER_LUTH1912.xml'
-    # FILE = './GER_ILGRDE.xml'
-    # FILE = './GER_SCH2000.xml'
-    FILE = './GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml'
-
-    ####################################################
-    # Insert bibles from zefanja xml
-    baum = ElementTree.parse(FILE)
-    root = baum.getroot()
-    identifier = root.findtext('INFORMATION/identifier')
-    language = root.findtext('INFORMATION/language')
-    title = root.findtext('INFORMATION/title')
-
-    # Ask if this translation does already exist
-    tr = BibleTranslation.objects.filter(identifier=identifier)
-    if tr.count() <= 0:
-        tr = BibleTranslation(identifier=identifier, name=title, language=language)
-        tr.save()
-        s += ' -> created new translation ' + identifier + '.<br>'
-    else:
-        tr = tr[0]
-
-    # Insert verses
-    for book in root.findall('BIBLEBOOK'):
-        chapterCount = 0
-
-        # Does this book already exist
-        tb = BibleBook.objects.filter(nr=book.get('bnumber'))
-        if tb.count() <= 0:
-            tb = BibleBook(nr=int(book.get('bnumber')), name='', alternativeNames='')
-            tb.save()
-        else:
-            tb = tb[0]
-
-        for chapter in book.findall('CHAPTER'):
-            chapterCount += 1
-            versCount = 0
-            for vers in chapter.findall("VERS"):
-                versCount += 1
-                dbVers = BibleVers(translationIdentifier=tr, bookNr=tb, chapterNr=chapter.get('cnumber'), versNr=vers.get('vnumber'), versText=element_to_string(vers))
-                dbVers.save()
-        s += ' -> inserted book nr ' + book.get('bnumber') + ' with ' + str(chapterCount)  + ' chapters and ' + str(versCount) + ' verses.<br>'
-
-
-
-    # for node in root.getchildren():
-    #     tag_schluessel = node.find("schluessel")
-    #     tag_wert = node.find("wert")
-    #     d[_lese_text(tag_schluessel)] = _lese_text(tag_wert)
-
-
-    ####################################################
-    ## TISCH WORDS
-    # for f in os.listdir('./books'):
-    #     if f.endswith('.TSP'):
-    #         with open('./books/' + f, 'r') as file:
-    #             for line in file:
-    #                 arr = line.split(' ')
-    #                 tisch = TischWord()
-    #
-    #                 tisch.book = arr[0]
-    #                 psarr = arr[1].split(':')
-    #                 tisch.chapter = psarr[0]
-    #                 psarr = psarr[1].split('.')
-    #                 tisch.verse = psarr[0]
-    #                 tisch.word = psarr[1]
-    #                 tisch.spelling = arr[3]
-    #                 tisch.morphology = arr[5]
-    #                 tisch.strong_nr = arr[6]
-    #                 tisch.save()
-    #         s += f + '<br>'
-    ####################################################
-
+    s = ''
+    # s += insert_bible_vers()
+    # s += init_strong_nr()     TODO: did not work till the end!
+    s += init_bible_books()
     return HttpResponse(s)
