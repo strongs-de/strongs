@@ -3,10 +3,11 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from models import BibleBook, BibleTranslation, BibleVers, StrongNr
 from django.db.models import Q
-from initDb import *
+from initDb import init_bible_books, insert_bible_vers, init_strong_grammar
 import re
 import xml.etree.ElementTree as ElementTree
 from itertools import izip_longest
+from django.db.models import Max
 
 
 # Create your views here.
@@ -50,8 +51,13 @@ def bible(request, bible_book):
         if s is not None and len(s.groups()) > 0:
             book = BibleBook.objects.filter(Q(name__iexact=s.group(1)) | Q(short_name__iexact=s.group(1)) | Q(alternativeNames__icontains=s.group(1) + ','))
             chapter = s.group(2) or 1
-            # vers = s.group(3)
             if book.count() > 0:
+                # verify that the chapter is > 1, else select the previous book
+                if int(chapter) < 1 and book[0].nr > 1:
+                    book = BibleBook.objects.filter(nr=book[0].nr - 1)
+                    # get the last chapter for this book
+                    chapter = BibleVers.objects.filter(bookNr=book).aggregate(Max('chapterNr'))
+                    chapter = chapter['chapterNr__max']
                 tr1 = BibleTranslation.objects.filter(identifier='ELB1905STR')
                 tr2 = BibleTranslation.objects.filter(identifier='SCH2000NEU')
                 tr3 = BibleTranslation.objects.filter(identifier='LUTH1912')
@@ -62,9 +68,19 @@ def bible(request, bible_book):
                     verses3 = BibleVers.objects.filter(translationIdentifier=tr3, bookNr=book, chapterNr=chapter)
                     verses4 = BibleVers.objects.filter(translationIdentifier=tr4, bookNr=book, chapterNr=chapter)
                     if verses1.count() > 0 and verses2.count() > 0 and verses3.count() > 0:
-                        return render(request, 'strongs/bible.html', {'search': bible_book, 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(verses1, verses2, verses3, verses4)})
-                    else:
-                        return HttpResponse('No verses found')
+                        return render(request, 'strongs/bible.html', {'search': book[0].name + ' ' + str(chapter), 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(verses1, verses2, verses3, verses4)})
+                    elif book[0].nr < 66:
+                        # try the next first chapter
+                        book = BibleBook.objects.filter(nr=book[0].nr + 1)
+                        chapter = 1
+                        verses1 = BibleVers.objects.filter(translationIdentifier=tr1, bookNr=book, chapterNr=chapter)
+                        verses2 = BibleVers.objects.filter(translationIdentifier=tr2, bookNr=book, chapterNr=chapter)
+                        verses3 = BibleVers.objects.filter(translationIdentifier=tr3, bookNr=book, chapterNr=chapter)
+                        verses4 = BibleVers.objects.filter(translationIdentifier=tr4, bookNr=book, chapterNr=chapter)
+                        if verses1.count() > 0 and verses2.count() > 0 and verses3.count() > 0:
+                            return render(request, 'strongs/bible.html', {'search': book[0].name + ' ' + str(chapter), 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(verses1, verses2, verses3, verses4)})
+                        else:
+                            return HttpResponse('No verses found')
                 else:
                     return HttpResponse('No translation found')
             else:
@@ -95,7 +111,7 @@ def element_to_string(element):
 
 def initDb(request):
     s = ''
-    # s += insert_bible_vers()
-    # s += init_strong_nr()     TODO: did not work till the end!
+    s += insert_bible_vers()
+    s += init_strong_grammar()     # TODO: did not work till the end!
     s += init_bible_books()
     return HttpResponse(s)

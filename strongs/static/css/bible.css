@@ -59,7 +59,7 @@ body {
 	padding: 0px;
 }
 #searchId {
-	width: 400px;
+	width: 300px;
 }
 gr:hover {
     background-color: #dddddd;
@@ -73,6 +73,20 @@ a {
 .search-highlight {
     background-color: rgba(0,255,255,128);
     color:red;
+}
+
+.navbar-nav {
+	margin-left: 120px;
+	float:left;
+}
+.navbar-nav, .navbar-nav>li {
+	display: inline;
+	float: left;
+}
+
+.navbar-form {
+	width: 250px;
+	float:left;
 }
 
 
@@ -159,7 +173,7 @@ a {
 
 
 
-@media(max-width:1024px) {
+@media(max-width:768px) {
 	table.table-bible td, table.table-bible th {
 		border-right: none;
 		padding: 0px 0px 0px 0px;
@@ -171,22 +185,25 @@ a {
 	.verse {
 		padding-left: 5px !important;
 	}
-	.navbar-brand {
-		padding: 0px !important;
-	}
 	.navbar-form {
-		width: 100% !important;
-		margin: auto;
+		margin:0;
 	}
-	#searchId {
-		width: 100%;
-		margin: auto;
-	}
+	/*.navbar-brand {*/
+		/*padding: 0px !important;*/
+	/*}*/
 	.sb-menu, .sb-button {
-		margin-top:15px;
+		margin-top:5px;
 	    /*visibility: hidden;*/
 	}
-	#searchform {
-	    padding-top:20px;
-	}
+	/*#searchId {*/
+		/*width: 100%;*/
+		/*margin: auto;*/
+	/*}*/
+	/*#searchform {*/
+	    /*padding-top:20px;*/
+	/*}*/
+	/*.navbar-form {*/
+		/*width: 80% !important;*/
+		/*margin: auto;*/
+	/*}*/
 }

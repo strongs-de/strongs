@@ -31,11 +31,12 @@
     <![endif]-->
   </head>
   <body>
+  <!--
   	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="hidden-xs navbar-header">
-        <!--<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-02">
+        <!- -<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-02">
           <span class="sr-only">Toggle navigation</span>
-        </button>-->
+        </button>- ->
         <a class="navbar-brand" href="#"><img src="{{ STATIC_URL }}images/logo.png" width="175" /></a>
       </div>
       <div class="navbar-collapse">
@@ -45,12 +46,42 @@
               <input class="form-control" id="searchId" type="search" value="{{search}}" placeholder="Suchen (Bibelstelle oder Strong-Nummer)">
               <span class="input-group-btn">
                 <button type="submit" class="btn"><span class="glyphicon glyphicon-search"></span></button>
-              </span>            
+              </span>
             </div>
-          </div>               
+          </div>
         </form>
-        <!-- <button data-effect="st-effect-1">Slide in on top</button> -->
+          <div class="btn-group navbar-left">
+            <button type="button" class="btn btn-default">Left</button>
+            <button type="button" class="btn btn-default">Middle</button>
+            <button type="button" class="btn btn-default">Right</button>
+          </div>
       </div>
+    </nav>-->
+    <nav class="navbar navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header hidden-xs">
+          <a class="navbar-brand" href="#"><img src="{{ STATIC_URL }}images/logo.png" width="175" /></a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="navbar-collapse">
+          <form class="navbar-form navbar-left" id="searchform" action="#" role="search">
+            <div class="form-group">
+              <div class="input-group">
+                <input class="form-control" id="searchId" type="search" value="{{search}}" placeholder="Suchen (Bibelstelle oder Strong-Nummer)">
+                <span class="input-group-btn">
+                  <button type="submit" class="btn"><span class="glyphicon glyphicon-search"></span></button>
+                </span>
+              </div>
+            </div>
+          </form>
+          <ul class="nav navbar-nav">
+            <li><a href="#" id='prev_chapter'><span class="glyphicon glyphicon-chevron-left"></span></a></li>
+            <li><a href="#" id='next_chapter'><span class="glyphicon glyphicon-chevron-right"></span></a></li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
     </nav>
     <div id="container-full" class="container-full">
         <div class="col-md-3 sb-button" id="sb-button"></div> <!-- MATTHIAS: Button (rechts oben) für die SideBar -->
@@ -87,7 +118,24 @@
             location.href=path;
             e.preventDefault();
         });
-        $('span[data-strong]').tooltip({placement:'top',selector:'', container:'body'});
+        // $('span[data-strong]').tooltip({placement:'top',selector:'', container:'body'});
+        $('#next_chapter').click(function(e) {
+          var val = $('#searchId').val();
+          arr = val.split(' ');
+          if(arr.length == 2)
+            $('#searchId').val(arr[0] + ' ' + (parseInt(arr[1]) + 1));
+          var path = '/' + $('#searchId').val();
+          location.href=path;
+        })
+        $('#prev_chapter').click(function(e) {
+          var val = $('#searchId').val();
+          arr = val.split(' ');
+          if(arr.length == 2) {
+            $('#searchId').val(arr[0] + ' ' + (parseInt(arr[1]) - 1));
+          }
+          var path = '/' + $('#searchId').val();
+          location.href=path;
+        })
     </script>
 
     {%if search %}

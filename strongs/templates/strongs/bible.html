@@ -4,8 +4,8 @@
         <tr>
             <th class="col-md-3">{{translation1}}</th>
             <th class="col-md-3 hidden-xs">{{translation2}}</th>
-            <th class="col-md-3 hidden-xs">{{translation3}}</th>
-            <th class="col-md-3 hidden-xs">{{translation4}}</th>
+            <th class="col-md-3 hidden-xs hidden-sm hidden-md">{{translation3}}</th>
+            <th class="col-md-3 hidden-xs hidden-sm hidden-md">{{translation4}}</th>
         </tr>
         {% for vers1, vers2, vers3, vers4 in verses %}
         <tr>
@@ -13,8 +13,8 @@
             {% load strongs_extras %}
             <td class="col-md-3"><table><tr><td class="versenr">{{vers1.versNr}}</td><td class="verse" id="{{vers1.bookNr.name}}{{vers1.chapterNr}}_{{vers1.versNr}}">{{vers1.versText|correctverstext}}</td></tr></table></td>
             <td class="col-md-3 hidden-xs"><table><tr><td class="versenr">{{vers2.versNr}}</td><td class="verse" id="{{vers2.bookNr.name}}{{vers2.chapterNr}}_{{vers2.versNr}}">{{vers2.versText|correctverstext}}</td></tr></table></td>
-            <td class="col-md-3 hidden-xs"><table><tr><td class="versenr">{{vers3.versNr}}</td><td class="verse" id="{{vers3.bookNr.name}}{{vers3.chapterNr}}_{{vers3.versNr}}">{{vers3.versText|correctverstext}}</td></tr></table></td>
-            <td class="col-md-3 hidden-xs"><table><tr><td class="versenr">{{vers4.versNr}}</td><td class="verse" id="{{vers4.bookNr.name}}{{vers4.chapterNr}}_{{vers4.versNr}}">{{vers4.versText|correctverstext}}</td></tr></table></td>
+            <td class="col-md-3 hidden-xs hidden-sm hidden-md"><table><tr><td class="versenr">{{vers3.versNr}}</td><td class="verse" id="{{vers3.bookNr.name}}{{vers3.chapterNr}}_{{vers3.versNr}}">{{vers3.versText|correctverstext}}</td></tr></table></td>
+            <td class="col-md-3 hidden-xs hidden-sm hidden-md"><table><tr><td class="versenr">{{vers4.versNr}}</td><td class="verse" id="{{vers4.bookNr.name}}{{vers4.chapterNr}}_{{vers4.versNr}}">{{vers4.versText|correctverstext}}</td></tr></table></td>
             {% endautoescape %}
         </tr>
         {% endfor %}
