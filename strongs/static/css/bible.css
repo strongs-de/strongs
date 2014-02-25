@@ -59,7 +59,7 @@ body {
 	padding: 0px;
 }
 #searchId {
-	width: 300px;
+	width: 250px;
 }
 gr:hover {
     background-color: #dddddd;
@@ -85,7 +85,7 @@ a {
 }
 
 .navbar-form {
-	width: 250px;
+	width: 200px;
 	float:left;
 }
 
