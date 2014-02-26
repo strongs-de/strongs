@@ -8,6 +8,7 @@ import re
 import xml.etree.ElementTree as ElementTree
 from itertools import izip_longest
 from django.db.models import Max
+from collections import Counter
 
 
 # Create your views here.
@@ -15,9 +16,9 @@ def index(request):
     return bible(request, 'joh1')
 
 def strongs(request, strong_id, vers):
-    # search = "<gr str=\"" + str(strong_id) + "\""
-    # search1 = BibleVers.objects.filter(versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
-    search1 = StrongNr.objects.filter(strongNr=strong_id)
+    search = "<gr str=\"" + str(strong_id) + "\""
+    search1 = BibleVers.objects.filter(bookNr=BibleBook.objects.filter(nr__gte=40), versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
+    # search1 = StrongNr.objects.filter(strongNr=strong_id)
     if search1.count() > 0:
         vers = vers.replace('_', ',')
         regex = re.compile("([0-9]?.? ?[a-zA-Z]+)\s?([0-9]+)?,?([0-9]+)?")
@@ -25,11 +26,22 @@ def strongs(request, strong_id, vers):
             v = regex.search(vers)
             if v is not None and len(v.groups()) > 0:
                 book = BibleBook.objects.filter(name=v.group(1))
-                bvers = BibleVers.objects.filter(bookNr=book, chapterNr=v.group(2), versNr=v.group(3))
-                search2 = StrongNr.objects.filter(bibleVers=bvers, strongNr=strong_id)
+                # bvers = BibleVers.objects.filter(bookNr=book, chapterNr=v.group(2), versNr=v.group(3))
+                search2 = StrongNr.objects.filter(book=book, chapterNr=v.group(2), versNr=v.group(3), strongNr=strong_id)
                 if search2.count() > 0:
                     vers = vers + ' Grammatik: ' + search2[0].grammar
-            return render(request, 'strongs/strongNr.html', {'verses': search1[0:100], 'vers': vers, 'count': search1.count()})
+            regex2 = re.compile("^.*str=\"" + str(strong_id) + "\">([a-zA-Z0-9_-]*)", re.MULTILINE)
+            if regex2 is not None:
+                translations = []
+                for vers in search1:
+                    found = regex2.search(vers.versText)
+                    if found is not None and found.groups() > 1:
+                        translations.append(found.group(1))
+                    elif found is not None and found.groups() > 1:
+                        translations.append(found.group(0))
+                translations = Counter(translations)
+            # translations = Counter([vv.word for vv in search1])
+                return render(request, 'strongs/strongNr.html', {'verses': search1[0:100], 'vers': vers, 'count': search1.count(), 'translations': translations.iteritems()})
     return HttpResponse('No verses found for strong nr ' + str(strong_id))
 
     # Try to search for this strong number
@@ -111,7 +123,7 @@ def element_to_string(element):
 
 def initDb(request):
     s = ''
-    s += insert_bible_vers()
+    # s += insert_bible_vers()
     s += init_strong_grammar()     # TODO: did not work till the end!
-    s += init_bible_books()
+    # s += init_bible_books()
     return HttpResponse(s)

@@ -42,10 +42,11 @@ class StrongNr(models.Model):
     parameter.
     '''
     strongNr = models.IntegerField(db_index=True)
-    bibleVers = models.ForeignKey("BibleVers")
+    translationIdentifier = models.ForeignKey("BibleTranslation")
+    book = models.ForeignKey("BibleBook")
+    versNr = models.IntegerField()
+    chapterNr = models.IntegerField()
     grammar = models.CharField(max_length=20)
-    word = models.TextField()
-    wordTranslation = models.ForeignKey('BibleTranslation')
 
     def __unicode__(self):
-        return str(self.strongNr) + ' = ' + self.grammar + ' in ' + self.bibleVers.__str__()
+        return str(self.strongNr) + ' = ' + self.grammar + ' in ' + self.book.__str__() + ' ' + str(self.chapterNr) + ',' + str(self.versNr)

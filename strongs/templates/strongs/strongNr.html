@@ -1,5 +1,11 @@
 <h5>Stelle: {{vers}}</h5>
 Insgesamt wurden {{count}} Stellen gefunden. {%if count > 100%}Davon werden die ersten 100 Stellen hier aufgelistet{%endif%}<br/><br/>
-{% for v in verses %}
-<a href="/{{ v.bibleVers }}">{{ v.bibleVers }}</a>,
-{% endfor %}
+{% autoescape off %}
+	{% for k, v in translations %}
+		{{k}}: {{v}}<br/>
+	{% endfor %}
+	<br/><br/>
+	{% for v in verses %}
+		<a href="/{{ v }}">{{ v }}</a>,
+	{% endfor %}
+{% endautoescape %}

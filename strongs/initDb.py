@@ -121,25 +121,28 @@ def insert_bible_vers():
 #     return s
 
 
-def init_strong_grammar(request):
+def init_strong_grammar():
     greekStrongVerses = BibleVers.objects.filter(versText__contains='<gr rmac=', translationIdentifier=BibleTranslation.objects.filter(identifier='GNTTR'))
     s = 'initStrongGrammar: ' + str(greekStrongVerses.count()) + ' verses found!'
     for vers in greekStrongVerses:
         # get the vers in another translation
-        trWord = BibleTranslation.objects.filter(identifier='ELB1905STR')
-        trVers = BibleVers.objects.filter(versNr=vers.versNr, chapterNr=vers.chapterNr, bookNr=vers.bookNr, translationIdentifier=trWord)
+        # trWord = BibleTranslation.objects.filter(identifier='ELB1905STR')
+        # trVers = BibleVers.objects.filter(versNr=vers.versNr, chapterNr=vers.chapterNr, bookNr=vers.bookNr, translationIdentifier=trWord)
         regex = re.compile("^.*rmac=\"(.*)\" str=\"(.*)\"", re.MULTILINE)
         if regex is not None:
             found = regex.findall(vers.versText)
             for one in found:
                 # find vers in translation
-                regex2 = re.compile("^.*str=\"" + one[1] + "\".*>(.*)<.*", re.MULTILINE)
-                word = ''
-                if regex2 is not None:
-                    found2 = regex2.findall(trVers[0].versText)
-                    if len(found2) > 0:
-                        word = found2[0]
-                strong = StrongNr(strongNr=int(one[1]), bibleVers=vers, grammar=one[0], word=word, wordTranslation=trWord[0])
+                # regex2 = re.compile("^.*str=\"" + one[1] + "\".*>(.*)<.*", re.MULTILINE)
+                # word = ''
+                # if regex2 is not None:
+                    # found2 = regex2.findall(trVers[0].versText)
+                    # Todo: Handle multiple strong numbers in one verse
+                    # if len(found2) > 1:
+                        # word = ' oder '.join(found2)
+                    # elif len(found2) > 0:
+                        # word = found2[0]
+                strong = StrongNr(strongNr=int(one[1]), book=vers.bookNr, versNr=vers.versNr, chapterNr=vers.chapterNr, grammar=one[0], translationIdentifier=vers.translationIdentifier)
                 strong.save()
     return s
 
