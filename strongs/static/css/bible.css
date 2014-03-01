@@ -1,9 +1,3 @@
-nav {
-    transition: top 0.2s ease-in-out;
-}
-.nav-up {
-    top: -55px;
-}
 .navbar-inverse, .navbar-form, .navbar-collapse {
 	/*background-color: white;*/
 	/*background-color: #f7f4ea;*/
@@ -172,13 +166,7 @@ a {
 	right: 0px;
 }
 
-.sb-menu-nav-up {
-	top:0px;
-}
-
 /*************************************/
-
-
 
 
 
@@ -215,4 +203,16 @@ a {
 		/*width: 80% !important;*/
 		/*margin: auto;*/
 	/*}*/
+}
+
+
+nav {
+    transition: top 0.2s ease-in-out;
+}
+.nav-up {
+    top: -55px;
+}
+
+.sb-menu-nav-up {
+	top:0px;
 }
