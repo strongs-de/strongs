@@ -4,7 +4,8 @@
 	/*background-color: rgba(243,239,225,0.7);*/
 	/*background-color: rgba(247,244,234,0.5);*/
 	/*background-color: rgba(204,201,194,0.7);*/
-	background-color: rgba(255,255,255,0.5);
+	background-color: rgba(255,255,255,0.7);
+	/*background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAJklEQVQIW2N0X56/eUfEBAYYYPz///9mOA/IgAt4rChgAKnEUAEAi9QRxcJ571YAAAAASUVORK5CYII=) repeat;*/
 	border-radius:0px;
 	border-style: none;
 }
@@ -100,7 +101,7 @@ a {
 	z-index: 1041;
 	width: 300px;
 	height: 100%;
-	background: #48a770;
+	background: rgba(72,167,112,0.7);
 	padding: 10px 10px;
 	color: rgb(0, 0, 0);
 	-webkit-transition: all 0.2s ease-in-out;
@@ -131,11 +132,11 @@ a {
 .sb-button {
 	position: fixed;
 	top: 53px;
-	right: -2px;
+	right: 0px;
 	z-index: 1040;
 	width: 40px;
 	height: 40px;
-	background: #48a770;
+	background: rgba(72,167,112,0.7);
 	-webkit-transition: all 0.2s ease-in-out;
 	transition: all 0.2s ease-in-out;
 	/*border-top-left-radius: 40px 40px;
@@ -186,10 +187,10 @@ a {
 		margin:0;
 	}
 	#searchId {
-		width: 200px;
+		width: 170px;
 	}
 	.navbar-form {
-		width: 150px;
+		width: 120px;
 		float:left;
 	}
 	/*.navbar-brand {*/
