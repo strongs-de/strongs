@@ -185,6 +185,13 @@ a {
 	.navbar-form {
 		margin:0;
 	}
+	#searchId {
+		width: 200px;
+	}
+	.navbar-form {
+		width: 150px;
+		float:left;
+	}
 	/*.navbar-brand {*/
 		/*padding: 0px !important;*/
 	/*}*/
