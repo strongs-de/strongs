@@ -187,11 +187,13 @@ a {
 		margin:0;
 	}
 	#searchId {
-		width: 170px;
+		width: 150px;
 	}
 	.navbar-form {
-		width: 100px;
+		width: 70px;
 		float:left;
+		margin-left:0px;
+		padding-left:0px;
 	}
 	/*.navbar-brand {*/
 		/*padding: 0px !important;*/
