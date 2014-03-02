@@ -97,19 +97,26 @@ def bible(request, bible_book):
                     return HttpResponse('No translation found')
             else:
                 # Try to search for this word
-                search1 = BibleVers.objects.filter(versText__contains=bible_book, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
-                search2 = BibleVers.objects.filter(versText__contains=bible_book, translationIdentifier=BibleTranslation.objects.filter(identifier='SCH2000NEU'))
-                search3 = BibleVers.objects.filter(versText__contains=bible_book, translationIdentifier=BibleTranslation.objects.filter(identifier='LUTH1912'))
-                search4 = BibleVers.objects.filter(versText__contains=bible_book, translationIdentifier=BibleTranslation.objects.filter(identifier='ILGRDE'))
-                if search1.count() > 0:
-                    return render(request, 'strongs/search.html', {'search': bible_book, 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(search1, search2, search3, search4)})
-                    # return HttpResponse('Found ' + str(search1.count()) + ' verses')
-                else:
-                    return HttpResponse('No book found for ' + bible_book)
+                return search(request, bible_book, 1)
         else:
             return HttpResponse('Keine Bibelstelle oder Strong Nummer eingegeben1!')
     else:
         return HttpResponse('Keine Bibelstelle oder Strong Nummer eingegeben!')
+
+def search(request, search, page):
+    # Try to search for this word
+    search1 = BibleVers.objects.filter(versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
+    search2 = BibleVers.objects.filter(versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='SCH2000NEU'))
+    search3 = BibleVers.objects.filter(versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='LUTH1912'))
+    search4 = BibleVers.objects.filter(versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ILGRDE'))
+    if search1.count() > 0:
+        # only show the first 200 items
+        idx1 = 100 * (int(page) - 1) if int(page) > 0 else 0
+        idx2 = 100 * int(page) if int(page) > 0 else 100
+        return render(request, 'strongs/search.html', {'search': search, 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(search1[idx1:idx2], search2[idx1:idx2], search3[idx1:idx2], search4[idx1:idx2])})
+        # return HttpResponse('Found ' + str(search1.count()) + ' verses')
+    else:
+        return HttpResponse('No book found for ' + search)
 
 def element_to_string(element):
     s = element.text or ""

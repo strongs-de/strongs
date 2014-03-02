@@ -118,14 +118,30 @@
             location.href=path;
             e.preventDefault();
         });
-        // $('span[data-strong]').tooltip({placement:'top',selector:'', container:'body'});
+
+        // Handle next and previous buttons
         $('#next_chapter').click(function(e) {
           var val = $('#searchId').val();
           arr = val.split(' ');
-          if(arr.length == 2)
+          if(arr.length >= 2) {
             $('#searchId').val(arr[0] + ' ' + (parseInt(arr[1]) + 1));
-          var path = '/' + $('#searchId').val();
-          location.href=path;
+            var path = '/' + $('#searchId').val();
+            location.href=path;
+          } else {
+            val = location.href;
+            arr = val.split('/')
+            if(arr.length > 4 && arr[4] !== '')
+              val = arr[0] + '/' + arr[1] + '/' + arr[2] + '/' + arr[3] + '/' + (parseInt(arr[4]) + 1);
+            else
+              val = arr[0] + '/' + arr[1] + '/' + arr[2] + '/' + arr[3] + '/2';
+            // alert(arr[4]);
+            // for(i = 0; i < arr.length; ++i) {
+              // if(arr[i] !== '')
+                // val += arr[i] + '/';
+            // }
+            location.href = val;
+          }
+          
         })
         $('#prev_chapter').click(function(e) {
           var val = $('#searchId').val();
