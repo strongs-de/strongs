@@ -214,7 +214,9 @@
                });
                // now the block is free from previous highlights
 
-               $(block).html($(block).html().replace(new RegExp(substring, 'g'), '<span class="search-highlight">' + substring + '</span>'));
+               $(block).html($(block).html().replace(new RegExp(substring, 'gi'), function(match, text, urlId){
+                  return '<span class="search-highlight">' + match + '</span>'
+               }));
             }
 
             highLight("{{ search }}", "#content");
