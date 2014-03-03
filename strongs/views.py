@@ -61,7 +61,7 @@ def bible(request, bible_book):
 
     regex = re.compile("([0-9]?.? ?[\S]+)\s?([0-9]+)?,?([0-9]+)?", re.UNICODE)
     if regex is not None:
-        bible_book = bible_book.trim()
+        bible_book = bible_book #.trim()
         s = regex.search(bible_book)
         if s is not None and len(s.groups()) > 0:
             book = BibleBook.objects.filter(Q(name__iexact=s.group(1)) | Q(short_name__iexact=s.group(1)) | Q(alternativeNames__icontains=s.group(1) + ','))
