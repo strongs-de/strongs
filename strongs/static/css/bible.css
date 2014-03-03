@@ -72,8 +72,7 @@ a {
 }
 
 .search-highlight {
-    background-color: rgba(0,255,255,128);
-    color:red;
+    background-color: rgba(0,200,112,0.1);
 }
 
 .navbar-nav {

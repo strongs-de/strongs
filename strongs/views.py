@@ -9,6 +9,7 @@ import xml.etree.ElementTree as ElementTree
 from itertools import izip_longest
 from django.db.models import Max
 from collections import Counter
+import operator
 
 
 # Create your views here.
@@ -30,7 +31,7 @@ def strongs(request, strong_id, vers):
                 search2 = StrongNr.objects.filter(book=book, chapterNr=v.group(2), versNr=v.group(3), strongNr=strong_id)
                 if search2.count() > 0:
                     vers = vers + ' Grammatik: ' + search2[0].grammar
-            regex2 = re.compile("^.*str=\"" + str(strong_id) + "\">([a-zA-Z0-9_-]*)", re.MULTILINE)
+            regex2 = re.compile("^.*str=\"" + str(strong_id) + "\">(\S*)", re.MULTILINE | re.UNICODE)
             if regex2 is not None:
                 translations = []
                 for vers in search1:
@@ -40,8 +41,9 @@ def strongs(request, strong_id, vers):
                     elif found is not None and found.groups() > 1:
                         translations.append(found.group(0))
                 translations = Counter(translations)
+                translations = sorted(translations.iteritems(), key=operator.itemgetter(1), reverse=True)
             # translations = Counter([vv.word for vv in search1])
-                return render(request, 'strongs/strongNr.html', {'verses': search1[0:100], 'vers': vers, 'count': search1.count(), 'translations': translations.iteritems()})
+                return render(request, 'strongs/strongNr.html', {'verses': search1[0:100], 'vers': vers, 'count': search1.count(), 'translations': translations})
     return HttpResponse('No verses found for strong nr ' + str(strong_id))
 
     # Try to search for this strong number
@@ -57,8 +59,9 @@ def bible(request, bible_book):
     if bible_book.isdigit():
         return strongs(request, bible_book)
 
-    regex = re.compile("([0-9]?.? ?[a-zA-Z]+)\s?([0-9]+)?,?([0-9]+)?")
+    regex = re.compile("([0-9]?.? ?[\S]+)\s?([0-9]+)?,?([0-9]+)?", re.UNICODE)
     if regex is not None:
+        bible_book = bible_book.trim()
         s = regex.search(bible_book)
         if s is not None and len(s.groups()) > 0:
             book = BibleBook.objects.filter(Q(name__iexact=s.group(1)) | Q(short_name__iexact=s.group(1)) | Q(alternativeNames__icontains=s.group(1) + ','))
@@ -111,8 +114,9 @@ def search(request, search, page):
     search4 = BibleVers.objects.filter(versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ILGRDE'))
     if search1.count() > 0:
         # only show the first 200 items
-        idx1 = 100 * (int(page) - 1) if int(page) > 0 else 0
-        idx2 = 100 * int(page) if int(page) > 0 else 100
+        num = 30
+        idx1 = num * (int(page) - 1) if int(page) > 0 else 0
+        idx2 = num * int(page) if int(page) > 0 else num
         return render(request, 'strongs/search.html', {'search': search, 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(search1[idx1:idx2], search2[idx1:idx2], search3[idx1:idx2], search4[idx1:idx2])})
         # return HttpResponse('Found ' + str(search1.count()) + ' verses')
     else:
