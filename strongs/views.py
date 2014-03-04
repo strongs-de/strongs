@@ -26,16 +26,16 @@ def strongs(request, strong_id, vers):
         if regex is not None:
             v = regex.search(vers)
             if v is not None and len(v.groups()) > 0:
-                book = BibleBook.objects.filter(name=v.group(1))
+                book = BibleBook.objects.filter(short_name=v.group(1))
                 # bvers = BibleVers.objects.filter(bookNr=book, chapterNr=v.group(2), versNr=v.group(3))
                 search2 = StrongNr.objects.filter(book=book, chapterNr=v.group(2), versNr=v.group(3), strongNr=strong_id)
                 if search2.count() > 0:
-                    vers = vers + ' Grammatik: ' + search2[0].grammar
+                    vers = book[0].name + ' ' + v.group(2) + ',' + v.group(3) + ' Grammatik: ' + search2[0].grammar
             regex2 = re.compile("^.*str=\"" + str(strong_id) + "\">(\S*)", re.MULTILINE | re.UNICODE)
             if regex2 is not None:
                 translations = []
-                for vers in search1:
-                    found = regex2.search(vers.versText)
+                for vers2 in search1:
+                    found = regex2.search(vers2.versText)
                     if found is not None and found.groups() > 1:
                         translations.append(found.group(1))
                     elif found is not None and found.groups() > 1:
