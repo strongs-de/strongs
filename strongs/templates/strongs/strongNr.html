@@ -1,11 +1,20 @@
-<h5>Stelle: {{vers}}</h5>
-Insgesamt wurden {{count}} Stellen gefunden. {%if count > 100%}Davon werden die ersten 100 Stellen hier aufgelistet{%endif%}<br/><br/>
 {% autoescape off %}
-	{% for k, v in translations %}
-		{{k}}: {{v}}<br/>
-	{% endfor %}
-	<br/><br/>
-	{% for v in verses %}
-		<a href="/{{ v }}">{{ v }}</a>,
-	{% endfor %}
+<h5>Stelle: {{vers}}</h5>
+Insgesamt wurden {{count}} Stellen mit {{occurences}} Vorkommnissen gefunden.<br/><br/>
+
+<b>Übersetzungsvarianten:</b><br/>
+<div style="padding-left:20px">
+{% for k, v in translations %}
+	{{k}}: {{v}}<br/>
+{% endfor %}
+</div>
+
+<br/><br/>
+
+<b>Stellen-Liste{%if count > 100%} (nur die ersten 100 Stellen){%endif%}:</b><br/>
+<div style="padding-left:20px">
+{% for v in verses %}
+	<a href="/{{ v }}">{{ v }}</a>,
+{% endfor %}
+</div>
 {% endautoescape %}
