@@ -55,6 +55,7 @@ body {
 	background-color: #f3efe1;
 	padding-top: 70px;
 	color: rgb(172, 168, 154);
+	color: rgb(132, 128, 114);
 }
 .navbar-brand {
 	padding: 0px;
@@ -100,7 +101,7 @@ a {
 	z-index: 1041;
 	width: 300px;
 	height: 100%;
-	background: rgba(72,167,112,0.7);
+	background: rgba(72,167,112,0.9);
 	padding: 10px 10px;
 	color: rgb(0, 0, 0);
 	-webkit-transition: all 0.2s ease-in-out;
@@ -119,12 +120,11 @@ a {
 }
 
 .sb-strong {
-	color: rgb(132, 128, 114);
+	color: rgb(92, 88, 74);
 }
 
 .sb-strong:hover {
-	color: rgb(132, 128, 114);
-	background-color: rgba(204,201,194,0.7);
+	background-color: rgba(204,201,194,0.9);
 	cursor: pointer;
 }
 
@@ -135,7 +135,7 @@ a {
 	z-index: 1040;
 	width: 40px;
 	height: 40px;
-	background: rgba(72,167,112,0.7);
+	background: rgba(72,167,112,0.9);
 	-webkit-transition: all 0.2s ease-in-out;
 	transition: all 0.2s ease-in-out;
 	/*border-top-left-radius: 40px 40px;
