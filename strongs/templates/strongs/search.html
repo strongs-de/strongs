@@ -11,10 +11,26 @@
         <tr>
             {% autoescape off %}
             {% load strongs_extras %}
-            <td class="col-md-3"><span class="versenr"><a href="/{{vers1.bookNr}} {{vers1.chapterNr}},{{vers1.versNr}}">{{vers1}}</a></span><span class="verse">{{vers1.versText|correctverstext}}</span></td>
-            <td class="col-md-3 hidden-xs"><span class="versenr"><a href="/{{vers2.bookNr}} {{vers2.chapterNr}},{{vers2.versNr}}">{{vers2}}</a></span><span class="verse">{{vers2.versText|correctverstext}}</span></td>
-            <td class="col-md-3 hidden-xs"><span class="versenr"><a href="/{{vers3.bookNr}} {{vers3.chapterNr}},{{vers3.versNr}}">{{vers3}}</a></span><span class="verse">{{vers3.versText|correctverstext}}</span></td>
-            <td class="col-md-3 hidden-xs"><span class="versenr"><a href="/{{vers4.bookNr}} {{vers4.chapterNr}},{{vers4.versNr}}">{{vers4}}</a></span><span class="verse">{{vers4.versText|correctverstext}}</span></td>
+            <td class="col-md-3">
+                {% if vers1 != None %}
+                <span class="versenr"><a href="/{{vers1.bookNr}} {{vers1.chapterNr}},{{vers1.versNr}}">{{vers1}}</a></span><span class="verse">{{vers1.versText|correctverstext}}</span>
+                {% endif %}
+            </td>
+            <td class="col-md-3 hidden-xs">
+                {% if vers2 != None %}
+                <span class="versenr"><a href="/{{vers2.bookNr}} {{vers2.chapterNr}},{{vers2.versNr}}">{{vers2}}</a></span><span class="verse">{{vers2.versText|correctverstext}}</span>
+                {% endif %}
+            </td>
+            <td class="col-md-3 hidden-xs">
+                {% if vers3 != None %}
+                <span class="versenr"><a href="/{{vers3.bookNr}} {{vers3.chapterNr}},{{vers3.versNr}}">{{vers3}}</a></span><span class="verse">{{vers3.versText|correctverstext}}</span>
+                {% endif %}
+            </td>
+            <td class="col-md-3 hidden-xs">
+                {% if vers4 != None %}
+                <span class="versenr"><a href="/{{vers4.bookNr}} {{vers4.chapterNr}},{{vers4.versNr}}">{{vers4}}</a></span><span class="verse">{{vers4.versText|correctverstext}}</span>
+                {% endif %}
+            </td>
             {% endautoescape %}
         </tr>
         {% endfor %}
