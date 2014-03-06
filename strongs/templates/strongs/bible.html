@@ -8,7 +8,7 @@
             <th class="col-md-3 hidden-xs hidden-sm hidden-md">{{translation4}}</th>
         </tr>
         {% for vers1, vers2, vers3, vers4 in verses %}
-        <tr>
+        <tr class="enableHover">
             {% autoescape off %}
             {% load strongs_extras %}
             <td class="col-md-3"><table><tr><td class="versenr">{{vers1.versNr}}</td><td class="verse" id="{{vers1.bookNr.short_name}}{{vers1.chapterNr}}_{{vers1.versNr}}">{{vers1.versText|correctverstext}}</td></tr></table></td>

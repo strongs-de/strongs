@@ -46,6 +46,24 @@ th {
     font-size:14pt;
     color:rgb(91, 176, 91);
 }
+tr.enableHover:hover {
+	background-color: rgba(172, 168, 154, .2);
+	-o-transition:.8s;
+	-ms-transition:.8s;
+	-moz-transition:.8s;
+	-webkit-transition:.8s;
+	transition:.8s;
+	transition-delay:.5s;
+}
+tr.enableHover {
+	background-color: transparent;
+	-o-transition:.8s;
+	-ms-transition:.8s;
+	-moz-transition:.8s;
+	-webkit-transition:.8s;
+	transition:.8s;
+	transition-delay:.5s;
+}
 .verse {
 	padding-left:5px;
 	border-right: none !important;

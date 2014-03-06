@@ -60,11 +60,10 @@ var SidebarMenuEffects = (function() {
         xhReq.send(null);
         var serverResponse = xhReq.responseText;
         $('#sb-menu').html("<h4>" + strong + "</h4>" + serverResponse);
-
+        location = document.location.href.match(/(^[^#]*)/)[0] + '#' + strong + "/" + vers;
 	}
 
 	function init() {
-
 		var container = document.getElementById( 'container-full' ),
 		button = document.getElementById( 'sb-button' ),
 		strongs = Array.prototype.slice.call( document.querySelectorAll( '.sb-strong' ) ),
@@ -96,39 +95,32 @@ var SidebarMenuEffects = (function() {
 			button.removeEventListener( eventtype, openSideBar );
 			button.addEventListener( eventtype, closeSideBar );
 		};
+		function open() {
+			container.className = 'container-full';
+			setTimeout( function() {
+				classie.addClass( container, 'sb-menu-open' );
+			}, 25 );
+
+			button.removeEventListener( eventtype, openSideBar );
+			button.addEventListener( eventtype, closeSideBar );
+		};
 		function clickfunc(ev) {
 				ev.stopPropagation();
 				ev.preventDefault();
 				loadStrong($(this).attr('data-strong'), $(this).parent().attr('id'));
-				container.className = 'container-full';
-				setTimeout( function() {
-					classie.addClass( container, 'sb-menu-open' );
-				}, 25 );
-
-				button.removeEventListener( eventtype, openSideBar );
-				button.addEventListener( eventtype, closeSideBar );
+				open();
 			};
 		$('.sb-strong').live('click', clickfunc);
-		// $('.sb-strong').live('touchend', clickfunc);
-/*
-		strongs.forEach( function( el, i ) {
-			var strong = el.getAttribute( 'data-strong' );
-
-			el.addEventListener( eventtype, function( ev ) {
-				ev.stopPropagation();
-				ev.preventDefault();
-				loadStrong(strong);
-				container.className = 'container-full';
-				setTimeout( function() {
-					classie.addClass( container, 'sb-menu-open' );
-				}, 25 );
-				
-				button.removeEventListener( eventtype, openSideBar );
-				button.addEventListener( eventtype, closeSideBar );
-			});
-		} );
-*/
 		button.addEventListener( eventtype, openSideBar );
+
+		// Wenn eine Strong-Nummer angegeben ist, dann gleich Sidebar öffnen
+		var idx = document.location.href.indexOf("#")+1;
+		if(idx > 0) {
+			var anchor = document.location.href.substring(idx);
+			var arr = anchor.split('/');
+			open();
+			loadStrong(arr[0], arr[1]);
+		}
 	}
 
 	init();
