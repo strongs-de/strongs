@@ -1,10 +1,15 @@
+.copyright {
+	color: rgb(172, 168, 154);
+	margin-left: 15px;
+	font-size: 10pt;
+}
 .navbar-inverse, .navbar-form, .navbar-collapse {
 	/*background-color: white;*/
 	/*background-color: #f7f4ea;*/
 	/*background-color: rgba(243,239,225,0.7);*/
 	/*background-color: rgba(247,244,234,0.5);*/
 	/*background-color: rgba(204,201,194,0.7);*/
-	background-color: rgba(255,255,255,0.7);
+	background-color: rgba(255,255,255,0.85);
 	/*background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAJklEQVQIW2N0X56/eUfEBAYYYPz///9mOA/IgAt4rChgAKnEUAEAi9QRxcJ571YAAAAASUVORK5CYII=) repeat;*/
 	border-radius:0px;
 	border-style: none;

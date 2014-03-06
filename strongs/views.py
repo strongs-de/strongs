@@ -10,6 +10,7 @@ from itertools import izip_longest
 from django.db.models import Max
 from collections import Counter
 import operator
+import shlex
 
 
 # Create your views here.
@@ -136,12 +137,16 @@ def bible(request, bible_book):
         return HttpResponse('Keine Bibelstelle oder Strong Nummer eingegeben!')
 
 def search(request, search, page):
+    searches = search.split(' ')
+    searches = map(lambda s: s.decode('UTF8').replace('"', '').replace("'", ''), shlex.split(search.encode('utf8')))
+    tag_search = reduce(operator.and_, (Q(versText__contains=x) for x in searches))
+
     # Try to search for this word
-    search1 = BibleVers.objects.filter(versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
-    search2 = BibleVers.objects.filter(versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='SCH2000NEU'))
-    search3 = BibleVers.objects.filter(versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='LUTH1912'))
-    search4 = BibleVers.objects.filter(versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ILGRDE'))
-    if search1.count() > 0:
+    search1 = BibleVers.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
+    search2 = BibleVers.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier='SCH2000NEU'))
+    search3 = BibleVers.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier='LUTH1912'))
+    search4 = BibleVers.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier='ILGRDE'))
+    if search1.count() > 0 or search2.count() > 0 or search3.count() > 0 or search4.count() > 0:
         # only show the first 200 items
         num = 30
         idx1 = num * (int(page) - 1) if int(page) > 0 else 0
@@ -149,7 +154,7 @@ def search(request, search, page):
         return render(request, 'strongs/search.html', {'search': search, 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(search1[idx1:idx2], search2[idx1:idx2], search3[idx1:idx2], search4[idx1:idx2])})
         # return HttpResponse('Found ' + str(search1.count()) + ' verses')
     else:
-        return HttpResponse('No book found for ' + search)
+        return HttpResponse('No book found for %s' % search)
 
 def element_to_string(element):
     s = element.text or ""

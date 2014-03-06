@@ -206,21 +206,7 @@
         }
     </script>
 
-    {%if search %}
-        <script>
-            function highLight(substring, block) {
-               $(block).find(".search-highlight").each(function () {
-                  $(this).outerHtml($(this).html());
-               });
-               // now the block is free from previous highlights
-
-               $(block).html($(block).html().replace(new RegExp(substring, 'gi'), function(match, text, urlId){
-                  return '<span class="search-highlight">' + match + '</span>'
-               }));
-            }
-
-            highLight("{{ search }}", "#content");
-        </script>
-    {% endif %}
+    {% block js %}
+    {% endblock %}
   </body>
 </html>
