@@ -21,12 +21,12 @@
                 <span class="versenr"><a href="/{{vers2.bookNr.short_name}} {{vers2.chapterNr}},{{vers2.versNr}}">{{vers2}}</a></span><span class="verse">{{vers2.versText|correctverstext}}</span>
                 {% endif %}
             </td>
-            <td class="col-md-3 hidden-xs">
+            <td class="col-md-3 hidden-xs hidden-sm hidden-md">
                 {% if vers3 != None %}
                 <span class="versenr"><a href="/{{vers3.bookNr.short_name}} {{vers3.chapterNr}},{{vers3.versNr}}">{{vers3}}</a></span><span class="verse">{{vers3.versText|correctverstext}}</span>
                 {% endif %}
             </td>
-            <td class="col-md-3 hidden-xs">
+            <td class="col-md-3 hidden-xs hidden-sm hidden-md">
                 {% if vers4 != None %}
                 <span class="versenr"><a href="/{{vers4.bookNr.short_name}} {{vers4.chapterNr}},{{vers4.versNr}}">{{vers4}}</a></span><span class="verse">{{vers4.versText|correctverstext}}</span>
                 {% endif %}
@@ -36,7 +36,7 @@
         {% endfor %}
         <tr>
             <td></td>
-            <td>
+            <td class="col-md-3 hidden-xs">
                 <div class="copyright">
                     <br/>
                     Bibeltext der Schlachter<br/>
@@ -44,8 +44,8 @@
                     Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>
                 </div>
             </td>
-            <td></td>
-            <td></td>
+            <td class="col-md-3 hidden-xs hidden-sm hidden-md"></td>
+            <td class="col-md-3 hidden-xs hidden-sm hidden-md"></td>
         </tr>
     </table>
 {% endblock %}
