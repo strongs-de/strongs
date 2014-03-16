@@ -54,9 +54,10 @@ def strongs(request, strong_id, vers):
                     search1 = BibleVers.objects.filter(bookNr=BibleBook.objects.filter(nr__gte=40), versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
                 if search1.count() > 0:
                     # bvers = BibleVers.objects.filter(bookNr=book, chapterNr=v.group(2), versNr=v.group(3))
-                    search2 = StrongNr.objects.filter(book=book, chapterNr=v.group(2), versNr=v.group(3), strongNr=strong_id)
-                    if search2.count() > 0:
-                        vers = book[0].name + ' ' + v.group(2) + ',' + v.group(3) + ' Grammatik: ' + search2[0].grammar
+                    if book[0].nr >= 40:
+                        search2 = StrongNr.objects.filter(book=book, chapterNr=v.group(2), versNr=v.group(3), strongNr=strong_id)
+                        if search2.count() > 0:
+                            vers = book[0].name + ' ' + v.group(2) + ',' + v.group(3) + ' Grammatik: ' + search2[0].grammar
 
                     translations = []
                     for vers2 in search1:
