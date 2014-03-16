@@ -40,41 +40,44 @@ def find_translations(strong_nr, versText):
 
 
 def strongs(request, strong_id, vers):
-    search = "<gr str=\"" + str(strong_id) + "\""
-    search1 = BibleVers.objects.filter(bookNr=BibleBook.objects.filter(nr__gte=40), versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
-    # search1 = StrongNr.objects.filter(strongNr=strong_id)
-    if search1.count() > 0:
-        vers = vers.replace('_', ',')
-        regex = re.compile("([0-9]?.? ?[a-zA-Z]+)\s?([0-9]+)?,?([0-9]+)?")
-        if regex is not None:
-            v = regex.search(vers)
-            if v is not None and len(v.groups()) > 0:
-                book = BibleBook.objects.filter(short_name=v.group(1))
-                # bvers = BibleVers.objects.filter(bookNr=book, chapterNr=v.group(2), versNr=v.group(3))
-                search2 = StrongNr.objects.filter(book=book, chapterNr=v.group(2), versNr=v.group(3), strongNr=strong_id)
-                if search2.count() > 0:
-                    vers = book[0].name + ' ' + v.group(2) + ',' + v.group(3) + ' Grammatik: ' + search2[0].grammar
+    vers = vers.replace('_', ',')
+    regex = re.compile("([0-9]?.? ?[a-zA-Z]+)\s?([0-9]+)?,?([0-9]+)?")
+    if regex is not None:
+        v = regex.search(vers)
+        if v is not None and len(v.groups()) > 0:
+            book = BibleBook.objects.filter(short_name=v.group(1))
+            search = "<gr str=\"" + str(strong_id) + "\""
+            if book.count() > 0:
+                if book[0].nr < 40:
+                    search1 = BibleVers.objects.filter(bookNr=BibleBook.objects.filter(nr__lt=40), versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
+                else:
+                    search1 = BibleVers.objects.filter(bookNr=BibleBook.objects.filter(nr__gte=40), versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
+                if search1.count() > 0:
+                    # bvers = BibleVers.objects.filter(bookNr=book, chapterNr=v.group(2), versNr=v.group(3))
+                    search2 = StrongNr.objects.filter(book=book, chapterNr=v.group(2), versNr=v.group(3), strongNr=strong_id)
+                    if search2.count() > 0:
+                        vers = book[0].name + ' ' + v.group(2) + ',' + v.group(3) + ' Grammatik: ' + search2[0].grammar
 
-            translations = []
-            for vers2 in search1:
-                translations = translations + find_translations(strong_id, vers2.versText)
-            occ = len(translations)
-            translations = Counter(translations)
-            translations = sorted(translations.iteritems(), key=operator.itemgetter(1), reverse=True)
-            return render(request, 'strongs/strongNr.html', {'verses': search1[0:100], 'vers': vers, 'occurences': occ, 'count': search1.count(), 'translations': translations})
-            # regex2 = re.compile('^<gr str="' + str(strong_id) + '">.*</gr>', re.UNICODE | re.IGNORECASE)
-            # if regex2 is not None:
-            #     translations = []
-            #     for vers2 in search1:
-            #         found = regex2.search(vers2.versText)
-            #         if found is not None and found.groups() > 2:
-            #             translations.append(found.group(1))
-            #         elif found is not None and found.groups() > 1:
-            #             translations.append(found.group(0))
-            #     translations = Counter(translations)
-            #     translations = sorted(translations.iteritems(), key=operator.itemgetter(1), reverse=True)
-            # translations = Counter([vv.word for vv in search1])
-            #     return render(request, 'strongs/strongNr.html', {'verses': search1[0:100], 'vers': vers, 'count': search1.count(), 'translations': translations})
+                    translations = []
+                    for vers2 in search1:
+                        translations = translations + find_translations(strong_id, vers2.versText)
+                    occ = len(translations)
+                    translations = Counter(translations)
+                    translations = sorted(translations.iteritems(), key=operator.itemgetter(1), reverse=True)
+                    return render(request, 'strongs/strongNr.html', {'verses': search1[0:100], 'vers': vers, 'occurences': occ, 'count': search1.count(), 'translations': translations})
+        # regex2 = re.compile('^<gr str="' + str(strong_id) + '">.*</gr>', re.UNICODE | re.IGNORECASE)
+        # if regex2 is not None:
+        #     translations = []
+        #     for vers2 in search1:
+        #         found = regex2.search(vers2.versText)
+        #         if found is not None and found.groups() > 2:
+        #             translations.append(found.group(1))
+        #         elif found is not None and found.groups() > 1:
+        #             translations.append(found.group(0))
+        #     translations = Counter(translations)
+        #     translations = sorted(translations.iteritems(), key=operator.itemgetter(1), reverse=True)
+        # translations = Counter([vv.word for vv in search1])
+        #     return render(request, 'strongs/strongNr.html', {'verses': search1[0:100], 'vers': vers, 'count': search1.count(), 'translations': translations})
     return HttpResponse('No verses found for strong nr ' + str(strong_id))
 
     # Try to search for this strong number
