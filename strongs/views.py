@@ -101,12 +101,22 @@ def bible(request, bible_book):
             book = BibleBook.objects.filter(Q(name__iexact=s.group(1)) | Q(short_name__iexact=s.group(1)) | Q(alternativeNames__icontains=s.group(1) + ','))
             chapter = s.group(2) or 1
             if book.count() > 0:
+                # get the last chapter for this book
+                max_chapter = BibleVers.objects.filter(bookNr=book).aggregate(Max('chapterNr'))
+                max_chapter = max_chapter['chapterNr__max']
+
                 # verify that the chapter is > 1, else select the previous book
                 if int(chapter) < 1 and book[0].nr > 1:
                     book = BibleBook.objects.filter(nr=book[0].nr - 1)
-                    # get the last chapter for this book
-                    chapter = BibleVers.objects.filter(bookNr=book).aggregate(Max('chapterNr'))
-                    chapter = chapter['chapterNr__max']
+                    max_chapter = BibleVers.objects.filter(bookNr=book).aggregate(Max('chapterNr'))
+                    max_chapter = max_chapter['chapterNr__max']
+                    chapter = max_chapter
+
+                if int(chapter) > max_chapter and book[0].nr < 66:
+                    # try the next first chapter
+                    book = BibleBook.objects.filter(nr=book[0].nr + 1)
+                    chapter = 1
+
                 tr1 = BibleTranslation.objects.filter(identifier='ELB1905STR')
                 tr2 = BibleTranslation.objects.filter(identifier='SCH2000NEU')
                 tr3 = BibleTranslation.objects.filter(identifier='LUTH1912')
@@ -118,18 +128,8 @@ def bible(request, bible_book):
                     verses4 = BibleVers.objects.filter(translationIdentifier=tr4, bookNr=book, chapterNr=chapter)
                     if verses1.count() > 0 and verses2.count() > 0 and verses3.count() > 0:
                         return render(request, 'strongs/bible.html', {'search': book[0].name + ' ' + str(chapter), 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(verses1, verses2, verses3, verses4)})
-                    elif book[0].nr < 66:
-                        # try the next first chapter
-                        book = BibleBook.objects.filter(nr=book[0].nr + 1)
-                        chapter = 1
-                        verses1 = BibleVers.objects.filter(translationIdentifier=tr1, bookNr=book, chapterNr=chapter)
-                        verses2 = BibleVers.objects.filter(translationIdentifier=tr2, bookNr=book, chapterNr=chapter)
-                        verses3 = BibleVers.objects.filter(translationIdentifier=tr3, bookNr=book, chapterNr=chapter)
-                        verses4 = BibleVers.objects.filter(translationIdentifier=tr4, bookNr=book, chapterNr=chapter)
-                        if verses1.count() > 0 and verses2.count() > 0 and verses3.count() > 0:
-                            return render(request, 'strongs/bible.html', {'search': book[0].name + ' ' + str(chapter), 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(verses1, verses2, verses3, verses4)})
-                        else:
-                            return HttpResponse('No verses found')
+                    else:
+                        return HttpResponse('No verses found')
                 else:
                     return HttpResponse('No translation found')
             else:
