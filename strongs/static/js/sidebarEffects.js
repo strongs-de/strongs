@@ -76,6 +76,9 @@ var SidebarMenuEffects = (function() {
 		closeSideBar = function(evt) {
 			if( !hasParentClass( evt.target, 'sb-menu' ) ) {
 				resetMenu();
+
+				// remove anchor link
+				parent.location.hash = '';
 				
 				button.removeEventListener( eventtype, closeSideBar );
 				button.addEventListener( eventtype, openSideBar );
@@ -114,9 +117,11 @@ var SidebarMenuEffects = (function() {
 		button.addEventListener( eventtype, openSideBar );
 
 		// Wenn eine Strong-Nummer angegeben ist, dann gleich Sidebar öffnen
-		var idx = document.location.href.indexOf("#")+1;
-		if(idx > 0) {
-			var anchor = document.location.href.substring(idx);
+		// var idx = document.location.href.indexOf("#")+1;
+		// if(idx > 0) {
+		if(parent.location.hash.length > 1) {
+			// var anchor = document.location.href.substring(idx);
+			var anchor = parent.location.hash.substring(1);
 			var arr = anchor.split('/');
 			open();
 			loadStrong(arr[0], arr[1]);
