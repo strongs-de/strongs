@@ -20,51 +20,53 @@ def insert_bible_vers():
     ####################################################
     # Insert book names if they does not exist
 
+    FILES = ['./GER_SCH1951_STRONG.xml', './GER_ELB1905_STRONG.xml', './GER_LUTH1912.xml', './GER_ILGRDE.xml', './GER_SCH2000.xml', './GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml', './GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml']
     # FILE = './GER_SCH1951_STRONG.xml'
     # FILE = './GER_ELB1905_STRONG.xml'
     # FILE = './GER_LUTH1912.xml'
     # FILE = './GER_ILGRDE.xml'
     # FILE = './GER_SCH2000.xml'
-    FILE = './GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml'
+    # FILE = './GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml'
 
-    ####################################################
-    # Insert bibles from zefanja xml
-    baum = ElementTree.parse(FILE)
-    root = baum.getroot()
-    identifier = root.findtext('INFORMATION/identifier')
-    language = root.findtext('INFORMATION/language')
-    title = root.findtext('INFORMATION/title')
+    for FILE in FILES:
+        ####################################################
+        # Insert bibles from zefanja xml
+        baum = ElementTree.parse(FILE)
+        root = baum.getroot()
+        identifier = root.findtext('INFORMATION/identifier')
+        language = root.findtext('INFORMATION/language')
+        title = root.findtext('INFORMATION/title')
 
-    # Ask if this translation does already exist
-    tr = BibleTranslation.objects.filter(identifier=identifier)
-    if tr.count() <= 0:
-        tr = BibleTranslation(identifier=identifier, name=title, language=language)
-        tr.save()
-        s += ' -> created new translation ' + identifier + '.<br>'
-    else:
-        tr = tr[0]
-
-    # Insert verses
-    for book in root.findall('BIBLEBOOK'):
-        chapterCount = 0
-
-        # Does this book already exist
-        tb = BibleBook.objects.filter(nr=book.get('bnumber'))
-        if tb.count() <= 0:
-            tb = BibleBook(nr=int(book.get('bnumber')), name='', alternativeNames='')
-            tb.save()
+        # Ask if this translation does already exist
+        tr = BibleTranslation.objects.filter(identifier=identifier)
+        if tr.count() <= 0:
+            tr = BibleTranslation(identifier=identifier, name=title, language=language)
+            tr.save()
+            s += ' -> created new translation ' + identifier + '.<br>'
         else:
-            tb = tb[0]
+            tr = tr[0]
 
-        for chapter in book.findall('CHAPTER'):
-            chapterCount += 1
-            versCount = 0
-            for vers in chapter.findall("VERS"):
-                versCount += 1
-                dbVers = BibleVers(translationIdentifier=tr, bookNr=tb, chapterNr=chapter.get('cnumber'), versNr=vers.get('vnumber'), versText=element_to_string(vers))
-                dbVers.save()
-        s += ' -> inserted book nr ' + book.get('bnumber') + ' with ' + str(chapterCount)  + ' chapters and ' + str(versCount) + ' verses.<br>'
-    return str
+        # Insert verses
+        for book in root.findall('BIBLEBOOK'):
+            chapterCount = 0
+
+            # Does this book already exist
+            tb = BibleBook.objects.filter(nr=book.get('bnumber'))
+            if tb.count() <= 0:
+                tb = BibleBook(nr=int(book.get('bnumber')), name='', alternativeNames='')
+                tb.save()
+            else:
+                tb = tb[0]
+
+            for chapter in book.findall('CHAPTER'):
+                chapterCount += 1
+                versCount = 0
+                for vers in chapter.findall("VERS"):
+                    versCount += 1
+                    dbVers = BibleVers(translationIdentifier=tr, bookNr=tb, chapterNr=chapter.get('cnumber'), versNr=vers.get('vnumber'), versText=element_to_string(vers))
+                    dbVers.save()
+            s += ' -> inserted book nr ' + book.get('bnumber') + ' with ' + str(chapterCount)  + ' chapters and ' + str(versCount) + ' verses.<br>'
+    return s
 
 # def insert_bible_translations():
 #     ####################################################

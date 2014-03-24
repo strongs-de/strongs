@@ -119,47 +119,63 @@
             e.preventDefault();
         });
 
+        function navigate(forwards) {
+          var url = location.href;
+          var adder = forwards ? 1 : -1;
+
+          // search for book and chapter
+          var regex = new RegExp("([0-9]?.? ?[a-zA-ZäöüÄÖÜ]+)\\s?([0-9]+),?([0-9]+)?", "g");
+          var result = regex.exec($('#searchId').val());
+          if(result != null) {
+            var book = result[1];
+            var chapter = result[2];
+            var vers = result[3];
+            var val = '/' + book + (parseInt(chapter)+adder) + (vers != null ? ',' + vers : '') + '/';
+            // alert(val);
+            location.href = val;
+            return;
+          }
+
+          // search for search text with page number
+          regex = new RegExp("(.*)/([^/]*)/(\\w)/(.*)", "g");
+          result = regex.exec(url);
+          if(result != null) {
+            // ULR is search string with page number specified
+            var start = result[1];
+            var search = result[2];
+            var page = result[3];
+            var end = result[4];
+            if(adder + parseInt(page) <= 0) return;
+
+            var val = start + '/' + search + '/' + (parseInt(page)+adder) + '/';
+            // alert(val);
+            location.href = val;
+            return;
+          }
+          // it is a search text without page number ... add it but don't forget there may be an anchor
+          else {
+            if(adder == -1) return; // we can't navigate backwards
+
+            var idx = url.indexOf('#');
+            val = url;
+            if(idx > -1) {
+              val = url.substring(0, idx) + '2/';
+            } else {
+              val = url + '2/';
+            }
+            location.href = val;
+            return;
+          }
+        }
+
         // Handle next and previous buttons
         $('#next_chapter').click(function(e) {
-          var val = $('#searchId').val();
-          arr = val.split(' ');
-          if(arr.length >= 2) {
-            $('#searchId').val(arr[0] + ' ' + (parseInt(arr[1]) + 1));
-            var path = '/' + $('#searchId').val();
-            location.href=path;
-          } else {
-            val = location.href;
-            arr = val.split('/')
-            if(arr.length > 4 && arr[4] !== '')
-              val = arr[0] + '/' + arr[1] + '/' + arr[2] + '/' + arr[3] + '/' + (parseInt(arr[4]) + 1);
-            else
-              val = arr[0] + '/' + arr[1] + '/' + arr[2] + '/' + arr[3] + '/2';
-            location.href = val;
-          }
-          
-        })
+          navigate(true);
+        });
+
         $('#prev_chapter').click(function(e) {
-          var val = $('#searchId').val();
-          arr = val.split(' ');
-          if(arr.length >= 2) {
-            $('#searchId').val(arr[0] + ' ' + (parseInt(arr[1]) - 1));
-            var path = '/' + $('#searchId').val();
-            location.href=path;
-          } else {
-            val = location.href;
-            arr = val.split('/')
-            if(arr.length > 4 && arr[4] !== '')
-              val = arr[0] + '/' + arr[1] + '/' + arr[2] + '/' + arr[3] + '/' + (parseInt(arr[4]) - 1);
-            else
-              val = arr[0] + '/' + arr[1] + '/' + arr[2] + '/' + arr[3] + '/1';
-            location.href = val;
-          }
-          // if(arr.length == 2) {
-          //   $('#searchId').val(arr[0] + ' ' + (parseInt(arr[1]) - 1));
-          // }
-          // var path = '/' + $('#searchId').val();
-          // location.href=path;
-        })
+          navigate(false);
+        });
 
 
         // Hide Header on on scroll down
