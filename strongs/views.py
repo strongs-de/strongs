@@ -98,7 +98,7 @@ def bible(request, bible_book):
     if regex is not None:
         s = regex.search(bible_book)
         if s is not None and len(s.groups()) > 0:
-            book = BibleBook.objects.filter(Q(name__iexact=s.group(1)) | Q(short_name__iexact=s.group(1)) | Q(alternativeNames__icontains=s.group(1) + ','))
+            book = BibleBook.objects.filter(Q(name__iexact=s.group(1)) | Q(short_name__iexact=s.group(1)) | Q(alternativeNames__icontains=',' + s.group(1) + ','))
             chapter = s.group(2) or 1
             if book.count() > 0:
                 # get the last chapter for this book
@@ -172,7 +172,7 @@ def element_to_string(element):
 
 def initDb(request):
     s = ''
-    s += insert_bible_vers()
-    s += init_strong_grammar()     # TODO: did not work till the end!
+    # s += insert_bible_vers()
+    # s += init_strong_grammar()     # TODO: did not work till the end!
     s += init_bible_books()
     return HttpResponse(s)

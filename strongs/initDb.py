@@ -172,8 +172,8 @@ def init_bible_books():
                 s += ele[1]
             s += ')'
             if len(ele) > 2:
-                bookNames.alternativeNames = string.join(ele[2:], ',')
-                s += ' [' + ele[2] + ']'
+                bookNames.alternativeNames = ',' + string.join(ele[2:], ',') + ','
+                s += ' [' + bookNames.alternativeNames + ']'
             bookNames.save()
             s += '<br>'
     return s
