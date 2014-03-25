@@ -155,7 +155,7 @@ def element_to_string(element):
 
 def initDb(request):
     s = ''
-    # s += insert_bible_vers()
-    # s += init_strong_grammar()     # TODO: did not work till the end!
+    s += insert_bible_vers()
+    s += init_strong_grammar()     # TODO: did not work till the end!
     s += init_bible_books()
     return HttpResponse(s)
