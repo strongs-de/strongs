@@ -104,6 +104,9 @@ var SidebarMenuEffects = (function() {
 				classie.addClass( container, 'sb-menu-open' );
 			}, 25 );
 
+			// Init tooltips
+			initTooltips();
+
 			button.removeEventListener( eventtype, openSideBar );
 			button.addEventListener( eventtype, closeSideBar );
 		};
