@@ -29,6 +29,7 @@
       <script src="{{ STATIC_URL }}js/html5shiv.js"></script>
       <script src="{{ STATIC_URL }}js/respond.min.js"></script>
     <![endif]-->
+    <link href="{{ STATIC_URL }}css/tooltip.css" rel="stylesheet">
   </head>
   <body>
   <!--
@@ -97,7 +98,8 @@
 
 
     </div>
-    <span title='test' rel='tooltip'>ein test</span>
+    <!-- <abbr rel="tooltip" title="This is a demo of article called &lt;em&gt;CSS and jQuery Tooltip: Responsive, Mobile-Friendly&lt;/em&gt;.">Demo-Tooltip</abbr> -->
+    <!-- <br/><br/><br/><br/><br/> -->
     <!-- /.container -->
 
 
@@ -113,6 +115,7 @@
     <script src="{{ STATIC_URL }}js/jquery.tagsinput.js"></script>
     <script src="{{ STATIC_URL }}js/jquery.placeholder.js"></script>
     <script src="{{ STATIC_URL }}js/sidebarEffects.js"></script>
+    <script src="{{ STATIC_URL }}js/tooltip.js"></script>
     <script>
         $('#searchform').submit(function(e) {
             var path = '/' + $('#searchId').val();
@@ -222,10 +225,13 @@
             lastScrollTop = st;
         }
     </script>
+    <script>
+    /*$(document).ready(function() {
+         $('.tip').tipr();
+    });*/
+    </script>
 
     {% block js %}
     {% endblock %}
-
-    <script src="{{ STATIC_URL }}js/tooltip.js"></script>
   </body>
 </html>
