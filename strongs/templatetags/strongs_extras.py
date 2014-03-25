@@ -12,7 +12,7 @@ register = template.Library()
 def correctverstext(value):
 	s = value.replace("<STYLE css=", "<span style=")
 	s = s.replace("</STYLE>", "</span>")
-	s = s.replace("<gr str=", "<span class='sb-strong' onclick='' rel='tooltip' title='test' data-placement='top' data-strong=")
+	s = s.replace("<gr str=", "<span class='sb-strong' onclick='' data-strong=")
 	s = s.replace("</gr>", "</span>")
 	s = s.replace(' </span>,', '</span>,')
 	s = s.replace(' </span>.', '</span>.')

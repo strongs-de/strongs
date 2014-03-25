@@ -11,6 +11,7 @@ from django.db.models import Max
 from collections import Counter
 import operator
 import shlex
+from grammar_parser import get_grammar_name
 
 
 # Create your views here.
@@ -38,9 +39,9 @@ def find_translations(strong_nr, versText):
     return translations
 
 
-
 def strongs(request, strong_id, vers):
     vers = vers.replace('_', ',')
+    grammar = ''
     regex = re.compile("([0-9]?.? ?[a-zA-Z]+)\s?([0-9]+)?,?([0-9]+)?")
     if regex is not None:
         v = regex.search(vers)
@@ -57,7 +58,9 @@ def strongs(request, strong_id, vers):
                     if book[0].nr >= 40:
                         search2 = StrongNr.objects.filter(book=book, chapterNr=v.group(2), versNr=v.group(3), strongNr=strong_id)
                         if search2.count() > 0:
-                            vers = book[0].name + ' ' + v.group(2) + ',' + v.group(3) + ' Grammatik: ' + search2[0].grammar
+                            vers = book[0].name + ' ' + v.group(2) + ',' + v.group(3)
+                            grammar = get_grammar_name(search2[0].grammar)
+
 
                     translations = []
                     for vers2 in search1:
@@ -65,29 +68,9 @@ def strongs(request, strong_id, vers):
                     occ = len(translations)
                     translations = Counter(translations)
                     translations = sorted(translations.iteritems(), key=operator.itemgetter(1), reverse=True)
-                    return render(request, 'strongs/strongNr.html', {'verses': search1[0:100], 'vers': vers, 'occurences': occ, 'count': search1.count(), 'translations': translations})
-        # regex2 = re.compile('^<gr str="' + str(strong_id) + '">.*</gr>', re.UNICODE | re.IGNORECASE)
-        # if regex2 is not None:
-        #     translations = []
-        #     for vers2 in search1:
-        #         found = regex2.search(vers2.versText)
-        #         if found is not None and found.groups() > 2:
-        #             translations.append(found.group(1))
-        #         elif found is not None and found.groups() > 1:
-        #             translations.append(found.group(0))
-        #     translations = Counter(translations)
-        #     translations = sorted(translations.iteritems(), key=operator.itemgetter(1), reverse=True)
-        # translations = Counter([vv.word for vv in search1])
-        #     return render(request, 'strongs/strongNr.html', {'verses': search1[0:100], 'vers': vers, 'count': search1.count(), 'translations': translations})
+                    return render(request, 'strongs/strongNr.html', {'verses': search1[0:100], 'grammar': grammar, 'vers': vers, 'occurences': occ, 'count': search1.count(), 'translations': translations})
     return HttpResponse('No verses found for strong nr ' + str(strong_id))
 
-    # Try to search for this strong number
-    # search = "<gr str=\"" + str(strong_id) + "\""
-    # search1 = BibleVers.objects.filter(versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
-    # if search1.count() > 0:
-    #     return render(request, 'strongs/strongNr.html', {'verses': search1})
-    # else:
-    #     return HttpResponse('No verses found for strong nr ' + str(strong_id))
 
 def bible(request, bible_book):
     # if strong-number, then forward
@@ -98,7 +81,7 @@ def bible(request, bible_book):
     if regex is not None:
         s = regex.search(bible_book)
         if s is not None and len(s.groups()) > 0:
-            book = BibleBook.objects.filter(Q(name__iexact=s.group(1)) | Q(short_name__iexact=s.group(1)) | Q(alternativeNames__icontains=s.group(1) + ','))
+            book = BibleBook.objects.filter(Q(name__iexact=s.group(1)) | Q(short_name__iexact=s.group(1)) | Q(alternativeNames__icontains=',' + s.group(1) + ','))
             chapter = s.group(2) or 1
             if book.count() > 0:
                 # get the last chapter for this book
@@ -173,6 +156,6 @@ def element_to_string(element):
 def initDb(request):
     s = ''
     # s += insert_bible_vers()
-    s += init_strong_grammar()     # TODO: did not work till the end!
-    # s += init_bible_books()
+    # s += init_strong_grammar()     # TODO: did not work till the end!
+    s += init_bible_books()
     return HttpResponse(s)
