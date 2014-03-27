@@ -1,4 +1,7 @@
 {% extends "baseTemplate.html" %}
+{% block pagenum %}
+{{ pageact }} / {{ pagecnt }}
+{% endblock %}
 {% block content %}
     <table class="col-md-12 table-bible">
         <tr>
@@ -111,6 +114,13 @@
                  $(block).html($(block).html().replace(new RegExp(substrings[i].replace(/"/g, "").replace(/'/g, ""), 'gi'), function(match, text, urlId){
                     return '<span class="search-highlight">' + match + '</span>'
                  }));
+               }
+
+               // check if it is a strong number
+               var regex = new RegExp("([GH])([0-9]{1,4})", "g")
+               var result = regex.exec(substring);
+               if(result != null) {
+                  $('.strong-' + result[2]).addClass('search-highlight');
                }
             }
 

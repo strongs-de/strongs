@@ -16,10 +16,13 @@ Insgesamt wurden {{count}} Stellen mit {{occurences}} Vorkommnissen gefunden.<br
 
 <br/><br/>
 
+<b><a href="/{{strong}}"><< Stellen anzeigen</a></b>
+<!--
 <b>Stellen-Liste{%if count > 100%} (nur die ersten 100 Stellen){%endif%}:</b><br/>
 <div style="padding-left:20px">
 {% for v in verses %}
 	<a href="/{{ v }}">{{ v }}</a>,
 {% endfor %}
 </div>
+-->
 {% endautoescape %}
