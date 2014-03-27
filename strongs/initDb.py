@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 __author__ = 'mirkohecky'
 
 from models import BibleTranslation, BibleVers, StrongNr, BibleBook
 import xml.etree.ElementTree as ElementTree
 import re, string
+from itertools import izip_longest
 
 
 def element_to_string(element):
@@ -14,13 +16,68 @@ def element_to_string(element):
     # s = s.replace('</gr>', '</a>')
     return s
 
+
+def insert_osis_bibles():
+    BOOKS = ['Gen', 'Exod', 'Lev', 'Num', 'Deut', 'Josh', 'Judg', 'Ruth', '1Sam', '2Sam', '1Kgs', '2Kgs', '1Chr', '2Chr', 'Ezra', 'Neh', 'Esth', 'Job', 'Ps', 'Prov', 'Eccl', 'Song', 'Klgl', 'Isa', 'Jer', 'Ezek', 'Dan', 'Hos', 'Joel', 'Amos', 'Obad', 'Jonah', 'Mic', 'Nah', 'Hab', 'Zeph', 'Hag', 'Zech', 'Mal', 'Matt', 'Mark', 'Luke', 'John', 'Acts', 'Rom', '1Cor', '2Cor', 'Gal', 'Eph', 'Phil', 'Col', '1Thess', '2Thess', '1Tim', '2Tim', 'Titus', 'Phlm', 'Heb', 'Jas', '1Pet', '2Pet', '1John', '2John', '3John', 'Jude', 'Rev']
+    s = ''
+    FILES = ['./bibles/osis.NGU.xml', './bibles/osis.psalmenNGU.xml', './bibles/osis.schlachter2000.v1.withoutnotes.xml']
+    IDENTIFIER = [u'NGÜ', u'NGÜ', 'SCH2000']
+    LANGS = ['GER', 'GER', 'GER']
+    TITLES = [u'Neue Genfer Übersetzung', u'Neue Genfer Übersetzung', 'Schlachter 2000']
+    lists = izip_longest(FILES, IDENTIFIER, LANGS, TITLES)
+    for FILE, identifier, lang, title in lists:
+        tree = ElementTree.parse(FILE)
+        root = tree.getroot()
+        # work = root.find('{http://www.bibletechnologies.net/2003/OSIS/namespace}osisText/{http://www.bibletechnologies.net/2003/OSIS/namespace}header/{http://www.bibletechnologies.net/2003/OSIS/namespace}work')
+        if title is not None and FILE is not None and identifier is not None and lang is not None:
+            # Ask if this translation does already exist
+            tr = BibleTranslation.objects.filter(identifier=identifier)
+            if tr.count() <= 0:
+                tr = BibleTranslation(identifier=identifier, name=title, language=lang)
+                tr.save()
+                s += ' -> created new translation ' + identifier + '.<br>'
+            else:
+                tr = tr[0]
+
+            # Insert verses
+            for book in root.findall('{http://www.bibletechnologies.net/2003/OSIS/namespace}osisText/{http://www.bibletechnologies.net/2003/OSIS/namespace}div'):
+                if book is not None:
+                    bindex = BOOKS.index(book.attrib.get('osisID'))
+                    # s += 'inserted book ' + str(bindex) + ': ' + BOOKS[bindex] + '<br/>'
+                    chapterCount = 0
+
+                    # Does this book already exist
+                    tb = BibleBook.objects.filter(nr=bindex+1)
+                    if tb.count() <= 0:
+                        tb = BibleBook(nr=bindex+1, name='', alternativeNames='')
+                        tb.save()
+                    else:
+                        tb = tb[0]
+
+                    for chapter in book.findall('{http://www.bibletechnologies.net/2003/OSIS/namespace}chapter'):
+                        chapterCount += 1
+                        versCount = 0
+                        if chapter.text is '':
+                            dbVers = BibleVers(translationIdentifier=tr, bookNr=tb, chapterNr=chapterCount, versNr=1, versText=chapter.text)
+                            # dbVers.save()
+                            versCount = 1
+
+                        for vers in chapter.findall("{http://www.bibletechnologies.net/2003/OSIS/namespace}verse"):
+                            versCount += 1
+                            dbVers = BibleVers(translationIdentifier=tr, bookNr=tb, chapterNr=chapterCount, versNr=versCount, versText=vers.text)
+                            # dbVers.save()
+                        s += ' -> inserted book nr ' + str(bindex+1) + ' chapter ' + str(chapterCount)  + ' with ' + str(versCount) + ' verses.<br>'
+        
+    return s
+
+
 def insert_bible_vers():
     s = 'Start parsing ...<br>'
 
     ####################################################
     # Insert book names if they does not exist
 
-    FILES = ['./GER_SCH1951_STRONG.xml', './GER_ELB1905_STRONG.xml', './GER_LUTH1912.xml', './GER_ILGRDE.xml', './GER_SCH2000.xml', './GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml', './GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml']
+    FILES = ['./bibles/GER_SCH1951_STRONG.xml', './bibles/GER_ELB1905_STRONG.xml', './bibles/GER_LUTH1912.xml', './bibles/GER_ILGRDE.xml', './bibles/GER_SCH2000.xml', './bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml', './bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml']
     # FILE = './GER_SCH1951_STRONG.xml'
     # FILE = './GER_ELB1905_STRONG.xml'
     # FILE = './GER_LUTH1912.xml'

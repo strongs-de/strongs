@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from models import BibleBook, BibleTranslation, BibleVers, StrongNr
 from django.db.models import Q
-from initDb import init_bible_books, insert_bible_vers, init_strong_grammar
+from initDb import init_bible_books, insert_bible_vers, init_strong_grammar, insert_osis_bibles
 import re
 import xml.etree.ElementTree as ElementTree
 from itertools import izip_longest
@@ -68,7 +68,8 @@ def strongs(request, strong_id, vers):
                     occ = len(translations)
                     translations = Counter(translations)
                     translations = sorted(translations.iteritems(), key=operator.itemgetter(1), reverse=True)
-                    return render(request, 'strongs/strongNr.html', {'verses': search1[0:100], 'grammar': grammar, 'vers': vers, 'occurences': occ, 'count': search1.count(), 'translations': translations})
+                    appender = 'H' if book[0].nr < 40 else 'G'
+                    return render(request, 'strongs/strongNr.html', {'strong': appender + str(strong_id), 'verses': search1[0:100], 'grammar': grammar, 'vers': vers, 'occurences': occ, 'count': search1.count(), 'translations': translations})
     return HttpResponse('No verses found for strong nr ' + str(strong_id))
 
 
@@ -123,6 +124,42 @@ def bible(request, bible_book):
     else:
         return HttpResponse('Keine Bibelstelle oder Strong Nummer eingegeben!')
 
+def search_strong(request, strong, page='1'):
+    nr = int(strong[1:])
+
+    search = "<gr str=\"" + str(nr) + "\""
+    if strong[0] == 'H':
+        search1 = BibleVers.objects.filter(bookNr=BibleBook.objects.filter(nr__lt=40), versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
+    elif strong[0] == 'G':
+        search1 = BibleVers.objects.filter(bookNr=BibleBook.objects.filter(nr__gte=40), versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
+
+    if search1.count() > 0:
+        search2, search3, search4 = [], [], []
+        count = search1.count()
+        
+        # only show the first 30 items
+        num = 30
+        idx1 = num * (int(page) - 1) if int(page) > 0 else 0
+        idx2 = num * int(page) if int(page) > 0 else num
+        search1 = search1[idx1:idx2]
+
+        for x in search1:
+            s2 = BibleVers.objects.filter(translationIdentifier=BibleTranslation.objects.filter(identifier='SCH2000NEU'), bookNr=x.bookNr, versNr=x.versNr, chapterNr=x.chapterNr)
+            s3 = BibleVers.objects.filter(translationIdentifier=BibleTranslation.objects.filter(identifier='LUTH1912'), bookNr=x.bookNr, versNr=x.versNr, chapterNr=x.chapterNr)
+            s4 = BibleVers.objects.filter(translationIdentifier=BibleTranslation.objects.filter(identifier='ILGRDE'), bookNr=x.bookNr, versNr=x.versNr, chapterNr=x.chapterNr)
+            if s2.count() > 0:
+                search2.append(s2[0])
+            if s3.count() > 0:
+                search3.append(s3[0])
+            if s4.count() > 0:
+                search4.append(s4[0])
+
+        pagecnt = max(1, int(count * 1.0 / num + .5))
+        return render(request, 'strongs/search.html', {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': strong, 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(search1, search2, search3, search4)})
+    else:
+        return HttpResponse('No verses found for strong number ' + strong)
+
+
 def search(request, search, page):
     searches = search.split(' ')
     searches = map(lambda s: s.decode('UTF8').replace('"', '').replace("'", ''), shlex.split(search.encode('utf8')))
@@ -138,7 +175,9 @@ def search(request, search, page):
         num = 30
         idx1 = num * (int(page) - 1) if int(page) > 0 else 0
         idx2 = num * int(page) if int(page) > 0 else num
-        return render(request, 'strongs/search.html', {'search': search, 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(search1[idx1:idx2], search2[idx1:idx2], search3[idx1:idx2], search4[idx1:idx2])})
+        count = max(search1.count(), search2.count(), search3.count(), search4.count())
+        pagecnt = max(1, int(count * 1.0 / num + .5))
+        return render(request, 'strongs/search.html', {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': search, 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(search1[idx1:idx2], search2[idx1:idx2], search3[idx1:idx2], search4[idx1:idx2])})
         # return HttpResponse('Found ' + str(search1.count()) + ' verses')
     else:
         return HttpResponse('No book found for %s' % search)
@@ -155,7 +194,8 @@ def element_to_string(element):
 
 def initDb(request):
     s = ''
-    s += insert_bible_vers()
-    s += init_strong_grammar()     # TODO: did not work till the end!
-    s += init_bible_books()
+    # s += insert_bible_vers()
+    s += insert_osis_bibles()
+    # s += init_strong_grammar()     # TODO: did not work till the end!
+    # s += init_bible_books()
     return HttpResponse(s)

@@ -79,6 +79,7 @@
           </form>
           <ul class="nav navbar-nav">
             <li><a href="#" id='prev_chapter'><span class="glyphicon glyphicon-chevron-left"></span></a></li>
+            <li><a style="height:50px">{% block pagenum %}{% endblock %}</a></li>
             <li><a href="#" id='next_chapter'><span class="glyphicon glyphicon-chevron-right"></span></a></li>
           </ul>
         </div><!-- /.navbar-collapse -->
@@ -124,18 +125,32 @@
         });
 
         function navigate(forwards) {
+          var max = '{{ pagecnt }}';
+          max = max == '' ? 1000 : max;
           var url = location.href;
           var adder = forwards ? 1 : -1;
 
+          // search for hebrew or greek strong
+          var regex = new RegExp("([GH])([0-9]{1,4})/?(\\w)?/", "g")
+          var result = regex.exec(url);
+          if(result != null) {
+            var gh = result[1];
+            var strong = result[2];
+            var page = result[3];
+            page = parseInt(page == null ? 1 : page) + adder;
+            if(page <= max && page > 0)
+              location.href = '/' + gh + strong + '/' + page + '/';
+            return;
+          }
+
           // search for book and chapter
-          var regex = new RegExp("([0-9]?.? ?[a-zA-ZäöüÄÖÜ]+)\\s?([0-9]+),?([0-9]+)?", "g");
-          var result = regex.exec($('#searchId').val());
+          regex = new RegExp("([0-9]?.? ?[a-zA-ZäöüÄÖÜ]+)\\s?([0-9]+),?([0-9]+)?", "g");
+          result = regex.exec($('#searchId').val());
           if(result != null) {
             var book = result[1];
             var chapter = result[2];
             var vers = result[3];
             var val = '/' + book + (parseInt(chapter)+adder) + (vers != null ? ',' + vers : '') + '/';
-            // alert(val);
             location.href = val;
             return;
           }
@@ -152,8 +167,9 @@
             if(adder + parseInt(page) <= 0) return;
 
             var val = start + '/' + search + '/' + (parseInt(page)+adder) + '/';
-            // alert(val);
-            location.href = val;
+            page = parseInt(page) + adder;
+            if(page <= max && page > 0)
+              location.href = val;
             return;
           }
           // it is a search text without page number ... add it but don't forget there may be an anchor
@@ -167,7 +183,8 @@
             } else {
               val = url + '2/';
             }
-            location.href = val;
+            if(page <= max)
+              location.href = val;
             return;
           }
         }
