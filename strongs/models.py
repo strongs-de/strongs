@@ -24,12 +24,21 @@ class BibleBook(models.Model):
         # return self.name
 
 
-class BibleVers(models.Model):
+class BibleText(models.Model):
+    vers = models.ForeignKey("BibleVers")
     translationIdentifier = models.ForeignKey("BibleTranslation")
+    versText = models.TextField(db_index=True)
+
+    def __unicode__(self):
+        return self.vers.__unicode__()
+
+
+class BibleVers(models.Model):
+    # translationIdentifier = models.ForeignKey("BibleTranslation")
     bookNr = models.ForeignKey("BibleBook")
     chapterNr = models.IntegerField()
     versNr = models.IntegerField()
-    versText = models.TextField(db_index=True)
+    # versText = models.TextField(db_index=True)
 
     def __unicode__(self):
         return unicode(self.bookNr.short_name) + ' ' + str(self.chapterNr) + ',' + str(self.versNr)

@@ -16,22 +16,22 @@
             {% load strongs_extras %}
             <td class="col-md-3">
                 {% if vers1 != None %}
-                <span class="versenr"><a href="/{{vers1.bookNr.short_name}}{{vers1.chapterNr}},{{vers1.versNr}}">{{vers1}}</a></span><span class="verse" id="{{vers1.bookNr.short_name}}{{vers1.chapterNr}}_{{vers1.versNr}}">{{vers1.versText|correctverstext}}</span>
+                <span class="versenr"><a href="/{{vers1.vers.bookNr.short_name}}{{vers1.vers.chapterNr}},{{vers1.vers.versNr}}">{{vers1.vers}}</a></span><span class="verse" id="{{vers1.vers.bookNr.short_name}}{{vers1.vers.chapterNr}}_{{vers1.vers.versNr}}">{{vers1.versText|correctverstext}}</span>
                 {% endif %}
             </td>
             <td class="col-md-3 hidden-xs">
                 {% if vers2 != None %}
-                <span class="versenr"><a href="/{{vers2.bookNr.short_name}} {{vers2.chapterNr}},{{vers2.versNr}}">{{vers2}}</a></span><span class="verse" id="{{vers2.bookNr.short_name}}{{vers2.chapterNr}}_{{vers2.versNr}}">{{vers2.versText|correctverstext}}</span>
+                <span class="versenr"><a href="/{{vers2.vers.bookNr.short_name}} {{vers2.vers.chapterNr}},{{vers2.vers.versNr}}">{{vers2.vers}}</a></span><span class="verse" id="{{vers2.vers.bookNr.short_name}}{{vers2.vers.chapterNr}}_{{vers2.vers.versNr}}">{{vers2.versText|correctverstext}}</span>
                 {% endif %}
             </td>
             <td class="col-md-3 hidden-xs hidden-sm hidden-md">
                 {% if vers3 != None %}
-                <span class="versenr"><a href="/{{vers3.bookNr.short_name}} {{vers3.chapterNr}},{{vers3.versNr}}">{{vers3}}</a></span><span class="verse" id="{{vers3.bookNr.short_name}}{{vers3.chapterNr}}_{{vers3.versNr}}">{{vers3.versText|correctverstext}}</span>
+                <span class="versenr"><a href="/{{vers3.vers.bookNr.short_name}} {{vers3.vers.chapterNr}},{{vers3.vers.versNr}}">{{vers3.vers}}</a></span><span class="verse" id="{{vers3.vers.bookNr.short_name}}{{vers3.vers.chapterNr}}_{{vers3.vers.versNr}}">{{vers3.versText|correctverstext}}</span>
                 {% endif %}
             </td>
             <td class="col-md-3 hidden-xs hidden-sm hidden-md">
                 {% if vers4 != None %}
-                <span class="versenr"><a href="/{{vers4.bookNr.short_name}} {{vers4.chapterNr}},{{vers4.versNr}}">{{vers4}}</a></span><span class="verse" id="{{vers4.bookNr.short_name}}{{vers4.chapterNr}}_{{vers4.versNr}}">{{vers4.versText|correctverstext}}</span>
+                <span class="versenr"><a href="/{{vers4.vers.bookNr.short_name}} {{vers4.vers.chapterNr}},{{vers4.vers.versNr}}">{{vers4.vers}}</a></span><span class="verse" id="{{vers4.vers.bookNr.short_name}}{{vers4.vers.chapterNr}}_{{vers4.vers.versNr}}">{{vers4.versText|correctverstext}}</span>
                 {% endif %}
             </td>
             {% endautoescape %}
