@@ -8,7 +8,7 @@
             <th class="col-md-3 hidden-xs hidden-sm hidden-md">{{translation4}}</th>
         </tr>
         {% for vers1, vers2, vers3, vers4 in verses %}
-        <tr class="enableHover">
+        <tr class="enableHover" id="vers-{{vers1.versNr}}">
             {% autoescape off %}
             {% load strongs_extras %}
             <td class="col-md-3"><table><tr><td class="versenr">{{vers1.versNr}}</td><td class="verse" id="{{vers1.bookNr.short_name}}{{vers1.chapterNr}}_{{vers1.versNr}}">{{vers1.versText|correctverstext}}</td></tr></table></td>
@@ -32,4 +32,16 @@
             <td class="col-md-3 hidden-xs hidden-sm hidden-md"></td>
         </tr>
     </table>
+{% endblock %}
+
+{% block js %}
+{%if vers > 0 %}
+<script>
+    $(window).load(function() {
+        // $("#vers-{{vers}}").animate({ scrollTop: 0 }, "slow");
+        $("html, body").animate({ scrollTop: $('#vers-{{vers}}').position().top + 70}, 500);
+        $('#vers-{{vers}}').css('background-color', 'rgba(91, 176, 91, .1)');
+    });
+</script>
+{% endif %}
 {% endblock %}
