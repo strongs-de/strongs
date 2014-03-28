@@ -117,7 +117,7 @@
                }
 
                // check if it is a strong number
-               var regex = new RegExp("([GH])([0-9]{1,4})", "g")
+               var regex = new RegExp("([GHgh])([0-9]{1,4})", "g")
                var result = regex.exec(substring);
                if(result != null) {
                   $('.strong-' + result[2]).addClass('search-highlight');

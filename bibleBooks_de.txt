@@ -20,9 +20,9 @@ Psalmen,Ps
 Sprüche,Spr
 Prediger,Pred,Kohelet,Koh
 Hoheslied,Hld,Hohes Lied
-Klagelieder,Klgl,Klag
 Jesaja,Jes
 Jeremia,Jer
+Klagelieder,Klgl,Klag
 Hesekiel,Hes,Ezechiel,Ez
 Daniel,Dan
 Hosea,Hos

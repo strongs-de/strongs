@@ -79,7 +79,7 @@
           </form>
           <ul class="nav navbar-nav">
             <li><a href="#" id='prev_chapter'><span class="glyphicon glyphicon-chevron-left"></span></a></li>
-            <li><a style="height:50px">{% block pagenum %}{% endblock %}</a></li>
+            {%if pagecnt > 0 %}<li><a style="height:50px">{% block pagenum %}{% endblock %}</a></li>{% endif %}
             <li><a href="#" id='next_chapter'><span class="glyphicon glyphicon-chevron-right"></span></a></li>
           </ul>
         </div><!-- /.navbar-collapse -->
@@ -131,7 +131,7 @@
           var adder = forwards ? 1 : -1;
 
           // search for hebrew or greek strong
-          var regex = new RegExp("([GH])([0-9]{1,4})/?(\\w)?/", "g")
+          var regex = new RegExp("([GHgh])([0-9]{1,4})/?(\\w)?/", "g")
           var result = regex.exec(url);
           if(result != null) {
             var gh = result[1];
@@ -183,7 +183,7 @@
             } else {
               val = url + '2/';
             }
-            if(page <= max)
+            if(page === undefined || page <= max)
               location.href = val;
             return;
           }

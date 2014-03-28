@@ -128,9 +128,9 @@ def search_strong(request, strong, page='1'):
     nr = int(strong[1:])
 
     search = "<gr str=\"" + str(nr) + "\""
-    if strong[0] == 'H':
+    if strong[0].upper() == 'H':
         search1 = BibleVers.objects.filter(bookNr=BibleBook.objects.filter(nr__lt=40), versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
-    elif strong[0] == 'G':
+    elif strong[0].upper() == 'G':
         search1 = BibleVers.objects.filter(bookNr=BibleBook.objects.filter(nr__gte=40), versText__contains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
 
     if search1.count() > 0:
