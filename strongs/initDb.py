@@ -17,58 +17,97 @@ def element_to_string(element):
     return s
 
 
-# def insert_osis_bibles():
-#     BOOKS = ['Gen', 'Exod', 'Lev', 'Num', 'Deut', 'Josh', 'Judg', 'Ruth', '1Sam', '2Sam', '1Kgs', '2Kgs', '1Chr', '2Chr', 'Ezra', 'Neh', 'Esth', 'Job', 'Ps', 'Prov', 'Eccl', 'Song', 'Klgl', 'Isa', 'Jer', 'Ezek', 'Dan', 'Hos', 'Joel', 'Amos', 'Obad', 'Jonah', 'Mic', 'Nah', 'Hab', 'Zeph', 'Hag', 'Zech', 'Mal', 'Matt', 'Mark', 'Luke', 'John', 'Acts', 'Rom', '1Cor', '2Cor', 'Gal', 'Eph', 'Phil', 'Col', '1Thess', '2Thess', '1Tim', '2Tim', 'Titus', 'Phlm', 'Heb', 'Jas', '1Pet', '2Pet', '1John', '2John', '3John', 'Jude', 'Rev']
-#     s = ''
-#     FILES = ['./bibles/osis.NGU.xml', './bibles/osis.psalmenNGU.xml', './bibles/osis.schlachter2000.v1.withoutnotes.xml']
-#     IDENTIFIER = [u'NGÜ', u'NGÜ', 'SCH2000']
-#     LANGS = ['GER', 'GER', 'GER']
-#     TITLES = [u'Neue Genfer Übersetzung', u'Neue Genfer Übersetzung', 'Schlachter 2000']
-#     lists = izip_longest(FILES, IDENTIFIER, LANGS, TITLES)
-#     for FILE, identifier, lang, title in lists:
-#         tree = ElementTree.parse(FILE)
-#         root = tree.getroot()
-#         # work = root.find('{http://www.bibletechnologies.net/2003/OSIS/namespace}osisText/{http://www.bibletechnologies.net/2003/OSIS/namespace}header/{http://www.bibletechnologies.net/2003/OSIS/namespace}work')
-#         if title is not None and FILE is not None and identifier is not None and lang is not None:
-#             # Ask if this translation does already exist
-#             tr = BibleTranslation.objects.filter(identifier=identifier)
-#             if tr.count() <= 0:
-#                 tr = BibleTranslation(identifier=identifier, name=title, language=lang)
-#                 tr.save()
-#                 s += ' -> created new translation ' + identifier + '.<br>'
-#             else:
-#                 tr = tr[0]
+def insert_osis_bibles():
+    BOOKS = ['Gen', 'Exod', 'Lev', 'Num', 'Deut', 'Josh', 'Judg', 'Ruth', '1Sam', '2Sam', '1Kgs', '2Kgs', '1Chr', '2Chr', 'Ezra', 'Neh', 'Esth', 'Job', 'Ps', 'Prov', 'Eccl', 'Song', 'Klgl', 'Isa', 'Jer', 'Ezek', 'Dan', 'Hos', 'Joel', 'Amos', 'Obad', 'Jonah', 'Mic', 'Nah', 'Hab', 'Zeph', 'Hag', 'Zech', 'Mal', 'Matt', 'Mark', 'Luke', 'John', 'Acts', 'Rom', '1Cor', '2Cor', 'Gal', 'Eph', 'Phil', 'Col', '1Thess', '2Thess', '1Tim', '2Tim', 'Titus', 'Phlm', 'Heb', 'Jas', '1Pet', '2Pet', '1John', '2John', '3John', 'Jude', 'Rev']
+    s = ''
+    FILES = ['./bibles/osis.NGU.xml', './bibles/osis.psalmenNGU.xml', './bibles/osis.schlachter2000.v1.withoutnotes.xml']
+    FILES = ['./bibles/osis.psalmenNGU.xml']
+    IDENTIFIER = [u'NGÜ', u'NGÜ', 'SCH2000']
+    IDENTIFIER = [u'NGÜ']
+    LANGS = ['GER', 'GER', 'GER']
+    LANGS = ['GER']
+    TITLES = [u'Neue Genfer Übersetzung', u'Neue Genfer Übersetzung', 'Schlachter 2000']
+    TITLES = [u'Neue Genfer Übersetzung']
+    NEEDS_CHAPTERS = [False]
+    lists = izip_longest(FILES, IDENTIFIER, LANGS, TITLES, NEEDS_CHAPTERS)
+    for FILE, identifier, lang, title, needs_chapter in lists:
+        tree = ElementTree.parse(FILE)
+        root = tree.getroot()
+        # work = root.find('{http://www.bibletechnologies.net/2003/OSIS/namespace}osisText/{http://www.bibletechnologies.net/2003/OSIS/namespace}header/{http://www.bibletechnologies.net/2003/OSIS/namespace}work')
+        if title is not None and FILE is not None and identifier is not None and lang is not None:
+            # Ask if this translation does already exist
+            tr = BibleTranslation.objects.filter(identifier=identifier)
+            if tr.count() <= 0:
+                tr = BibleTranslation(identifier=identifier, name=title, language=lang)
+                tr.save()
+                s += ' -> created new translation ' + identifier + '.<br>'
+            else:
+                tr = tr[0]
 
-#             # Insert verses
-#             for book in root.findall('{http://www.bibletechnologies.net/2003/OSIS/namespace}osisText/{http://www.bibletechnologies.net/2003/OSIS/namespace}div'):
-#                 if book is not None:
-#                     bindex = BOOKS.index(book.attrib.get('osisID'))
-#                     # s += 'inserted book ' + str(bindex) + ': ' + BOOKS[bindex] + '<br/>'
-#                     chapterCount = 0
+            # iterate over all verses
+            if needs_chapter:
+                chapters = root.findall('.//{http://www.bibletechnologies.net/2003/OSIS/namespace}chapter')
+            else:
+                chapters = root.getchildren()
+            actbook = ''
+            actchapter = 0
+            tb = None
+            for chapter in chapters:
+                versesinchapter = chapter.findall('.//{http://www.bibletechnologies.net/2003/OSIS/namespace}verse')
+                for vers in versesinchapter:
+                    parts = vers.attrib.get('osisID').split('.')
+                    bookname = parts[0]
+                    cnumber = int(parts[1])
+                    vnumber = int(parts[2])
+                    text = element_to_string(vers)
 
-#                     # Does this book already exist
-#                     tb = BibleBook.objects.filter(nr=bindex+1)
-#                     if tb.count() <= 0:
-#                         tb = BibleBook(nr=bindex+1, name='', alternativeNames='')
-#                         tb.save()
-#                     else:
-#                         tb = tb[0]
+                    if bookname != actbook:
+                        # Does this book already exist?
+                        bindex = BOOKS.index(bookname)
+                        tb = BibleBook.objects.filter(nr=bindex+1)
+                        if tb.count() <= 0:
+                            tb = BibleBook(nr=bindex+1, name='', alternativeNames='')
+                            tb.save()
+                        else:
+                            tb = tb[0]
 
-#                     for chapter in book.findall('{http://www.bibletechnologies.net/2003/OSIS/namespace}chapter'):
-#                         chapterCount += 1
-#                         versCount = 0
-#                         if chapter.text is '':
-#                             dbVers = BibleVers(translationIdentifier=tr, bookNr=tb, chapterNr=chapterCount, versNr=1, versText=chapter.text)
-#                             # dbVers.save()
-#                             versCount = 1
+                    # check for existance of the first vers in this chapter,
+                    # cause in Schlachter 2000 the first vers isn't encapsulated
+                    # in a verse-tag!
+                    if cnumber != actchapter:
+                        if vnumber > 1:
+                            # The first verse can be found in the parent chapter tag-text
+                            __insert(tr, tb, cnumber, 1, chapter.text)
+                        actchapter = cnumber
 
-#                         for vers in chapter.findall("{http://www.bibletechnologies.net/2003/OSIS/namespace}verse"):
-#                             versCount += 1
-#                             dbVers = BibleVers(translationIdentifier=tr, bookNr=tb, chapterNr=chapterCount, versNr=versCount, versText=vers.text)
-#                             # dbVers.save()
-#                         s += ' -> inserted book nr ' + str(bindex+1) + ' chapter ' + str(chapterCount)  + ' with ' + str(versCount) + ' verses.<br>'
+                    __insert(tr, tb, cnumber, vnumber, text)
+                    # s += bookname + str(cnumber) + ',' + str(vnumber) + ': ' + text
+                    # break
         
-#     return s
+    return s
+
+def __insert(translation, book, chapter, vers, text):
+    '''
+        Insert the bible text into the database. Create the BibleVers 
+        and the BibleText if it does not exist.
+            @translation is a BibleTranslation instance
+            @book is a BibleBook instance
+            @chapter and @vers are integers
+            @text is a string
+    '''
+    # Does this vers already exist?
+    v = BibleVers.objects.filter(bookNr=book, chapterNr=chapter, versNr=vers)
+    if v.count() <= 0:
+        v = BibleVers(bookNr=book, chapterNr=chapter, versNr=vers)
+        v.save()
+    else:
+        v = v[0]
+
+    # Insert text if it does not already exist
+    t = BibleText.objects.filter(vers=v, translationIdentifier=translation)
+    if t.count() <= 0:
+        t = BibleText(vers=v, translationIdentifier=translation, versText=text)
+        t.save()
 
 
 def insert_bible_vers():
@@ -129,8 +168,11 @@ def insert_bible_vers():
                     else:
                         v = v[0]
 
-                    dbVers = BibleText(translationIdentifier=tr, vers=v, versText=element_to_string(vers))
-                    dbVers.save()
+                    # Insert text if it does not already exist
+                    dbVers = BibleText.objects.filter(translationIdentifier=tr, vers=v)
+                    if dbVers.count() <= 0:
+                        dbVers = BibleText(translationIdentifier=tr, vers=v, versText=element_to_string(vers))
+                        dbVers.save()
             s += ' -> inserted book nr ' + book.get('bnumber') + ' with ' + str(chapterCount)  + ' chapters and ' + str(versCount) + ' verses.<br>'
     return s
 

@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from models import BibleBook, BibleTranslation, BibleVers, StrongNr, BibleText
 from django.db.models import Q
-from initDb import init_bible_books, insert_bible_vers, init_strong_grammar#, insert_osis_bibles
+from initDb import init_bible_books, insert_bible_vers, init_strong_grammar, insert_osis_bibles
 import re
 import xml.etree.ElementTree as ElementTree
 from itertools import izip_longest
@@ -12,6 +12,10 @@ from collections import Counter
 import operator
 import shlex
 from grammar_parser import get_grammar_name
+
+
+BIBLES_IN_VIEW = ['ELB1905STR', 'SCH2000', 'LUTH1912', u'NGÜ']
+BIBLE_NAMES_IN_VIEW = ['Elberfelder 1905 mit Strongs', 'Schlachter 2000', 'Luther 1912', u'Neue Genfer Übersetzung']
 
 
 # Create your views here.
@@ -51,9 +55,9 @@ def strongs(request, strong_id, vers):
             # search = "<gr str=\".*?" + str(strong_id) + ".*?\""
             if book.count() > 0:
                 if book[0].nr < 40:
-                    search1 = BibleText.objects.filter(vers__bookNr__nr__lt=40, versText__icontains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
+                    search1 = BibleText.objects.filter(vers__bookNr__nr__lt=40, versText__icontains=search, translationIdentifier__identifier=BIBLES_IN_VIEW[0])
                 else:
-                    search1 = BibleText.objects.filter(vers__bookNr__nr__gte=40, versText__icontains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
+                    search1 = BibleText.objects.filter(vers__bookNr__nr__gte=40, versText__icontains=search, translationIdentifier__identifier=BIBLES_IN_VIEW[0])
                 if search1.count() > 0:
                     # bvers = BibleVers.objects.filter(bookNr=book, chapterNr=v.group(2), versNr=v.group(3))
                     if book[0].nr >= 40:
@@ -102,17 +106,17 @@ def bible(request, bible_book):
                     book = BibleBook.objects.filter(nr=book[0].nr + 1)
                     chapter = 1
 
-                tr1 = BibleTranslation.objects.filter(identifier='ELB1905STR')
-                tr2 = BibleTranslation.objects.filter(identifier='SCH2000NEU')
-                tr3 = BibleTranslation.objects.filter(identifier='LUTH1912')
-                tr4 = BibleTranslation.objects.filter(identifier='ILGRDE')
+                tr1 = BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[0])
+                tr2 = BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[1])
+                tr3 = BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[2])
+                tr4 = BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[3])
                 if tr1.count() > 0 and tr2.count() > 0 and tr3.count() > 0 and tr4.count() > 0:
                     verses1 = BibleText.objects.filter(translationIdentifier=tr1, vers__bookNr=book, vers__chapterNr=chapter)
                     verses2 = BibleText.objects.filter(translationIdentifier=tr2, vers__bookNr=book, vers__chapterNr=chapter)
                     verses3 = BibleText.objects.filter(translationIdentifier=tr3, vers__bookNr=book, vers__chapterNr=chapter)
                     verses4 = BibleText.objects.filter(translationIdentifier=tr4, vers__bookNr=book, vers__chapterNr=chapter)
                     if verses1.count() > 0 and verses2.count() > 0 and verses3.count() > 0:
-                        return render(request, 'strongs/bible.html', {'vers': s.group(3), 'search': book[0].name + ' ' + str(chapter), 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(verses1, verses2, verses3, verses4)})
+                        return render(request, 'strongs/bible.html', {'vers': s.group(3), 'search': book[0].name + ' ' + str(chapter), 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses': izip_longest(verses1, verses2, verses3, verses4)})
                     else:
                         return HttpResponse('No verses found')
                 else:
@@ -130,9 +134,9 @@ def search_strong(request, strong, page='1'):
 
     search = "<gr str=\"" + str(nr) + "\""
     if strong[0].upper() == 'H':
-        search1 = BibleText.objects.filter(vers__bookNr__nr__lt=40, versText__icontains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
+        search1 = BibleText.objects.filter(vers__bookNr__nr__lt=40, versText__icontains=search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[0]))
     elif strong[0].upper() == 'G':
-        search1 = BibleText.objects.filter(vers__bookNr__nr__gte=40, versText__icontains=search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
+        search1 = BibleText.objects.filter(vers__bookNr__nr__gte=40, versText__icontains=search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[0]))
 
     if search1.count() > 0:
         search2, search3, search4 = [], [], []
@@ -146,9 +150,9 @@ def search_strong(request, strong, page='1'):
         verses = search1.values('vers')
 
         # for x in search1:
-        search2 = BibleText.objects.filter(translationIdentifier=BibleTranslation.objects.filter(identifier='SCH2000NEU'), vers=verses)
-        search3 = BibleText.objects.filter(translationIdentifier=BibleTranslation.objects.filter(identifier='LUTH1912'), vers=verses)
-        search4 = BibleText.objects.filter(translationIdentifier=BibleTranslation.objects.filter(identifier='ILGRDE'), vers=verses)
+        search2 = BibleText.objects.filter(translationIdentifier__identifier=BIBLES_IN_VIEW[1], vers=verses)
+        search3 = BibleText.objects.filter(translationIdentifier__identifier=BIBLES_IN_VIEW[2], vers=verses)
+        search4 = BibleText.objects.filter(translationIdentifier__identifier=BIBLES_IN_VIEW[3], vers=verses)
         # if s2.count() > 0:
             # search2.append(s2[0])
         # if s3.count() > 0:
@@ -157,7 +161,7 @@ def search_strong(request, strong, page='1'):
             # search4.append(s4[0])
 
         pagecnt = max(1, int(count * 1.0 / num + .5))
-        return render(request, 'strongs/search.html', {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': strong, 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(search1, search2, search3, search4)})
+        return render(request, 'strongs/search.html', {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': strong, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses': izip_longest(search1, search2, search3, search4)})
     else:
         return HttpResponse('No verses found for strong number ' + strong)
 
@@ -168,10 +172,10 @@ def search(request, search, page):
     tag_search = reduce(operator.and_, (Q(versText__contains=x) for x in searches))
 
     # Try to search for this word
-    search1 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier='ELB1905STR'))
-    search2 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier='SCH2000NEU'))
-    search3 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier='LUTH1912'))
-    search4 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier='ILGRDE'))
+    search1 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[0]))
+    search2 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[1]))
+    search3 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[2]))
+    search4 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[3]))
     if search1.count() > 0 or search2.count() > 0 or search3.count() > 0 or search4.count() > 0:
         # only show the first 200 items
         num = 30
@@ -179,7 +183,7 @@ def search(request, search, page):
         idx2 = num * int(page) if int(page) > 0 else num
         count = max(search1.count(), search2.count(), search3.count(), search4.count())
         pagecnt = max(1, int(count * 1.0 / num + .5))
-        return render(request, 'strongs/search.html', {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': search, 'translation1': 'Elberfelder 1905 mit Strongs', 'translation2': 'Schlachter 2000', 'translation3': 'Luther 1912', 'translation4': 'Interlinearübersetzung', 'verses': izip_longest(search1[idx1:idx2], search2[idx1:idx2], search3[idx1:idx2], search4[idx1:idx2])})
+        return render(request, 'strongs/search.html', {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': search, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses': izip_longest(search1[idx1:idx2], search2[idx1:idx2], search3[idx1:idx2], search4[idx1:idx2])})
         # return HttpResponse('Found ' + str(search1.count()) + ' verses')
     else:
         return HttpResponse('No book found for %s' % search)
@@ -197,7 +201,7 @@ def element_to_string(element):
 def initDb(request):
     s = ''
     # s += init_bible_books()
-    s += insert_bible_vers()
-    # s += insert_osis_bibles()
-    s += init_strong_grammar()
+    # s += insert_bible_vers()
+    s += insert_osis_bibles()
+    # s += init_strong_grammar()
     return HttpResponse(s)
