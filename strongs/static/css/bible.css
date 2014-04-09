@@ -248,3 +248,19 @@ nav {
 .sb-menu-nav-up {
 	top:0px;
 }
+
+/* EDITOR */
+#editorwrapper {
+    width: 30%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    float: left;
+}
+#editor {
+	background-color: white;
+}
+
+#content {
+	overflow: hidden;
+}

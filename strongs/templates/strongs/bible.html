@@ -11,10 +11,10 @@
         <tr class="enableHover" id="vers-{{vers1.vers.versNr}}">
             {% autoescape off %}
             {% load strongs_extras %}
-            <td class="col-md-3"><table><tr><td class="versenr">{{vers1.vers.versNr}}</td><td class="verse" id="{{vers1.vers.bookNr.short_name}}{{vers1.vers.chapterNr}}_{{vers1.vers.versNr}}">{{vers1.versText|correctverstext}}</td></tr></table></td>
-            <td class="col-md-3 hidden-xs"><table><tr><td class="versenr">{{vers2.vers.versNr}}</td><td class="verse" id="{{vers2.vers.bookNr.short_name}}{{vers2.vers.chapterNr}}_{{vers2.vers.versNr}}">{{vers2.versText|correctverstext}}</td></tr></table></td>
-            <td class="col-md-3 hidden-xs hidden-sm hidden-md"><table><tr><td class="versenr">{{vers3.vers.versNr}}</td><td class="verse" id="{{vers3.vers.bookNr.short_name}}{{vers3.vers.chapterNr}}_{{vers3.vers.versNr}}">{{vers3.versText|correctverstext}}</td></tr></table></td>
-            <td class="col-md-3 hidden-xs hidden-sm hidden-md"><table><tr><td class="versenr">{{vers4.vers.versNr}}</td><td class="verse" id="{{vers4.vers.bookNr.short_name}}{{vers4.vers.chapterNr}}_{{vers4.vers.versNr}}">{{vers4.versText|correctverstext}}</td></tr></table></td>
+            <td class="col-md-3"><table><tr><td class="versenr"><a href="/note/{{vers1.vers.bookNr.nr}}/{{vers1.vers.chapterNr}}/{{vers1.vers.versNr}}">{{vers1.vers.versNr}}</a></td><td class="verse" id="{{vers1.vers.bookNr.short_name}}{{vers1.vers.chapterNr}}_{{vers1.vers.versNr}}">{{vers1.versText|correctverstext}}</td></tr></table></td>
+            <td class="col-md-3 hidden-xs"><table><tr><td class="versenr"><a href="/note/{{vers1.vers.bookNr.nr}}/{{vers1.vers.chapterNr}}/{{vers1.vers.versNr}}">{{vers2.vers.versNr}}</a></td><td class="verse" id="{{vers2.vers.bookNr.short_name}}{{vers2.vers.chapterNr}}_{{vers2.vers.versNr}}">{{vers2.versText|correctverstext}}</td></tr></table></td>
+            <td class="col-md-3 hidden-xs hidden-sm hidden-md"><table><tr><td class="versenr"><a href="/note/{{vers1.vers.bookNr.nr}}/{{vers1.vers.chapterNr}}/{{vers1.vers.versNr}}">{{vers3.vers.versNr}}</a></td><td class="verse" id="{{vers3.vers.bookNr.short_name}}{{vers3.vers.chapterNr}}_{{vers3.vers.versNr}}">{{vers3.versText|correctverstext}}</td></tr></table></td>
+            <td class="col-md-3 hidden-xs hidden-sm hidden-md"><table><tr><td class="versenr"><a href="/note/{{vers1.vers.bookNr.nr}}/{{vers1.vers.chapterNr}}/{{vers1.vers.versNr}}">{{vers4.vers.versNr}}</a></td><td class="verse" id="{{vers4.vers.bookNr.short_name}}{{vers4.vers.chapterNr}}_{{vers4.vers.versNr}}">{{vers4.versText|correctverstext}}</td></tr></table></td>
             {% endautoescape %}
         </tr>
         {% endfor %}

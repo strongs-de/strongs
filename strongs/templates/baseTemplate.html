@@ -30,6 +30,13 @@
       <script src="{{ STATIC_URL }}js/respond.min.js"></script>
     <![endif]-->
     <link href="{{ STATIC_URL }}css/tooltip.css" rel="stylesheet">
+
+    <!-- editor requirements -->
+    <link href="{{ STATIC_URL }}css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.notebook.css">
+
+    {% block head %}
+    {% endblock %}
   </head>
   <body>
   <!--
@@ -62,7 +69,7 @@
       <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header hidden-xs">
-          <a class="navbar-brand" href="#"><img src="{{ STATIC_URL }}images/logo.png" width="175" /></a>
+          <a class="navbar-brand" href="/"><img src="{{ STATIC_URL }}images/logo.png" width="175" /></a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -81,6 +88,7 @@
             <li><a href="#" id='prev_chapter'><span class="glyphicon glyphicon-chevron-left"></span></a></li>
             {%if pagecnt > 0 %}<li><a style="height:50px">{% block pagenum %}{% endblock %}</a></li>{% endif %}
             <li><a href="#" id='next_chapter'><span class="glyphicon glyphicon-chevron-right"></span></a></li>
+            <li>{% if user.is_authenticated %}<a href='/accounts/logout/'>Logout {{user.username}}</a> {% else %} <a href='/accounts/login/'>Login</a> {% endif %}</li>
           </ul>
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
@@ -88,6 +96,9 @@
     <div id="container-full" class="container-full">
         <div class="col-md-3 sb-button" id="sb-button"></div> <!-- MATTHIAS: Button (rechts oben) für die SideBar -->
 		<nav id="sb-menu" class="sb-menu"></nav> <!-- MATTHIAS: NAV Container für die SideBar. Sollte in einzelne Bereich (divs) unterteilt werden -->
+
+        {% block editor %}
+        {% endblock %}
 
         <div id="content">
             {% block content %}
@@ -105,7 +116,7 @@
 
 
     <!-- Load JS here for greater good =============================-->
-    <script src="{{ STATIC_URL }}js/jquery-1.8.3.min.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery-2.1.0.min.js"></script>
     <script src="{{ STATIC_URL }}js/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="{{ STATIC_URL }}js/jquery.ui.touch-punch.min.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
@@ -117,6 +128,7 @@
     <script src="{{ STATIC_URL }}js/jquery.placeholder.js"></script>
     <script src="{{ STATIC_URL }}js/tooltip.js"></script>
     <script src="{{ STATIC_URL }}js/sidebarEffects.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.notebook.js"></script>
     <script>
         $('#searchform').submit(function(e) {
             var path = '/' + $('#searchId').val();
@@ -218,11 +230,11 @@
 
         function hasScrolled() {
             var st = $(this).scrollTop();
-            
+
             // Make sure they scroll more than delta
             if(Math.abs(lastScrollTop - st) <= delta)
                 return;
-            
+
             // If they scrolled down and are past the navbar, add class .nav-up.
             // This is necessary so you never see what is "behind" the navbar.
             if (st > lastScrollTop && st > navbarHeight){
@@ -238,9 +250,17 @@
                     $('#sb-button').removeClass('sb-menu-nav-up').addClass('sb-menu-nav-down');
                 }
             }
-            
+
             lastScrollTop = st;
         }
+
+        // add key listener for search
+        document.onkeypress = function(evt) {
+          var evt  = (evt) ? evt : ((event) ? event : null);
+          var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+          if(node.type != "text")
+            $("#searchId").focus();
+        };
     </script>
     <script>
     /*$(document).ready(function() {
@@ -250,5 +270,15 @@
 
     {% block js %}
     {% endblock %}
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-47251309-1', 'strongs.de');
+      ga('send', 'pageview');
+
+    </script>
   </body>
 </html>

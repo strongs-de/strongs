@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render
 from django.http import HttpResponse
-from models import BibleBook, BibleTranslation, BibleVers, StrongNr, BibleText
+from models import BibleBook, BibleTranslation, BibleVers, StrongNr, BibleText, BibleVersList, BibleVersNote
 from django.db.models import Q
 from initDb import init_bible_books, insert_bible_vers, init_strong_grammar, insert_osis_bibles
 import re
@@ -12,6 +12,10 @@ from collections import Counter
 import operator
 import shlex
 from grammar_parser import get_grammar_name
+from django.contrib.auth.decorators import login_required
+from django.template import RequestContext, Template
+from django.views.decorators.csrf import csrf_protect
+from forms import NoteForm
 
 
 BIBLES_IN_VIEW = ['ELB1905STR', 'SCH2000', 'LUTH1912', u'NGÜ']
@@ -141,7 +145,7 @@ def search_strong(request, strong, page='1'):
     if search1.count() > 0:
         search2, search3, search4 = [], [], []
         count = search1.count()
-        
+
         # only show the first 30 items
         num = 30
         idx1 = num * (int(page) - 1) if int(page) > 0 else 0
@@ -205,3 +209,39 @@ def initDb(request):
     s += insert_osis_bibles()
     # s += init_strong_grammar()
     return HttpResponse(s)
+
+
+@login_required
+def note(request, booknr, chapternr, versnr):
+    text = ''
+    if request.method == 'POST':
+        form = NoteForm(request.POST)
+        if form.is_valid():
+            # save note
+            note = BibleVersNote.objects.filter(vers__bookNr__nr=booknr, vers__chapterNr=chapternr, vers__versNr=versnr, user=request.user)
+            if note.count() <= 0:
+                book = BibleBook.objects.filter(nr=booknr)[0]
+                vers = BibleVers.objects.filter(versNr=versnr, chapterNr=chapternr, bookNr=book)[0]
+                note = BibleVersNote(vers=vers, user=request.user, text=request.POST['note'])
+            else:
+                note = note[0]
+            note.text = form.cleaned_data['note']
+            text = note.text
+            note.save()
+        else:
+            # display error
+            pass
+    else:
+        form = NoteForm()
+
+        # retrieve content from db
+        note = BibleVersNote.objects.filter(vers__bookNr__nr=booknr, vers__chapterNr=chapternr, vers__versNr=versnr, user=request.user)
+        if note.count() > 0:
+            text = note[0].text
+            form.note = text
+
+    verses1 = BibleText.objects.filter(vers__bookNr__nr=booknr, vers__chapterNr=chapternr, translationIdentifier__identifier=BIBLES_IN_VIEW[0])
+    verses2 = BibleText.objects.filter(vers__bookNr__nr=booknr, vers__chapterNr=chapternr, translationIdentifier__identifier=BIBLES_IN_VIEW[1])
+    verses3 = BibleText.objects.filter(vers__bookNr__nr=booknr, vers__chapterNr=chapternr, translationIdentifier__identifier=BIBLES_IN_VIEW[2])
+    verses4 = BibleText.objects.filter(vers__bookNr__nr=booknr, vers__chapterNr=chapternr, translationIdentifier__identifier=BIBLES_IN_VIEW[3])
+    return render(request, 'strongs/editorbible.html', {'form': form, 'text': text, 'saveurl':'/note/' + booknr + '/' + chapternr + '/' + versnr + '/', 'vers': versnr, 'search': verses1[0].vers.bookNr.name + ' ' + str(chapternr), 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses': izip_longest(verses1, verses2, verses3, verses4)})

@@ -21,14 +21,10 @@ def insert_osis_bibles():
     BOOKS = ['Gen', 'Exod', 'Lev', 'Num', 'Deut', 'Josh', 'Judg', 'Ruth', '1Sam', '2Sam', '1Kgs', '2Kgs', '1Chr', '2Chr', 'Ezra', 'Neh', 'Esth', 'Job', 'Ps', 'Prov', 'Eccl', 'Song', 'Klgl', 'Isa', 'Jer', 'Ezek', 'Dan', 'Hos', 'Joel', 'Amos', 'Obad', 'Jonah', 'Mic', 'Nah', 'Hab', 'Zeph', 'Hag', 'Zech', 'Mal', 'Matt', 'Mark', 'Luke', 'John', 'Acts', 'Rom', '1Cor', '2Cor', 'Gal', 'Eph', 'Phil', 'Col', '1Thess', '2Thess', '1Tim', '2Tim', 'Titus', 'Phlm', 'Heb', 'Jas', '1Pet', '2Pet', '1John', '2John', '3John', 'Jude', 'Rev']
     s = ''
     FILES = ['./bibles/osis.NGU.xml', './bibles/osis.psalmenNGU.xml', './bibles/osis.schlachter2000.v1.withoutnotes.xml']
-    FILES = ['./bibles/osis.psalmenNGU.xml']
     IDENTIFIER = [u'NGÜ', u'NGÜ', 'SCH2000']
-    IDENTIFIER = [u'NGÜ']
     LANGS = ['GER', 'GER', 'GER']
-    LANGS = ['GER']
     TITLES = [u'Neue Genfer Übersetzung', u'Neue Genfer Übersetzung', 'Schlachter 2000']
-    TITLES = [u'Neue Genfer Übersetzung']
-    NEEDS_CHAPTERS = [False]
+    NEEDS_CHAPTERS = [False, False, True]
     lists = izip_longest(FILES, IDENTIFIER, LANGS, TITLES, NEEDS_CHAPTERS)
     for FILE, identifier, lang, title, needs_chapter in lists:
         tree = ElementTree.parse(FILE)
@@ -83,12 +79,12 @@ def insert_osis_bibles():
                     __insert(tr, tb, cnumber, vnumber, text)
                     # s += bookname + str(cnumber) + ',' + str(vnumber) + ': ' + text
                     # break
-        
+
     return s
 
 def __insert(translation, book, chapter, vers, text):
     '''
-        Insert the bible text into the database. Create the BibleVers 
+        Insert the bible text into the database. Create the BibleVers
         and the BibleText if it does not exist.
             @translation is a BibleTranslation instance
             @book is a BibleBook instance
@@ -116,7 +112,8 @@ def insert_bible_vers():
     ####################################################
     # Insert book names if they does not exist
 
-    FILES = ['./bibles/GER_SCH1951_STRONG.xml', './bibles/GER_ELB1905_STRONG.xml', './bibles/GER_LUTH1912.xml', './bibles/GER_ILGRDE.xml', './bibles/GER_SCH2000.xml', './bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml', './bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml']
+    # FILES = ['./bibles/GER_SCH1951_STRONG.xml', './bibles/GER_ELB1905_STRONG.xml', './bibles/GER_LUTH1912.xml', './bibles/GER_ILGRDE.xml', './bibles/GER_SCH2000.xml', './bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml', './bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml']
+    FILES = ['./bibles/GER_ELB1905_STRONG.xml', './bibles/GER_LUTH1912.xml', './bibles/GER_ILGRDE.xml', './bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml']
     # FILE = './GER_SCH1951_STRONG.xml'
     # FILE = './GER_ELB1905_STRONG.xml'
     # FILE = './GER_LUTH1912.xml'
@@ -174,7 +171,7 @@ def insert_bible_vers():
                         dbVers = BibleText(translationIdentifier=tr, vers=v, versText=element_to_string(vers))
                         dbVers.save()
             s += ' -> inserted book nr ' + book.get('bnumber') + ' with ' + str(chapterCount)  + ' chapters and ' + str(versCount) + ' verses.<br>'
-    return s
+    return ''
 
 # def insert_bible_translations():
 #     ####################################################
