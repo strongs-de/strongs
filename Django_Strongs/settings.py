@@ -61,14 +61,14 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3')
     },
-    'postgresql': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'strongs-dev',
-        'USER': 'strongs-dev',
-        'PASSWORD': 'gcW2vWfe6V1i7J',
-        'HOST': 'beta.strongs.de',
-        'PORT': ''
-    }
+    # 'postgresql': {
+    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #     'NAME': 'strongs-dev',
+    #     'USER': 'strongs-dev',
+    #     'PASSWORD': 'gcW2vWfe6V1i7J',
+    #     'HOST': 'beta.strongs.de',
+    #     'PORT': ''
+    # }
         # 'ENGINE': 'mysql_pymysql',
         # 'NAME': 'strongs',
         # 'HOST': 'umnn0x2ci0.database.windows.net',

@@ -52,7 +52,7 @@ var SidebarMenuEffects = (function() {
 		}
 		return e.parentNode && hasParentClass( e.parentNode, classname );
 	}
-	
+
 	// MATTHIAS: Funktion wird aufgerufen, wenn eine Strong geklickt wurde
 	function loadStrong( strong, vers ) {
         var xhReq = new XMLHttpRequest();
@@ -68,33 +68,33 @@ var SidebarMenuEffects = (function() {
 		button = document.getElementById( 'sb-button' ),
 		strongs = Array.prototype.slice.call( document.querySelectorAll( '.sb-strong' ) ),
 		eventtype = 'click',
-			
+
 		resetMenu = function() {
 			classie.removeClass( container, 'sb-menu-open' );
 		},
-			
+
 		closeSideBar = function(evt) {
 			if( !hasParentClass( evt.target, 'sb-menu' ) ) {
 				resetMenu();
 
 				// remove anchor link
 				parent.location.hash = '';
-				
+
 				button.removeEventListener( eventtype, closeSideBar );
 				button.addEventListener( eventtype, openSideBar );
 			}
 		},
-		
+
 		// MATTHIAS: Funktion wird aufgerufen, wenn die SideBar über den Button rechts oben aktiviert wurde
 		openSideBar = function() {
 			setTimeout( function() {
 				classie.addClass( container, 'sb-menu-open' );
 			}, 25 );
-			
+
 			// Inhalt leeren
 			var menu = document.getElementById('sb-menu');
 			//menu.innerHTML = '';
-			
+
 			button.removeEventListener( eventtype, openSideBar );
 			button.addEventListener( eventtype, closeSideBar );
 		};
@@ -116,7 +116,7 @@ var SidebarMenuEffects = (function() {
 				loadStrong($(this).attr('data-strong'), $(this).parent().attr('id'));
 				open();
 			};
-		$('.sb-strong').live('click', clickfunc);
+		$('.sb-strong').on('click', clickfunc);
 		button.addEventListener( eventtype, openSideBar );
 
 		// If there is a strong-number given (as anchor in url) open the sidebar

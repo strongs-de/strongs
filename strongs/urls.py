@@ -3,6 +3,7 @@ from strongs import views
 
 urlpatterns = patterns('',
     url(r'^$', views.index, name='index'),
+    url(r'^note/(?P<booknr>\d+)/(?P<chapternr>\d+)/(?P<versnr>\d+)/$', views.note, name='note'),
     url(r'^(?P<strong>[GHgh]\d+)/$', views.search_strong, name='search_strongs'),
     url(r'^(?P<strong>[GHgh]\d+)/(?P<page>\d+)/$', views.search_strong, name='search_strongs'),
     url(r'^strong/(?P<strong_id>\d+)/(?P<vers>[a-zA-Z0-9_\.]+)/$', views.strongs, name='strongs'),

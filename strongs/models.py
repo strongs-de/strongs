@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class BibleTranslation(models.Model):
@@ -59,3 +60,29 @@ class StrongNr(models.Model):
 
     def __unicode__(self):
         return str(self.strongNr) + ' = ' + self.grammar + ' in ' + self.book.__str__() + ' ' + str(self.chapterNr) + ',' + str(self.versNr)
+
+
+class UserData(models.Model):
+    user = models.ForeignKey(User, editable=False)
+    class Meta:
+        abstract = True
+
+
+class BibleVersNote(UserData):
+    vers = models.ForeignKey('BibleVers')
+    versList = models.ForeignKey('BibleVersList', null=True)
+    text = models.TextField(null=True)
+    lastchanged = models.CharField(null=True, max_length="20")
+
+    def __unicode__(self):
+        return self.vers.__unicode__() + self.text
+
+
+class BibleVersList(UserData):
+    title = models.CharField(max_length=300)
+    lastchanged = models.CharField(null=True, max_length="20")
+
+
+class BibleVersNoteComment(UserData):
+    text = models.TextField()
+    lastchanged = models.CharField(null=True, max_length="20")
