@@ -205,9 +205,9 @@ def element_to_string(element):
 def initDb(request):
     s = ''
     # s += init_bible_books()
-    # s += insert_bible_vers()
-    s += insert_osis_bibles()
-    # s += init_strong_grammar()
+    # s += insert_osis_bibles()
+    s += insert_bible_vers()
+    s += init_strong_grammar()
     return HttpResponse(s)
 
 

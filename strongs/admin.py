@@ -1,5 +1,5 @@
 from django.contrib import admin
-from strongs.models import BibleBook, BibleTranslation, BibleVers, StrongNr, BibleVersNote, BibleVersNoteComment, BibleVersList
+from strongs.models import BibleBook, BibleTranslation, BibleVers, StrongNr, BibleVersNote, BibleVersNoteComment, BibleVersList,BibleText
 
 # Register your models here.
 admin.site.register(BibleBook)
@@ -9,3 +9,4 @@ admin.site.register(StrongNr)
 admin.site.register(BibleVersNote)
 admin.site.register(BibleVersNoteComment)
 admin.site.register(BibleVersList)
+admin.site.register(BibleText)

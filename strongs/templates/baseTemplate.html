@@ -19,6 +19,7 @@
     <!--<link href="{{ STATIC_URL }}css/flat-ui.css" rel="stylesheet">-->
     <link href="{{ STATIC_URL }}css/bible.css" rel="stylesheet">
 
+
 	<!-- MATTHIAS: Laden der Modernizr-Bibliothek. Muss im HEAD passieren -->
 	<script src="{{ STATIC_URL }}js/modernizr.custom.js"></script>
 
@@ -74,7 +75,7 @@
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="navbar-collapse">
-          <form class="navbar-form navbar-left" id="searchform" action="#" role="search">
+          <form name="searchform" class="navbar-form navbar-left" id="searchform" action="#" role="search">
             <div class="form-group">
               <div class="input-group">
                 <input class="form-control" id="searchId" type="search" value="{{search}}" placeholder="Suchen (Bibelstelle oder Strong-Nummer)">
@@ -127,12 +128,20 @@
     <script src="{{ STATIC_URL }}js/jquery.tagsinput.js"></script>
     <script src="{{ STATIC_URL }}js/jquery.placeholder.js"></script>
     <script src="{{ STATIC_URL }}js/tooltip.js"></script>
+    <!-- For Autocomplete staff ... -->
+    <link href="{{ STATIC_URL }}css/jquery-ui.css" rel="stylesheet">
+    <script src="{{ STATIC_URL }}js/jquery-ui.js"></script>
+    <!-- ... for Autocomplete staff -->
     <script src="{{ STATIC_URL }}js/sidebarEffects.js"></script>
+  <script src="{{ STATIC_URL }}js/autocomplete.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.notebook.js"></script>
     <script>
-        $('#searchform').submit(function(e) {
+        function doSearch() {
             var path = '/' + $('#searchId').val();
             location.href=path;
+        }
+        $('#searchform').submit(function(e) {
+            doSearch();
             e.preventDefault();
         });
 

@@ -27,6 +27,12 @@ def insert_osis_bibles():
     NEEDS_CHAPTERS = [False, False, True]
     lists = izip_longest(FILES, IDENTIFIER, LANGS, TITLES, NEEDS_CHAPTERS)
     for FILE, identifier, lang, title, needs_chapter in lists:
+        FILE = './bibles/osis.schlachter2000.v1.withoutnotes.xml'
+        identifier = 'SCH2000'
+        lang = 'GER'
+        title = 'Schlachter 2000'
+        needs_chapter = True
+
         tree = ElementTree.parse(FILE)
         root = tree.getroot()
         # work = root.find('{http://www.bibletechnologies.net/2003/OSIS/namespace}osisText/{http://www.bibletechnologies.net/2003/OSIS/namespace}header/{http://www.bibletechnologies.net/2003/OSIS/namespace}work')
