@@ -14,7 +14,7 @@ Rut,Rut
 2.Chronik,2Chr,2.Chr
 Esra,Esra
 Nehemia,Neh
-Ester,Est
+Esther,Est,Ester
 Hiob,Hi,Ijob,Job
 Psalmen,Ps
 Sprüche,Spr
@@ -55,7 +55,7 @@ Kolosser,Kol
 2.Timotheus,2Tim,2.Tim
 Titus,Tit
 Philemon,Phlm
-Hebräer,Hebr
+Hebräer,Hebr,Heb
 Jakobus,Jak
 1.Petrus,1Petr,1.Petr,1.Pet,1.Pe,1Pet,1Pe,Pe,Pet,Petr,Petrus
 2.Petrus,2Petr,2.Petr,2.Pet,2.Pe,2Pet,2Pe

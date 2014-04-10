@@ -16,6 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.template import RequestContext, Template
 from django.views.decorators.csrf import csrf_protect
 from forms import NoteForm
+import math
 
 
 BIBLES_IN_VIEW = ['ELB1905STR', 'SCH2000', 'LUTH1912', u'NGÜ']
@@ -164,16 +165,17 @@ def search_strong(request, strong, page='1'):
         # if s4.count() > 0:
             # search4.append(s4[0])
 
-        pagecnt = max(1, int(count * 1.0 / num + .5))
+        pagecnt = max(1, int(math.ceil(count * 1.0 / num)))
         return render(request, 'strongs/search.html', {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': strong, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses': izip_longest(search1, search2, search3, search4)})
     else:
         return HttpResponse('No verses found for strong number ' + strong)
 
 
 def search(request, search, page):
+    search = search.strip()
     searches = search.split(' ')
     searches = map(lambda s: s.decode('UTF8').replace('"', '').replace("'", ''), shlex.split(search.encode('utf8')))
-    tag_search = reduce(operator.and_, (Q(versText__contains=x) for x in searches))
+    tag_search = reduce(operator.and_, (Q(versText__contains=" " + x) for x in searches))
 
     # Try to search for this word
     search1 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[0]))
@@ -186,7 +188,7 @@ def search(request, search, page):
         idx1 = num * (int(page) - 1) if int(page) > 0 else 0
         idx2 = num * int(page) if int(page) > 0 else num
         count = max(search1.count(), search2.count(), search3.count(), search4.count())
-        pagecnt = max(1, int(count * 1.0 / num + .5))
+        pagecnt = max(1, int(math.ceil(count * 1.0 / num)))
         return render(request, 'strongs/search.html', {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': search, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses': izip_longest(search1[idx1:idx2], search2[idx1:idx2], search3[idx1:idx2], search4[idx1:idx2])})
         # return HttpResponse('Found ' + str(search1.count()) + ' verses')
     else:
@@ -204,10 +206,10 @@ def element_to_string(element):
 
 def initDb(request):
     s = ''
-    # s += init_bible_books()
+    s += init_bible_books()
     # s += insert_osis_bibles()
-    s += insert_bible_vers()
-    s += init_strong_grammar()
+    # s += insert_bible_vers()
+    # s += init_strong_grammar()
     return HttpResponse(s)
 
 

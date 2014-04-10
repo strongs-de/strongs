@@ -118,8 +118,8 @@
 
                substrings = shlex(substring.replace(/&quot;/g, '"'));
                for(i = 0; i < substrings.length; ++i) {
-                 $(block).html($(block).html().replace(new RegExp(substrings[i].replace(/"/g, "").replace(/'/g, ""), 'gi'), function(match, text, urlId){
-                    return '<span class="search-highlight">' + match + '</span>'
+                 $(block).html($(block).html().replace(new RegExp("\\s" + substrings[i].replace(/"/g, "").replace(/'/g, ""), 'gi'), function(match, text, urlId){
+                    return ' <span class="search-highlight">' + match.substring(1) + '</span>'
                  }));
                }
 

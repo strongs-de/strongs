@@ -26,7 +26,7 @@ var strBooks = ",1.Mose,1Mos,Genesis,Gen,1Mo,1.Mo,1.Mos,Mo,Mos,Mose,\n\
 ,2.Chronik,2Chr,2.Chr,\n\
 ,Esra,Esra,\n\
 ,Nehemia,Neh,\n\
-,Ester,Est,\n\
+,Esther,Ester,Est,\n\
 ,Hiob,Hi,Ijob,Job,\n\
 ,Psalmen,Ps,\n\
 ,Sprüche,Spr,\n\
@@ -67,7 +67,7 @@ var strBooks = ",1.Mose,1Mos,Genesis,Gen,1Mo,1.Mo,1.Mos,Mo,Mos,Mose,\n\
 ,2.Timotheus,2Tim,2.Tim,\n\
 ,Titus,Tit,\n\
 ,Philemon,Phlm,\n\
-,Hebräer,Hebr,\n\
+,Hebräer,Hebr,Heb,\n\
 ,Jakobus,Jak,\n\
 ,1.Petrus,1Petr,1.Petr,1.Pet,1.Pe,1Pet,1Pe,Pe,Pet,Petr,Petrus,\n\
 ,2.Petrus,2Petr,2.Petr,2.Pet,2.Pe,2Pet,2Pe,\n\
