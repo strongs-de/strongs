@@ -1,0 +1,137 @@
+/***********************************************************************
+The MIT License (MIT)
+
+Copyright (c) 2013 Eugen Wagner - Jev
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+***********************************************************************/
+
+#anysearch-slidebox{
+    width:325px;
+    position:fixed;
+    bottom:0px;
+    height: 35px;
+    position: fixed;
+    top: 0px;
+    z-index: 10000;
+    padding: 0;
+    margin: 0;
+}
+
+#anysearch-slidebox-button {
+    width: 35px;
+    height: 100%;
+    float: right;
+}
+
+#anysearch-slidebox-content {
+    width: 290px;
+    height: 100%;
+    float: left;
+    -moz-box-shadow:-2px 0px 5px #aaa;
+    -webkit-box-shadow:-2px 0px 5px #aaa;
+    box-shadow:-2px 0px 5px #aaa;
+    background-color: #F7F9FA;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+#anysearch-sidebutton {
+    font-family: Glyphter;
+    box-shadow: none;
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    border: 1px solid rgb(72,167,112);
+    border-radius: 0 14px 14px 0;
+    color: rgb(72,167,112);
+    cursor: pointer;
+    display: inline-block;
+    padding: 4px 8px;
+    height: 28px;
+    margin-top: -2px;
+    text-align: center;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+    font-size: 150%;
+    font-weight: normal;
+    line-height: normal;
+    float: right;
+    background-color: #f3efe1;
+}
+
+#anysearch-sidebutton:focus{
+    outline-offset: -2px;
+}
+
+#anysearch-sidebutton:hover{
+    background-position: 0 -15px;
+    text-decoration: none;
+    transition: background-position 0.1s linear 0s;
+}
+
+#anysearch-sidebutton:active{
+    /*background-image: none;*/
+    /*box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) inset, 0 1px 2px rgba(0, 0, 0, 0.05);*/
+    outline: 0 none;
+    /*background-color: #E3EBEF;*/
+    /*color: #333333;*/
+}
+
+#anysearch-sidebutton .anysearch-icon{
+    background-image: url("../images/anysearch-icon.png");
+    background-repeat: no-repeat;
+    display: inline-block;
+    height: 14px;
+    line-height: 14px;
+    margin-top: 1px;
+    vertical-align: text-top;
+    width: 14px;
+    z-index: 0;
+}
+
+#anysearch-input{
+    transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+    /*border-radius: 3px;*/
+    color: #555555;
+    display: inline-block;
+    padding: 4px 6px;
+    vertical-align: middle;
+    width: 275px;
+    margin: 0;
+    font-family: "Lucida Grande","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 13px;
+    font-weight: normal;
+    line-height: normal;
+    background-color: rgba(255,255,255,.9);
+    border: 1px solid #D1D2D3;
+    border-color: rgb(72,167,112);
+    background-color: #f3efe1;
+    /*box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;*/
+    transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+    /*border-color: #ffffff;*/
+    /*box-shadow: 0 1px 1px #ffffff inset, 0 0 8px #ffffff;*/
+}
+
+#anysearch-input:focus {
+    outline: 0 none;
+}
+
+
+

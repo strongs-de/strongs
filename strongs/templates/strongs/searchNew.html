@@ -1,0 +1,173 @@
+{% extends "baseTemplate2.html" %}
+{% block pagenum %}
+{{ pageact }} / {{ pagecnt }}
+{% endblock %}
+
+{% block searchtitle %}
+    Suche nach:
+{% endblock %}
+{% block results1 %}
+    ({{ count1 }} Treffer)
+{% endblock %}
+{% block results2 %}
+    ({{ count2 }} Treffer)
+{% endblock %}
+{% block results3 %}
+    ({{ count3 }} Treffer)
+{% endblock %}
+{% block results4 %}
+    ({{ count4 }} Treffer)
+{% endblock %}
+
+
+{% block content %}
+    {% autoescape off %}
+    {% load strongs_extras %}
+        <div id="tr1" class="tr">
+            <div class="content">
+                {% for vers1 in verses1 %}
+                    <div class="verse" id="{{vers1.vers.bookNr.short_name}}{{vers1.vers.chapterNr}}_{{vers1.vers.versNr}}">
+                        <span class="versenr vers-{{ vers1.vers.versNr }}">
+                            <a href="/{{vers1.vers.bookNr.short_name}}{{vers1.vers.chapterNr}},{{vers1.vers.versNr}}">{{vers1.vers}}</a>&nbsp;
+                        </span>
+                        {{vers1.versText|correctverstext}}
+                    </div>
+                {% endfor %}
+            </div>
+            <p class="copyright">
+            </p>
+        </div>
+        <div id="tr2" class="tr">
+            <div class="content">
+                {% for vers2 in verses2 %}
+                    <div class="verse" id="{{vers2.vers.bookNr.short_name}}{{vers2.vers.chapterNr}}_{{vers2.vers.versNr}}">
+                        <span class="versenr vers-{{ vers2.vers.versNr }}">
+                            <a href="/{{vers2.vers.bookNr.short_name}}{{vers2.vers.chapterNr}},{{vers2.vers.versNr}}">{{vers2.vers}}</a>&nbsp;
+                        </span>
+                        {{vers2.versText|correctverstext}}
+                    </div>
+                {% endfor %}
+            </div>
+            <p class="copyright">
+                <br/>
+                Bibeltext der Schlachter Übersetzung<br/>
+                Copyright © 2000 Genfer Bibelgesellschaft<br/>
+                Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>
+            </p>
+        </div>
+        <div id="tr3" class="tr">
+            <div class="content">
+                {% for vers3 in verses3 %}
+                    <div class="verse" id="{{vers3.vers.bookNr.short_name}}{{vers3.vers.chapterNr}}_{{vers3.vers.versNr}}">
+                        <span class="versenr vers-{{ vers3.vers.versNr }}">
+                            <a href="/{{vers3.vers.bookNr.short_name}}{{vers3.vers.chapterNr}},{{vers3.vers.versNr}}">{{vers3.vers}}</a>&nbsp;
+                        </span>
+                        {{vers3.versText|correctverstext}}
+                    </div>
+                {% endfor %}
+            </div>
+            <p class="copyright">
+            </p>
+        </div>
+        <div id="tr4" class="tr noborder">
+            <div class="content">
+                {% for vers4 in verses4 %}
+                    <div class="verse" id="{{vers4.vers.bookNr.short_name}}{{vers4.vers.chapterNr}}_{{vers4.vers.versNr}}">
+                        <span class="versenr vers-{{ vers4.vers.versNr }}">
+                            <a href="/{{vers4.vers.bookNr.short_name}}{{vers4.vers.chapterNr}},{{vers4.vers.versNr}}">{{vers4.vers}}</a>&nbsp;
+                        </span>
+                        {{vers4.versText|correctverstext}}
+                    </div>
+                {% endfor %}
+            </div>
+            <p class="copyright">
+                <br/>
+                Bibeltext der Neuen Genfer Übersetzung – Neues Testament und Psalmen<br/>
+                Copyright © 2011 Genfer Bibelgesellschaft<br/>
+                Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>
+            </p>
+        </div>
+        {% endautoescape %}
+{% endblock %}
+
+
+{% block js %}
+    {%if search %}
+        <script>
+            function shlex(str) {
+                var args = str.split(" ");
+                var out = [];
+                var lookForClose = -1;
+                var quoteOpen = false;
+                for (var x in args) {
+                    if (args.hasOwnProperty(x)) {
+                        var arg = args[x];
+                        var escSeq = false;
+                        for (var y in arg) {
+                            if (escSeq) {
+                                escSeq = false;
+                            } else if (arg[y] === "\\") {
+                                escSeq = true;
+                            } else if (arg[y] === "\"") {
+                                quoteOpen = !quoteOpen;
+                            }
+                        }
+                        if (!quoteOpen && lookForClose === -1) {
+                            out.push(arg);
+                        } else if (quoteOpen && lookForClose === -1) {
+                            lookForClose = x;
+                        } else if (!quoteOpen && lookForClose >= 0) {
+                            var block = args.slice(lookForClose, parseInt(x) + 1).join(" ");
+                            var escSeq = false;
+                            var quotes = [];
+                            for (var y in block) {
+                                if (escSeq) {
+                                    escSeq = false;
+                                } else if (block[y] === "\\") {
+                                    escSeq = true;
+                                } else if (block[y] === "\"") {
+                                    quotes.push(y);
+                                }
+                            }
+                            var parts = [];
+                            parts.push(block.substr(0, quotes[0]));
+                            parts.push(block.substr(parseInt(quotes[0]) + 1, quotes[1] - (parseInt(quotes[0]) + 1)));
+                            parts.push(block.substr(parseInt(quotes[1]) + 1));
+                            block = parts.join("");
+                            out.push(block);
+                            lookForClose = -1;
+                        }
+                    }
+                }
+                return quoteOpen ? false : out;
+            }
+            function highLight(substring, block) {
+               $(block).find(".search-highlight").each(function () {
+                  $(this).outerHtml($(this).html());
+               });
+               // now the block is free from previous highlights
+
+               substrings = shlex(substring.replace(/&quot;/g, '"'));
+               for(i = 0; i < substrings.length; ++i) {
+                 $(block).html($(block).html().replace(new RegExp("\\s" + substrings[i].replace(/"/g, "").replace(/'/g, ""), 'gi'), function(match, text, urlId){
+                    return ' <span class="search-highlight">' + match.substring(1) + '</span>'
+                 }));
+               }
+
+               // check if it is a strong number
+               var regex = new RegExp("([GHgh])([0-9]{1,4})", "g")
+               var result = regex.exec(substring);
+               if(result != null) {
+                  $('.strong-' + result[2]).addClass('search-highlight');
+                  // do matchrowheight for verses
+                  $('.verse').matchHeight(true);
+               }
+            }
+
+            highLight("{{ search }}", ".container");
+
+            // insert matchrowheight
+            $('.tr').matchHeight(true);
+        </script>
+    {% endif %}
+{% endblock %}

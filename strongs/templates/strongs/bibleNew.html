@@ -1,0 +1,87 @@
+{% extends "baseTemplate2.html" %}
+{% block content %}
+    {% autoescape off %}
+    {% load strongs_extras %}
+        <div id="tr1" class="tr">
+            <div class="content">
+                {% for vers1 in verses1 %}
+                    <div class="verse" id="{{vers1.vers.bookNr.short_name}}{{vers1.vers.chapterNr}}_{{vers1.vers.versNr}}">
+                        <span class="versenr vers-{{ vers1.vers.versNr }}">
+                            <a href="/note/{{vers1.vers.bookNr.nr}}/{{vers1.vers.chapterNr}}/{{vers1.vers.versNr}}">{{vers1.vers.versNr}}</a>&nbsp;
+                        </span>
+                        {{vers1.versText|correctverstext}}
+                    </div>
+                {% endfor %}
+            </div>
+            <p class="copyright">
+            </p>
+        </div>
+        <div id="tr2" class="tr">
+            <div class="content">
+                {% for vers2 in verses2 %}
+                    <div class="verse" id="{{vers2.vers.bookNr.short_name}}{{vers2.vers.chapterNr}}_{{vers2.vers.versNr}}">
+                        <span class="versenr vers-{{ vers2.vers.versNr }}">
+                            <a href="/note/{{vers2.vers.bookNr.nr}}/{{vers2.vers.chapterNr}}/{{vers2.vers.versNr}}">{{vers2.vers.versNr}}</a>&nbsp;
+                        </span>
+                        {{vers2.versText|correctverstext}}
+                    </div>
+                {% endfor %}
+            </div>
+            <p class="copyright">
+                <br/>
+                Bibeltext der Schlachter Übersetzung<br/>
+                Copyright © 2000 Genfer Bibelgesellschaft<br/>
+                Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>
+            </p>
+        </div>
+        <div id="tr3" class="tr">
+            <div class="content">
+                {% for vers3 in verses3 %}
+                    <div class="verse" id="{{vers3.vers.bookNr.short_name}}{{vers3.vers.chapterNr}}_{{vers3.vers.versNr}}">
+                        <span class="versenr vers-{{ vers3.vers.versNr }}">
+                            <a href="/note/{{vers3.vers.bookNr.nr}}/{{vers3.vers.chapterNr}}/{{vers3.vers.versNr}}">{{vers3.vers.versNr}}</a>&nbsp;
+                        </span>
+                        {{vers3.versText|correctverstext}}
+                    </div>
+                {% endfor %}
+            </div>
+            <p class="copyright">
+            </p>
+        </div>
+        <div id="tr4" class="tr noborder">
+            <div class="content">
+                {% for vers4 in verses4 %}
+                    <div class="verse" id="{{vers4.vers.bookNr.short_name}}{{vers4.vers.chapterNr}}_{{vers4.vers.versNr}}">
+                        <span class="versenr vers-{{ vers4.vers.versNr }}">
+                            <a href="/note/{{vers4.vers.bookNr.nr}}/{{vers4.vers.chapterNr}}/{{vers4.vers.versNr}}">{{vers4.vers.versNr}}</a>&nbsp;
+                        </span>
+                        {{vers4.versText|correctverstext}}
+                    </div>
+                {% endfor %}
+            </div>
+            <p class="copyright">
+                <br/>
+                Bibeltext der Neuen Genfer Übersetzung – Neues Testament und Psalmen<br/>
+                Copyright © 2011 Genfer Bibelgesellschaft<br/>
+                Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>
+            </p>
+        </div>
+        {% endautoescape %}
+{% endblock %}
+
+{% block js %}
+{%if vers > 0 %}
+<script>
+    $(window).load(function() {
+        // scroll to selected vers
+        $(".container").animate({ scrollTop: $('.vers-{{vers}}').position().top + 0}, 500);
+        $(".vers-{{ vers }}").parent().addClass('search-highlight');
+    });
+</script>
+{% endif %}
+<script>
+    // insert matchrowheight
+    $('.verse').matchHeight(true);
+    $('.tr').matchHeight(true);
+</script>
+{% endblock %}

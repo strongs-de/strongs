@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"c",
+				"csrf_protect  (variable)"
+			],
+			[
 				"vers__book",
 				"vers__bookNr__nr"
 			],
@@ -67,23 +71,7 @@
 			"file": "strongs/views.py",
 			"settings":
 			{
-				"buffer_size": 13069,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "strongs/static/css/bible.css",
-			"settings":
-			{
-				"buffer_size": 4942,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "strongs/static/js/sidebarEffects.js",
-			"settings":
-			{
-				"buffer_size": 3602,
+				"buffer_size": 13561,
 				"line_ending": "Unix"
 			}
 		},
@@ -91,7 +79,7 @@
 			"file": "strongs/initDb.py",
 			"settings":
 			{
-				"buffer_size": 13014,
+				"buffer_size": 13196,
 				"line_ending": "Unix"
 			}
 		},
@@ -99,7 +87,7 @@
 			"file": "strongs/models.py",
 			"settings":
 			{
-				"buffer_size": 3387,
+				"buffer_size": 3352,
 				"line_ending": "Unix"
 			}
 		},
@@ -107,7 +95,7 @@
 			"file": "Django_Strongs/settings.py",
 			"settings":
 			{
-				"buffer_size": 2785,
+				"buffer_size": 2801,
 				"line_ending": "Unix"
 			}
 		},
@@ -115,7 +103,7 @@
 			"file": "strongs/admin.py",
 			"settings":
 			{
-				"buffer_size": 432,
+				"buffer_size": 473,
 				"line_ending": "Unix"
 			}
 		},
@@ -123,18 +111,15 @@
 			"file": "strongs/templates/baseTemplate.html",
 			"settings":
 			{
-				"buffer_size": 10990,
+				"buffer_size": 12092,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "{% extends \"baseTemplate.html\" %}\n{% block editor %}\n\n<div id=\"editorwrapper\">\n    <div id='editor'>\n    </div>\n    <input type=\"button\" value=\"Speichern\" onclick=\"saveNote()\"/>\n</div>\n{% endblock %}\n\n{% block content %}\n    <table class=\"col-md-12 table-bible\">\n        <tr>\n            <th class=\"col-md-3\">{{translation1}}</th>\n            <th class=\"col-md-3 hidden-xs\">{{translation2}}</th>\n            <th class=\"col-md-3 hidden-xs hidden-sm hidden-md\">{{translation3}}</th>\n            <th class=\"col-md-3 hidden-xs hidden-sm hidden-md\">{{translation4}}</th>\n        </tr>\n        {% for vers1, vers2, vers3, vers4 in verses %}\n        <tr class=\"enableHover\" id=\"vers-{{vers1.vers.versNr}}\">\n            {% autoescape off %}\n            {% load strongs_extras %}\n            <td class=\"col-md-3\"><table><tr><td class=\"versenr\"><a href=\"/edit/{{vers1.vers.bookNr.nr}}/{{vers1.vers.chapterNr}}/{{vers1.vers.versNr}}\">{{vers1.vers.versNr}}</a></td><td class=\"verse\" id=\"{{vers1.vers.bookNr.short_name}}{{vers1.vers.chapterNr}}_{{vers1.vers.versNr}}\">{{vers1.versText|correctverstext}}</td></tr></table></td>\n            <td class=\"col-md-3 hidden-xs\"><table><tr><td class=\"versenr\"><a href=\"/edit/{{vers1.vers.bookNr.nr}}/{{vers1.vers.chapterNr}}/{{vers1.vers.versNr}}\">{{vers2.vers.versNr}}</a></td><td class=\"verse\" id=\"{{vers2.vers.bookNr.short_name}}{{vers2.vers.chapterNr}}_{{vers2.vers.versNr}}\">{{vers2.versText|correctverstext}}</td></tr></table></td>\n            <td class=\"col-md-3 hidden-xs hidden-sm hidden-md\"><table><tr><td class=\"versenr\"><a href=\"/edit/{{vers1.vers.bookNr.nr}}/{{vers1.vers.chapterNr}}/{{vers1.vers.versNr}}\">{{vers3.vers.versNr}}</a></td><td class=\"verse\" id=\"{{vers3.vers.bookNr.short_name}}{{vers3.vers.chapterNr}}_{{vers3.vers.versNr}}\">{{vers3.versText|correctverstext}}</td></tr></table></td>\n            <td class=\"col-md-3 hidden-xs hidden-sm hidden-md\"><table><tr><td class=\"versenr\"><a href=\"/edit/{{vers1.vers.bookNr.nr}}/{{vers1.vers.chapterNr}}/{{vers1.vers.versNr}}\">{{vers4.vers.versNr}}</a></td><td class=\"verse\" id=\"{{vers4.vers.bookNr.short_name}}{{vers4.vers.chapterNr}}_{{vers4.vers.versNr}}\">{{vers4.versText|correctverstext}}</td></tr></table></td>\n            {% endautoescape %}\n        </tr>\n        {% endfor %}\n        <tr>\n            <td></td>\n            <td class=\"col-md-3 hidden-xs\">\n                <div class=\"copyright\">\n                    <br/>\n                    Bibeltext der Schlachter<br/>\n                    Copyright © 2000 Genfer Bibelgesellschaft<br/>\n                    Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>\n                </div>\n            </td>\n            <td class=\"col-md-3 hidden-xs hidden-sm hidden-md\"></td>\n            <td class=\"col-md-3 hidden-xs hidden-sm hidden-md\">\n                <div class=\"copyright\">\n                    <br/>\n                    Bibeltext der Neuen Genfer Übersetzung – Neues Testament und Psalmen<br/>\n                    Copyright © 2011 Genfer Bibelgesellschaft<br/>\n                    Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>\n                </div>\n            </td>\n        </tr>\n    </table>\n{% endblock %}\n\n{% block js %}\n{%if vers > 0 %}\n<script>\n    $(window).load(function() {\n        // $(\"#vers-{{vers}}\").animate({ scrollTop: 0 }, \"slow\");\n        $(\"html, body\").animate({ scrollTop: $('#vers-{{vers}}').position().top + 70}, 500);\n        $('#vers-{{vers}}').css('background-color', 'rgba(91, 176, 91, .1)');\n    });\n</script>\n{% endif %}\n<script>\n    var content = '';\n    $(document).ready(function() {\n        $.fn.notebook.defaults = {\n            autoFocus: true,\n            placeholder: 'Hier bitte den Kommentar eingeben ... zum Formatieren doppelt klicken.',\n            mode: 'multiline', // multiline or inline\n            modifiers: ['bold', 'italic', 'underline', 'h1', 'h2', 'ol', 'ul', 'anchor']\n        };\n        $('#editor').html('{{text}}');  \n        $('#editor').notebook();\n        $('#editor').on('contentChange', function(e) {\n            content = e.originalEvent.detail.content;\n        });\n    });\n\n    function saveNote() {\n        $.post('{{saveurl}}', {note:content}, function(data) {\n            alert(data);\n        });;\n    }\n</script>\n{% endblock %}",
 			"file": "strongs/templates/strongs/editorbible.html",
-			"file_size": 4298,
-			"file_write_time": 130406798870000000,
 			"settings":
 			{
-				"buffer_size": 4295,
+				"buffer_size": 5056,
 				"line_ending": "Unix"
 			}
 		},
@@ -142,7 +127,7 @@
 			"file": "strongs/urls.py",
 			"settings":
 			{
-				"buffer_size": 831,
+				"buffer_size": 702,
 				"line_ending": "Unix"
 			}
 		},
@@ -222,7 +207,7 @@
 				"Set Syntax: PHP"
 			]
 		],
-		"width": 514.0
+		"width": 610.0
 	},
 	"console":
 	{
@@ -245,16 +230,27 @@
 	},
 	"file_history":
 	[
+		"/Users/mirkohecky/Downloads/pwd.csv",
+		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/static/js/sidebarEffects.js",
+		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/static/css/bible.css",
+		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/tests.py",
+		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/forms.py",
+		"/private/var/folders/91/fwgpk5s17rdb06_2j466jlcw0000gn/T/fz3temp-1/index.html",
+		"/Users/mirkohecky/PycharmProjects/Django_Strongs/bible.css",
+		"/Users/mirkohecky/PycharmProjects/Django_Strongs/bibleBooks_de.txt",
+		"/Users/mirkohecky/PycharmProjects/Django_Strongs/Django_Strongs/urls.py",
+		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/static/less/modules/forms.less",
+		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/static/less/fonts.less",
+		"/Users/mirkohecky/PycharmProjects/Django_Strongs/include/python2.7/fileobject.h",
+		"/Users/mirkohecky/PycharmProjects/Django_Strongs/lib/python2.7/site-packages/psycopg2/tests/test_extras_dictcursor.py",
+		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/static/js/tooltip.js",
 		"/Users/mirkohecky/Desktop/sunshine/html/index.html",
 		"/Users/mirkohecky/Library/Caches/TemporaryItems/Outlook Temp/GGreek.s/G03/G04500.txt",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/bibles/osis.schlachter2000.v1.withoutnotes.xml",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/lib/python2.7/site-packages/django/template/loaders/app_directories.py",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/bin/activate",
-		"/Users/mirkohecky/PycharmProjects/Django_Strongs/Django_Strongs/urls.py",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/static/js/jquery-2.1.0.min.js",
-		"/Users/mirkohecky/PycharmProjects/Django_Strongs/lib/python2.7/site-packages/psycopg2/tests/test_extras_dictcursor.py",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/.idea/encodings.xml",
-		"/Users/mirkohecky/PycharmProjects/Django_Strongs/bible.css",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/lib/python2.7/site-packages/django/contrib/admin/static/admin/css/base.css",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/lib/python2.7/site-packages/pip/basecommand.py",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/static/css/jquery.notebook.css",
@@ -268,7 +264,6 @@
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/lib/python2.7/encodings/utf_16_le.py",
 		"/Users/mirkohecky/Library/Application Support/Sublime Text 3/Packages/User/Preferences.sublime-settings",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/templatetags/strongs_extras.py",
-		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/static/js/sidebarEffects.js",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/templates/strongs/strongNr.html",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/models.py",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/initDb.py",
@@ -276,13 +271,11 @@
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/static/js/iscroll.js",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/include/python2.7/cStringIO.h",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/lib/python2.7/config/install-sh",
-		"/Users/mirkohecky/PycharmProjects/Django_Strongs/bibleBooks_de.txt",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/templates/strongs/strongs.html",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/static/res/strongs.js",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/lib/python2.7/site-packages/psycopg2/extensions.py",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/.idea/modules.xml",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/manage.py",
-		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/static/css/bible.css",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/static/bible.html",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/lib/python2.7/site-packages/django/contrib/admindocs/templates/admin_doc/view_index.html",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/.idea/vcs.xml",
@@ -292,9 +285,7 @@
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/include/python2.7/object.h",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/grammar_parser.py",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/static/css/tooltip.css",
-		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/static/js/tooltip.js",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/include/python2.7/token.h",
-		"/Users/mirkohecky/PycharmProjects/Django_Strongs/strongs/tests.py",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/lib/python2.7/site-packages/setuptools/command/build_ext.py",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/lib/python2.7/site-packages/setuptools/extension.py",
 		"/Users/mirkohecky/PycharmProjects/Django_Strongs/lib/python2.7/site-packages/psycopg2/extras.py",
@@ -366,13 +357,7 @@
 		"/Users/mirkohecky/Library/Caches/com.binarynights.ForkLift2/#7/index.php",
 		"/Users/mirkohecky/Library/Caches/com.binarynights.ForkLift2/#1/strongsgreek.xml",
 		"/Users/mirkohecky/Library/Caches/com.binarynights.ForkLift2/#0/style.default.css",
-		"/Volumes/srv17.domainssaubillig.de/htdocs/fcg-weiden.de2/configuration.php",
-		"/private/var/folders/91/fwgpk5s17rdb06_2j466jlcw0000gn/T/fz3temp-1/style.default.css",
-		"/Users/mirkohecky/Downloads/WLMContacts.csv",
-		"/Users/mirkohecky/Downloads/jos_users.sql",
-		"/Applications/CLeVer.app/Contents/Resources/data/KoningRichter.db",
-		"/Users/mirkohecky/Downloads/web65_dbfcgwen.sql",
-		"/Volumes/srv17.domainssaubillig.de/htdocs/fcg-weiden.de2/templates/as002050free/index.php"
+		"/Volumes/srv17.domainssaubillig.de/htdocs/fcg-weiden.de2/configuration.php"
 	],
 	"find":
 	{
@@ -391,6 +376,11 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"edit",
+			"note",
+			"edit",
+			"savenote",
+			"request.user",
 			"content",
 			"position:",
 			"position: abs",
@@ -492,7 +482,7 @@
 	"groups":
 	[
 		{
-			"selected": 3,
+			"selected": 1,
 			"sheets":
 			[
 				{
@@ -501,15 +491,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 13069,
+						"buffer_size": 13561,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								11162,
-								11162
+								0,
+								0
 							]
 						],
 						"settings":
@@ -517,30 +507,30 @@
 							"BracketHighlighterBusy": false,
 							"bh_regions":
 							[
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
 								"bh_regex",
 								"bh_regex_center",
 								"bh_regex_open",
 								"bh_regex_close",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
 								"bh_angle",
 								"bh_angle_center",
 								"bh_angle_open",
@@ -549,14 +539,14 @@
 								"bh_tag_center",
 								"bh_tag_open",
 								"bh_tag_close",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close"
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close"
 							],
 							"codeintel": true,
 							"codeintel_config":
@@ -667,7 +657,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3231.0,
+						"translation.y": 3125.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
@@ -675,373 +665,19 @@
 				},
 				{
 					"buffer": 1,
-					"file": "strongs/static/css/bible.css",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4942,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								4906,
-								4906
-							]
-						],
-						"settings":
-						{
-							"BracketHighlighterBusy": false,
-							"bh_regions":
-							[
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close"
-							],
-							"codeintel": true,
-							"codeintel_config":
-							{
-								"JavaScript":
-								{
-									"codeintel_max_recursive_dir_depth": 2,
-									"codeintel_scan_files_in_project": false,
-									"javascriptExtraPaths":
-									[
-									]
-								},
-								"PHP":
-								{
-									"codeintel_max_recursive_dir_depth": 5,
-									"codeintel_scan_files_in_project": false,
-									"phpExtraPaths":
-									[
-									]
-								},
-								"Python":
-								{
-									"env":
-									{
-									}
-								}
-							},
-							"codeintel_enabled_languages":
-							[
-								"JavaScript",
-								"Mason",
-								"XBL",
-								"XUL",
-								"RHTML",
-								"SCSS",
-								"Python",
-								"HTML",
-								"Ruby",
-								"Python3",
-								"XML",
-								"Sass",
-								"XSLT",
-								"Django",
-								"HTML5",
-								"Perl",
-								"CSS",
-								"Twig",
-								"Less",
-								"Smarty",
-								"Node.js",
-								"Tcl",
-								"TemplateToolkit",
-								"PHP"
-							],
-							"codeintel_live": true,
-							"codeintel_live_enabled_languages":
-							[
-								"JavaScript",
-								"Mason",
-								"XBL",
-								"XUL",
-								"RHTML",
-								"SCSS",
-								"Python",
-								"HTML",
-								"Ruby",
-								"Python3",
-								"XML",
-								"Sass",
-								"XSLT",
-								"Django",
-								"HTML5",
-								"Perl",
-								"CSS",
-								"Twig",
-								"Less",
-								"Smarty",
-								"Node.js",
-								"Tcl",
-								"TemplateToolkit",
-								"PHP"
-							],
-							"codeintel_max_recursive_dir_depth": 10,
-							"codeintel_scan_exclude_dir":
-							{
-								"JavaScript":
-								[
-									"/build/",
-									"/min/"
-								]
-							},
-							"codeintel_scan_files_in_project": true,
-							"codeintel_selected_catalogs":
-							[
-								"PyWin32",
-								"jQuery",
-								"Rails"
-							],
-							"codeintel_snippets": true,
-							"codeintel_syntax_map":
-							{
-								"Python Django": "Python"
-							},
-							"codeintel_tooltips": "popup",
-							"sublime_auto_complete": true,
-							"syntax": "Packages/CSS/CSS.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 3992.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "strongs/static/js/sidebarEffects.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3602,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3263,
-								3263
-							]
-						],
-						"settings":
-						{
-							"BracketHighlighterBusy": false,
-							"bh_regions":
-							[
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close"
-							],
-							"codeintel": true,
-							"codeintel_config":
-							{
-								"JavaScript":
-								{
-									"codeintel_max_recursive_dir_depth": 2,
-									"codeintel_scan_files_in_project": false,
-									"javascriptExtraPaths":
-									[
-									]
-								},
-								"PHP":
-								{
-									"codeintel_max_recursive_dir_depth": 5,
-									"codeintel_scan_files_in_project": false,
-									"phpExtraPaths":
-									[
-									]
-								},
-								"Python":
-								{
-									"env":
-									{
-									}
-								}
-							},
-							"codeintel_enabled_languages":
-							[
-								"JavaScript",
-								"Mason",
-								"XBL",
-								"XUL",
-								"RHTML",
-								"SCSS",
-								"Python",
-								"HTML",
-								"Ruby",
-								"Python3",
-								"XML",
-								"Sass",
-								"XSLT",
-								"Django",
-								"HTML5",
-								"Perl",
-								"CSS",
-								"Twig",
-								"Less",
-								"Smarty",
-								"Node.js",
-								"Tcl",
-								"TemplateToolkit",
-								"PHP"
-							],
-							"codeintel_live": true,
-							"codeintel_live_enabled_languages":
-							[
-								"JavaScript",
-								"Mason",
-								"XBL",
-								"XUL",
-								"RHTML",
-								"SCSS",
-								"Python",
-								"HTML",
-								"Ruby",
-								"Python3",
-								"XML",
-								"Sass",
-								"XSLT",
-								"Django",
-								"HTML5",
-								"Perl",
-								"CSS",
-								"Twig",
-								"Less",
-								"Smarty",
-								"Node.js",
-								"Tcl",
-								"TemplateToolkit",
-								"PHP"
-							],
-							"codeintel_max_recursive_dir_depth": 10,
-							"codeintel_scan_exclude_dir":
-							{
-								"JavaScript":
-								[
-									"/build/",
-									"/min/"
-								]
-							},
-							"codeintel_scan_files_in_project": true,
-							"codeintel_selected_catalogs":
-							[
-								"PyWin32",
-								"jQuery",
-								"Rails"
-							],
-							"codeintel_snippets": true,
-							"codeintel_syntax_map":
-							{
-								"Python Django": "Python"
-							},
-							"codeintel_tooltips": "popup",
-							"sublime_auto_complete": true,
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1419.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 10,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
 					"file": "strongs/initDb.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 13014,
+						"buffer_size": 13196,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1369,
-								1369
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1049,46 +685,46 @@
 							"BracketHighlighterBusy": false,
 							"bh_regions":
 							[
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
 								"bh_double_quote",
 								"bh_double_quote_center",
 								"bh_double_quote_open",
 								"bh_double_quote_close",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
 								"bh_default",
 								"bh_default_center",
 								"bh_default_open",
 								"bh_default_close",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
 								"bh_angle",
 								"bh_angle_center",
 								"bh_angle_open",
 								"bh_angle_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
 								"bh_unmatched",
 								"bh_unmatched_center",
 								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close"
+								"bh_unmatched_close"
 							],
 							"codeintel": true,
 							"codeintel_config":
@@ -1198,28 +834,28 @@
 							"tab_size": 4,
 							"translate_tabs_to_spaces": true
 						},
-						"translation.x": 0.0,
-						"translation.y": 242.0,
+						"translation.x": 5.0,
+						"translation.y": 2203.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
+					"buffer": 2,
 					"file": "strongs/models.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3387,
+						"buffer_size": 3352,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3387,
-								3387
+								2824,
+								2833
 							]
 						],
 						"settings":
@@ -1227,30 +863,30 @@
 							"BracketHighlighterBusy": false,
 							"bh_regions":
 							[
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
 								"bh_regex",
 								"bh_regex_center",
 								"bh_regex_open",
 								"bh_regex_close",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
 								"bh_angle",
 								"bh_angle_center",
 								"bh_angle_open",
@@ -1259,14 +895,14 @@
 								"bh_tag_center",
 								"bh_tag_open",
 								"bh_tag_close",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close"
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close"
 							],
 							"codeintel": true,
 							"codeintel_config":
@@ -1377,27 +1013,27 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 755.0,
+						"translation.y": 430.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 6,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 3,
 					"file": "Django_Strongs/settings.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2785,
+						"buffer_size": 2801,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1015,
-								1015
+								1857,
+								1857
 							]
 						],
 						"settings":
@@ -1405,30 +1041,30 @@
 							"BracketHighlighterBusy": false,
 							"bh_regions":
 							[
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
 								"bh_regex",
 								"bh_regex_center",
 								"bh_regex_open",
 								"bh_regex_close",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
 								"bh_angle",
 								"bh_angle_center",
 								"bh_angle_open",
@@ -1437,14 +1073,14 @@
 								"bh_tag_center",
 								"bh_tag_open",
 								"bh_tag_close",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close"
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close"
 							],
 							"codeintel": true,
 							"codeintel_config":
@@ -1555,27 +1191,27 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 698.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
+					"buffer": 4,
 					"file": "strongs/admin.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 432,
+						"buffer_size": 473,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								428,
-								428
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1734,24 +1370,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
+					"buffer": 5,
 					"file": "strongs/templates/baseTemplate.html",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 10990,
+						"buffer_size": 12092,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								5109,
-								5109
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1759,30 +1395,30 @@
 							"BracketHighlighterBusy": false,
 							"bh_regions":
 							[
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
 								"bh_regex",
 								"bh_regex_center",
 								"bh_regex_open",
 								"bh_regex_close",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
 								"bh_angle",
 								"bh_angle_center",
 								"bh_angle_open",
@@ -1791,14 +1427,14 @@
 								"bh_tag_center",
 								"bh_tag_open",
 								"bh_tag_close",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close"
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close"
 							],
 							"codeintel": true,
 							"codeintel_config":
@@ -1909,27 +1545,27 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1058.0,
+						"translation.y": 3753.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
-					"buffer": 8,
+					"buffer": 6,
 					"file": "strongs/templates/strongs/editorbible.html",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4295,
+						"buffer_size": 5056,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3974,
-								3974
+								314,
+								314
 							]
 						],
 						"settings":
@@ -1938,30 +1574,30 @@
 							"auto_name": "",
 							"bh_regions":
 							[
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
 								"bh_regex",
 								"bh_regex_center",
 								"bh_regex_open",
 								"bh_regex_close",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
 								"bh_angle",
 								"bh_angle_center",
 								"bh_angle_open",
@@ -1970,14 +1606,14 @@
 								"bh_tag_center",
 								"bh_tag_open",
 								"bh_tag_close",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close"
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close"
 							],
 							"codeintel": true,
 							"codeintel_config":
@@ -2088,27 +1724,27 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 787.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 3,
 					"type": "text"
 				},
 				{
-					"buffer": 9,
+					"buffer": 7,
 					"file": "strongs/urls.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 831,
+						"buffer_size": 702,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								354,
-								354
+								140,
+								140
 							]
 						],
 						"settings":
@@ -2116,30 +1752,30 @@
 							"BracketHighlighterBusy": false,
 							"bh_regions":
 							[
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
 								"bh_regex",
 								"bh_regex_center",
 								"bh_regex_open",
 								"bh_regex_close",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
 								"bh_angle",
 								"bh_angle_center",
 								"bh_angle_open",
@@ -2148,14 +1784,14 @@
 								"bh_tag_center",
 								"bh_tag_open",
 								"bh_tag_close",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close"
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close"
 							],
 							"codeintel": true,
 							"codeintel_config":
@@ -2271,7 +1907,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 10,
+					"buffer": 8,
 					"file": "strongs/templates/strongs/bible.html",
 					"semi_transient": false,
 					"settings":
@@ -2283,8 +1919,8 @@
 						"selection":
 						[
 							[
-								2087,
-								476
+								682,
+								682
 							]
 						],
 						"settings":
@@ -2292,30 +1928,30 @@
 							"BracketHighlighterBusy": false,
 							"bh_regions":
 							[
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
 								"bh_regex",
 								"bh_regex_center",
 								"bh_regex_open",
 								"bh_regex_close",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
 								"bh_angle",
 								"bh_angle_center",
 								"bh_angle_open",
@@ -2324,14 +1960,14 @@
 								"bh_tag_center",
 								"bh_tag_open",
 								"bh_tag_close",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close"
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close"
 							],
 							"codeintel": true,
 							"codeintel_config":
@@ -2445,7 +2081,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 4,
 					"type": "text"
 				}
 			]
@@ -2502,20 +2138,40 @@
 		"selected_items":
 		[
 			[
-				"admin",
-				"strongs/admin.py"
+				"biblecss",
+				"strongs/static/css/bible.css"
 			],
 			[
-				"settings",
-				"Django_Strongs/settings.py"
+				"bible",
+				"strongs/templates/strongs/bible.html"
 			],
 			[
 				"urls",
 				"strongs/urls.py"
 			],
 			[
-				"bible",
-				"strongs/templates/strongs/bible.html"
+				"mode",
+				"strongs/models.py"
+			],
+			[
+				"sett",
+				"Django_Strongs/settings.py"
+			],
+			[
+				"test",
+				"strongs/tests.py"
+			],
+			[
+				"ba",
+				"strongs/templates/baseTemplate.html"
+			],
+			[
+				"admin",
+				"strongs/admin.py"
+			],
+			[
+				"settings",
+				"Django_Strongs/settings.py"
 			],
 			[
 				"sideb",
@@ -2536,10 +2192,6 @@
 			[
 				"basecs",
 				"lib/python2.7/site-packages/django/contrib/admin/static/admin/css/base.css"
-			],
-			[
-				"sett",
-				"Django_Strongs/settings.py"
 			],
 			[
 				"url",

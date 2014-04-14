@@ -1,0 +1,287 @@
+nav {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 50px;
+    /*background: rgba(0,0,0,0.6);*/
+    /*background: rgba(255,255,255,0.8);*/
+    color: #ffffff;
+    color: rgba(0,0,0,0.6);
+    font-size: 130%;
+    /*background-image: url('../images/plexiglass.png');*/
+    background-image: url("../images/navbg.png");
+    background-position: top;
+    background-repeat: repeat-x;
+    z-index: 1;
+}
+
+.navbar-brand {
+    position: fixed;
+    top: 0px;
+    left: 50%;
+    margin-left: 1px;
+}
+
+.logo {
+    width: 150px;
+}
+
+.title-container {
+    position: fixed;
+    left: 0px;
+    width: 100%;
+    height: 25px;
+    margin-left: 1%;
+    top: 27px;
+}
+
+.titleTr {
+    text-align: right;
+    /*top: 27px;*/
+    height: 25px;
+    position: relative;
+    width: 24.5%;
+    float: left;
+    border-right: 1px solid #aeaeae;
+    /*margin: 0;*/
+    /*padding: 0 10px;*/
+    color: rgb(72,167,112);
+}
+
+.title {
+    margin-right: 15px;
+}
+
+.tr {
+    position: relative;
+    width: 24.5%;
+    float: left;
+    border-right: 1px solid #aeaeae;
+    /*margin: 0;*/
+    /*padding: 0 10px;*/
+}
+
+.copyright {
+	color: rgb(172, 168, 154);
+	margin-left: 15px;
+	font-size: 9pt;
+    position: relative;
+    margin-bottom: 70px;
+}
+
+.sb-strong {
+    color: rgb(109, 105, 90);
+    cursor: pointer;
+}
+
+.sb-strong:hover {
+    color: rgb(72,167,112);
+}
+
+.content {
+    margin-top: 10px;
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.noborder {
+    border: none;
+}
+
+#actSearch {
+    position: absolute;
+    left: 0px;
+    width: 100%;
+    height: 20px;
+    margin-top: 5px;
+    padding-left: 45px;
+    border-bottom: 1px solid rgb(72,167,112);
+}
+
+.container {
+    position: fixed;
+    left: 0px;
+    width: 100%;
+    top: 0px;
+    height: 100%;
+    overflow: auto;
+    padding-top: 50px;
+    margin-left: 1%;
+}
+
+.sidebaroffset {
+    /*padding-right: 55px;*/
+    /*margin-left: -56px;*/
+}
+
+abbr {
+    font-size: 80%;
+}
+
+body {
+    background-color: rgb(72,167,112);
+    background-color: #f3efe1;
+    color: rgb(132, 128, 114);
+    overflow: hidden;
+    font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;
+    font-family: "Lucida Grande","Lucida Sans Unicode","Lucida Sans",Geneva,Verdana,sans-serif;
+}
+
+.versenr {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    top: -0.3em;
+}
+
+.verse {
+    padding-left: 10px;
+    text-indent: -10px;
+    display: block;
+    line-height: 131%;
+    font-size: 130%;
+    padding-bottom: 5px;
+}
+
+a, a:visited {
+    color: rgb(91, 176, 91);
+    color: rgb(69, 65, 52);
+    color: black;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+.glyphter {
+    font-family: "Glyphter";
+}
+
+.navbuttons {
+    margin-left: 20px;
+}
+
+.navbuttons > a {
+    color: rgb(72,167,112);
+}
+
+.navbuttons > a:hover {
+    text-shadow: 0 5px 5px rgba(255,255,255,0.75);
+    text-decoration: none;
+}
+
+.search-highlight {
+    background-color: rgba(0,200,112,0.1);
+    background-color: rgba(255, 255, 0, 0.50);
+}
+
+
+/**************************** sidebarEffects */
+
+#sb-slidebox {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    width: 25%;
+    height: 100%;
+    min-width: 300px;
+    max-width: 400px;
+}
+
+#sb-button {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    /*box-shadow: none;*/
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-repeat: no-repeat;
+    /*border-color: #ffffff;*/
+    /*border-color: rgba(72,167,112,0.8);*/
+    /*border-image: none;*/
+    /*border-style: solid;*/
+    /*border-width: 1px;*/
+    color: white;
+    cursor: pointer;
+    display: inline-block;
+    margin-top: 0;
+    padding: 0px 16px;
+    padding-left: 9px;
+    text-align: center;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+    vertical-align: middle;
+    /*font-family: "Lucida Grande","Helvetica Neue",Helvetica,Arial,sans-serif;*/
+    font-family: "Glyphter";
+    font-size: 150%;
+    font-weight: bold;
+    line-height: normal;
+    /*border-radius: 14px 0px 0px 14px;*/
+    /*border-color: rgb(72,167,112);*/
+    float: left;
+    /*box-shadow: 0 1px 1px rgba(72,167,112,0.8) inset, 0 0 8px rgba(72,167,112,0.8);*/
+    /*box-shadow: 0 1px 1px rgba(72,167,112,0.8) inset, 0 0 8px rgba(72,167,112,0.8);*/
+    /*background-color: #ffffff;*/
+    background-color: rgb(72,167,112);
+    /*background-color: #f3efe1;*/
+    /*background-image: url("../images/info.png");*/
+    height: 24px;
+    width: 3px;
+    z-index: 2;
+    border: none;
+    border: 1px solid rgb(72,167,112);
+    border-radius: 14px 0 0 14px;
+}
+
+.sb-menu {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	z-index: 3;
+	width: 100%;
+	height: 100%;
+	background: rgba(72,167,112,0.8);
+    /*background-color: rgba(243, 239, 225, .9);*/
+    /*background: rgba(255,255,255,0.3);*/
+	/*padding: 10px 10px;*/
+	color: rgb(0, 0, 0);
+	-webkit-transition: all 0.2s ease-in-out;
+	transition: all 0.2s ease-in-out;
+	overflow:scroll;
+	-webkit-transform: translate3d(100%, 0, 0);
+	transform: translate3d(100%, 0, 0);
+    font-size: 120%;
+    /*border: 1px solid rgb(72,167,112);*/
+    /*background-image: url('../images/plexiglass.png');*/
+}
+
+#info-content {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.sb-menu-open .sb-menu {
+	-webkit-transform: translate3d(0, 0, 0);
+	transform: translate3d(0, 0, 0);
+}
+
+.sb-menu-open .sb-button {
+	-webkit-transform: translate3d(-300px, 0, 0);
+	transform: translate3d(-300px, 0, 0);
+	background-image:url('../images/right.png');
+}
+
+/* Fallback example for browsers that don't support 3D transforms and/or no JS */
+.no-csstransforms3d .sb-menu,
+.no-js .sb-menu {
+	right: -300px;
+}
+
+.no-csstransforms3d .sb-menu-open .sb-menu,
+.no-js .sb-menu-open .sb-menu {
+	right: 0px;
+}
+
+/*************************************/

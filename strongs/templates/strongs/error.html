@@ -1,0 +1,20 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/newDesign.css" />
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/error.css" />
+        <!--[if lte IE 7]><style>.main{display:none;} .support-note .note-ie{display:block;}</style><![endif]-->
+    </head>
+    <body>
+    {% autoescape off %}
+        <div class="center">
+            <h1 class="error">{{ message }}</h1>
+            <h3>
+                {{ solution }}
+            </h3>
+            <br/>
+            <br/>
+            <h2><a href="/">Hier</a> geht's zurück zur <a href="/">Hauptseite</a>.</h2>
+        </div>
+    {% endautoescape %}
+    </body>
+</html>
