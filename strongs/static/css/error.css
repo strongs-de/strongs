@@ -1,6 +1,6 @@
 @import url(http://fonts.googleapis.com/css?family=Raleway:400,700);
 body {
-    background: #7f9b4e url("../images/bg-error.jpeg") no-repeat center top;
+    background: rgb(91,176,91) url("../images/bg-error.jpeg") no-repeat center top;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     background-size: cover;
@@ -12,7 +12,7 @@ body {
     text-shadow: 0 1px 1px rgba(0,0,0,0.7);
 }
 a {
-    color: rgb(72,167,112) !important;
+    color: rgb(91,176,91) !important;
 }
 .error {
     color: #ce2200;

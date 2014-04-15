@@ -1,56 +1,49 @@
 'use strict';
 
-$(function() {
-    // function for opening the searchsidebar
-    function animateOpenInfobox() {
-        setTimeout(function() {
-            var button = $('#sb-menu');
-            if (!$(button).hasClass('sb-menu-open')) {
+// function for opening the searchsidebar
+function animateOpenInfobox() {
+    setTimeout(function() {
+        var button = $('#sb-menu');
+        if (!$(button).hasClass('sb-menu-open')) {
 //                $('#sb-menu').animate({'right': $('#sb-menu').outerWidth()}, 300);
-                $('#sb-slidebox').animate({'right': $('#sb-slidebox').outerWidth()}, 300);
-                $('#sb-menu').addClass('sb-menu-open');
-            }
-        }, 25);
-    }
+            $('#sb-slidebox').animate({'right': $('#sb-slidebox').outerWidth()}, 300);
+            $('#sb-menu').addClass('sb-menu-open');
+        }
+    }, 25);
+}
 
-    // function for closing the searchsidebar
-    function animateCloseInfobox() {
-        setTimeout(function() {
-            var button = $('#sb-menu');
-            if ($(button).hasClass('sb-menu-open')) {
+// function for closing the searchsidebar
+function animateCloseInfobox() {
+    setTimeout(function() {
+        var button = $('#sb-menu');
+        if ($(button).hasClass('sb-menu-open')) {
 //                $('#sb-menu').stop(true).animate({'right': '0px'}, 100);
-                $('#sb-slidebox').stop(true).animate({'right': '0px'}, 100);
-                $(button).removeClass('sb-menu-open');
-				// remove anchor link
-				parent.location.hash = '';
-            }
-        }, 25);
-    }
+            $('#sb-slidebox').stop(true).animate({'right': '0px'}, 100);
+            $(button).removeClass('sb-menu-open');
+            // remove anchor link
+            parent.location.hash = '';
+        }
+    }, 25);
+}
 
-    function loadStrong( strong, vers ) {
-        var xhReq = new XMLHttpRequest();
-        xhReq.open("GET", "/strong/" + strong + "/" + vers, false);
-        xhReq.send(null);
-        var serverResponse = xhReq.responseText;
-        $('#sb-menu > #info-content').html("<h4>" + strong + "</h4>" + serverResponse);
-        document.location = document.location.href.match(/(^[^#]*)/)[0] + '#' + strong + "/" + vers;
-    }
+function loadStrong( strong, vers ) {
+    var xhReq = new XMLHttpRequest();
+    xhReq.open("GET", "/strong/" + strong + "/" + vers, false);
+    xhReq.send(null);
+    var serverResponse = xhReq.responseText;
+    $('#sb-menu > #info-content').html("<h4>" + strong + "</h4>" + serverResponse);
+    initTooltips();
+    document.location = document.location.href.match(/(^[^#]*)/)[0] + '#' + strong + "/" + vers;
+}
 
-    function strongclick(ev) {
-        ev.stopPropagation();
-        ev.preventDefault();
-        loadStrong($(this).attr('data-strong'), $(this).parent().attr('id'));
-        animateOpenInfobox();
-    }
+function strongclick(ev) {
+    ev.stopPropagation();
+    ev.preventDefault();
+    loadStrong($(this).attr('data-strong'), $(this).parent().attr('id'));
+    animateOpenInfobox();
+}
 
-    // If there is a strong-number given (as anchor in url) open the sidebar
-    if(parent.location.hash.length > 1) {
-        var anchor = parent.location.hash.substring(1);
-        var arr = anchor.split('/');
-        loadStrong(arr[0], arr[1]);
-        animateOpenInfobox();
-    }
-
+function initStrongLinks() {
     $('.sb-strong').on('click', strongclick);
 
     // open and close the searchsidebar
@@ -61,6 +54,18 @@ $(function() {
             animateCloseInfobox();
         }
     });
+}
+
+$(function() {
+    // If there is a strong-number given (as anchor in url) open the sidebar
+    if(parent.location.hash.length > 1) {
+        var anchor = parent.location.hash.substring(1);
+        var arr = anchor.split('/');
+        loadStrong(arr[0], arr[1]);
+        animateOpenInfobox();
+    }
+
+    initStrongLinks();
 });
 /*
 var SidebarMenuEffects = (function() {

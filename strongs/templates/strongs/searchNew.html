@@ -1,29 +1,17 @@
-{% extends "baseTemplate2.html" %}
+{% extends "baseTemplate3.html" %}
 {% block pagenum %}
-{{ pageact }} / {{ pagecnt }}
+Seite {{ pageact }}/{{ pagecnt }}
 {% endblock %}
 
 {% block searchtitle %}
     Suche nach:
 {% endblock %}
-{% block results1 %}
-    ({{ count1 }} Treffer)
-{% endblock %}
-{% block results2 %}
-    ({{ count2 }} Treffer)
-{% endblock %}
-{% block results3 %}
-    ({{ count3 }} Treffer)
-{% endblock %}
-{% block results4 %}
-    ({{ count4 }} Treffer)
-{% endblock %}
-
 
 {% block content %}
     {% autoescape off %}
     {% load strongs_extras %}
         <div id="tr1" class="tr">
+            <div id="titleTr1" class="titleTr"><span class="title">{{ translation1 }} ({{ count1 }} Treffer)</span></div>
             <div class="content">
                 {% for vers1 in verses1 %}
                     <div class="verse" id="{{vers1.vers.bookNr.short_name}}{{vers1.vers.chapterNr}}_{{vers1.vers.versNr}}">
@@ -38,6 +26,7 @@
             </p>
         </div>
         <div id="tr2" class="tr">
+            <div id="titleTr2" class="titleTr"><span class="title">{{ translation2 }} ({{ count2 }} Treffer)</span></div>
             <div class="content">
                 {% for vers2 in verses2 %}
                     <div class="verse" id="{{vers2.vers.bookNr.short_name}}{{vers2.vers.chapterNr}}_{{vers2.vers.versNr}}">
@@ -56,6 +45,7 @@
             </p>
         </div>
         <div id="tr3" class="tr">
+            <div id="titleTr3" class="titleTr"><span class="title">{{ translation3 }} ({{ count3 }} Treffer)</span></div>
             <div class="content">
                 {% for vers3 in verses3 %}
                     <div class="verse" id="{{vers3.vers.bookNr.short_name}}{{vers3.vers.chapterNr}}_{{vers3.vers.versNr}}">
@@ -70,6 +60,7 @@
             </p>
         </div>
         <div id="tr4" class="tr noborder">
+            <div id="titleTr4" class="titleTr noborder"><span class="title">{{ translation4 }} ({{ count4 }} Treffer)</span></div>
             <div class="content">
                 {% for vers4 in verses4 %}
                     <div class="verse" id="{{vers4.vers.bookNr.short_name}}{{vers4.vers.chapterNr}}_{{vers4.vers.versNr}}">
@@ -151,6 +142,9 @@
                for(i = 0; i < substrings.length; ++i) {
                  $(block).html($(block).html().replace(new RegExp("\\s" + substrings[i].replace(/"/g, "").replace(/'/g, ""), 'gi'), function(match, text, urlId){
                     return ' <span class="search-highlight">' + match.substring(1) + '</span>'
+                 }));
+                 $(block).html($(block).html().replace(new RegExp(">" + substrings[i].replace(/"/g, "").replace(/'/g, ""), 'gi'), function(match, text, urlId){
+                    return '><span class="search-highlight">' + match.substring(1) + '</span>'
                  }));
                }
 

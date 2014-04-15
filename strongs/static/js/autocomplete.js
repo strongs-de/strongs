@@ -82,7 +82,7 @@ var arrBooks = strBooks.split("\n");
 $(function() {
 //    $('#searchId').autocomplete({source: books});
 //    return;
-    $('#anysearch-input').autocomplete({select: function(event, ui) {
+    $('#searchId').autocomplete({select: function(event, ui) {
         // trigger the search action
         doSearch(ui.item.value);
     }, source: function(request, response) {

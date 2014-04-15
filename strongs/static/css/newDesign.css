@@ -1,56 +1,134 @@
-nav {
+
+/***********************************************************************************************************************
+ *                                                                                              HTML-TAGS
+ ***********************************************************************************************************************/
+
+abbr {
+    font-size: 100%;
+}
+
+body {
+    background-color: #5BB05B;
+    /*background-color: #f3efe1;*/
+    color: rgb(132, 128, 114);
+    overflow: hidden;
+    font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;
+    font-family: "Lucida Grande","Lucida Sans Unicode","Lucida Sans",Geneva,Verdana,sans-serif;
+}
+
+a, a:visited {
+    color: #5BB05B;
+    color: rgb(69, 65, 52);
+    color: black;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+a, a:hover, a:visited {
+    color: #5BB05B;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+a:hover {
+    text-shadow: 1px 1px 1px rgba(91,176,91,0.3);
+}
+
+
+input[type=text],
+input[type=email],
+input[type=date] {
+	border: 1px solid #ddd;
+	padding: 7px 10px;
+	/*font-weight: bold;*/
+	text-shadow: 0 1px 1px rgba(255,255,255,0.8);
+    font-size: 120%;
+	color: #666;
+	width: 300px;
+	/*background: #ffffff;*/
+	/*background: -moz-linear-gradient(top, #ffffff 0%, #f7f7f7 7%, #f7f7f7 22%, #ffffff 100%);*/
+	/*background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(7%,#f7f7f7), color-stop(22%,#f7f7f7), color-stop(100%,#ffffff));*/
+	/*background: -webkit-linear-gradient(top, #ffffff 0%,#f7f7f7 7%,#f7f7f7 22%,#ffffff 100%);*/
+	/*background: -o-linear-gradient(top, #ffffff 0%,#f7f7f7 7%,#f7f7f7 22%,#ffffff 100%);*/
+	/*background: -ms-linear-gradient(top, #ffffff 0%,#f7f7f7 7%,#f7f7f7 22%,#ffffff 100%);*/
+	/*background: linear-gradient(top, #ffffff 0%,#f7f7f7 7%,#f7f7f7 22%,#ffffff 100%);*/
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ffffff',GradientType=0 );
+	box-shadow: 0px 1px 1px rgba(255,255,255,0.7), 1px 1px 2px rgba(0,0,0,0.1) inset;
+}
+
+input:focus {
+	/*background: rgba(155, 255, 155, 0.05);*/
+    border: 1px solid #aaa;
+	outline: none;
+}
+
+/***********************************************************************************************************************
+ *                                                                                              NAV-BAR
+ ***********************************************************************************************************************/
+
+
+.nav {
+    background-color: rgb(255,255,255);
     position: fixed;
     top: 0px;
     left: 0px;
     width: 100%;
-    height: 50px;
-    /*background: rgba(0,0,0,0.6);*/
-    /*background: rgba(255,255,255,0.8);*/
-    color: #ffffff;
-    color: rgba(0,0,0,0.6);
-    font-size: 130%;
-    /*background-image: url('../images/plexiglass.png');*/
-    background-image: url("../images/navbg.png");
-    background-position: top;
-    background-repeat: repeat-x;
-    z-index: 1;
+    height: 53px;
+    /*float: left;*/
+}
+
+.nav-ele {
+    display: table-cell;
+    vertical-align: middle;
+    padding: 0 10px;
+}
+
+#center-div {
+    width: 0px;
+    padding-top: 53px;
 }
 
 .navbar-brand {
-    position: fixed;
-    top: 0px;
-    left: 50%;
-    margin-left: 1px;
-}
-
-.logo {
-    width: 150px;
-}
-
-.title-container {
-    position: fixed;
-    left: 0px;
-    width: 100%;
-    height: 25px;
-    margin-left: 1%;
-    top: 27px;
-}
-
-.titleTr {
-    text-align: right;
-    /*top: 27px;*/
-    height: 25px;
     position: relative;
-    width: 24.5%;
+    top: 0px;
+    left: 0px;
     float: left;
-    border-right: 1px solid #aeaeae;
-    /*margin: 0;*/
-    /*padding: 0 10px;*/
-    color: rgb(72,167,112);
 }
 
-.title {
-    margin-right: 15px;
+.search {
+    background-image: url("../images/anysearch-icon.png");
+    background-repeat: no-repeat;
+    background-position: 300px;
+}
+
+.navbuttons {
+    font-size: 130%;
+}
+
+.navbuttons > a:hover {
+    text-shadow: 3px 3px 3px rgba(91,176,91,0.3);
+}
+
+
+
+/***********************************************************************************************************************
+ *                                                                                              CONTENT
+ ***********************************************************************************************************************/
+
+.container {
+    position: fixed;
+    left: 0;
+    top: 53px;
+    /*width: 100%;*/
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(255,255,255,.95);
+    background-color: #f3efe1;
+    border: 10px solid #5BB05B;
+    padding-top: 10px;
 }
 
 .tr {
@@ -58,25 +136,31 @@ nav {
     width: 24.5%;
     float: left;
     border-right: 1px solid #aeaeae;
-    /*margin: 0;*/
-    /*padding: 0 10px;*/
 }
 
-.copyright {
-	color: rgb(172, 168, 154);
-	margin-left: 15px;
-	font-size: 9pt;
+.titleTr {
+    position: fixed;
+    text-align: right;
+    height: 25px;
+    width: 24.5%;
+    float: left;
+    top: 63px;
+    color: #5BB05B;
+    background-image: url("../images/navbg.png");
+    background-repeat: repeat-x;
+    background-position: top;
+    background-size: contain;
+}
+
+.title {
+    margin-right: 15px;
+}
+
+.versenr {
+    font-size: 75%;
+    line-height: 0;
     position: relative;
-    margin-bottom: 70px;
-}
-
-.sb-strong {
-    color: rgb(109, 105, 90);
-    cursor: pointer;
-}
-
-.sb-strong:hover {
-    color: rgb(72,167,112);
+    top: -0.3em;
 }
 
 .content {
@@ -85,54 +169,13 @@ nav {
     margin-right: 15px;
 }
 
-.noborder {
-    border: none;
+.sb-strong {
+    color: rgb(80, 76, 61);
+    cursor: pointer;
 }
 
-#actSearch {
-    position: absolute;
-    left: 0px;
-    width: 100%;
-    height: 20px;
-    margin-top: 5px;
-    padding-left: 45px;
-    border-bottom: 1px solid rgb(72,167,112);
-}
-
-.container {
-    position: fixed;
-    left: 0px;
-    width: 100%;
-    top: 0px;
-    height: 100%;
-    overflow: auto;
-    padding-top: 50px;
-    margin-left: 1%;
-}
-
-.sidebaroffset {
-    /*padding-right: 55px;*/
-    /*margin-left: -56px;*/
-}
-
-abbr {
-    font-size: 80%;
-}
-
-body {
-    background-color: rgb(72,167,112);
-    background-color: #f3efe1;
-    color: rgb(132, 128, 114);
-    overflow: hidden;
-    font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;
-    font-family: "Lucida Grande","Lucida Sans Unicode","Lucida Sans",Geneva,Verdana,sans-serif;
-}
-
-.versenr {
-    font-size: 75%;
-    line-height: 0;
-    position: relative;
-    top: -0.3em;
+.sb-strong:hover {
+    color: #5BB05B;
 }
 
 .verse {
@@ -144,31 +187,28 @@ body {
     padding-bottom: 5px;
 }
 
-a, a:visited {
-    color: rgb(91, 176, 91);
-    color: rgb(69, 65, 52);
-    color: black;
-    text-decoration: none;
+.copyright {
+	color: rgb(172, 168, 154);
+	margin-left: 15px;
+	font-size: 9pt;
+    position: relative;
+    margin-bottom: 70px;
 }
-a:hover {
-    text-decoration: underline;
+
+
+
+
+
+/***********************************************************************************************************************
+ *                                                                                              PROPERTIES
+ ***********************************************************************************************************************/
+
+.noborder {
+    border: none;
 }
 
 .glyphter {
     font-family: "Glyphter";
-}
-
-.navbuttons {
-    margin-left: 20px;
-}
-
-.navbuttons > a {
-    color: rgb(72,167,112);
-}
-
-.navbuttons > a:hover {
-    text-shadow: 0 5px 5px rgba(255,255,255,0.75);
-    text-decoration: none;
 }
 
 .search-highlight {
@@ -176,8 +216,26 @@ a:hover {
     background-color: rgba(255, 255, 0, 0.50);
 }
 
+.error {
+    color: #ce2200;
+}
 
-/**************************** sidebarEffects */
+.logogreen {
+    color: #5BB05B;
+}
+
+.small {
+    font-size: 80%;
+}
+
+
+
+
+
+/***********************************************************************************************************************
+ *                                                                                              INFO SIDEBAR
+ ***********************************************************************************************************************/
+
 
 #sb-slidebox {
     position: absolute;
@@ -193,17 +251,13 @@ a:hover {
     position: absolute;
     right: 0px;
     top: 0px;
-    /*box-shadow: none;*/
+    height: 53px;
+    width: 23px;
     -moz-border-bottom-colors: none;
     -moz-border-left-colors: none;
     -moz-border-right-colors: none;
     -moz-border-top-colors: none;
     background-repeat: no-repeat;
-    /*border-color: #ffffff;*/
-    /*border-color: rgba(72,167,112,0.8);*/
-    /*border-image: none;*/
-    /*border-style: solid;*/
-    /*border-width: 1px;*/
     color: white;
     cursor: pointer;
     display: inline-block;
@@ -213,25 +267,15 @@ a:hover {
     text-align: center;
     text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
     vertical-align: middle;
-    /*font-family: "Lucida Grande","Helvetica Neue",Helvetica,Arial,sans-serif;*/
     font-family: "Glyphter";
-    font-size: 150%;
+    font-size: 350%;
     font-weight: bold;
     line-height: normal;
-    /*border-radius: 14px 0px 0px 14px;*/
-    /*border-color: rgb(72,167,112);*/
     float: left;
-    /*box-shadow: 0 1px 1px rgba(72,167,112,0.8) inset, 0 0 8px rgba(72,167,112,0.8);*/
-    /*box-shadow: 0 1px 1px rgba(72,167,112,0.8) inset, 0 0 8px rgba(72,167,112,0.8);*/
-    /*background-color: #ffffff;*/
-    background-color: rgb(72,167,112);
-    /*background-color: #f3efe1;*/
-    /*background-image: url("../images/info.png");*/
-    height: 24px;
-    width: 3px;
+    background-color: transparent;
+    color: #5BB05B;
     z-index: 2;
-    border: none;
-    border: 1px solid rgb(72,167,112);
+    border: 1px solid #5BB05B;
     border-radius: 14px 0 0 14px;
 }
 
@@ -242,10 +286,8 @@ a:hover {
 	z-index: 3;
 	width: 100%;
 	height: 100%;
-	background: rgba(72,167,112,0.8);
-    /*background-color: rgba(243, 239, 225, .9);*/
-    /*background: rgba(255,255,255,0.3);*/
-	/*padding: 10px 10px;*/
+    border: 5px solid #5BB05B;
+    background-color: #f3efe1;
 	color: rgb(0, 0, 0);
 	-webkit-transition: all 0.2s ease-in-out;
 	transition: all 0.2s ease-in-out;
@@ -253,8 +295,6 @@ a:hover {
 	-webkit-transform: translate3d(100%, 0, 0);
 	transform: translate3d(100%, 0, 0);
     font-size: 120%;
-    /*border: 1px solid rgb(72,167,112);*/
-    /*background-image: url('../images/plexiglass.png');*/
 }
 
 #info-content {
@@ -283,5 +323,3 @@ a:hover {
 .no-js .sb-menu-open .sb-menu {
 	right: 0px;
 }
-
-/*************************************/

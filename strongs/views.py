@@ -27,7 +27,7 @@ BIBLE_NAMES_IN_VIEW = ['Elberfelder 1905', 'Schlachter 2000', 'Luther 1912', u'N
 
 # Create your views here.
 def index(request):
-    return bible(request, 'joh1')
+    return sync_bible(request, 'joh1')
 
 
 def register(request):
@@ -141,7 +141,23 @@ def strongs(request, strong_id, vers):
     return render(request, 'strongs/error.html', {'message': u'Es wurden keine Verse für die Strong-Nummer ' + str(strong_id) + ' gefunden!', 'solution':'Evtl. existiert diese Strong Nummer nicht.'})
 
 
-def bible(request, bible_book):
+def async_bible(request, bible_book):
+    ret = bible(request, bible_book, 'strongs/bibleAsync.html')
+    if not ret:
+        return async_search(request, bible_book, 1)
+    else:
+        return ret
+
+
+def sync_bible(request, bible_book):
+    ret = bible(request, bible_book, 'strongs/bibleNew.html')
+    if not ret:
+        return sync_search(request, bible_book, 1)
+    else:
+        return ret
+
+
+def bible(request, bible_book, templateName):
     # if strong-number, then forward
     if bible_book.isdigit():
         return strongs(request, bible_book)
@@ -184,7 +200,7 @@ def bible(request, bible_book):
                         srch = book[0].name + ' ' + str(chapter)
                         if vers != None:
                             srch += ',' + str(vers)
-                        return render(request, 'strongs/bibleNew.html', {'vers': vers, 'search': srch, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses1': verses1, 'verses2': verses2, 'verses3': verses3, 'verses4': verses4})
+                        return render(request, templateName, {'vers': vers, 'search': srch, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses1': verses1, 'verses2': verses2, 'verses3': verses3, 'verses4': verses4})
                     else:
                         # return HttpResponse('No verses found')
                         return render(request, 'strongs/error.html', {'message': u'Die Bibelstelle konnte nicht geladen werden!', 'solution':u'Versuche es bitte später noch einmal.<br/>Sollte der Fehler noch immer bestehen, gib uns bitte unter info@strongs.de bescheid!'})
@@ -193,14 +209,23 @@ def bible(request, bible_book):
                     return render(request, 'strongs/error.html', {'message': u'Die Übersetzungen konnten nicht geladen werden!', 'solution':'Probiere es bitte später noch einmal.<br/>Sollte der Fehler noch immer bestehen, gib uns bitte unter info@strongs.de bescheid!'})
             else:
                 # Try to search for this word
-                return search(request, bible_book, 1)
+                return False
         else:
             # return HttpResponse('Keine Bibelstelle oder Strong Nummer eingegeben1!')
             return render(request, 'strongs/error.html', {'message': 'Es wurde im Suchfeld nichts eingegeben!', 'solution':u'Bitte gebe in dem Suchfeld eine Bibelstelle, einen beliebigen Suchbegriff oder eine<br/>Strong-Nummer (G = griechisch oder H = hebräisch, z.B. "G4506") ein.'})
     else:
         return render(request, 'strongs/error.html', {'message': 'Es ist ein Fehler aufgetreten!', 'solution':u'Bitte probiere es später noch einmal.<br/>Sollte der Fehler noch immer bestehen, gib uns bitte unter info@strongs.de bescheid!'})
 
-def search_strong(request, strong, page='1'):
+
+def sync_search_strong(request, strong, page='1'):
+    return search_strong(request, strong, 'strongs/searchNew.html', page)
+
+
+def async_search_strong(request, strong, page='1'):
+    return search_strong(request, strong, 'strongs/searchAsync.html', page)
+
+
+def search_strong(request, strong, templateName, page='1'):
     nr = int(strong[1:])
 
     search = "<gr str=\"" + str(nr) + "\""
@@ -235,7 +260,7 @@ def search_strong(request, strong, page='1'):
 
         pagecnt = max(1, int(math.ceil(count * 1.0 / num)))
         # return render(request, 'strongs/search.html', {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': strong, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses': izip_longest(search1, search2, search3, search4)})
-        return render(request, 'strongs/searchNew.html', {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': strong, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses1': search1, 'verses2': search2, 'verses3': search3, 'verses4': search4})
+        return render(request, templateName, {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': strong, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses1': search1, 'verses2': search2, 'verses3': search3, 'verses4': search4})
     else:
         # return HttpResponse('No verses found for strong number ' + strong)
         alt = 'H' + strong[1:]
@@ -244,11 +269,19 @@ def search_strong(request, strong, page='1'):
         return render(request, 'strongs/error.html', {'message': 'Keine Verse mit dieser Strong-Nummer gefunden!', 'solution':u'Scheinbar existiert die Strong-Nummer ' + strong + ' nicht!<br/>Korrigiere deine Eingabe, oder probiere es einmal mit <a href="/' + alt + '">' + alt + '</a>.'})
 
 
-def search(request, search, page):
+def sync_search(request, srch, page):
+    return search(request, srch, page, 'strongs/searchNew.html');
+
+
+def async_search(request, srch, page):
+    return search(request, srch, page, 'strongs/searchAsync.html');
+
+
+def search(request, search, page, templateName):
     search = search.strip()
     searches = search.split(' ')
     searches = map(lambda s: s.decode('UTF8').replace('"', '').replace("'", ''), shlex.split(search.encode('utf8')))
-    tag_search = reduce(operator.and_, (Q(versText__contains=" " + x) for x in searches))
+    tag_search = reduce(operator.and_, (Q(versText__contains=" " + x) | Q(versText__contains=">" + x) for x in searches))
 
     # Try to search for this word
     search1 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[0]))
@@ -263,7 +296,7 @@ def search(request, search, page):
         count = max(search1.count(), search2.count(), search3.count(), search4.count())
         pagecnt = max(1, int(math.ceil(count * 1.0 / num)))
         # return render(request, 'strongs/search.html', {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': search, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses': izip_longest(search1[idx1:idx2], search2[idx1:idx2], search3[idx1:idx2], search4[idx1:idx2])})
-        return render(request, 'strongs/searchNew.html', {'count1': search1.count(), 'count2': search2.count(), 'count3': search3.count(), 'count4': search4.count(), 'maxcount': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': search, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses1': search1[idx1:idx2], 'verses2': search2[idx1:idx2], 'verses3': search3[idx1:idx2], 'verses4': search4[idx1:idx2]})
+        return render(request, templateName, {'count1': search1.count(), 'count2': search2.count(), 'count3': search3.count(), 'count4': search4.count(), 'maxcount': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': search, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses1': search1[idx1:idx2], 'verses2': search2[idx1:idx2], 'verses3': search3[idx1:idx2], 'verses4': search4[idx1:idx2]})
         # return HttpResponse('Found ' + str(search1.count()) + ' verses')
     else:
         # return HttpResponse('No book found for %s' % search)

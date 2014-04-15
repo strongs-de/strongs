@@ -32,10 +32,10 @@ def correctverstext(value):
 	s = s.replace('<ns0:catchWord>', '***')
 	s = s.replace('</ns0:catchWord>', '+++')
 	# Replace doubled hints
-	s = re.sub("<ns0:note xmlns:ns0=['\"]http://www.bibletechnologies.net/2003/OSIS/namespace['\"] n=['\"]\\[([^'\"]*)\\]['\"]>([^<]*)</ns0:note><ns0:note xmlns:ns0=['\"]http://www.bibletechnologies.net/2003/OSIS/namespace['\"] n=['\"]\\[([^'\"]*)\\]['\"]>([^<]*)</ns0:note>", "<sup><abbr rel='tooltip' title='\\2'>\\1</abbr></sup> ", s)
+	s = re.sub("<ns0:note xmlns:ns0=['\"]http://www.bibletechnologies.net/2003/OSIS/namespace['\"] n=['\"]\\[([^'\"]*)\\]['\"]>([^<]*)</ns0:note><ns0:note xmlns:ns0=['\"]http://www.bibletechnologies.net/2003/OSIS/namespace['\"] n=['\"]\\[([^'\"]*)\\]['\"]>([^<]*)</ns0:note>", "<sup><abbr class='small' rel='tooltip' title='\\2'>\\1</abbr></sup> ", s)
 	# Replace single hints
 	#           <ns0:note xmlns:ns0="    http://www.bibletechnologies.net/2003/OSIS/namespace"     n="[k]">
-	s = re.sub("<ns0:note xmlns:ns0=['\"]http://www.bibletechnologies.net/2003/OSIS/namespace['\"] n=['\"]\\[([^'\"]*)\\]['\"]>([^<]*)</ns0:note>", "<sup><abbr rel='tooltip' title='\\2'>\\1</abbr></sup> ", s)
+	s = re.sub("<ns0:note xmlns:ns0=['\"]http://www.bibletechnologies.net/2003/OSIS/namespace['\"] n=['\"]\\[([^'\"]*)\\]['\"]>([^<]*)</ns0:note>", "<sup><abbr class='small' rel='tooltip' title='\\2'>\\1</abbr></sup> ", s)
 	s = s.replace('***', '<b>')
 	s = s.replace('+++', '</b>')
 
