@@ -1,0 +1,49 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/login.css" />
+		<!--[if lte IE 7]><style>.main{display:none;} .support-note .note-ie{display:block;}</style><![endif]-->
+		<style>
+			@import url(http://fonts.googleapis.com/css?family=Raleway:400,700);
+			body {
+				background: #7f9b4e url("{{ STATIC_URL }}images/bg-login.jpeg") no-repeat center top;
+				-webkit-background-size: cover;
+				-moz-background-size: cover;
+				background-size: cover;
+			}
+			.container > header h1,
+			.container > header h2 {
+				color: #fff;
+				text-shadow: 0 1px 1px rgba(0,0,0,0.7);
+			}
+		</style>
+    </head>
+    <body>
+        <nav>
+            <a href="/"><img src="{{ STATIC_URL }}images/logo.png"></a></a>
+            <p>
+                <a href="/">Home</a>
+                <a href="/logout/">Logout</a>
+            </p>
+        </nav>
+
+        <form class="form-4" method="POST" action="">
+            {% csrf_token %}
+            <h1>Dein Konto</h1>
+
+            {% if error %}
+            <h4 class="error">Fehler: {{ error }}</h4><br/>
+            {% endif %}
+
+            <label for="id_first_name">Vorname:</label><input placeholder="Vorname" id="id_first_name" maxlength="75" name="first_name" type="text" value="{{ fn }}" />
+            <label for="id_last_name">Nachname:</label><input placeholder="Nachname" id="id_last_name" maxlength="75" name="last_name" type="text" value="{{ ln }}" />
+            <label for="id_email">E-Mail-Adresse:</label><input placeholder="E-Mail-Adresse" id="id_email" maxlength="75" name="email" type="email" value="{{ email }}" />
+            <label for="id_username">Benutzername:</label><input placeholder="Benutzername" id="id_username" maxlength="30" name="username" type="text" value="{{ un }}" />
+            <br>
+            <span class="helptext">Hinweis: Passwort nur dann eingeben, wenn es geändert werden soll.</span><br/><br/>
+            <label for="id_password">Passwort:</label><input placeholder="Passwort" id="id_password" maxlength="30" name="password" type="password" />
+            <label for="id_password">Passwort wiederholen:</label><input placeholder="Passwort wiederholen" id="id_password2" maxlength="30" name="password2" type="password" />
+
+            <input type="submit" value="Änderungen speichern">
+        </form>
+    </body>
+</html>

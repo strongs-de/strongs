@@ -17,30 +17,40 @@
 			}
 		</style>
     </head>
-<body>
+    <body>
+        <nav>
+            <a href="/"><img src="{{ STATIC_URL }}images/logo.png"></a></a>
+            <p>
+                <a href="/">Home</a>
+                <a href="/register/">Registrierung</a>
+            </p>
+        </nav>
 
-{% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %}
+        <form class="form-4" method="post" action="">
+            {% csrf_token %}
+            <h1>Login</h1>
+            {% if form.errors %}
+            <h4 class="error">Der Benutzername und das Passwort stimmen nicht überein!</h4><br/>
+            {% endif %}
+            <p>
+                {{ form.username.label_tag }}
+                <input id="id_username" maxlength="254" name="username" type="text" placeholder="Benutzername">
+            </p>
+            <p>
+                {{ form.password.label_tag }}
+                <input id="id_password" name="password" type="password" placeholder="Passwort">
+            </p>
 
+            <p>
+                <input type="submit" name="submit" value="Login">
+            </p>
+            <input type="hidden" name="next" value="/" />
+            <br/>
+            <p>
+                Zur <a href="/accounts/register/">Registrierung</a>.
+            </p>
+            <input type="hidden" name="next" value="{{ next }}" />
+        </form>​
 
-<form class="form-4" method="post" action="{% url 'django.contrib.auth.views.login' %}">
-    {% csrf_token %}
-    <h1>Login</h1>
-    <p>
-        {{ form.username.label_tag }}
-        <input id="id_username" maxlength="254" name="username" type="text" placeholder="Benutzername">
-    </p>
-    <p>
-        {{ form.password.label_tag }}
-        <input id="id_password" name="password" type="password" placeholder="Passwort">
-    </p>
-
-    <p>
-        <input type="submit" name="submit" value="Login">
-    </p>
-    <input type="hidden" name="next" value="/" />
-</form>​
-
-{#{% endblock %}#}
-</body></html>
+    </body>
+</html>

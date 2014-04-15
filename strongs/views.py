@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render
-from django.http import HttpResponse
-from models import BibleBook, BibleTranslation, BibleVers, StrongNr, BibleText, BibleVersList, BibleVersNote
+from django.shortcuts import render, render_to_response
+from django.http import HttpResponse, HttpResponseRedirect
+from models import BibleBook, BibleTranslation, BibleVers, StrongNr, BibleText, BibleVersList, BibleVersNote, UserData
 from django.db.models import Q
 from initDb import init_bible_books, insert_bible_vers, init_strong_grammar, insert_osis_bibles
 import re
@@ -15,8 +15,10 @@ from grammar_parser import get_grammar_name
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext, Template
 from django.views.decorators.csrf import csrf_protect
-from forms import NoteForm
+from forms import NoteForm, RegistrationForm, MyAccountForm
 import math
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.views import login
 
 
 BIBLES_IN_VIEW = ['ELB1905STR', 'SCH2000', 'LUTH1912', u'NGÜ']
@@ -26,6 +28,61 @@ BIBLE_NAMES_IN_VIEW = ['Elberfelder 1905', 'Schlachter 2000', 'Luther 1912', u'N
 # Create your views here.
 def index(request):
     return bible(request, 'joh1')
+
+
+def register(request):
+    if request.user.is_authenticated():
+        return HttpResponseRedirect('/account/')
+    else:
+        if request.method == 'POST':
+            uf = RegistrationForm(request.POST, prefix='user')
+            # upf = RegistrationForm2(request.POST, prefix='userprofile')
+            if uf.is_valid():
+                if uf.cleaned_data['password'] == uf.cleaned_data['password2']:
+                    user = uf.save(commit=False)
+                    user.password = make_password(user.password)
+                    user.save()
+                    # userprofile = upf.save(commit=False)
+                    # userprofile.user = user
+                    # userprofile.save()
+                    return HttpResponseRedirect(request.POST['next'])
+                else:
+                    return render_to_response('strongs/register.html', {'error': 'Die beiden Passwörter stimmen nicht überein!'}, context_instance=RequestContext(request))
+        else:
+            uf = RegistrationForm(prefix='user')
+            # upf = RegistrationForm2(prefix='userprofile')
+        return render_to_response('strongs/register.html', None, context_instance=RequestContext(request))
+
+
+@login_required
+def my_account(request):
+    user = request.user
+    if request.method == 'POST':
+        form = MyAccountForm(request.POST)
+        if form.is_valid():
+            if request.POST['password'] == request.POST['password2']:
+                # user = User.objects.get(user=request.user)
+                if request.POST['username'] != '':
+                    user.username = request.POST['username']
+                if request.POST['password'] != '':
+                    user.set_password(request.POST['password']),
+                user.email = request.POST['email']
+                user.first_name = request.POST['first_name']
+                user.last_name = request.POST['last_name']
+                user.save()
+            else:
+                return render_to_response('strongs/account.html', {'error': 'Die beiden Passwörter stimmen nicht überein!'}, context_instance=RequestContext(request))
+    else:
+        form = MyAccountForm()
+
+    return render_to_response('strongs/account.html', {'form': form, 'fn': user.first_name, 'ln': user.last_name, 'email': user.email, 'un': user.username}, context_instance=RequestContext(request))
+
+
+def custom_login(request):
+    if request.user.is_authenticated():
+        return HttpResponseRedirect('/account/')
+    else:
+        return login(request)
 
 
 def find_translations(strong_nr, versText):

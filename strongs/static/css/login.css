@@ -21,14 +21,17 @@
 .form-4 {
     /* Size and position */
     width: 300px;
-    margin: 60px 400px 30px;
+    /*margin: 60px 400px 30px;*/
+    top: 150px;
+    left: 20%;
     padding: 10px;
     position: relative;
 
     /* Font styles */
     font-family: 'Raleway', 'Lato', Arial, sans-serif;
-    color: #fff;
-    text-shadow: 0 2px 1px rgba(0,0,0,0.6);
+    color: #000;
+    /*text-shadow: 0 2px 1px rgba(0,0,0,0.6);*/
+    background-color: rgba(255,255,255,.6);
 }
 
 h1 {
@@ -37,6 +40,7 @@ h1 {
 }
 
 input[type=text],
+input[type=email],
 input[type=password] {
     /* Size and position */
     width: 100%;
@@ -59,7 +63,7 @@ input[type=password] {
 
     /* Font styles */
     font-family: 'Raleway', 'Lato', Arial, sans-serif;
-    color: #fff;
+    color: #000;
     font-size: 13px;
 }
 
@@ -81,11 +85,13 @@ input:-ms-input-placeholder {
 }
 
 input[type=text]:hover,
+input[type=email]:hover,
 input[type=password]:hover {
     border-color: #333;
 }
 
 input[type=text]:focus,
+input[type=email]:focus,
 input[type=password]:focus,
 input[type=submit]:focus {
     box-shadow:
@@ -97,6 +103,7 @@ input[type=submit]:focus {
 
 /* Fallback */
 .no-boxshadow input[type=text]:focus,
+.no-boxshadow input[type=email]:focus,
 .no-boxshadow input[type=password]:focus {
     outline: 1px solid white;
 }
@@ -155,4 +162,48 @@ label:hover ~ input {
 
 .no-placeholder label {
     display: block;
+}
+
+.error {
+    color: #ce2200;
+}
+
+a {
+    color: rgb(72,167,112);
+    font-weight: bold;
+    text-decoration: none;
+}
+
+a:hover {
+    text-shadow: 1px 1px 1px rgba(72,167,112,0.3);
+}
+
+nav {
+    background-color: rgba(255,255,255,.8);
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 53px;
+    float: left;
+}
+
+nav > p {
+    margin-top: -53px;
+    padding-top: 17px;
+    margin-left: 200px;
+    height: 100%;
+}
+
+nav > p > a {
+    padding-right: 30px;
+}
+
+.vertical-center {
+    /*position: relative;*/
+    /*top: 10px;*/
+
+    /*height: 20px;*/
+    /*display: table-cell;*/
+    /*vertical-align: middle;*/
 }

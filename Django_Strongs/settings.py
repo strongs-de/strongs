@@ -103,3 +103,8 @@ STATICFILES_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
     ('', SITE_STATIC_ROOT),
 )
+
+# Other settings
+LOGIN_URL = '/login/'
+LOGOUT_URL = '/logout/'
+LOGIN_REDIRECT_URL = '/account/'

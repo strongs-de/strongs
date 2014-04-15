@@ -23,10 +23,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="baseTemplate2.html" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate2.html">
+      <file leaf-file-name="register.html" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/register.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="164" column="47" selection-start="7336" selection-end="7336" vertical-scroll-proportion="0.6799629" vertical-offset="1727" max-vertical-offset="2820">
+            <state line="24" column="39" selection-start="833" selection-end="833" vertical-scroll-proportion="-15.0" vertical-offset="0" max-vertical-offset="840">
               <folding />
             </state>
           </provider>
@@ -35,18 +35,58 @@
       <file leaf-file-name="views.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="267" column="18" selection-start="16920" selection-end="16927" vertical-scroll-proportion="0.0" vertical-offset="3021" max-vertical-offset="4110">
+            <state line="86" column="0" selection-start="3707" selection-end="3707" vertical-scroll-proportion="0.0" vertical-offset="525" max-vertical-offset="4965">
               <folding>
-                <element signature="e#24#59#0" expanded="true" />
+                <element signature="e#24#79#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="error.html" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/error.html">
+      <file leaf-file-name="urls.py" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/strongs/urls.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="16" column="14" selection-start="639" selection-end="639" vertical-scroll-proportion="-10.0" vertical-offset="0" max-vertical-offset="375">
+            <state line="5" column="39" selection-start="199" selection-end="199" vertical-scroll-proportion="0.06805807" vertical-offset="0" max-vertical-offset="1102">
+              <folding>
+                <element signature="e#0#42#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="settings.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Django_Strongs/settings.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="109" column="32" selection-start="2898" selection-end="2898" vertical-scroll-proportion="0.0" vertical-offset="593" max-vertical-offset="1725">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="account.html" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/account.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="19" column="10" selection-start="650" selection-end="871" vertical-scroll-proportion="-11.875" vertical-offset="0" max-vertical-offset="810">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="admin.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/strongs/admin.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="1" column="138" selection-start="171" selection-end="171" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="255">
+              <folding>
+                <element signature="e#0#32#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="login.css" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/strongs/static/css/login.css">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="33" column="43" selection-start="656" selection-end="656" vertical-scroll-proportion="0.0" vertical-offset="190" max-vertical-offset="3210">
               <folding />
             </state>
           </provider>
@@ -55,75 +95,7 @@
       <file leaf-file-name="error.css" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/static/css/error.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="14" selection-start="543" selection-end="543" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="555">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="anysearch.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strongs/static/js/anysearch.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="373" column="119" selection-start="21852" selection-end="21852" vertical-scroll-proportion="0.0" vertical-offset="5490" max-vertical-offset="6885">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="searchNew.html" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="12" selection-start="442" selection-end="442" vertical-scroll-proportion="8.125" vertical-offset="540" max-vertical-offset="2670">
-              <folding>
-                <marker date="1397503909000" expanded="true" signature="517:1169" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="551:1103" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="718:1055" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="794:969" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="1137:1154" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="1203:2088" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="1237:1789" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="1404:1741" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="1480:1655" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="1823:2073" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="2122:2774" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="2156:2708" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="2323:2660" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="2399:2574" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="2742:2759" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="2817:3734" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="2851:3403" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="3018:3355" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="3094:3269" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="3437:3719" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="3830:7344" placeholder="..." />
-                <marker date="1397503909000" expanded="true" signature="3864:6107" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="4053:6045" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="4103:6027" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="4235:4601" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="4277:4356" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="4383:4461" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="4488:4575" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="4665:4735" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="4779:4852" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="4895:6005" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="5132:5526" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="5178:5265" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="5294:5380" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="5409:5496" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="6157:7195" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="6226:6297" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="6490:6787" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="6652:6767" placeholder="{...}" />
-                <marker date="1397503909000" expanded="true" signature="6990:7181" placeholder="{...}" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="newDesign.css" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strongs/static/css/newDesign.css">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="48" column="11" selection-start="902" selection-end="917" vertical-scroll-proportion="0.0" vertical-offset="60" max-vertical-offset="4380">
+            <state line="15" column="1" selection-start="428" selection-end="459" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="555">
               <folding />
             </state>
           </provider>
@@ -132,26 +104,19 @@
       <file leaf-file-name="login.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/registration/login.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="15" column="54" selection-start="610" selection-end="610" vertical-scroll-proportion="-9.375" vertical-offset="0" max-vertical-offset="765">
+            <state line="24" column="50" selection-start="844" selection-end="844" vertical-scroll-proportion="-15.0" vertical-offset="0" max-vertical-offset="915">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="login.css" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strongs/static/css/login.css">
+      <file leaf-file-name="forms.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/strongs/forms.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="99" column="14" selection-start="2198" selection-end="2198" vertical-scroll-proportion="0.0" vertical-offset="1118" max-vertical-offset="2460">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="anysearch.css" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strongs/static/css/anysearch.css">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="28" column="14" selection-start="1320" selection-end="1320" vertical-scroll-proportion="0.0" vertical-offset="600" max-vertical-offset="2145">
-              <folding />
+            <state line="21" column="20" selection-start="535" selection-end="535" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="465">
+              <folding>
+                <element signature="e#0#24#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -166,17 +131,13 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/Django_Strongs/urls.py" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/strongs.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/index.html" />
         <option value="$PROJECT_DIR$/strongs/static/js/sidebarEffects.js" />
         <option value="$PROJECT_DIR$/strongs/static/css/bible.css" />
-        <option value="$PROJECT_DIR$/strongs/urls.py" />
         <option value="$PROJECT_DIR$/strongs/templatetags/strongs_extras.py" />
         <option value="$PROJECT_DIR$/strongs/models.py" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/strongNr.html" />
-        <option value="$PROJECT_DIR$/Django_Strongs/settings.py" />
-        <option value="$PROJECT_DIR$/strongs/admin.py" />
         <option value="$PROJECT_DIR$/strongs/initDb.py" />
         <option value="$PROJECT_DIR$/bibles/osis.schlachter2000.v1.withoutnotes.xml" />
         <option value="$PROJECT_DIR$/strongs/static/js/autocomplete_test.html" />
@@ -193,13 +154,20 @@
         <option value="$PROJECT_DIR$/strongs/static/js/anysearch.js" />
         <option value="$PROJECT_DIR$/strongs/static/css/anysearch.css" />
         <option value="$PROJECT_DIR$/strongs/static/css/newDesign.css" />
-        <option value="$PROJECT_DIR$/strongs/templates/registration/login.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/searchNew.html" />
-        <option value="$PROJECT_DIR$/strongs/static/css/login.css" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/error.html" />
         <option value="$PROJECT_DIR$/strongs/static/css/error.css" />
-        <option value="$PROJECT_DIR$/strongs/views.py" />
         <option value="$PROJECT_DIR$/strongs/templates/baseTemplate2.html" />
+        <option value="$PROJECT_DIR$/Django_Strongs/urls.py" />
+        <option value="$PROJECT_DIR$/strongs/admin.py" />
+        <option value="$PROJECT_DIR$/Django_Strongs/settings.py" />
+        <option value="$PROJECT_DIR$/strongs/forms.py" />
+        <option value="$PROJECT_DIR$/strongs/templates/strongs/account.html" />
+        <option value="$PROJECT_DIR$/strongs/static/css/login.css" />
+        <option value="$PROJECT_DIR$/strongs/templates/registration/login.html" />
+        <option value="$PROJECT_DIR$/strongs/templates/strongs/register.html" />
+        <option value="$PROJECT_DIR$/strongs/views.py" />
+        <option value="$PROJECT_DIR$/strongs/urls.py" />
       </list>
     </option>
   </component>
@@ -303,6 +271,46 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Django_Strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Django_Strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="static" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Django_Strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Django_Strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="strongs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="static" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="css" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -642,7 +650,7 @@
           <option name="timeStamp" value="18" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="26" />
+      <option name="time" value="33" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -685,7 +693,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="7" column="29" selection-start="268" selection-end="268" vertical-scroll-proportion="0.0" vertical-offset="119" max-vertical-offset="221">
           <folding>
-            <element signature="e#0#32#0" expanded="false" />
+            <element signature="e#0#32#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -739,33 +747,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="49" selection-start="189" selection-end="189" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="210">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templatetags/strongs_extras.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="12" column="27" selection-start="213" selection-end="213" vertical-scroll-proportion="0.0" vertical-offset="180" max-vertical-offset="720">
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Django_Strongs/settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="59" column="16" selection-start="1601" selection-end="1601" vertical-scroll-proportion="0.6230769" vertical-offset="480" max-vertical-offset="1650">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/admin.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="30" selection-start="473" selection-end="473" vertical-scroll-proportion="0.14972776" vertical-offset="0" max-vertical-offset="1102">
-          <folding>
-            <element signature="e#0#32#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -821,13 +806,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="44" column="0" selection-start="1855" selection-end="1855" vertical-scroll-proportion="0.3323077" vertical-offset="429" max-vertical-offset="1395">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///Library/Python/2.7/site-packages/django/utils/autoreload.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="127" column="0" selection-start="4621" selection-end="4621" vertical-scroll-proportion="0.3323077" vertical-offset="1689" max-vertical-offset="2820">
@@ -877,96 +855,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/static/css/anysearch.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="14" selection-start="1320" selection-end="1320" vertical-scroll-proportion="0.0" vertical-offset="30" max-vertical-offset="2145">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/registration/login.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="15" column="54" selection-start="610" selection-end="610" vertical-scroll-proportion="-9.375" vertical-offset="0" max-vertical-offset="765">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/static/css/login.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="99" column="14" selection-start="2198" selection-end="2198" vertical-scroll-proportion="0.0" vertical-offset="1118" max-vertical-offset="2460">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/static/css/newDesign.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="48" column="11" selection-start="902" selection-end="917" vertical-scroll-proportion="0.0" vertical-offset="60" max-vertical-offset="4380">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="12" selection-start="442" selection-end="442" vertical-scroll-proportion="8.125" vertical-offset="540" max-vertical-offset="2670">
-          <folding>
-            <marker date="1397503909000" expanded="true" signature="517:1169" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="551:1103" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="718:1055" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="794:969" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="1137:1154" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="1203:2088" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="1237:1789" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="1404:1741" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="1480:1655" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="1823:2073" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="2122:2774" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="2156:2708" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="2323:2660" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="2399:2574" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="2742:2759" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="2817:3734" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="2851:3403" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="3018:3355" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="3094:3269" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="3437:3719" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="3830:7344" placeholder="..." />
-            <marker date="1397503909000" expanded="true" signature="3864:6107" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="4053:6045" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="4103:6027" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="4235:4601" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="4277:4356" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="4383:4461" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="4488:4575" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="4665:4735" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="4779:4852" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="4895:6005" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="5132:5526" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="5178:5265" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="5294:5380" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="5409:5496" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="6157:7195" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="6226:6297" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="6490:6787" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="6652:6767" placeholder="{...}" />
-            <marker date="1397503909000" expanded="true" signature="6990:7181" placeholder="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/error.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="16" column="14" selection-start="639" selection-end="639" vertical-scroll-proportion="-10.0" vertical-offset="0" max-vertical-offset="375">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/static/css/error.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="14" selection-start="543" selection-end="543" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="555">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/strongNr.html">
       <provider selected="true" editor-type-id="text-editor">
         <state line="25" column="6" selection-start="613" selection-end="613" vertical-scroll-proportion="0.34786642" vertical-offset="0" max-vertical-offset="1078">
@@ -974,11 +862,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/views.py">
+    <entry file="file://$PROJECT_DIR$/Django_Strongs/urls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="267" column="18" selection-start="16920" selection-end="16927" vertical-scroll-proportion="0.0" vertical-offset="3021" max-vertical-offset="4110">
+        <state line="2" column="0" selection-start="85" selection-end="85" vertical-scroll-proportion="0.027223231" vertical-offset="0" max-vertical-offset="1102">
           <folding>
-            <element signature="e#24#59#0" expanded="true" />
+            <element signature="e#0#51#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -987,6 +875,197 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="164" column="47" selection-start="7336" selection-end="7336" vertical-scroll-proportion="0.6799629" vertical-offset="1727" max-vertical-offset="2820">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/error.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="16" column="14" selection-start="639" selection-end="639" vertical-scroll-proportion="0.22263451" vertical-offset="0" max-vertical-offset="1078">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="23" column="12" selection-start="442" selection-end="442" vertical-scroll-proportion="-0.18089055" vertical-offset="540" max-vertical-offset="2670">
+          <folding>
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+            <marker date="1397503909000" expanded="true" signature="-1:-1" placeholder="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/static/css/newDesign.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="48" column="11" selection-start="902" selection-end="917" vertical-scroll-proportion="0.59891105" vertical-offset="60" max-vertical-offset="4380">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/static/css/anysearch.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="28" column="14" selection-start="1320" selection-end="1320" vertical-scroll-proportion="-0.16333938" vertical-offset="600" max-vertical-offset="2145">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/static/css/error.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="15" column="1" selection-start="428" selection-end="459" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="555">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/admin.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1" column="138" selection-start="171" selection-end="171" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="255">
+          <folding>
+            <element signature="e#0#32#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Library/Python/2.7/site-packages/django/contrib/auth/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="360" column="6" selection-start="12682" selection-end="12682" vertical-scroll-proportion="0.08802178" vertical-offset="5303" max-vertical-offset="7995">
+          <folding>
+            <element signature="e#0#39#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Library/Python/2.7/site-packages/django/forms/fields.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="207" column="32" selection-start="8167" selection-end="8167" vertical-scroll-proportion="0.6323077" vertical-offset="2334" max-vertical-offset="16875">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Library/Python/2.7/site-packages/django/core/handlers/base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="118" column="51" selection-start="4951" selection-end="4951" vertical-scroll-proportion="0.3323077" vertical-offset="1329" max-vertical-offset="4215">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="40" selection-start="93" selection-end="93" vertical-scroll-proportion="0.013611616" vertical-offset="15" max-vertical-offset="1410">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Library/Python/2.7/site-packages/django/contrib/auth/decorators.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="21" column="0" selection-start="874" selection-end="874" vertical-scroll-proportion="0.19056262" vertical-offset="0" max-vertical-offset="1102">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Django_Strongs/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="109" column="32" selection-start="2898" selection-end="2898" vertical-scroll-proportion="0.0" vertical-offset="593" max-vertical-offset="1725">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/forms.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="21" column="20" selection-start="535" selection-end="535" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="465">
+          <folding>
+            <element signature="e#0#24#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$APPLICATION_HOME_DIR$/lib/pycharm.jar!/resources/html5-schema/web-forms.rnc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="572" column="23" selection-start="13047" selection-end="13047" vertical-scroll-proportion="0.44615385" vertical-offset="8290" max-vertical-offset="8940">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/static/css/login.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="33" column="43" selection-start="656" selection-end="656" vertical-scroll-proportion="0.0" vertical-offset="190" max-vertical-offset="3210">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/account.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="10" selection-start="650" selection-end="871" vertical-scroll-proportion="-11.875" vertical-offset="0" max-vertical-offset="810">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/registration/login.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="24" column="50" selection-start="844" selection-end="844" vertical-scroll-proportion="-15.0" vertical-offset="0" max-vertical-offset="915">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/register.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="24" column="39" selection-start="833" selection-end="833" vertical-scroll-proportion="-15.0" vertical-offset="0" max-vertical-offset="840">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="86" column="0" selection-start="3707" selection-end="3707" vertical-scroll-proportion="0.0" vertical-offset="525" max-vertical-offset="4965">
+          <folding>
+            <element signature="e#24#79#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="39" selection-start="199" selection-end="199" vertical-scroll-proportion="0.06805807" vertical-offset="0" max-vertical-offset="1102">
+          <folding>
+            <element signature="e#0#42#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
