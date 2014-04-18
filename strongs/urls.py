@@ -25,11 +25,11 @@ urlpatterns = patterns('',
     url(r'^async/(?P<strong>[GHgh]\d+)/(?P<page>\d+)/$', views.async_search_strong, name='async_search_strongs'),
 
     # Search for sidebar content
-    url(r'^strong/(?P<strong_id>\d+)/(?P<vers>[a-zA-Z0-9_\.]+)/$', views.strongs, name='strongs'),
+    url(r'^strong/(?P<strong_id>\d+)/(?P<vers>[a-zA-Z0-9_\.]+)/(?P<word>[^/]+)/$', views.strongs, name='strongs'),
 
     # Search for string
-    url(r'^(?P<search>.+)/(?P<page>\d+)/$', views.sync_search, name='sync_search'),
-    url(r'^async/(?P<search>.+)/(?P<page>\d+)/$', views.async_search, name='async_search'),
+    url(r'^(?P<srch>.+)/(?P<page>\d+)/$', views.sync_search, name='sync_search'),
+    url(r'^async/(?P<srch>.+)/(?P<page>\d+)/$', views.async_search, name='async_search'),
 
     # Search for bible text
     url(r'^async/(?P<bible_book>.+)/$', views.async_bible, name='async_bible'),

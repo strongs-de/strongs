@@ -19,7 +19,7 @@ Hiob,Hi,Ijob,Job
 Psalmen,Ps
 Sprüche,Spr
 Prediger,Pred,Kohelet,Koh
-Hoheslied,Hld,Hohes Lied
+Hoheslied,Hld,Hohes Lied,Hohelied,Hoh
 Jesaja,Jes
 Jeremia,Jer
 Klagelieder,Klgl,Klag

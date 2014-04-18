@@ -104,7 +104,7 @@
                   var adder = forwards ? 1 : -1;
 
                   // search for hebrew or greek strong
-                  var regex = new RegExp("([GHgh])([0-9]{1,4})/?(\\w)?/", "g")
+                  var regex = new RegExp("/([GHgh])([0-9]{1,4})/?(\\w)?/", "g")
                   var result = regex.exec(url);
                   if(result != null) {
                     var gh = result[1];
@@ -129,7 +129,7 @@
                   }
 
                   // search for search text with page number
-                  regex = new RegExp("(.*)/([^/]*)/(\\w)/(.*)", "g");
+                  regex = new RegExp("(.*)/([^/]*)/([\\d]+)/(.*)", "g");
                   result = regex.exec(url);
                   if(result != null) {
                     // ULR is search string with page number specified
@@ -179,6 +179,25 @@
                     $("#searchId").focus();
                 };
 
+                // find all empty verses and add there vers-number to the previous vers (e.g. vers 16-17)
+                var lastValidVers = 0;
+                var lastEmptyVers = 0;
+                var versDiv = undefined;
+                $(".verse").each(function() {
+                    if($(this).clone().children().remove().end().text().trim() === "") {
+                        lastEmptyVers = parseInt($(this).find("span > a").text().trim());
+                        $(this).find("span").remove();
+                    } else {
+                        if(lastEmptyVers > 0) {
+                            // add this vers to the upper div
+                            versDiv.find("span > a").text(lastValidVers + "-" + lastEmptyVers);
+                            lastEmptyVers = 0;
+                            versDiv = undefined;
+                        }
+                        lastValidVers = parseInt($(this).find("span").text().trim());
+                        versDiv = $(this);
+                    }
+                });
             });
         </script>
         <script src="{{ STATIC_URL }}js/autocomplete.js"></script>

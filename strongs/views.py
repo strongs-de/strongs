@@ -98,6 +98,7 @@ def find_translations(strong_nr, versText):
         idx2 = versText.lower().find('</gr>', idx)
         if idx2 > 0:
             f = versText[idx + len(search):idx2]
+            f = f.replace('"', '').replace("'", '')
             translations.append(f)
             idx = versText.find(search, idx2)
         else:
@@ -105,9 +106,15 @@ def find_translations(strong_nr, versText):
     return translations
 
 
-def strongs(request, strong_id, vers):
+def strongs(request, strong_id, vers, word):
+    '''
+    Will be called if a strong number was clicked. This returns only a
+    part of the HTML page which will be displayed in the info sidebar.
+    '''
     vers = vers.replace('_', ',')
-    grammar = ''
+    grammar = None
+    greek = None
+    pronounciation = None
     regex = re.compile("([0-9]?.? ?[a-zA-Z]+)\s?([0-9]+)?,?([0-9]+)?")
     if regex is not None:
         v = regex.search(vers)
@@ -123,10 +130,12 @@ def strongs(request, strong_id, vers):
                 if search1.count() > 0:
                     # bvers = BibleVers.objects.filter(bookNr=book, chapterNr=v.group(2), versNr=v.group(3))
                     if book[0].nr >= 40:
-                        search2 = StrongNr.objects.filter(book=book, chapterNr=v.group(2), versNr=v.group(3), strongNr=strong_id)
+                        search2 = StrongNr.objects.filter(vers__bookNr=book[0], vers__chapterNr=v.group(2), vers__versNr=v.group(3), strongNr=strong_id)
                         if search2.count() > 0:
                             vers = book[0].name + ' ' + v.group(2) + ',' + v.group(3)
                             grammar = get_grammar_name(search2[0].grammar)
+                            greek = search2[0].greek
+                            pronounciation = search2[0].pronounciation
 
 
                     translations = []
@@ -136,7 +145,7 @@ def strongs(request, strong_id, vers):
                     translations = Counter(translations)
                     translations = sorted(translations.iteritems(), key=operator.itemgetter(1), reverse=True)
                     appender = 'H' if book[0].nr < 40 else 'G'
-                    return render(request, 'strongs/strongNr.html', {'strong': appender + str(strong_id), 'grammar': grammar, 'vers': vers, 'occurences': occ, 'count': search1.count(), 'translations': translations})
+                    return render(request, 'strongs/strongNr.html', {'pronounciation': pronounciation, 'word': word, 'strongnr': appender + strong_id, 'greek':greek, 'strong': appender + str(strong_id), 'grammar': grammar, 'vers': vers, 'occurences': occ, 'count': search1.count(), 'translations': translations})
     # return HttpResponse('No verses found for strong nr ' + str(strong_id))
     return render(request, 'strongs/error.html', {'message': u'Es wurden keine Verse für die Strong-Nummer ' + str(strong_id) + ' gefunden!', 'solution':'Evtl. existiert diese Strong Nummer nicht.'})
 
@@ -195,7 +204,7 @@ def bible(request, bible_book, templateName):
                     verses2 = BibleText.objects.filter(translationIdentifier=tr2, vers__bookNr=book, vers__chapterNr=chapter)
                     verses3 = BibleText.objects.filter(translationIdentifier=tr3, vers__bookNr=book, vers__chapterNr=chapter)
                     verses4 = BibleText.objects.filter(translationIdentifier=tr4, vers__bookNr=book, vers__chapterNr=chapter)
-                    if verses1.count() > 0 and verses2.count() > 0 and verses3.count() > 0:
+                    if verses1.count() > 0 or verses2.count() > 0 or verses3.count() > 0 or verses4.count() > 0:
                         # return render(request, 'strongs/bible.html', {'vers': s.group(3), 'search': book[0].name + ' ' + str(chapter), 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses': izip_longest(verses1, verses2, verses3, verses4)})
                         srch = book[0].name + ' ' + str(chapter)
                         if vers != None:
@@ -315,9 +324,9 @@ def element_to_string(element):
 def initDb(request):
     s = ''
     s += init_bible_books()
-    # s += insert_osis_bibles()
-    # s += insert_bible_vers()
-    # s += init_strong_grammar()
+    s += insert_osis_bibles()
+    s += insert_bible_vers()
+    s += init_strong_grammar()
     return HttpResponse(s)
 
 

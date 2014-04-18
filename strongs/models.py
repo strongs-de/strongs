@@ -53,10 +53,13 @@ class StrongNr(models.Model):
     '''
     strongNr = models.IntegerField(db_index=True)
     translationIdentifier = models.ForeignKey("BibleTranslation")
-    book = models.ForeignKey("BibleBook")
-    versNr = models.IntegerField()
-    chapterNr = models.IntegerField()
+    vers = models.ForeignKey("BibleVers")
+    # book = models.ForeignKey("BibleBook")
+    # versNr = models.IntegerField()
+    # chapterNr = models.IntegerField()
     grammar = models.CharField(max_length=20)
+    greek = models.CharField(max_length=1024)
+    pronounciation = models.CharField(max_length=1024)
 
     def __unicode__(self):
         return str(self.strongNr) + ' = ' + self.grammar + ' in ' + self.book.__str__() + ' ' + str(self.chapterNr) + ',' + str(self.versNr)

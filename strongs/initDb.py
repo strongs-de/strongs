@@ -18,7 +18,7 @@ def element_to_string(element):
 
 
 def insert_osis_bibles():
-    BOOKS = ['Gen', 'Exod', 'Lev', 'Num', 'Deut', 'Josh', 'Judg', 'Ruth', '1Sam', '2Sam', '1Kgs', '2Kgs', '1Chr', '2Chr', 'Ezra', 'Neh', 'Esth', 'Job', 'Ps', 'Prov', 'Eccl', 'Song', 'Klgl', 'Isa', 'Jer', 'Ezek', 'Dan', 'Hos', 'Joel', 'Amos', 'Obad', 'Jonah', 'Mic', 'Nah', 'Hab', 'Zeph', 'Hag', 'Zech', 'Mal', 'Matt', 'Mark', 'Luke', 'John', 'Acts', 'Rom', '1Cor', '2Cor', 'Gal', 'Eph', 'Phil', 'Col', '1Thess', '2Thess', '1Tim', '2Tim', 'Titus', 'Phlm', 'Heb', 'Jas', '1Pet', '2Pet', '1John', '2John', '3John', 'Jude', 'Rev']
+    BOOKS = ['Gen', 'Exod', 'Lev', 'Num', 'Deut', 'Josh', 'Judg', 'Ruth', '1Sam', '2Sam', '1Kgs', '2Kgs', '1Chr', '2Chr', 'Ezra', 'Neh', 'Esth', 'Job', 'Ps', 'Prov', 'Eccl', 'Song', 'Isa', 'Jer', 'Lam', 'Ezek', 'Dan', 'Hos', 'Joel', 'Amos', 'Obad', 'Jonah', 'Mic', 'Nah', 'Hab', 'Zeph', 'Hag', 'Zech', 'Mal', 'Matt', 'Mark', 'Luke', 'John', 'Acts', 'Rom', '1Cor', '2Cor', 'Gal', 'Eph', 'Phil', 'Col', '1Thess', '2Thess', '1Tim', '2Tim', 'Titus', 'Phlm', 'Heb', 'Jas', '1Pet', '2Pet', '1John', '2John', '3John', 'Jude', 'Rev']
     s = ''
     FILES = ['./bibles/osis.NGU.xml', './bibles/osis.psalmenNGU.xml', './bibles/osis.schlachter2000.v1.withoutnotes.xml']
     IDENTIFIER = [u'NGÜ', u'NGÜ', 'SCH2000']
@@ -27,11 +27,11 @@ def insert_osis_bibles():
     NEEDS_CHAPTERS = [False, False, True]
     lists = izip_longest(FILES, IDENTIFIER, LANGS, TITLES, NEEDS_CHAPTERS)
     for FILE, identifier, lang, title, needs_chapter in lists:
-        FILE = './bibles/osis.schlachter2000.v1.withoutnotes.xml'
-        identifier = 'SCH2000'
-        lang = 'GER'
-        title = 'Schlachter 2000'
-        needs_chapter = True
+        # FILE = './bibles/osis.schlachter2000.v1.withoutnotes.xml'
+        # identifier = 'SCH2000'
+        # lang = 'GER'
+        # title = 'Schlachter 2000'
+        # needs_chapter = True
 
         tree = ElementTree.parse(FILE)
         root = tree.getroot()
@@ -97,6 +97,16 @@ def __insert(translation, book, chapter, vers, text):
             @chapter and @vers are integers
             @text is a string
     '''
+
+
+    # vnumber can contain multiple verses. In NGUE it is seperated by a 8209 (e.g. 16-17 is defined
+    # as 16820917. So we have to check if this is the case, then separate the verse numbers, insert the
+    # first one and every following as an empty verse.
+    numverses = 1
+    if str(vers).__contains__('8209'):
+        vers, lastvers = int(str(vers).split('8209')[0]), int(str(vers).split('8209')[1])
+        numverses = lastvers - vers + 1
+
     # Does this vers already exist?
     v = BibleVers.objects.filter(bookNr=book, chapterNr=chapter, versNr=vers)
     if v.count() <= 0:
@@ -110,6 +120,10 @@ def __insert(translation, book, chapter, vers, text):
     if t.count() <= 0:
         t = BibleText(vers=v, translationIdentifier=translation, versText=text)
         t.save()
+
+        if numverses > 1:
+            for i in range(1, numverses):
+                __insert(translation, book, chapter, vers+i, '')
 
 
 def insert_bible_vers():
@@ -237,11 +251,13 @@ def insert_bible_vers():
 def init_strong_grammar():
     greekStrongVerses = BibleText.objects.filter(versText__icontains='<gr rmac=', translationIdentifier=BibleTranslation.objects.filter(identifier='GNTTR'))
     s = 'initStrongGrammar: ' + str(greekStrongVerses.count()) + ' verses found!'
+    sgreek = ElementTree.parse("./strongsgreek.xml").getroot()
+    entries = sgreek.findall(".//entries/entry")
     for vers in greekStrongVerses:
         # get the vers in another translation
         # trWord = BibleTranslation.objects.filter(identifier='ELB1905STR')
         # trVers = BibleVers.objects.filter(versNr=vers.versNr, chapterNr=vers.chapterNr, bookNr=vers.bookNr, translationIdentifier=trWord)
-        regex = re.compile("^.*rmac=\"(.*)\" str=\"(.*)\"", re.MULTILINE)
+        regex = re.compile("^.*rmac=\"([^\"]*)\" str=\"([^\"]*)\">([^<]*)<", re.MULTILINE)
         if regex is not None:
             found = regex.findall(vers.versText)
             for one in found:
@@ -255,8 +271,15 @@ def init_strong_grammar():
                         # word = ' oder '.join(found2)
                     # elif len(found2) > 0:
                         # word = found2[0]
-                strong = StrongNr(strongNr=int(one[1]), book=vers.vers.bookNr, versNr=vers.vers.versNr, chapterNr=vers.vers.chapterNr, grammar=one[0], translationIdentifier=vers.translationIdentifier)
-                strong.save()
+                bvers = BibleVers.objects.filter(bookNr=vers.vers.bookNr, versNr=vers.vers.versNr, chapterNr=vers.vers.chapterNr)
+                if bvers.count() > 0:
+                    # search for pronounciation in strongsgreek.xml
+                    for onegreek in entries:
+                        if int(onegreek.get("strongs")) == int(one[1]):
+                            translit = onegreek.find("./greek").get("translit")
+                            break
+                    strong = StrongNr(pronounciation=translit, strongNr=int(one[1]), grammar=one[0], translationIdentifier=vers.translationIdentifier, greek=one[2], vers=bvers[0])
+                    strong.save()
     return s
 
 
