@@ -19,13 +19,13 @@ urlpatterns = patterns('',
     url(r'^note/(?P<booknr>\d+)/(?P<chapternr>\d+)/(?P<versnr>\d+)/$', views.note, name='note'),
 
     # Strong search
-    url(r'^(?P<strong>[GHgh]\d+)/$', views.sync_search_strong, name='sync_search_strongs'),
-    url(r'^(?P<strong>[GHgh]\d+)/(?P<page>\d+)/$', views.sync_search_strong, name='sync_search_strongs'),
-    url(r'^async/(?P<strong>[GHgh]\d+)/$', views.async_search_strong, name='async_search_strongs'),
-    url(r'^async/(?P<strong>[GHgh]\d+)/(?P<page>\d+)/$', views.async_search_strong, name='async_search_strongs'),
+    url(r'^(?P<strong>[\d\-HGhg]+)/$', views.sync_search_strong, name='sync_search_strongs'),
+    url(r'^(?P<strong>[\d\-HGhg]+)/(?P<page>\d+)/$', views.sync_search_strong, name='sync_search_strongs'),
+    url(r'^async/(?P<strong>[\d\-HGhg]+)/$', views.async_search_strong, name='async_search_strongs'),
+    url(r'^async/(?P<strong>[\d\-HGhg]+)/(?P<page>\d+)/$', views.async_search_strong, name='async_search_strongs'),
 
     # Search for sidebar content
-    url(r'^strong/(?P<strong_id>\d+)/(?P<vers>[a-zA-Z0-9_\.]+)/(?P<word>[^/]+)/$', views.strongs, name='strongs'),
+    url(r'^strong/(?P<strong_id>[\d\-HGhg]+)/(?P<vers>[a-zA-Z0-9_\.]+)/(?P<word>[^/]+)/$', views.strongs, name='strongs'),
 
     # Search for string
     url(r'^(?P<srch>.+)/(?P<page>\d+)/$', views.sync_search, name='sync_search'),

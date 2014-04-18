@@ -235,7 +235,7 @@ def async_search_strong(request, strong, page='1'):
 
 
 def search_strong(request, strong, templateName, page='1'):
-    nr = int(strong[1:])
+    nr = strong[1:]
 
     search = "<gr str=\"" + str(nr) + "\""
     heb = False
