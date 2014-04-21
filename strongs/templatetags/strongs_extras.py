@@ -25,7 +25,7 @@ def correctverstext(value):
     # s = re.sub("<ns0:note xmlns:ns0=['\"]http://www.bibletechnologies.net/2003/OSIS/namespace['\"] n=['\"]\\[([^'\"]*)\\]['\"]>([^<]*)</ns0:note>", "<sup><abbr class='small' rel='tooltip' title='\\2'>\\1</abbr></sup> ", s)
     s = re.sub("<ns0:note xmlns:ns0=['\"]http://www.bibletechnologies.net/2003/OSIS/namespace['\"] n=['\"]\\[([^'\"]*)\\]['\"]>([^<]*)</ns0:note>", "<sup class=\"small tooltip\" title='\\2'>\\1</sup> ", s)
     # Replace hint in zefania xml bibles
-    s = re.sub('<note[^>]>([^<]*)</note>', "<sup><abbr class='small' rel='tooltip' title='Hinweis'>\\1</abbr></sup>", s)
+    s = re.sub('(?i)<div><note type=[\'"]x-studynote[\'"]>([^<]*)</note></div>', "<sup class='small tooltip' title='\\1'>Hinweis</sup>", s)
     s = s.replace('***', '<b>')
     s = s.replace('+++', '</b>')
 
