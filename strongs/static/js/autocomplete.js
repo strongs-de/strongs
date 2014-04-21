@@ -3,12 +3,21 @@
  */
 var books = ['1.Mose', '2.Mose', '3.Mose', '4.Mose', '5.Mose', 'Josua', 'Richter', 'Ruth', '1.Samuel', '2.Samuel',
              '1.Könige', '2.Könige', '1.Chronik', '2.Chronik', 'Esra', 'Nehemia', 'Esther', 'Hiob', 'Psalmen', 'Sprüche',
-             'Prediger', 'Hohelied', 'Jesaja', 'Jeremia', 'Klagelieder', 'Hesekiel', 'Daniel', 'Hosea', 'Joeal', 'Amos',
+             'Prediger', 'Hohelied', 'Jesaja', 'Jeremia', 'Klagelieder', 'Hesekiel', 'Daniel', 'Hosea', 'Joel', 'Amos',
              'Obadja', 'Jona', 'Micha', 'Nahum', 'Habakuk', 'Zefanja', 'Haggai', 'Sacharja', 'Maleachi',
              'Matthäus', 'Markus', 'Lukas', 'Johannes', 'Apostelgeschichte', 'Römer', '1.Korinther', '2.Korinther',
              'Galater', 'Epheser', 'Philipper', 'Kolosser', '1.Thessalonicher', '2.Thessalonicher', '1.Timotheus',
              '2.Timotheus', 'Titus', 'Philemon', 'Hebräer', 'Jakobus', '1.Petrus', '2.Petrus', '1.Johannes', '2.Johannes',
              '3.Johannes', 'Judas', 'Offenbarung'];
+
+var shortBooks = ['1Mo', '2Mo', '3Mo', '4Mo', '5Mo', 'Jos', 'Ri', 'Ruth', '1Sam', '2Sam',
+             '1Kön', '2Kön', '1Chr', '2Chr', 'Esra', 'Neh', 'Est', 'Hi', 'Ps', 'Spr',
+             'Pred', 'Hoh', 'Jes', 'Jer', 'Klgl', 'Hes', 'Dan', 'Hos', 'Joel', 'Amos',
+             'Obad', 'Jona', 'Mi', 'Nah', 'Hab', 'Zef', 'Hag', 'Sach', 'Mal',
+             'Mt', 'Mk', 'Lk', 'Joh', 'Apg', 'Röm', '1Kor', '2Kor',
+             'Gal', 'Eph', 'Phil', 'Kol', '1Thes', '2Thes', '1Tim',
+             '2Tim', 'Tit', 'Phlm', 'Hebr', 'Jak', '1Petr', '2Petr', '1Joh', '2Joh',
+             '3Joh', 'Jud', 'Off'];
 
 var strBooks = ",1.Mose,1Mos,Genesis,Gen,1Mo,1.Mo,1.Mos,Mo,Mos,Mose,\n\
 ,2.Mose,2Mos,Exodus,Ex,2Mo,2.Mo,2.Mos,\n\

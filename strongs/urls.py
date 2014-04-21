@@ -15,6 +15,15 @@ urlpatterns = patterns('',
     # Home page
     url(r'^$', views.index, name='index'),
 
+    # Vers list
+    url(r'^add-vers/(?P<vers>[^/]+)/(?P<versListId>\d+)/$', views.add_vers_to_list, name='add_vers_to_list'),
+    url(r'^add-vers/(?P<vers>.+)/$', views.add_vers_to_list, name='add_vers_to_list'),
+    url(r'^remove-vers/(?P<vers>.+)/$', views.remove_vers_from_list, name='remove_vers_from_list'),
+    url(r'^set-verslist-title/(?P<id>\d+)/(?P<t>.+)/$', views.set_verslist_title, name='set_verslist_title'),
+    url(r'^create-verslist/$', views.create_verslist, name='create_verslist'),
+    url(r'^select-verslist/(?P<id>\d+)/$', views.select_verslist, name='select_verslist'),
+    url(r'^remove-verslist/$', views.remove_verslist, name='remove_verslist'),
+
     # Editor pages
     url(r'^note/(?P<booknr>\d+)/(?P<chapternr>\d+)/(?P<versnr>\d+)/$', views.note, name='note'),
 
@@ -35,3 +44,5 @@ urlpatterns = patterns('',
     url(r'^async/(?P<bible_book>.+)/$', views.async_bible, name='async_bible'),
     url(r'^(?P<bible_book>.+)/$', views.sync_bible, name='sync_bible'),
 )
+
+

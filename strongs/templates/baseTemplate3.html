@@ -17,7 +17,8 @@
 {#        <link href="{{ STATIC_URL }}css/anysearch.css" rel="stylesheet">#}
         <link href="{{ STATIC_URL }}css/glyphter.css" rel="stylesheet">
         <link href="{{ STATIC_URL }}css/newDesign.css" rel="stylesheet">
-        <link href="{{ STATIC_URL }}css/tooltip.css" rel="stylesheet">
+        <link href="{{ STATIC_URL }}css/tooltipster.css" rel="stylesheet">
+        <link href="{{ STATIC_URL }}css/themes/tooltipster-shadow.css" rel="stylesheet">
 
         {% block header %}
         {% endblock %}
@@ -67,6 +68,21 @@
         </div>
         <!-- ... Content -->
 
+        <!-- Verslist ... -->
+        {% if versList %}
+            <div class="versList" id="{{ versList.id }}">
+                <ul class="versListItems">
+                    {% for vli in versListItems %}
+                        <li class="versListItem"><a href="/{{ vli.vers }}">{{ vli.vers }}</a><a data="{{vli.vers.bookNr.nr}}_{{vli.vers.chapterNr}}_{{vli.vers.versNr}}" class="remove-from-verslist" href="#">X</a></li>
+                    {% endfor %}
+                </ul>
+                <input type="text" class="versListTitle" value="{{ versList.title }}" />
+                <span class="glyphter versListTitleCombo">c</span>
+                <span class="glyphter versListRemove">W</span>
+            </div>
+        {% endif %}
+        <!-- ... Verslist -->
+
         <!-- Javascript -->
         <script src="{{ STATIC_URL }}js/jquery-1.10.2.min.js"></script>
         <script src="{{ STATIC_URL }}js/jquery.matchHeight.js"></script>
@@ -77,7 +93,42 @@
         <!-- ... for Autocomplete staff -->
 
         <script src="{{ STATIC_URL }}js/infoSidebar.js"></script>
+
+        <!-- Tooltipster -->
+        <script src="{{ STATIC_URL }}js/jquery.tooltipster.min.js"></script>
         <script>
+
+            function removeVersFromList() {
+                var xhReq = new XMLHttpRequest();
+                xhReq.open("GET", "/remove-vers/" + $(this).attr('data') + '/', false);
+                xhReq.send(null);
+                if(xhReq.responseText === 'Ok')
+                    $(this).parent().remove();
+            }
+
+            function addVersToList(me) {
+                var xhReq = new XMLHttpRequest();
+                xhReq.open("GET", "/add-vers/" + $(me).attr('data') + '/', false);
+                xhReq.send(null);
+                if(xhReq.responseText === 'Ok') {
+                    arr = $(me).attr('data').split('/')[0].split('_');
+                    vlId = $(me).attr('data').split('/')[1];
+                    if(arr.length >= 3 && vlId !== undefined && $('.versList#' + vlId).length > 0) {
+                        ele = $('.versListItems').append('<li class="versListItem"><a href="/' + shortBooks[arr[0] - 1] + arr[1] + ',' + arr[2] + '">' + shortBooks[arr[0] - 1] + ' ' + arr[1] + ',' + arr[2] + '</a><a data="' + $(me).attr('data').split('/')[0] + '" class="remove-from-verslist" href="#">X</a></li>');
+                        ele.find('a.remove-from-verslist').click(removeVersFromList);
+                    }
+                }
+            }
+
+            function removeVersList() {
+                var xhReq = new XMLHttpRequest();
+                xhReq.open("GET", "/remove-verslist/", false);
+                xhReq.send(null);
+                if(xhReq.responseText === 'Ok') {
+                    location.reload();
+                }
+            }
+
             function doSearch(string) {
                 var path = '/' + string;
                 location.href=path;
@@ -91,9 +142,74 @@
             }
 
             $(document).ready(function() {
+                // Activate tooltipster
+                $('.tooltip').tooltipster({
+                    contentAsHTML: true,
+                    interactive: true,
+                    maxWidth: 500,
+                    theme: 'tooltipster-shadow'
+                });
+
+                // Key listener for search field
                 $('#searchId').keydown(function(e) {
                     if(e.keyCode == 13)
                         doSearch($('#searchId').val())
+                });
+
+                // Autocomplete for vers lists
+                $('.versListTitle').autocomplete({
+                    source:[
+                        {% for vl in versLists %}
+                            { label: '{{ vl.title }}', value: {{ vl.id }} },
+                        {% endfor %}
+                        {label: '<Neue Versliste>', value: -1}
+                    ],
+                    position: { my: "left bottom", at: "left top", collision: "none" },
+                    minLength: 0,
+                    select: function(ev, ui) {
+                        if(ui.item.value == -1) {
+                            // Create new one
+                            var xhReq = new XMLHttpRequest();
+                            xhReq.open("GET", "/create-verslist/", false);
+                            xhReq.send(null);
+                            if(xhReq.responseText === 'Ok') {
+                                location.reload();
+{#                                $('.versListItems').children().remove();#}
+{#                                $('.versListTitle').val('Neue Versliste');#}
+                            }
+                        } else {
+                            // Open selected verslist
+                            var xhReq = new XMLHttpRequest();
+                            xhReq.open("GET", "/select-verslist/" + ui.item.value + '/', false);
+                            xhReq.send(null);
+                            if(xhReq.responseText === 'Ok') {
+                                location.reload();
+                            }
+                        }
+                        ev.preventDefault();
+                    }
+                });
+                $( ".versListTitle" ).autocomplete("disable", "");
+                var versListOpen = false;
+                $('.versListTitleCombo').click(function(ev) {
+                    if(!versListOpen) {
+                        $( ".versListTitle" ).autocomplete("enable", "");
+                        $( ".versListTitle" ).autocomplete("search", "");
+                        $('.versListTitleCombo').text('b');
+                    } else {
+                        $( ".versListTitle" ).autocomplete("disable", "");
+                        $( ".versListTitle" ).autocomplete("close", "");
+                        $('.versListTitleCombo').text('c');
+                    }
+                    versListOpen = !versListOpen;
+                });
+                $(document).click(function(ev) {
+                    if(!$(ev.target).hasClass('versListTitleCombo')) {
+                        $( ".versListTitle" ).autocomplete("disable", "");
+                        $( ".versListTitle" ).autocomplete("close", "");
+                        $('.versListTitleCombo').html('c');
+                        versListOpen = false;
+                    }
                 });
 
                 // navigation functions
@@ -184,7 +300,7 @@
                 var lastEmptyVers = 0;
                 var versDiv = undefined;
                 $(".verse").each(function() {
-                    if($(this).clone().children().remove().end().text().trim() === "") {
+                    if($(this).clone().children('span').remove().end().text().trim() === "") {
                         lastEmptyVers = parseInt($(this).find("span > a").text().trim());
                         $(this).find("span").remove();
                     } else {
@@ -198,10 +314,28 @@
                         versDiv = $(this);
                     }
                 });
+
+                // insert actions to add verses to verslist
+                $('a.add-to-verslist').click(addVersToList);
+
+                // insert actions to remove verses to verslist
+                $('a.remove-from-verslist').click(removeVersFromList);
+
+                // insert remove verslist action
+                $('.versListRemove').click(removeVersList);
+
+                // add key listener for saving the verslist title
+                $('.versListTitle').keyup(function(ev) {
+                    var id = $(this).parent().attr('id');
+                    var xhReq = new XMLHttpRequest();
+                    xhReq.open("GET", "/set-verslist-title/" + id + '/' + $(this).val() + '/', false);
+                    xhReq.send(null);
+                    if(xhReq.responseText === 'Ok')
+                        ;
+                });
             });
         </script>
         <script src="{{ STATIC_URL }}js/autocomplete.js"></script>
-        <script src="{{ STATIC_URL }}js/tooltip.js"></script>
         {% block js %}
         {% endblock %}
         <script>

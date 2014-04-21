@@ -8,7 +8,17 @@
                 {% for vers1 in verses1 %}
                     <div class="verse" id="{{vers1.vers.bookNr.short_name}}{{vers1.vers.chapterNr}}_{{vers1.vers.versNr}}">
                         <span class="versenr vers-{{ vers1.vers.versNr }}">
-                            <a href="/note/{{vers1.vers.bookNr.nr}}/{{vers1.vers.chapterNr}}/{{vers1.vers.versNr}}">{{vers1.vers.versNr}}</a>&nbsp;
+                            {% if user.is_authenticated %}
+                                <a class="tooltip" title="Hinzufügen zur Versliste:<br/>
+                                    {% for vl in versLists %}
+                                        <a class='add-to-verslist' onclick='addVersToList(this)' href='#' data='{{vers1.vers.bookNr.nr}}_{{vers1.vers.chapterNr}}_{{vers1.vers.versNr}}/{{ vl.id }}'>
+                                            <span class='pad-left glyphter logogreen'>e</span>{{ vl.title }}</a><br/>
+                                    {% endfor %}" href="#">
+                            {% endif %}
+                            {{vers1.vers.versNr}}
+                            {% if user.is_authenticated %}
+                                </a>
+                            {% endif %}&nbsp;
                         </span>
                         {{vers1.versText|correctverstext}}
                     </div>
@@ -20,12 +30,22 @@
         <div id="tr2" class="tr hide-small">
             <div id="titleTr2" class="titleTr"><span class="title">{{ translation2 }}{% block results2 %}{% endblock %}</span></div>
             <div class="content">
-                {% for vers2 in verses2 %}
-                    <div class="verse" id="{{vers2.vers.bookNr.short_name}}{{vers2.vers.chapterNr}}_{{vers2.vers.versNr}}">
-                        <span class="versenr vers-{{ vers2.vers.versNr }}">
-                            <a href="/note/{{vers2.vers.bookNr.nr}}/{{vers2.vers.chapterNr}}/{{vers2.vers.versNr}}">{{vers2.vers.versNr}}</a>&nbsp;
+                {% for v in verses2 %}
+                    <div class="verse" id="{{v.vers.bookNr.short_name}}{{v.vers.chapterNr}}_{{v.vers.versNr}}">
+                        <span class="versenr vers-{{ v.vers.versNr }}">
+                            {% if user.is_authenticated %}
+                                <a class="tooltip" title="Hinzufügen zur Versliste:<br/>
+                                    {% for vl in versLists %}
+                                        <a class='add-to-verslist' onclick='addVersToList(this)' href='#' data='{{v.vers.bookNr.nr}}_{{v.vers.chapterNr}}_{{v.vers.versNr}}/{{ vl.id }}'>
+                                            <span class='pad-left glyphter logogreen'>e</span>{{ vl.title }}</a><br/>
+                                    {% endfor %}" href="#">
+                            {% endif %}
+                            {{v.vers.versNr}}
+                            {% if user.is_authenticated %}
+                                </a>
+                            {% endif %}&nbsp;
                         </span>
-                        {{vers2.versText|correctverstext}}
+                        {{v.versText|correctverstext}}
                     </div>
                 {% endfor %}
             </div>
@@ -39,12 +59,22 @@
         <div id="tr3" class="tr hide-small hide-vga">
             <div id="titleTr3" class="titleTr"><span class="title">{{ translation3 }}{% block results3 %}{% endblock %}</span></div>
             <div class="content">
-                {% for vers3 in verses3 %}
-                    <div class="verse" id="{{vers3.vers.bookNr.short_name}}{{vers3.vers.chapterNr}}_{{vers3.vers.versNr}}">
-                        <span class="versenr vers-{{ vers3.vers.versNr }}">
-                            <a href="/note/{{vers3.vers.bookNr.nr}}/{{vers3.vers.chapterNr}}/{{vers3.vers.versNr}}">{{vers3.vers.versNr}}</a>&nbsp;
+                {% for v in verses3 %}
+                    <div class="verse" id="{{v.vers.bookNr.short_name}}{{v.vers.chapterNr}}_{{v.vers.versNr}}">
+                        <span class="versenr vers-{{ v.vers.versNr }}">
+                            {% if user.is_authenticated %}
+                                <a class="tooltip" title="Hinzufügen zur Versliste:<br/>
+                                    {% for vl in versLists %}
+                                        <a class='add-to-verslist' onclick='addVersToList(this)' href='#' data='{{v.vers.bookNr.nr}}_{{v.vers.chapterNr}}_{{v.vers.versNr}}/{{ vl.id }}'>
+                                            <span class='pad-left glyphter logogreen'>e</span>{{ vl.title }}</a><br/>
+                                    {% endfor %}" href="#">
+                            {% endif %}
+                            {{v.vers.versNr}}
+                            {% if user.is_authenticated %}
+                                </a>
+                            {% endif %}&nbsp;
                         </span>
-                        {{vers3.versText|correctverstext}}
+                        {{v.versText|correctverstext}}
                     </div>
                 {% endfor %}
             </div>
@@ -54,12 +84,22 @@
         <div id="tr4" class="tr noborder hide-small hide-vga hide-xga">
             <div id="titleTr4" class="titleTr noborder"><span class="title">{{ translation4 }}{% block results4 %}{% endblock %}</span></div>
             <div class="content">
-                {% for vers4 in verses4 %}
-                    <div class="verse" id="{{vers4.vers.bookNr.short_name}}{{vers4.vers.chapterNr}}_{{vers4.vers.versNr}}">
-                        <span class="versenr vers-{{ vers4.vers.versNr }}">
-                            <a href="/note/{{vers4.vers.bookNr.nr}}/{{vers4.vers.chapterNr}}/{{vers4.vers.versNr}}">{{vers4.vers.versNr}}</a>&nbsp;
+                {% for v in verses4 %}
+                    <div class="verse" id="{{v.vers.bookNr.short_name}}{{v.vers.chapterNr}}_{{v.vers.versNr}}">
+                        <span class="versenr vers-{{ v.vers.versNr }}">
+                            {% if user.is_authenticated %}
+                                <a class="tooltip" title="Hinzufügen zur Versliste:<br/>
+                                    {% for vl in versLists %}
+                                        <a class='add-to-verslist' onclick='addVersToList(this)' href='#' data='{{v.vers.bookNr.nr}}_{{v.vers.chapterNr}}_{{v.vers.versNr}}/{{ vl.id }}'>
+                                            <span class='pad-left glyphter logogreen'>e</span>{{ vl.title }}</a><br/>
+                                    {% endfor %}" href="#">
+                            {% endif %}
+                            {{v.vers.versNr}}
+                            {% if user.is_authenticated %}
+                                </a>
+                            {% endif %}&nbsp;
                         </span>
-                        {{vers4.versText|correctverstext}}
+                        {{v.versText|correctverstext}}
                     </div>
                 {% endfor %}
             </div>
@@ -78,7 +118,7 @@
 <script>
     $(window).load(function() {
         // scroll to selected vers
-        $(".container").animate({ scrollTop: $('.vers-{{vers}}').position().top + 0}, 500);
+        $(".container").animate({ scrollTop: $('.vers-{{vers}}').position().top - 13}, 500);
         $(".vers-{{ vers }}").parent().addClass('search-highlight');
     });
 </script>
