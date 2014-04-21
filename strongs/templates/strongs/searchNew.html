@@ -1,84 +1,10 @@
-{% extends "baseTemplate3.html" %}
+{% extends "strongs/bibleNew.html" %}
 {% block pagenum %}
 Seite {{ pageact }}/{{ pagecnt }}
 {% endblock %}
 
 {% block searchtitle %}
     Suche nach:
-{% endblock %}
-
-{% block content %}
-    {% autoescape off %}
-    {% load strongs_extras %}
-        <div id="tr1" class="tr">
-            <div id="titleTr1" class="titleTr"><span class="title">{{ translation1 }} ({{ count1 }} Treffer)</span></div>
-            <div class="content">
-                {% for vers1 in verses1 %}
-                    <div class="verse" id="{{vers1.vers.bookNr.short_name}}{{vers1.vers.chapterNr}}_{{vers1.vers.versNr}}">
-                        <span class="versenr vers-{{ vers1.vers.versNr }}">
-                            <a href="/{{vers1.vers.bookNr.short_name}}{{vers1.vers.chapterNr}},{{vers1.vers.versNr}}">{{vers1.vers}}</a>&nbsp;
-                        </span>
-                        {{vers1.versText|correctverstext}}
-                    </div>
-                {% endfor %}
-            </div>
-            <p class="copyright">
-            </p>
-        </div>
-        <div id="tr2" class="tr">
-            <div id="titleTr2" class="titleTr"><span class="title">{{ translation2 }} ({{ count2 }} Treffer)</span></div>
-            <div class="content">
-                {% for vers2 in verses2 %}
-                    <div class="verse" id="{{vers2.vers.bookNr.short_name}}{{vers2.vers.chapterNr}}_{{vers2.vers.versNr}}">
-                        <span class="versenr vers-{{ vers2.vers.versNr }}">
-                            <a href="/{{vers2.vers.bookNr.short_name}}{{vers2.vers.chapterNr}},{{vers2.vers.versNr}}">{{vers2.vers}}</a>&nbsp;
-                        </span>
-                        {{vers2.versText|correctverstext}}
-                    </div>
-                {% endfor %}
-            </div>
-            <p class="copyright">
-                <br/>
-                Bibeltext der Schlachter Übersetzung<br/>
-                Copyright © 2000 Genfer Bibelgesellschaft<br/>
-                Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>
-            </p>
-        </div>
-        <div id="tr3" class="tr">
-            <div id="titleTr3" class="titleTr"><span class="title">{{ translation3 }} ({{ count3 }} Treffer)</span></div>
-            <div class="content">
-                {% for vers3 in verses3 %}
-                    <div class="verse" id="{{vers3.vers.bookNr.short_name}}{{vers3.vers.chapterNr}}_{{vers3.vers.versNr}}">
-                        <span class="versenr vers-{{ vers3.vers.versNr }}">
-                            <a href="/{{vers3.vers.bookNr.short_name}}{{vers3.vers.chapterNr}},{{vers3.vers.versNr}}">{{vers3.vers}}</a>&nbsp;
-                        </span>
-                        {{vers3.versText|correctverstext}}
-                    </div>
-                {% endfor %}
-            </div>
-            <p class="copyright">
-            </p>
-        </div>
-        <div id="tr4" class="tr noborder">
-            <div id="titleTr4" class="titleTr noborder"><span class="title">{{ translation4 }} ({{ count4 }} Treffer)</span></div>
-            <div class="content">
-                {% for vers4 in verses4 %}
-                    <div class="verse" id="{{vers4.vers.bookNr.short_name}}{{vers4.vers.chapterNr}}_{{vers4.vers.versNr}}">
-                        <span class="versenr vers-{{ vers4.vers.versNr }}">
-                            <a href="/{{vers4.vers.bookNr.short_name}}{{vers4.vers.chapterNr}},{{vers4.vers.versNr}}">{{vers4.vers}}</a>&nbsp;
-                        </span>
-                        {{vers4.versText|correctverstext}}
-                    </div>
-                {% endfor %}
-            </div>
-            <p class="copyright">
-                <br/>
-                Bibeltext der Neuen Genfer Übersetzung – Neues Testament und Psalmen<br/>
-                Copyright © 2011 Genfer Bibelgesellschaft<br/>
-                Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>
-            </p>
-        </div>
-        {% endautoescape %}
 {% endblock %}
 
 
@@ -139,11 +65,13 @@ Seite {{ pageact }}/{{ pagecnt }}
                // now the block is free from previous highlights
 
                substrings = shlex(substring.replace(/&quot;/g, '"'));
+               if(substrings === false) substrings = [substring.replace(/&quot;/g, '"')];
+               else substrings.forEach(function(e, i){return e.replace(/"/g, "").replace(/'/g, "");});
                for(i = 0; i < substrings.length; ++i) {
-                 $(block).html($(block).html().replace(new RegExp("\\s" + substrings[i].replace(/"/g, "").replace(/'/g, ""), 'gi'), function(match, text, urlId){
+                 $(block).html($(block).html().replace(new RegExp("\\s" + substrings[i], 'gi'), function(match, text, urlId){
                     return " <span class='search-highlight'>" + match.substring(1) + '</span>'
                  }));
-                 $(block).html($(block).html().replace(new RegExp(">" + substrings[i].replace(/"/g, "").replace(/'/g, ""), 'gi'), function(match, text, urlId){
+                 $(block).html($(block).html().replace(new RegExp(">" + substrings[i], 'gi'), function(match, text, urlId){
                     return "><span class='search-highlight'>" + match.substring(1) + '</span>'
                  }));
                }

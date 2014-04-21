@@ -383,7 +383,10 @@ def async_search(request, srch, page):
 def search(request, search, page, templateName):
     search = search.strip()
     searches = search.split(' ')
-    searches = map(lambda s: s.decode('UTF8').replace('"', '').replace("'", ''), shlex.split(search.encode('utf8')))
+    try:
+        searches = map(lambda s: s.decode('UTF8').replace('"', '').replace("'", ''), shlex.split(search.encode('utf8')))
+    except:
+        pass
     tag_search = reduce(operator.and_, (Q(versText__contains=" " + x) | Q(versText__contains=">" + x) for x in searches))
 
     # Try to search for this word
