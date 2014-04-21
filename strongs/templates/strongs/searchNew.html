@@ -1,4 +1,4 @@
-{% extends "strongs/bibleNew.html" %}
+{% extends "baseTemplate3.html" %}
 {% block pagenum %}
 Seite {{ pageact }}/{{ pagecnt }}
 {% endblock %}
@@ -6,6 +6,81 @@ Seite {{ pageact }}/{{ pagecnt }}
 {% block searchtitle %}
     Suche nach:
 {% endblock %}
+
+{% block content %}
+    {% autoescape off %}
+    {% load strongs_extras %}
+        <div id="tr1" class="tr">
+            <div id="titleTr1" class="titleTr"><span class="title">{{ translation1 }}{% block results1 %}{% endblock %}</span></div>
+            <div class="content">
+                {% for v in verses1 %}
+                    <div class="verse" id="{{v.vers.bookNr.short_name}}{{v.vers.chapterNr}}_{{v.vers.versNr}}">
+                        <span class="versenr vers-{{ v.vers.versNr }}">
+                            <a href="/{{v.vers}}">{{v.vers}}</a>&nbsp;
+                        </span>
+                        {{v.versText|correctverstext}}
+                    </div>
+                {% endfor %}
+            </div>
+            <p class="copyright">
+            </p>
+        </div>
+        <div id="tr2" class="tr hide-small">
+            <div id="titleTr2" class="titleTr"><span class="title">{{ translation2 }}{% block results2 %}{% endblock %}</span></div>
+            <div class="content">
+                {% for v in verses2 %}
+                    <div class="verse" id="{{v.vers.bookNr.short_name}}{{v.vers.chapterNr}}_{{v.vers.versNr}}">
+                        <span class="versenr vers-{{ v.vers.versNr }}">
+                            <a href="/{{v.vers}}">{{v.vers}}</a>&nbsp;
+                        </span>
+                        {{v.versText|correctverstext}}
+                    </div>
+                {% endfor %}
+            </div>
+            <p class="copyright">
+                <br/>
+                Bibeltext der Schlachter Übersetzung<br/>
+                Copyright © 2000 Genfer Bibelgesellschaft<br/>
+                Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>
+            </p>
+        </div>
+        <div id="tr3" class="tr hide-small hide-vga">
+            <div id="titleTr3" class="titleTr"><span class="title">{{ translation3 }}{% block results3 %}{% endblock %}</span></div>
+            <div class="content">
+                {% for v in verses3 %}
+                    <div class="verse" id="{{v.vers.bookNr.short_name}}{{v.vers.chapterNr}}_{{v.vers.versNr}}">
+                        <span class="versenr vers-{{ v.vers.versNr }}">
+                            <a href="/{{v.vers}}">{{v.vers}}</a>&nbsp;
+                        </span>
+                        {{v.versText|correctverstext}}
+                    </div>
+                {% endfor %}
+            </div>
+            <p class="copyright">
+            </p>
+        </div>
+        <div id="tr4" class="tr noborder hide-small hide-vga hide-xga">
+            <div id="titleTr4" class="titleTr noborder"><span class="title">{{ translation4 }}{% block results4 %}{% endblock %}</span></div>
+            <div class="content">
+                {% for v in verses4 %}
+                    <div class="verse" id="{{v.vers.bookNr.short_name}}{{v.vers.chapterNr}}_{{v.vers.versNr}}">
+                        <span class="versenr vers-{{ v.vers.versNr }}">
+                            <a href="/{{v.vers}}">{{v.vers}}</a>&nbsp;
+                        </span>
+                        {{v.versText|correctverstext}}
+                    </div>
+                {% endfor %}
+            </div>
+            <p class="copyright">
+                <br/>
+                Bibeltext der Neuen Genfer Übersetzung – Neues Testament und Psalmen<br/>
+                Copyright © 2011 Genfer Bibelgesellschaft<br/>
+                Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>
+            </p>
+        </div>
+        {% endautoescape %}
+{% endblock %}
+
 
 
 {% block js %}

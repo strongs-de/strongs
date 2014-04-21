@@ -7,9 +7,11 @@ import re, string
 from itertools import izip_longest
 
 
-def element_to_string(element):
+def element_to_string(element, until_child_is=None):
     s = element.text or ""
     for sub_element in element:
+        if until_child_is != None and sub_element.tag in until_child_is:
+            break
         s += ElementTree.tostring(sub_element)
     s += element.tail
     # s = s.replace('<gr', '<a')
@@ -27,11 +29,11 @@ def insert_osis_bibles():
     NEEDS_CHAPTERS = [False, False, True]
     lists = izip_longest(FILES, IDENTIFIER, LANGS, TITLES, NEEDS_CHAPTERS)
     for FILE, identifier, lang, title, needs_chapter in lists:
-        # FILE = './bibles/osis.schlachter2000.v1.withoutnotes.xml'
-        # identifier = 'SCH2000'
-        # lang = 'GER'
-        # title = 'Schlachter 2000'
-        # needs_chapter = True
+        FILE = './bibles/osis.schlachter2000.v1.withoutnotes.xml'
+        identifier = 'SCH2000'
+        lang = 'GER'
+        title = 'Schlachter 2000'
+        needs_chapter = True
 
         tree = ElementTree.parse(FILE)
         root = tree.getroot()
@@ -79,7 +81,8 @@ def insert_osis_bibles():
                     if cnumber != actchapter:
                         if vnumber > 1:
                             # The first verse can be found in the parent chapter tag-text
-                            __insert(tr, tb, cnumber, 1, chapter.text)
+                            # __insert(tr, tb, cnumber, 1, chapter.text)
+                            __insert(tr, tb, cnumber, 1, element_to_string(chapter, ['{http://www.bibletechnologies.net/2003/OSIS/namespace}div', '{http://www.bibletechnologies.net/2003/OSIS/namespace}verse']))
                         actchapter = cnumber
 
                     __insert(tr, tb, cnumber, vnumber, text)

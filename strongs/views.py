@@ -401,8 +401,20 @@ def search(request, search, page, templateName):
         idx2 = num * int(page) if int(page) > 0 else num
         count = max(search1.count(), search2.count(), search3.count(), search4.count())
         pagecnt = max(1, int(math.ceil(count * 1.0 / num)))
+
+        # select the current verse list if user is logged in
+        versLists = []
+        versList = None
+        versListItems = []
+        if request.user.is_authenticated():
+            versLists = BibleVersList.objects.filter(user=request.user).order_by('-lastchanged')
+            if versLists.count() <= 0:
+                versList = BibleVersList(lastchanged=_get_date(), title='Neue Versliste', user=request.user).save()
+            else:
+                versList = versLists[0]
+                versListItems = BibleVersNote.objects.filter(user=request.user, versList=versList).order_by('order')
         # return render(request, 'strongs/search.html', {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': search, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses': izip_longest(search1[idx1:idx2], search2[idx1:idx2], search3[idx1:idx2], search4[idx1:idx2])})
-        return render(request, templateName, {'count1': search1.count(), 'count2': search2.count(), 'count3': search3.count(), 'count4': search4.count(), 'maxcount': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': search, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses1': search1[idx1:idx2], 'verses2': search2[idx1:idx2], 'verses3': search3[idx1:idx2], 'verses4': search4[idx1:idx2]})
+        return render(request, templateName, {'versLists': versLists, 'versListItems': versListItems, 'versList': versList, 'count1': search1.count(), 'count2': search2.count(), 'count3': search3.count(), 'count4': search4.count(), 'maxcount': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': search, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses1': search1[idx1:idx2], 'verses2': search2[idx1:idx2], 'verses3': search3[idx1:idx2], 'verses4': search4[idx1:idx2]})
         # return HttpResponse('Found ' + str(search1.count()) + ' verses')
     else:
         # return HttpResponse('No book found for %s' % search)
@@ -420,10 +432,10 @@ def element_to_string(element):
 
 def initDb(request):
     s = ''
-    s += init_bible_books()
+    # s += init_bible_books()
     s += insert_osis_bibles()
-    s += insert_bible_vers()
-    s += init_strong_grammar()
+    # s += insert_bible_vers()
+    # s += init_strong_grammar()
     return HttpResponse(s)
 
 
