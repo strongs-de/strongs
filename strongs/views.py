@@ -116,7 +116,7 @@ def strongs(request, strong_id, vers, word):
     grammar = None
     greek = None
     pronounciation = None
-    regex = re.compile("([0-9]?.? ?[a-zA-Z]+)\s?([0-9]+)?,?([0-9]+)?")
+    regex = re.compile(u"([0-9]?\\.? ?[a-zA-ZäöüÄÖÜ]+)\s?([0-9]+)?,?([0-9]+)?")
     if regex is not None:
         v = regex.search(vers)
         if v is not None and len(v.groups()) > 0:
@@ -253,7 +253,7 @@ def bible(request, bible_book, templateName):
     if bible_book.isdigit():
         return strongs(request, bible_book)
 
-    regex = re.compile(u"([0-9]?.? ?[a-zA-ZäöüÄÖÜ]+)\s?([0-9]+)?,?([0-9]+)?", re.UNICODE)
+    regex = re.compile(u"([0-9]?\\.? ?[a-zA-ZäöüÄÖÜ]+)\s?([0-9]+)?,?([0-9]+)?", re.UNICODE)
     if regex is not None:
         s = regex.search(bible_book)
         if s is not None and len(s.groups()) > 0:

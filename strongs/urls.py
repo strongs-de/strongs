@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.conf.urls import patterns, url
 from strongs import views
 from django.contrib.auth.views import login, logout_then_login
@@ -34,7 +35,7 @@ urlpatterns = patterns('',
     url(r'^async/(?P<strong>[\d\-HGhg]+)/(?P<page>\d+)/$', views.async_search_strong, name='async_search_strongs'),
 
     # Search for sidebar content
-    url(r'^strong/(?P<strong_id>[\d\-HGhg]+)/(?P<vers>[a-zA-Z0-9_\.]+)/(?P<word>[^/]+)/$', views.strongs, name='strongs'),
+    url(ur'^strong/(?P<strong_id>[\d\-HGhg]+)/(?P<vers>[äöüÄÖÜa-zA-Z0-9_\.]+)/(?P<word>[^/]+)/$', views.strongs, name='strongs'),
 
     # Search for string
     url(r'^(?P<srch>.+)/(?P<page>\d+)/$', views.sync_search, name='sync_search'),

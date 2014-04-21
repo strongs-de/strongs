@@ -141,14 +141,18 @@
 {#                initStrongLinks();#}
             }
 
-            $(document).ready(function() {
-                // Activate tooltipster
+            function initTooltips() {
                 $('.tooltip').tooltipster({
                     contentAsHTML: true,
                     interactive: true,
                     maxWidth: 500,
                     theme: 'tooltipster-shadow'
                 });
+            }
+
+            $(document).ready(function() {
+                // Activate tooltipster
+                initTooltips();
 
                 // Key listener for search field
                 $('#searchId').keydown(function(e) {

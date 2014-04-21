@@ -26,10 +26,19 @@
       <file leaf-file-name="views.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="386" column="12" selection-start="19774" selection-end="19774" vertical-scroll-proportion="0.0" vertical-offset="5323" max-vertical-offset="7050">
+            <state line="142" column="0" selection-start="6274" selection-end="6274" vertical-scroll-proportion="0.0" vertical-offset="1732" max-vertical-offset="7050">
               <folding>
                 <element signature="e#24#79#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="initDb.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/strongs/initDb.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="267" column="33" selection-start="12440" selection-end="12440" vertical-scroll-proportion="0.0" vertical-offset="3456" max-vertical-offset="4725">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -80,15 +89,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="strongs_extras.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strongs/templatetags/strongs_extras.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="27" column="82" selection-start="1795" selection-end="1795" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="840">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="models.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/models.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -103,9 +103,9 @@
       <file leaf-file-name="urls.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/urls.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="18" column="109" selection-start="611" selection-end="611" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="810">
+            <state line="37" column="9" selection-start="1783" selection-end="1783" vertical-scroll-proportion="0.0" vertical-offset="174" max-vertical-offset="825">
               <folding>
-                <element signature="e#0#42#0" expanded="true" />
+                <element signature="e#24#66#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -114,16 +114,25 @@
       <file leaf-file-name="newDesign.css" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/static/css/newDesign.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="181" column="20" selection-start="4507" selection-end="4507" vertical-scroll-proportion="0.0" vertical-offset="2031" max-vertical-offset="6420">
+            <state line="394" column="17" selection-start="8900" selection-end="8900" vertical-scroll-proportion="0.0" vertical-offset="5226" max-vertical-offset="6420">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="baseTemplate3.html" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="baseTemplate3.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate3.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="241" column="71" selection-start="11282" selection-end="11282" vertical-scroll-proportion="0.37558687" vertical-offset="3215" max-vertical-offset="5415">
+            <state line="155" column="0" selection-start="7008" selection-end="7008" vertical-scroll-proportion="-24.333334" vertical-offset="1741" max-vertical-offset="5475">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="grammar_parser.py" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/strongs/grammar_parser.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="52" column="0" selection-start="1872" selection-end="1872" vertical-scroll-proportion="0.33333334" vertical-offset="417" max-vertical-offset="1530">
               <folding />
             </state>
           </provider>
@@ -133,15 +142,6 @@
         <entry file="file://$PROJECT_DIR$/strongs/static/js/autocomplete.js">
           <provider selected="true" editor-type-id="text-editor">
             <state line="98" column="13" selection-start="3564" selection-end="3564" vertical-scroll-proportion="0.0" vertical-offset="803" max-vertical-offset="1905">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="infoSidebar.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strongs/static/js/infoSidebar.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="32" column="44" selection-start="987" selection-end="1164" vertical-scroll-proportion="0.0" vertical-offset="8" max-vertical-offset="1110">
               <folding />
             </state>
           </provider>
@@ -184,19 +184,20 @@
         <option value="$PROJECT_DIR$/strongs/templates/strongs/searchAsync.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/account.html" />
         <option value="$PROJECT_DIR$/bibles/osis.schlachter2000.v1.withoutnotes.xml" />
-        <option value="$PROJECT_DIR$/strongs/static/js/infoSidebar.js" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/strongNr.html" />
         <option value="$PROJECT_DIR$/bibleBooks_de.txt" />
         <option value="$PROJECT_DIR$/strongs/initDb.py" />
         <option value="$PROJECT_DIR$/strongs/static/js/autocomplete.js" />
         <option value="$PROJECT_DIR$/strongs/models.py" />
-        <option value="$PROJECT_DIR$/strongs/urls.py" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html" />
-        <option value="$PROJECT_DIR$/strongs/views.py" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/searchNew.html" />
         <option value="$PROJECT_DIR$/strongs/templatetags/strongs_extras.py" />
-        <option value="$PROJECT_DIR$/strongs/static/css/newDesign.css" />
+        <option value="$PROJECT_DIR$/strongs/urls.py" />
+        <option value="$PROJECT_DIR$/strongs/views.py" />
+        <option value="$PROJECT_DIR$/strongs/static/js/infoSidebar.js" />
         <option value="$PROJECT_DIR$/strongs/templates/baseTemplate3.html" />
+        <option value="$PROJECT_DIR$/strongs/static/css/newDesign.css" />
+        <option value="$PROJECT_DIR$/strongs/grammar_parser.py" />
       </list>
     </option>
   </component>
@@ -633,17 +634,10 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="96" />
+      <option name="time" value="104" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/strongNr.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="14" selection-start="62" selection-end="72" vertical-scroll-proportion="0.0" vertical-offset="34" max-vertical-offset="425">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Django_Strongs/settings.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="62" column="0" selection-start="1704" selection-end="1704" vertical-scroll-proportion="0.0" vertical-offset="1054" max-vertical-offset="1870">
@@ -864,13 +858,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/strongNr.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="0" selection-start="58" selection-end="58" vertical-scroll-proportion="-1.25" vertical-offset="0" max-vertical-offset="540">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/bibleBooks_de.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state line="21" column="37" selection-start="560" selection-end="560" vertical-scroll-proportion="-11.666667" vertical-offset="0" max-vertical-offset="1065">
@@ -881,32 +868,9 @@
         <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/initDb.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="40" column="44" selection-start="2181" selection-end="2181" vertical-scroll-proportion="0.0" vertical-offset="268" max-vertical-offset="4725">
-          <folding>
-            <marker date="1397819196000" expanded="true" signature="-1:-1" placeholder="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/python2.7/site-packages/django/contrib/admindocs/templates/admin_doc/view_detail.html">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="651">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/static/js/infoSidebar.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="32" column="44" selection-start="987" selection-end="1164" vertical-scroll-proportion="0.0" vertical-offset="8" max-vertical-offset="1110">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/static/js/autocomplete.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="98" column="13" selection-start="3564" selection-end="3564" vertical-scroll-proportion="0.0" vertical-offset="803" max-vertical-offset="1905">
           <folding />
         </state>
       </provider>
@@ -941,29 +905,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="109" selection-start="611" selection-end="611" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="810">
-          <folding>
-            <element signature="e#0#42#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/python2.7/site-packages/pip/commands/search.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2070">
           <folding>
             <element signature="e#0#10#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="386" column="12" selection-start="19774" selection-end="19774" vertical-scroll-proportion="0.0" vertical-offset="5323" max-vertical-offset="7050">
-          <folding>
-            <element signature="e#24#79#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1017,16 +963,69 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/static/css/newDesign.css">
+    <entry file="file://$PROJECT_DIR$/strongs/urls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="181" column="20" selection-start="4507" selection-end="4507" vertical-scroll-proportion="0.0" vertical-offset="2031" max-vertical-offset="6420">
+        <state line="37" column="9" selection-start="1783" selection-end="1783" vertical-scroll-proportion="0.0" vertical-offset="174" max-vertical-offset="825">
+          <folding>
+            <element signature="e#24#66#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/static/js/infoSidebar.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="34" column="4" selection-start="1225" selection-end="1240" vertical-scroll-proportion="0.28725037" vertical-offset="323" max-vertical-offset="1110">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/static/js/autocomplete.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="98" column="13" selection-start="3564" selection-end="3564" vertical-scroll-proportion="0.0" vertical-offset="803" max-vertical-offset="1905">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate3.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="241" column="71" selection-start="11282" selection-end="11282" vertical-scroll-proportion="0.37558687" vertical-offset="3215" max-vertical-offset="5415">
+        <state line="155" column="0" selection-start="7008" selection-end="7008" vertical-scroll-proportion="-24.333334" vertical-offset="1741" max-vertical-offset="5475">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/strongNr.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="0" selection-start="58" selection-end="58" vertical-scroll-proportion="0.04784689" vertical-offset="0" max-vertical-offset="627">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/static/css/newDesign.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="394" column="17" selection-start="8900" selection-end="8900" vertical-scroll-proportion="0.0" vertical-offset="5226" max-vertical-offset="6420">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="142" column="0" selection-start="6274" selection-end="6274" vertical-scroll-proportion="0.0" vertical-offset="1918" max-vertical-offset="7050">
+          <folding>
+            <element signature="e#24#79#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/initDb.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="267" column="33" selection-start="12440" selection-end="12440" vertical-scroll-proportion="0.0" vertical-offset="3456" max-vertical-offset="4725">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/grammar_parser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="52" column="0" selection-start="1872" selection-end="1872" vertical-scroll-proportion="0.33333334" vertical-offset="417" max-vertical-offset="1530">
           <folding />
         </state>
       </provider>
