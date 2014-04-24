@@ -19,16 +19,22 @@ from forms import NoteForm, RegistrationForm, MyAccountForm
 import math
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.views import login
+from strongs.utils import bible_translation_order
+from strongs.utils import set_cookies
 import time
 
 
 BIBLES_IN_VIEW = ['ELB1905STR', 'SCH2000', 'LUTH1912', u'NGÜ']
 BIBLE_NAMES_IN_VIEW = ['Elberfelder 1905', 'Schlachter 2000', 'Luther 1912', u'Neue Genfer Übersetzung']
+BIBLE_HINTS_IN_VIEW = ['', '<br/>Bibeltext der Schlachter Übersetzung<br/>Copyright &copy; 2000 Genfer Bibelgesellschaft<br/>Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>', '', '<br/>Bibeltext der Neuen Genfer Übersetzung – Neues Testament und Psalmen<br/>Copyright &copy; 2011 Genfer Bibelgesellschaft<br/>Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>']
 
 
 # Create your views here.
 def index(request):
     return sync_bible(request, 'joh1')
+
+def async_index(request, column=None, translation=None):
+    return async_bible(request, 'joh1', column, translation)
 
 
 def register(request):
@@ -150,14 +156,12 @@ def strongs(request, strong_id, vers, word):
     # return HttpResponse('No verses found for strong nr ' + str(strong_id))
     return render(request, 'strongs/error.html', {'message': u'Es wurden keine Verse für die Strong-Nummer ' + str(strong_id) + ' gefunden!', 'solution':'Evtl. existiert diese Strong Nummer nicht.'})
 
-
-def async_bible(request, bible_book):
-    ret = bible(request, bible_book, 'strongs/bibleAsync.html')
+def async_bible(request, bible_book, column=None, translation=None):
+    ret = bible(request, bible_book, 'strongs/bibleAsync.html', column, translation)
     if not ret:
-        return async_search(request, bible_book, 1)
+        return async_search(request, bible_book, 1, column, translation)
     else:
         return ret
-
 
 def sync_bible(request, bible_book):
     ret = bible(request, bible_book, 'strongs/bibleNew.html')
@@ -165,6 +169,7 @@ def sync_bible(request, bible_book):
         return sync_search(request, bible_book, 1)
     else:
         return ret
+
 
 
 @login_required
@@ -248,7 +253,7 @@ def _get_date():
     return time.strftime('%Y-%m-%d %H-%M-%S', time.localtime())
 
 
-def bible(request, bible_book, templateName):
+def bible(request, bible_book, templateName, column=None, translation=None):
     # if strong-number, then forward
     if bible_book.isdigit():
         return strongs(request, bible_book)
@@ -277,10 +282,12 @@ def bible(request, bible_book, templateName):
                     book = BibleBook.objects.filter(nr=book[0].nr + 1)
                     chapter = 1
 
-                tr1 = BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[0])
-                tr2 = BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[1])
-                tr3 = BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[2])
-                tr4 = BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[3])
+                bible_order = bible_translation_order(request, column, translation)
+
+                tr1 = BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[0]])
+                tr2 = BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[1]])
+                tr3 = BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[2]])
+                tr4 = BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[3]])
                 if tr1.count() > 0 and tr2.count() > 0 and tr3.count() > 0 and tr4.count() > 0:
                     verses1 = BibleText.objects.filter(translationIdentifier=tr1, vers__bookNr=book, vers__chapterNr=chapter)
                     verses2 = BibleText.objects.filter(translationIdentifier=tr2, vers__bookNr=book, vers__chapterNr=chapter)
@@ -291,6 +298,7 @@ def bible(request, bible_book, templateName):
                         srch = book[0].name + ' ' + str(chapter)
                         if vers != None:
                             srch += ',' + str(vers)
+
 
                         # select the current verse list if user is logged in
                         versLists = []
@@ -303,7 +311,14 @@ def bible(request, bible_book, templateName):
                             else:
                                 versList = versLists[0]
                                 versListItems = BibleVersNote.objects.filter(user=request.user, versList=versList).order_by('order')
-                        return render(request, templateName, {'versLists': versLists, 'versListItems': versListItems, 'versList': versList, 'vers': vers, 'search': srch, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses1': verses1, 'verses2': verses2, 'verses3': verses3, 'verses4': verses4})
+
+                        response = render(request, templateName, {'versLists': versLists, 'versListItems': versListItems, 'versList': versList, 'full_url': request.build_absolute_uri(None),'vers': vers, 'search': srch, 'translation1': BIBLE_NAMES_IN_VIEW[bible_order[0]], 'translation2': BIBLE_NAMES_IN_VIEW[bible_order[1]], 'translation3': BIBLE_NAMES_IN_VIEW[bible_order[2]], 'translation4': BIBLE_NAMES_IN_VIEW[bible_order[3]], 'verses1': verses1, 'verses2': verses2, 'verses3': verses3, 'verses4': verses4, 'bible_hint1': BIBLE_HINTS_IN_VIEW[bible_order[0]], 'bible_hint2': BIBLE_HINTS_IN_VIEW[bible_order[1]], 'bible_hint3': BIBLE_HINTS_IN_VIEW[bible_order[2]], 'bible_hint4': BIBLE_HINTS_IN_VIEW[bible_order[3]]})
+
+                        # handle cookies
+                        set_cookies(response, bible_order)
+
+                        return response;
+
                     else:
                         # return HttpResponse('No verses found')
                         return render(request, 'strongs/error.html', {'message': u'Die Bibelstelle konnte nicht geladen werden!', 'solution':u'Versuche es bitte später noch einmal.<br/>Sollte der Fehler noch immer bestehen, gib uns bitte unter info@strongs.de bescheid!'})
@@ -376,11 +391,11 @@ def sync_search(request, srch, page):
     return search(request, srch, page, 'strongs/searchNew.html');
 
 
-def async_search(request, srch, page):
-    return search(request, srch, page, 'strongs/searchAsync.html');
+def async_search(request, srch, page, column=None, translation=None):
+    return search(request, srch, page, 'strongs/searchAsync.html', column, translation);
 
 
-def search(request, search, page, templateName):
+def search(request, search, page, templateName, column=None, translation=None):
     search = search.strip()
     searches = search.split(' ')
     try:
@@ -389,11 +404,13 @@ def search(request, search, page, templateName):
         pass
     tag_search = reduce(operator.and_, (Q(versText__contains=" " + x) | Q(versText__contains=">" + x) for x in searches))
 
+    bible_order = bible_translation_order(request, column, translation)
+
     # Try to search for this word
-    search1 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[0]))
-    search2 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[1]))
-    search3 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[2]))
-    search4 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[3]))
+    search1 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[0]]))
+    search2 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[1]]))
+    search3 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[2]]))
+    search4 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[3]]))
     if search1.count() > 0 or search2.count() > 0 or search3.count() > 0 or search4.count() > 0:
         # only show the first 200 items
         num = 30
@@ -414,7 +431,12 @@ def search(request, search, page, templateName):
                 versList = versLists[0]
                 versListItems = BibleVersNote.objects.filter(user=request.user, versList=versList).order_by('order')
         # return render(request, 'strongs/search.html', {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': search, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses': izip_longest(search1[idx1:idx2], search2[idx1:idx2], search3[idx1:idx2], search4[idx1:idx2])})
-        return render(request, templateName, {'versLists': versLists, 'versListItems': versListItems, 'versList': versList, 'count1': search1.count(), 'count2': search2.count(), 'count3': search3.count(), 'count4': search4.count(), 'maxcount': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': search, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses1': search1[idx1:idx2], 'verses2': search2[idx1:idx2], 'verses3': search3[idx1:idx2], 'verses4': search4[idx1:idx2]})
+        response = render(request, templateName, {'count1': search1.count(), 'count2': search2.count(), 'count3': search3.count(), 'count4': search4.count(), 'maxcount': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': search, 'translation1': BIBLE_NAMES_IN_VIEW[bible_order[0]], 'translation2': BIBLE_NAMES_IN_VIEW[bible_order[1]], 'translation3': BIBLE_NAMES_IN_VIEW[bible_order[2]], 'translation4': BIBLE_NAMES_IN_VIEW[bible_order[3]], 'verses1': search1[idx1:idx2], 'verses2': search2[idx1:idx2], 'verses3': search3[idx1:idx2], 'verses4': search4[idx1:idx2], 'bible_hint1': BIBLE_HINTS_IN_VIEW[bible_order[0]], 'bible_hint2': BIBLE_HINTS_IN_VIEW[bible_order[1]], 'bible_hint3': BIBLE_HINTS_IN_VIEW[bible_order[2]], 'bible_hint4': BIBLE_HINTS_IN_VIEW[bible_order[3]]})
+
+        # handle cookies
+        set_cookies(response, bible_order)
+
+        return response
         # return HttpResponse('Found ' + str(search1.count()) + ' verses')
     else:
         # return HttpResponse('No book found for %s' % search)

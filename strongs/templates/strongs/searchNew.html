@@ -11,7 +11,17 @@ Seite {{ pageact }}/{{ pagecnt }}
     {% autoescape off %}
     {% load strongs_extras %}
         <div id="tr1" class="tr">
-            <div id="titleTr1" class="titleTr"><span class="title">{{ translation1 }}{% block results1 %}{% endblock %}</span></div>
+            <div id="titleTr1" class="titleTr" _hmnu="1">
+                <span class="title" style="cursor: pointer;">{{ translation1 }} ({{ count1 }} Treffer)</span>
+                <span class="glyphter" style="margin: 0px 15px 0px 3px; cursor: pointer;">b</span>
+                <div id="switchTr1" class="switchTr">
+                    <div onclick="switchTranslation(0, 0)">Elberfelder 1905</div>
+                    <div onclick="switchTranslation(0, 1)">Schlachter 2000</div>
+                    <div onclick="switchTranslation(0, 2)">Luther 1912</div>
+                    <div onclick="switchTranslation(0, 3)">Neue Genfer Übersetzung</div>
+                    <div onclick="switchTranslation(0, 4)">Interlinear</div>
+                </div>
+            </div>
             <div class="content">
                 {% for v in verses1 %}
                     <div class="verse" id="{{v.vers.bookNr.short_name}}{{v.vers.chapterNr}}_{{v.vers.versNr}}">
@@ -23,10 +33,21 @@ Seite {{ pageact }}/{{ pagecnt }}
                 {% endfor %}
             </div>
             <p class="copyright">
+                {{ bible_hint1 }}
             </p>
         </div>
-        <div id="tr2" class="tr hide-small">
-            <div id="titleTr2" class="titleTr"><span class="title">{{ translation2 }}{% block results2 %}{% endblock %}</span></div>
+        <div id="tr2" class="tr">
+            <div id="titleTr2" class="titleTr" _hmnu="2">
+                <span class="title" style="cursor: pointer;">{{ translation2 }} ({{ count2 }} Treffer)</span>
+                <span class="glyphter" style="margin: 0px 15px 0px 3px; cursor: pointer;">b</span>
+                <div id="switchTr2" class="switchTr">
+                    <div onclick="switchTranslation(1, 0)">Elberfelder 1905</div>
+                    <div onclick="switchTranslation(1, 1)">Schlachter 2000</div>
+                    <div onclick="switchTranslation(1, 2)">Luther 1912</div>
+                    <div onclick="switchTranslation(1, 3)">Neue Genfer Übersetzung</div>
+                    <div onclick="switchTranslation(1, 4)">Interlinear</div>
+                </div>
+            </div>
             <div class="content">
                 {% for v in verses2 %}
                     <div class="verse" id="{{v.vers.bookNr.short_name}}{{v.vers.chapterNr}}_{{v.vers.versNr}}">
@@ -38,14 +59,21 @@ Seite {{ pageact }}/{{ pagecnt }}
                 {% endfor %}
             </div>
             <p class="copyright">
-                <br/>
-                Bibeltext der Schlachter Übersetzung<br/>
-                Copyright © 2000 Genfer Bibelgesellschaft<br/>
-                Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>
+                {{ bible_hint2 }}
             </p>
         </div>
-        <div id="tr3" class="tr hide-small hide-vga">
-            <div id="titleTr3" class="titleTr"><span class="title">{{ translation3 }}{% block results3 %}{% endblock %}</span></div>
+        <div id="tr3" class="tr">
+            <div id="titleTr3" class="titleTr" _hmnu="3">
+                <span class="title" style="cursor: pointer;">{{ translation3 }} ({{ count3 }} Treffer)</span>
+                <span class="glyphter" style="margin: 0px 15px 0px 3px; cursor: pointer;">b</span>
+                <div id="switchTr3" class="switchTr">
+                    <div onclick="switchTranslation(2, 0)">Elberfelder 1905</div>
+                    <div onclick="switchTranslation(2, 1)">Schlachter 2000</div>
+                    <div onclick="switchTranslation(2, 2)">Luther 1912</div>
+                    <div onclick="switchTranslation(2, 3)">Neue Genfer Übersetzung</div>
+                    <div onclick="switchTranslation(2, 4)">Interlinear</div>
+                </div>
+            </div>
             <div class="content">
                 {% for v in verses3 %}
                     <div class="verse" id="{{v.vers.bookNr.short_name}}{{v.vers.chapterNr}}_{{v.vers.versNr}}">
@@ -57,10 +85,21 @@ Seite {{ pageact }}/{{ pagecnt }}
                 {% endfor %}
             </div>
             <p class="copyright">
+                {{ bible_hint3 }}
             </p>
         </div>
-        <div id="tr4" class="tr noborder hide-small hide-vga hide-xga">
-            <div id="titleTr4" class="titleTr noborder"><span class="title">{{ translation4 }}{% block results4 %}{% endblock %}</span></div>
+        <div id="tr4" class="tr noborder">
+            <div id="titleTr4" class="titleTr noborder" _hmnu="4">
+                <span class="title" style="cursor: pointer;">{{ translation4 }} ({{ count4 }} Treffer)</span>
+                <span class="glyphter" style="margin: 0px 15px 0px 3px; cursor: pointer;">b</span>
+                <div id="switchTr4" class="switchTr">
+                    <div onclick="switchTranslation(3, 0)">Elberfelder 1905</div>
+                    <div onclick="switchTranslation(3, 1)">Schlachter 2000</div>
+                    <div onclick="switchTranslation(3, 2)">Luther 1912</div>
+                    <div onclick="switchTranslation(3, 3)">Neue Genfer Übersetzung</div>
+                    <div onclick="switchTranslation(3, 4)">Interlinear</div>
+                </div>
+            </div>
             <div class="content">
                 {% for v in verses4 %}
                     <div class="verse" id="{{v.vers.bookNr.short_name}}{{v.vers.chapterNr}}_{{v.vers.versNr}}">
@@ -72,10 +111,7 @@ Seite {{ pageact }}/{{ pagecnt }}
                 {% endfor %}
             </div>
             <p class="copyright">
-                <br/>
-                Bibeltext der Neuen Genfer Übersetzung – Neues Testament und Psalmen<br/>
-                Copyright © 2011 Genfer Bibelgesellschaft<br/>
-                Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>
+                {{ bible_hint4 }}
             </p>
         </div>
         {% endautoescape %}

@@ -15,6 +15,7 @@ urlpatterns = patterns('',
 
     # Home page
     url(r'^$', views.index, name='index'),
+    url(r'^trans/(?P<column>\d+)_(?P<translation>\d+)/$', views.async_index, name='async_index'),
 
     # Vers list
     url(r'^add-vers/(?P<vers>[^/]+)/(?P<versListId>\d+)/$', views.add_vers_to_list, name='add_vers_to_list'),
@@ -38,12 +39,14 @@ urlpatterns = patterns('',
     url(ur'^strong/(?P<strong_id>[\d\-HGhg]+)/(?P<vers>[äöüÄÖÜa-zA-Z0-9_\.]+)/(?P<word>[^/]+)/$', views.strongs, name='strongs'),
 
     # Search for string
+    url(r'^(?P<srch>.+)/(?P<page>\d+)/trans/(?P<column>\d+)_(?P<translation>\d+)/$', views.async_search, name='async_search'),
     url(r'^(?P<srch>.+)/(?P<page>\d+)/$', views.sync_search, name='sync_search'),
     url(r'^async/(?P<srch>.+)/(?P<page>\d+)/$', views.async_search, name='async_search'),
 
     # Search for bible text
+    url(r'^(?P<bible_book>.+)/trans/(?P<column>\d+)_(?P<translation>\d+)/$', views.async_bible, name='async_bible'),
     url(r'^async/(?P<bible_book>.+)/$', views.async_bible, name='async_bible'),
-    url(r'^(?P<bible_book>.+)/$', views.sync_bible, name='sync_bible'),
+    url(r'^(?P<bible_book>.+)/$', views.sync_bible, name='sync_bible')
 )
 
 
