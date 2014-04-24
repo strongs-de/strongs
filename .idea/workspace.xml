@@ -36,7 +36,9 @@
         <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleAsync.html">
           <provider selected="true" editor-type-id="text-editor">
             <state line="7" column="47" selection-start="420" selection-end="420" vertical-scroll-proportion="-4.375" vertical-offset="0" max-vertical-offset="2535">
-              <folding />
+              <folding>
+                <marker date="1398367902000" expanded="true" signature="6358:7373" placeholder="{% for v in verses4 ... %}" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -44,7 +46,7 @@
       <file leaf-file-name="bibleNew.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="34" column="28" selection-start="974" selection-end="2125" vertical-scroll-proportion="-21.25" vertical-offset="0" max-vertical-offset="2580">
+            <state line="164" column="35" selection-start="9180" selection-end="9180" vertical-scroll-proportion="-39.916668" vertical-offset="1502" max-vertical-offset="2580">
               <folding />
             </state>
           </provider>
@@ -59,10 +61,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="baseTemplate3.html" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="baseTemplate3.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate3.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="350" column="69" selection-start="15917" selection-end="15917" vertical-scroll-proportion="0.28169015" vertical-offset="4950" max-vertical-offset="6390">
+            <state line="87" column="47" selection-start="4109" selection-end="4109" vertical-scroll-proportion="-15.5" vertical-offset="933" max-vertical-offset="6390">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="jquery.matchHeight.js" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/strongs/static/js/jquery.matchHeight.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="17" column="27" selection-start="465" selection-end="465" vertical-scroll-proportion="0.23139746" vertical-offset="0" max-vertical-offset="3525">
               <folding />
             </state>
           </provider>
@@ -77,77 +88,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="urls.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strongs/urls.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="46" column="90" selection-start="2445" selection-end="2445" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="840">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="searchNew.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="12" selection-start="12" selection-end="12" vertical-scroll-proportion="-0.0" vertical-offset="0" max-vertical-offset="3180">
+            <state line="203" column="43" selection-start="9894" selection-end="9894" vertical-scroll-proportion="-39.291668" vertical-offset="2102" max-vertical-offset="3180">
               <folding>
-                <marker date="1398364248000" expanded="true" signature="268:1627" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="326:1037" placeholder="..." />
-                <marker date="1398364248000" expanded="false" signature="371:387" placeholder="..." />
-                <marker date="1398364248000" expanded="false" signature="484:526" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="589:1018" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="1071:1527" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="1222:1479" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="1294:1397" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="1561:1612" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="1661:3020" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="1719:2430" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="1764:1780" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="1877:1919" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="1982:2411" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="2464:2920" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="2615:2872" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="2687:2790" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="2954:3005" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="3054:4413" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="3112:3823" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="3157:3173" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="3270:3312" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="3375:3804" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="3857:4313" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="4008:4265" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="4080:4183" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="4347:4398" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="4456:5824" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="4523:5234" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="4568:4584" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="4681:4723" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="4786:5215" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="5268:5724" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="5419:5676" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="5491:5594" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="5758:5809" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="5921:9907" placeholder="..." />
-                <marker date="1398364248000" expanded="true" signature="5955:8198" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="6144:8136" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="6194:8118" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="6326:6692" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="6368:6447" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="6474:6552" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="6579:6666" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="6756:6826" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="6870:6943" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="6986:8096" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="7223:7617" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="7269:7356" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="7385:7471" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="7500:7587" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="8248:9758" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="8317:8388" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="8774:9276" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="8900:9015" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="9141:9256" placeholder="{...}" />
-                <marker date="1398364248000" expanded="true" signature="9553:9744" placeholder="{...}" />
+                <element signature="e#364#388#0" expanded="true" />
+                <element signature="e#477#527#0" expanded="true" />
+                <element signature="e#1757#1781#0" expanded="true" />
+                <element signature="e#1870#1920#0" expanded="true" />
+                <element signature="e#3150#3174#0" expanded="true" />
+                <element signature="e#3263#3313#0" expanded="true" />
+                <element signature="e#4561#4585#0" expanded="true" />
+                <element signature="e#4674#4724#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -179,7 +132,6 @@
         <option value="$PROJECT_DIR$/strongs/static/js/autocomplete_test.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/search.html" />
         <option value="$PROJECT_DIR$/strongs/templates/baseTemplate.html" />
-        <option value="$PROJECT_DIR$/strongs/static/js/jquery.matchHeight.js" />
         <option value="$PROJECT_DIR$/strongs/templates/newDesign.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/bible.html" />
         <option value="$PROJECT_DIR$/strongs/static/js/stronghandler.js" />
@@ -205,15 +157,16 @@
         <option value="$PROJECT_DIR$/strongs/templatetags/strongs_extras.py" />
         <option value="$PROJECT_DIR$/strongs/urls.py" />
         <option value="$PROJECT_DIR$/strongs/grammar_parser.py" />
-        <option value="$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html" />
         <option value="$PROJECT_DIR$/strongs/initDb.py" />
         <option value="$PROJECT_DIR$/tools/extend.strongs.py" />
-        <option value="$PROJECT_DIR$/strongs/templates/strongs/searchNew.html" />
         <option value="$PROJECT_DIR$/strongs/static/css/newDesign.css" />
         <option value="$PROJECT_DIR$/strongs/static/js/infoSidebar.js" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/bibleAsync.html" />
         <option value="$PROJECT_DIR$/strongs/views.py" />
         <option value="$PROJECT_DIR$/strongs/templates/baseTemplate3.html" />
+        <option value="$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html" />
+        <option value="$PROJECT_DIR$/strongs/templates/strongs/searchNew.html" />
+        <option value="$PROJECT_DIR$/strongs/static/js/jquery.matchHeight.js" />
       </list>
     </option>
   </component>
@@ -666,11 +619,6 @@
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1500" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/static/js/jquery.matchHeight.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="165" column="19" selection-start="5299" selection-end="5299" vertical-scroll-proportion="0.0" vertical-offset="1778" max-vertical-offset="2880" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/static/css/bible.css">
       <provider selected="true" editor-type-id="text-editor">
         <state line="98" column="42" selection-start="2060" selection-end="2098" vertical-scroll-proportion="0.36206895" vertical-offset="1071" max-vertical-offset="4065" />
@@ -816,11 +764,6 @@
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2070" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/strongNr.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="0" selection-start="58" selection-end="58" vertical-scroll-proportion="0.04784689" vertical-offset="0" max-vertical-offset="627" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/initDb.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="36" column="0" selection-start="1810" selection-end="1810" vertical-scroll-proportion="-0.041246563" vertical-offset="540" max-vertical-offset="4770" />
@@ -859,71 +802,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="12" selection-start="12" selection-end="12" vertical-scroll-proportion="-0.0" vertical-offset="0" max-vertical-offset="3180">
-          <folding>
-            <marker date="1398364248000" expanded="true" signature="268:1627" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="326:1037" placeholder="..." />
-            <marker date="1398364248000" expanded="false" signature="371:387" placeholder="..." />
-            <marker date="1398364248000" expanded="false" signature="484:526" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="589:1018" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="1071:1527" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="1222:1479" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="1294:1397" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="1561:1612" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="1661:3020" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="1719:2430" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="1764:1780" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="1877:1919" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="1982:2411" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="2464:2920" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="2615:2872" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="2687:2790" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="2954:3005" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="3054:4413" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="3112:3823" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="3157:3173" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="3270:3312" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="3375:3804" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="3857:4313" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="4008:4265" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="4080:4183" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="4347:4398" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="4456:5824" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="4523:5234" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="4568:4584" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="4681:4723" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="4786:5215" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="5268:5724" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="5419:5676" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="5491:5594" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="5758:5809" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="5921:9907" placeholder="..." />
-            <marker date="1398364248000" expanded="true" signature="5955:8198" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="6144:8136" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="6194:8118" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="6326:6692" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="6368:6447" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="6474:6552" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="6579:6666" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="6756:6826" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="6870:6943" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="6986:8096" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="7223:7617" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="7269:7356" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="7385:7471" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="7500:7587" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="8248:9758" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="8317:8388" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="8774:9276" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="8900:9015" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="9141:9256" placeholder="{...}" />
-            <marker date="1398364248000" expanded="true" signature="9553:9744" placeholder="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/static/js/autocomplete.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="98" column="13" selection-start="3564" selection-end="3564" vertical-scroll-proportion="0.0" vertical-offset="803" max-vertical-offset="1905">
@@ -938,13 +816,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="34" column="28" selection-start="974" selection-end="2125" vertical-scroll-proportion="-21.25" vertical-offset="0" max-vertical-offset="2580">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/views.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="314" column="66" selection-start="15500" selection-end="15500" vertical-scroll-proportion="0.0" vertical-offset="3747" max-vertical-offset="7230">
@@ -955,7 +826,9 @@
     <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleAsync.html">
       <provider selected="true" editor-type-id="text-editor">
         <state line="7" column="47" selection-start="420" selection-end="420" vertical-scroll-proportion="-4.375" vertical-offset="0" max-vertical-offset="2535">
-          <folding />
+          <folding>
+            <marker date="1398367902000" expanded="true" signature="6358:7373" placeholder="{% for v in verses4 ... %}" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -968,7 +841,44 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate3.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="350" column="69" selection-start="15917" selection-end="15917" vertical-scroll-proportion="0.28169015" vertical-offset="4950" max-vertical-offset="6390">
+        <state line="87" column="47" selection-start="4109" selection-end="4109" vertical-scroll-proportion="-15.5" vertical-offset="933" max-vertical-offset="6390">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="164" column="35" selection-start="9180" selection-end="9180" vertical-scroll-proportion="-39.916668" vertical-offset="1502" max-vertical-offset="2580">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="203" column="43" selection-start="9894" selection-end="9894" vertical-scroll-proportion="-39.291668" vertical-offset="2102" max-vertical-offset="3180">
+          <folding>
+            <element signature="e#364#388#0" expanded="true" />
+            <element signature="e#477#527#0" expanded="true" />
+            <element signature="e#1757#1781#0" expanded="true" />
+            <element signature="e#1870#1920#0" expanded="true" />
+            <element signature="e#3150#3174#0" expanded="true" />
+            <element signature="e#3263#3313#0" expanded="true" />
+            <element signature="e#4561#4585#0" expanded="true" />
+            <element signature="e#4674#4724#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/strongNr.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="0" selection-start="58" selection-end="58" vertical-scroll-proportion="0.027829314" vertical-offset="0" max-vertical-offset="1078">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/static/js/jquery.matchHeight.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="17" column="27" selection-start="465" selection-end="465" vertical-scroll-proportion="0.23139746" vertical-offset="0" max-vertical-offset="3525">
           <folding />
         </state>
       </provider>
