@@ -154,7 +154,8 @@ def strongs(request, strong_id, vers, word):
                     appender = 'H' if book[0].nr < 40 else 'G'
                     return render(request, 'strongs/strongNr.html', {'pronounciation': pronounciation, 'word': word, 'strongnr': appender + strong_id, 'greek':greek, 'strong': appender + str(strong_id), 'grammar': grammar, 'vers': vers, 'occurences': occ, 'count': search1.count(), 'translations': translations})
     # return HttpResponse('No verses found for strong nr ' + str(strong_id))
-    return render(request, 'strongs/error.html', {'message': u'Es wurden keine Verse für die Strong-Nummer ' + str(strong_id) + ' gefunden!', 'solution':'Evtl. existiert diese Strong Nummer nicht.'})
+    # return render(request, 'strongs/error.html', {'message': u'Es wurden keine Verse für die Strong-Nummer ' + str(strong_id) + ' gefunden!', 'solution':'Evtl. existiert diese Strong Nummer nicht.'})
+    return render(request, 'strongs/strongNr.html', {'error': 'Diese Strong-Nummer existiert scheinbar nicht!'})
 
 def async_bible(request, bible_book, column=None, translation=None):
     ret = bible(request, bible_book, 'strongs/bibleAsync.html', column, translation)
