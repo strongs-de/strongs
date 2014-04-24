@@ -75,6 +75,7 @@ class BibleVersNote(UserData):
     vers = models.ForeignKey('BibleVers')
     versList = models.ForeignKey('BibleVersList', null=True)
     text = models.TextField(null=True)
+    order = models.IntegerField()
     lastchanged = models.CharField(null=True, max_length="20")
 
     def __unicode__(self):
@@ -83,9 +84,29 @@ class BibleVersNote(UserData):
 
 class BibleVersList(UserData):
     title = models.CharField(max_length=300)
+    introduction = models.TextField()
     lastchanged = models.CharField(null=True, max_length="20")
+
+    def containsVers(self, vers):
+        if BibleVersNote.objects.filter(user=self.user, versList=self, vers=vers).count() > 0:
+            return True
+        return False
+
+    def __unicode__(self):
+        if self.lastchanged:
+            return unicode(self.title + ' (' + self.lastchanged + ')')
+        else:
+            return unicode(self.title)
 
 
 class BibleVersNoteComment(UserData):
-    text = models.TextField()
+    note = models.ForeignKey("BibleVersNote")
+    comment = models.TextField()
     lastchanged = models.CharField(null=True, max_length="20")
+
+
+class WordMapping(models.Model):
+    word = models.CharField(max_length=1024, primary_key=True)
+    lemma = models.CharField(max_length=1024)
+
+

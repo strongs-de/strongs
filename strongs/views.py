@@ -21,6 +21,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.views import login
 from strongs.utils import bible_translation_order
 from strongs.utils import set_cookies
+import time
 
 
 BIBLES_IN_VIEW = ['ELB1905STR', 'SCH2000', 'LUTH1912', u'NGÜ']
@@ -169,6 +170,89 @@ def sync_bible(request, bible_book):
     else:
         return ret
 
+
+
+@login_required
+def add_vers_to_list(request, vers, versListId='-1'):
+    if int(versListId) == -1:
+        versList = BibleVersList.objects.filter(user=request.user).order_by('-lastchanged')
+    else:
+        versList = BibleVersList.objects.filter(user=request.user, id=versListId)
+
+    if versList.count() > 0:
+        versList = versList[0]
+        s = vers.split('_')
+        if len(s) >= 3:
+            bvers = BibleVers.objects.filter(bookNr__nr=s[0], chapterNr=s[1], versNr=s[2])
+            if bvers.count() > 0 and not versList.containsVers(bvers):
+                versNotes = BibleVersNote.objects.filter(user=request.user, versList=versList, vers=bvers[0])
+                versNote = BibleVersNote(lastchanged=_get_date(), user=request.user, versList=versList, vers=bvers[0], order=versNotes.count())
+                versNote.save()
+                return HttpResponse('Ok')
+    return HttpResponse('Could not save, cause there is no list available!')
+
+
+@login_required
+def remove_vers_from_list(request, vers):
+    versList = BibleVersList.objects.filter(user=request.user).order_by('-lastchanged')
+    if versList.count() > 0:
+        versList = versList[0]
+        s = vers.split('_')
+        if len(s) >= 3:
+            bvers = BibleVers.objects.filter(bookNr__nr=s[0], chapterNr=s[1], versNr=s[2])
+            if bvers.count() > 0:
+                versNotes = BibleVersNote.objects.filter(user=request.user, versList=versList, vers=bvers[0])
+                if versNotes.count() > 0:
+                    versNotes[0].delete()
+                # versNote = BibleVersNote(user=request.user, versList=versList, vers=bvers[0], order=versNotes.count())
+                # versNote.save()
+                    return HttpResponse('Ok')
+    return HttpResponse('Could not delete!')
+
+
+@login_required
+def set_verslist_title(request, id, t):
+    versList = BibleVersList.objects.filter(user=request.user, id=id)
+    if versList.count() > 0:
+        versList = versList[0]
+        versList.title = t
+        versList.save()
+        return HttpResponse('Ok')
+    return HttpResponse('Could not change the verslist title')
+
+
+@login_required
+def create_verslist(request):
+    versList = BibleVersList(lastchanged=_get_date(), user=request.user, title='Neue Versliste')
+    versList.save()
+    return HttpResponse('Ok')
+
+
+@login_required
+def select_verslist(request, id):
+    versList = BibleVersList.objects.filter(user=request.user, id=id)
+    if versList.count() > 0:
+        versList = versList[0]
+        versList.lastchanged = _get_date()
+        versList.save()
+        return HttpResponse('Ok')
+    return HttpResponse('Could not find the requested vers list')
+
+
+@login_required
+def remove_verslist(request):
+    versList = BibleVersList.objects.filter(user=request.user).order_by('-lastchanged')
+    if versList.count() > 0:
+        versList = versList[0]
+        versList.delete()
+        return HttpResponse('Ok')
+    return HttpResponse('Could not delete the vers list')
+
+
+def _get_date():
+    return time.strftime('%Y-%m-%d %H-%M-%S', time.localtime())
+
+
 def bible(request, bible_book, templateName, column=None, translation=None):
     # if strong-number, then forward
     if bible_book.isdigit():
@@ -215,12 +299,26 @@ def bible(request, bible_book, templateName, column=None, translation=None):
                         if vers != None:
                             srch += ',' + str(vers)
 
-                        response = render(request, templateName, {'full_url': request.build_absolute_uri(None),'vers': vers, 'search': srch, 'translation1': BIBLE_NAMES_IN_VIEW[bible_order[0]], 'translation2': BIBLE_NAMES_IN_VIEW[bible_order[1]], 'translation3': BIBLE_NAMES_IN_VIEW[bible_order[2]], 'translation4': BIBLE_NAMES_IN_VIEW[bible_order[3]], 'verses1': verses1, 'verses2': verses2, 'verses3': verses3, 'verses4': verses4, 'bible_hint1': BIBLE_HINTS_IN_VIEW[bible_order[0]], 'bible_hint2': BIBLE_HINTS_IN_VIEW[bible_order[1]], 'bible_hint3': BIBLE_HINTS_IN_VIEW[bible_order[2]], 'bible_hint4': BIBLE_HINTS_IN_VIEW[bible_order[3]]})
+
+                        # select the current verse list if user is logged in
+                        versLists = []
+                        versList = None
+                        versListItems = []
+                        if request.user.is_authenticated():
+                            versLists = BibleVersList.objects.filter(user=request.user).order_by('-lastchanged')
+                            if versLists.count() <= 0:
+                                versList = BibleVersList(lastchanged=_get_date(), title='Neue Versliste', user=request.user).save()
+                            else:
+                                versList = versLists[0]
+                                versListItems = BibleVersNote.objects.filter(user=request.user, versList=versList).order_by('order')
+
+                        response = render(request, templateName, {'versLists': versLists, 'versListItems': versListItems, 'versList': versList, 'full_url': request.build_absolute_uri(None),'vers': vers, 'search': srch, 'translation1': BIBLE_NAMES_IN_VIEW[bible_order[0]], 'translation2': BIBLE_NAMES_IN_VIEW[bible_order[1]], 'translation3': BIBLE_NAMES_IN_VIEW[bible_order[2]], 'translation4': BIBLE_NAMES_IN_VIEW[bible_order[3]], 'verses1': verses1, 'verses2': verses2, 'verses3': verses3, 'verses4': verses4, 'bible_hint1': BIBLE_HINTS_IN_VIEW[bible_order[0]], 'bible_hint2': BIBLE_HINTS_IN_VIEW[bible_order[1]], 'bible_hint3': BIBLE_HINTS_IN_VIEW[bible_order[2]], 'bible_hint4': BIBLE_HINTS_IN_VIEW[bible_order[3]]})
 
                         # handle cookies
                         set_cookies(response, bible_order)
 
                         return response;
+
                     else:
                         # return HttpResponse('No verses found')
                         return render(request, 'strongs/error.html', {'message': u'Die Bibelstelle konnte nicht geladen werden!', 'solution':u'Versuche es bitte später noch einmal.<br/>Sollte der Fehler noch immer bestehen, gib uns bitte unter info@strongs.de bescheid!'})
