@@ -12,7 +12,7 @@
         <link rel="shortcut icon" href="{{ STATIC_URL }}images/favicon.ico">
         <link rel="apple-touch-icon" href="{{ STATIC_URL }}images/icon_iPhone5.png">
 
-        <title>Strongs.de</title>
+        <title>{{ search }}</title>
 
 {#        <link href="{{ STATIC_URL }}css/anysearch.css" rel="stylesheet">#}
         <link href="{{ STATIC_URL }}css/glyphter.css" rel="stylesheet">
@@ -98,50 +98,7 @@
         <script src="{{ STATIC_URL }}js/jquery.tooltipster.min.js"></script>
         <script>
 
-            function removeVersFromList() {
-                var xhReq = new XMLHttpRequest();
-                xhReq.open("GET", "/remove-vers/" + $(this).attr('data') + '/', false);
-                xhReq.send(null);
-                if(xhReq.responseText === 'Ok')
-                    $(this).parent().remove();
-            }
-
-            function addVersToList(me) {
-                var xhReq = new XMLHttpRequest();
-                xhReq.open("GET", "/add-vers/" + $(me).attr('data') + '/', false);
-                xhReq.send(null);
-                if(xhReq.responseText === 'Ok') {
-                    arr = $(me).attr('data').split('/')[0].split('_');
-                    vlId = $(me).attr('data').split('/')[1];
-                    if(arr.length >= 3 && vlId !== undefined && $('.versList#' + vlId).length > 0) {
-                        ele = $('.versListItems').append('<li class="versListItem"><a href="/' + shortBooks[arr[0] - 1] + arr[1] + ',' + arr[2] + '">' + shortBooks[arr[0] - 1] + ' ' + arr[1] + ',' + arr[2] + '</a><a data="' + $(me).attr('data').split('/')[0] + '" class="remove-from-verslist" href="#">X</a></li>');
-                        ele.find('a.remove-from-verslist').click(removeVersFromList);
-                    }
-                }
-            }
-
-            function removeVersList() {
-                var xhReq = new XMLHttpRequest();
-                xhReq.open("GET", "/remove-verslist/", false);
-                xhReq.send(null);
-                if(xhReq.responseText === 'Ok') {
-                    location.reload();
-                }
-            }
-
-            function doSearch(string) {
-                var path = '/' + string;
-                location.href=path;
-{#                var xhReq = new XMLHttpRequest();#}
-{#                xhReq.open("GET", path, false);#}
-{#                xhReq.send(null);#}
-{#                var serverResponse = xhReq.responseText;#}
-{#                $('.container').html(serverResponse);#}
-{#                $('#searchId').blur();#}
-{#                initStrongLinks();#}
-            }
-
-            $(document).ready(function() {
+            function initTooltips() {
                 // Activate tooltipster
                 $('.tooltip').tooltipster({
                     contentAsHTML: true,
@@ -149,6 +106,11 @@
                     maxWidth: 500,
                     theme: 'tooltipster-shadow'
                 });
+            }
+
+            function initSite() {
+                initTooltips();
+                initStrongLinks();
 
                 // Key listener for search field
                 $('#searchId').keydown(function(e) {
@@ -239,7 +201,7 @@
                     var book = result[1];
                     var chapter = result[2];
                     var vers = result[3];
-                    var val = '/' + book + (parseInt(chapter)+adder) + (vers != null ? ',' + vers : '') + '/';
+                    var val = '/' + book + (parseInt(chapter)+adder) + '/';
                     location.href = val;
                     return;
                   }
@@ -333,7 +295,110 @@
                     if(xhReq.responseText === 'Ok')
                         ;
                 });
+
+                $('.titleTr').click(function(e) {
+                    $('.switchTr').css( "display", "none" );
+                    $('#switchTr' + $(this).attr('_hmnu')).css( "display", "block" );
+                });
+
+                register_title_hover();
+            }
+
+            function removeVersFromList() {
+                var xhReq = new XMLHttpRequest();
+                xhReq.open("GET", "/remove-vers/" + $(this).attr('data') + '/', false);
+                xhReq.send(null);
+                if(xhReq.responseText === 'Ok')
+                    $(this).parent().remove();
+            }
+
+            function addVersToList(me) {
+                var xhReq = new XMLHttpRequest();
+                xhReq.open("GET", "/add-vers/" + $(me).attr('data') + '/', false);
+                xhReq.send(null);
+                if(xhReq.responseText === 'Ok') {
+                    arr = $(me).attr('data').split('/')[0].split('_');
+                    vlId = $(me).attr('data').split('/')[1];
+                    if(arr.length >= 3 && vlId !== undefined && $('.versList#' + vlId).length > 0) {
+                        ele = $('.versListItems').append('<li class="versListItem"><a href="/' + shortBooks[arr[0] - 1] + arr[1] + ',' + arr[2] + '">' + shortBooks[arr[0] - 1] + ' ' + arr[1] + ',' + arr[2] + '</a><a data="' + $(me).attr('data').split('/')[0] + '" class="remove-from-verslist" href="#">X</a></li>');
+                        ele.find('a.remove-from-verslist').click(removeVersFromList);
+                    }
+                }
+            }
+
+            function removeVersList() {
+                var xhReq = new XMLHttpRequest();
+                xhReq.open("GET", "/remove-verslist/", false);
+                xhReq.send(null);
+                if(xhReq.responseText === 'Ok') {
+                    location.reload();
+                }
+            }
+
+            function doSearch(string) {
+                var path = '/' + string;
+                location.href=path;
+{#                var xhReq = new XMLHttpRequest();#}
+{#                xhReq.open("GET", path, false);#}
+{#                xhReq.send(null);#}
+{#                var serverResponse = xhReq.responseText;#}
+{#                $('.container').html(serverResponse);#}
+{#                $('#searchId').blur();#}
+{#                initStrongLinks();#}
+            }
+
+            function switchTranslation(column, translation) {
+                var url = document.location.href.match(/(^[^#]*)/)[0];
+                url = url + "trans/"+column+"_"+translation+"/";
+{#                var xhReq = new XMLHttpRequest();#}
+{#                xhReq.open("GET", url, false);#}
+{#                xhReq.send(null);#}
+{#                location.reload();#}
+                $('.container').load(url, function( response, status, xhr ) {
+                    if ( status != "error" ) {
+{#                        register_title_hover();#}
+                        initSite();
+                    }
+                });
+
+            }
+
+            $(document).ready(function() {
+                initSite();
             });
+
+            function register_title_hover() {
+                var title_delayIn = 0;
+                var title_delayOut = 0;
+                var title = -1;
+                $('.titleTr').hover (
+                    function() {
+                        var hmnu = $(this).attr('_hmnu');
+                        title_delayIn = 1;
+
+                        if (title == hmnu) {
+                            title_delayOut = 0;
+                        }
+
+                        window.setTimeout(function () {
+                            if (title_delayIn) {
+                                $('.switchTr').css( "display", "none" );
+                                $('#switchTr' + hmnu).css( "display", "block" );
+                            }
+                        }, 300);
+                    }, function() {
+                        var hmnu = $(this).attr('_hmnu');
+                        title_delayIn = 0;
+                        title_delayOut = 1;
+                        title = hmnu;
+                        window.setTimeout(function () {
+                            if (title_delayOut) {
+                                $('#switchTr' + hmnu).css( "display", "none" );
+                            }
+                        }, 500);
+                    }
+                );
+            }
         </script>
         <script src="{{ STATIC_URL }}js/autocomplete.js"></script>
         {% block js %}

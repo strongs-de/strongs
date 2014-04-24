@@ -1,4 +1,8 @@
 {% autoescape off %}
+{% if error %}
+    <h2>Fehler!</h2>
+    <h3>{{ error }}</h3>
+{% else %}
 <h2>{{ word }} ({{ strongnr }})</h2>
 {% if greek %}<h3>Griechisch: {{ greek }}{% if pronounciation %} ({{ pronounciation }}){% endif %}</h3>{% endif %}
 <h4>Stelle: {{vers}}</h4>
@@ -28,4 +32,5 @@ Insgesamt wurden {{count}} Stellen mit {{occurences}} Vorkommnissen gefunden.<br
 {% endfor %}
 </div>
 -->
+{% endif %}
 {% endautoescape %}

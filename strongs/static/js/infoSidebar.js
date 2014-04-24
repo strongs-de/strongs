@@ -61,7 +61,7 @@ $(function() {
     if(parent.location.hash.length > 1) {
         var anchor = parent.location.hash.substring(1);
         var arr = anchor.split('/');
-        loadStrong(arr[0], arr[1], arr[2]);
+        loadStrong(arr[0], arr[1]);
         animateOpenInfobox();
     }
 

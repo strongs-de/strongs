@@ -26,9 +26,32 @@
       <file leaf-file-name="views.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="171" column="0" selection-start="7740" selection-end="7740" vertical-scroll-proportion="0.0" vertical-offset="2353" max-vertical-offset="7005">
+            <state line="329" column="25" selection-start="17179" selection-end="17179" vertical-scroll-proportion="0.0" vertical-offset="4675" max-vertical-offset="7575">
               <folding>
                 <element signature="e#24#79#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="strongNr.html" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/strongNr.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="2" column="15" selection-start="51" selection-end="51" vertical-scroll-proportion="-1.25" vertical-offset="0" max-vertical-offset="615">
+              <folding>
+                <element signature="e#315#340#0" expanded="true" />
+                <element signature="e#508#533#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="bibleAsync.html" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleAsync.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="7" column="47" selection-start="420" selection-end="420" vertical-scroll-proportion="-4.375" vertical-offset="0" max-vertical-offset="2535">
+              <folding>
+                <marker date="1398367902000" expanded="true" signature="6358:7373" placeholder="{% for v in verses4 ... %}" />
               </folding>
             </state>
           </provider>
@@ -37,47 +60,16 @@
       <file leaf-file-name="bibleNew.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="38" column="0" selection-start="2249" selection-end="2249" vertical-scroll-proportion="-7.5" vertical-offset="390" max-vertical-offset="2040">
+            <state line="164" column="35" selection-start="9180" selection-end="9180" vertical-scroll-proportion="-39.916668" vertical-offset="1502" max-vertical-offset="2580">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="searchNew.html" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
+      <file leaf-file-name="extend.strongs.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tools/extend.strongs.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="152" column="50" selection-start="7484" selection-end="7484" vertical-scroll-proportion="-45.541668" vertical-offset="1187" max-vertical-offset="2595">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="models.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strongs/models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="96" column="42" selection-start="3714" selection-end="3714" vertical-scroll-proportion="0.0" vertical-offset="668" max-vertical-offset="1770">
-              <folding>
-                <element signature="e#24#52#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="urls.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strongs/urls.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="18" column="109" selection-start="611" selection-end="611" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="810">
-              <folding>
-                <element signature="e#0#42#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="newDesign.css" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strongs/static/css/newDesign.css">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="307" column="19" selection-start="6993" selection-end="6993" vertical-scroll-proportion="0.0" vertical-offset="4266" max-vertical-offset="6420">
+            <state line="3" column="0" selection-start="91" selection-end="91" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="135">
               <folding />
             </state>
           </provider>
@@ -86,25 +78,16 @@
       <file leaf-file-name="baseTemplate3.html" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate3.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="115" column="97" selection-start="5366" selection-end="5366" vertical-scroll-proportion="0.5070422" vertical-offset="1185" max-vertical-offset="5415">
+            <state line="14" column="24" selection-start="896" selection-end="896" vertical-scroll-proportion="0.1971831" vertical-offset="0" max-vertical-offset="6390">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="strongs_extras.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strongs/templatetags/strongs_extras.py">
+      <file leaf-file-name="jquery.matchHeight.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/strongs/static/js/jquery.matchHeight.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="22" column="0" selection-start="881" selection-end="881" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="840">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="autocomplete.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strongs/static/js/autocomplete.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="98" column="13" selection-start="3564" selection-end="3564" vertical-scroll-proportion="0.0" vertical-offset="803" max-vertical-offset="1905">
+            <state line="17" column="27" selection-start="465" selection-end="465" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="3525">
               <folding />
             </state>
           </provider>
@@ -113,7 +96,34 @@
       <file leaf-file-name="infoSidebar.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/static/js/infoSidebar.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="32" column="44" selection-start="987" selection-end="1164" vertical-scroll-proportion="0.0" vertical-offset="8" max-vertical-offset="1110">
+            <state line="61" column="41" selection-start="2043" selection-end="2043" vertical-scroll-proportion="0.0" vertical-offset="8" max-vertical-offset="1110">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="searchNew.html" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="5" column="15" selection-start="120" selection-end="120" vertical-scroll-proportion="-3.125" vertical-offset="0" max-vertical-offset="3180">
+              <folding>
+                <element signature="e#364#388#0" expanded="true" />
+                <element signature="e#477#527#0" expanded="true" />
+                <element signature="e#1757#1781#0" expanded="true" />
+                <element signature="e#1870#1920#0" expanded="true" />
+                <element signature="e#3150#3174#0" expanded="true" />
+                <element signature="e#3263#3313#0" expanded="true" />
+                <element signature="e#4561#4585#0" expanded="true" />
+                <element signature="e#4674#4724#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="autocomplete.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/strongs/static/js/autocomplete.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="98" column="13" selection-start="3564" selection-end="3564" vertical-scroll-proportion="0.0" vertical-offset="803" max-vertical-offset="1905">
               <folding />
             </state>
           </provider>
@@ -136,7 +146,6 @@
         <option value="$PROJECT_DIR$/strongs/static/js/autocomplete_test.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/search.html" />
         <option value="$PROJECT_DIR$/strongs/templates/baseTemplate.html" />
-        <option value="$PROJECT_DIR$/strongs/static/js/jquery.matchHeight.js" />
         <option value="$PROJECT_DIR$/strongs/templates/newDesign.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/bible.html" />
         <option value="$PROJECT_DIR$/strongs/static/js/stronghandler.js" />
@@ -152,22 +161,25 @@
         <option value="$PROJECT_DIR$/strongs/templates/registration/login.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/register.html" />
         <option value="$PROJECT_DIR$/strongs/static/css/login.css" />
-        <option value="$PROJECT_DIR$/strongs/templates/strongs/bibleAsync.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/searchAsync.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/account.html" />
         <option value="$PROJECT_DIR$/bibles/osis.schlachter2000.v1.withoutnotes.xml" />
-        <option value="$PROJECT_DIR$/strongs/static/js/infoSidebar.js" />
-        <option value="$PROJECT_DIR$/strongs/templates/strongs/strongNr.html" />
         <option value="$PROJECT_DIR$/bibleBooks_de.txt" />
-        <option value="$PROJECT_DIR$/strongs/initDb.py" />
-        <option value="$PROJECT_DIR$/strongs/templates/strongs/searchNew.html" />
         <option value="$PROJECT_DIR$/strongs/static/js/autocomplete.js" />
         <option value="$PROJECT_DIR$/strongs/models.py" />
         <option value="$PROJECT_DIR$/strongs/templatetags/strongs_extras.py" />
-        <option value="$PROJECT_DIR$/strongs/static/css/newDesign.css" />
-        <option value="$PROJECT_DIR$/strongs/views.py" />
         <option value="$PROJECT_DIR$/strongs/urls.py" />
+        <option value="$PROJECT_DIR$/strongs/grammar_parser.py" />
+        <option value="$PROJECT_DIR$/strongs/initDb.py" />
+        <option value="$PROJECT_DIR$/tools/extend.strongs.py" />
+        <option value="$PROJECT_DIR$/strongs/static/css/newDesign.css" />
+        <option value="$PROJECT_DIR$/strongs/static/js/infoSidebar.js" />
+        <option value="$PROJECT_DIR$/strongs/templates/strongs/bibleAsync.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html" />
+        <option value="$PROJECT_DIR$/strongs/templates/strongs/searchNew.html" />
+        <option value="$PROJECT_DIR$/strongs/static/js/jquery.matchHeight.js" />
+        <option value="$PROJECT_DIR$/strongs/views.py" />
+        <option value="$PROJECT_DIR$/strongs/templates/strongs/strongNr.html" />
         <option value="$PROJECT_DIR$/strongs/templates/baseTemplate3.html" />
       </list>
     </option>
@@ -231,61 +243,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="strongs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Django_Strongs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Django_Strongs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="strongs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="static" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Django_Strongs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Django_Strongs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="strongs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="static" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="js" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Django_Strongs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Django_Strongs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="bibles" />
+              <option name="myItemId" value="tools" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -308,7 +266,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/Django_Strongs/settings.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/tools/extend.strongs.py" />
     <property name="FullScreen" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="recentsLimit" value="5" />
@@ -417,27 +375,7 @@
       <option name="PARAMETERS" value="" />
       <method />
     </configuration>
-    <configuration default="true" type="Python.DjangoServer" factoryName="Django server">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="Django_Strongs" />
-      <option name="launchJavascriptDebuger" value="false" />
-      <option name="port" value="8000" />
-      <option name="host" value="" />
-      <option name="additionalOptions" value="" />
-      <option name="browserUrl" value="" />
-      <option name="runTestServer" value="false" />
-      <option name="runNoReload" value="false" />
-      <option name="useCustomRunCommand" value="false" />
-      <option name="customRunCommand" value="" />
+    <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug" singleton="true">
       <method />
     </configuration>
     <configuration default="true" type="tests" factoryName="Unittests">
@@ -463,7 +401,27 @@
       <option name="USE_PARAM" value="false" />
       <method />
     </configuration>
-    <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug" singleton="true">
+    <configuration default="true" type="Python.DjangoServer" factoryName="Django server">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="Django_Strongs" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <option name="port" value="8000" />
+      <option name="host" value="" />
+      <option name="additionalOptions" value="" />
+      <option name="browserUrl" value="" />
+      <option name="runTestServer" value="false" />
+      <option name="runNoReload" value="false" />
+      <option name="useCustomRunCommand" value="false" />
+      <option name="customRunCommand" value="" />
       <method />
     </configuration>
     <configuration default="true" type="tests" factoryName="Doctests">
@@ -536,8 +494,26 @@
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method />
     </configuration>
-    <list size="1">
+    <configuration default="false" name="extend.strongs" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tools" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="Django_Strongs" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tools/extend.strongs.py" />
+      <option name="PARAMETERS" value="" />
+      <method />
+    </configuration>
+    <list size="2">
       <item index="0" class="java.lang.String" itemvalue="Django server.Strongs.de" />
+      <item index="1" class="java.lang.String" itemvalue="Python.extend.strongs" />
     </list>
   </component>
   <component name="ShelveChangesManager" show_recycled="false" />
@@ -571,19 +547,19 @@
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32920355" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32920355" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32920355" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.16080937" sideWeight="0.6708075" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39911506" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.16347177" sideWeight="0.6708075" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39823008" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32920355" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32920355" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -605,29 +581,17 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="95" />
+      <breakpoints>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/tools/extend.strongs.py</url>
+          <line>2</line>
+          <option name="timeStamp" value="114" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="115" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/strongs/admin.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="29" selection-start="268" selection-end="268" vertical-scroll-proportion="0.0" vertical-offset="119" max-vertical-offset="221" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/strongNr.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="14" selection-start="62" selection-end="72" vertical-scroll-proportion="0.0" vertical-offset="34" max-vertical-offset="425">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Django_Strongs/settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="62" column="0" selection-start="1704" selection-end="1704" vertical-scroll-proportion="0.0" vertical-offset="1054" max-vertical-offset="1870">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templatetags/strongs_extras.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="12" column="52" selection-start="253" selection-end="253" vertical-scroll-proportion="0.0" vertical-offset="204" max-vertical-offset="561">
@@ -637,16 +601,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/static/css/bible.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="186" column="10" selection-start="3815" selection-end="3815" vertical-scroll-proportion="0.0" vertical-offset="3162" max-vertical-offset="4335">
-          <folding />
-        </state>
+        <state line="186" column="10" selection-start="3815" selection-end="3815" vertical-scroll-proportion="0.0" vertical-offset="3162" max-vertical-offset="4335" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/urls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="49" selection-start="189" selection-end="189" vertical-scroll-proportion="0.0" vertical-offset="85" max-vertical-offset="255">
-          <folding />
-        </state>
+        <state line="5" column="49" selection-start="189" selection-end="189" vertical-scroll-proportion="0.0" vertical-offset="85" max-vertical-offset="255" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/views.py">
@@ -660,51 +620,32 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/urls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="65" selection-start="206" selection-end="206" vertical-scroll-proportion="0.0" vertical-offset="90" max-vertical-offset="210">
-          <folding />
-        </state>
+        <state line="6" column="65" selection-start="206" selection-end="206" vertical-scroll-proportion="0.0" vertical-offset="90" max-vertical-offset="210" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/static/js/autocomplete_test.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="17" selection-start="252" selection-end="297" vertical-scroll-proportion="-3.75" vertical-offset="0" max-vertical-offset="270">
-          <folding />
-        </state>
+        <state line="6" column="17" selection-start="252" selection-end="297" vertical-scroll-proportion="-3.75" vertical-offset="0" max-vertical-offset="270" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/bible.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1500">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/static/js/jquery.matchHeight.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="165" column="19" selection-start="5299" selection-end="5299" vertical-scroll-proportion="0.0" vertical-offset="1778" max-vertical-offset="2880">
-          <folding />
-        </state>
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1500" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/static/css/bible.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="98" column="42" selection-start="2060" selection-end="2098" vertical-scroll-proportion="0.36206895" vertical-offset="1071" max-vertical-offset="4065">
-          <folding />
-        </state>
+        <state line="98" column="42" selection-start="2060" selection-end="2098" vertical-scroll-proportion="0.36206895" vertical-offset="1071" max-vertical-offset="4065" />
       </provider>
     </entry>
     <entry file="file:///Library/Python/2.7/site-packages/django/utils/autoreload.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="127" column="0" selection-start="4621" selection-end="4621" vertical-scroll-proportion="0.3323077" vertical-offset="1689" max-vertical-offset="2820">
-          <folding />
-        </state>
+        <state line="127" column="0" selection-start="4621" selection-end="4621" vertical-scroll-proportion="0.3323077" vertical-offset="1689" max-vertical-offset="2820" />
       </provider>
     </entry>
     <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/SocketServer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="154" column="0" selection-start="5999" selection-end="5999" vertical-scroll-proportion="0.3323077" vertical-offset="2034" max-vertical-offset="10995">
-          <folding />
-        </state>
+        <state line="154" column="0" selection-start="5999" selection-end="5999" vertical-scroll-proportion="0.3323077" vertical-offset="2034" max-vertical-offset="10995" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/manage.py">
@@ -719,11 +660,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Django_Strongs/urls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="0" selection-start="85" selection-end="85" vertical-scroll-proportion="0.027223231" vertical-offset="0" max-vertical-offset="1102">
-          <folding>
-            <element signature="e#0#51#0" expanded="false" />
-          </folding>
-        </state>
+        <state line="2" column="0" selection-start="85" selection-end="85" vertical-scroll-proportion="0.027223231" vertical-offset="0" max-vertical-offset="1102" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/error.html">
@@ -733,9 +670,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/static/css/anysearch.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="14" selection-start="1320" selection-end="1320" vertical-scroll-proportion="-0.16333938" vertical-offset="600" max-vertical-offset="2145">
-          <folding />
-        </state>
+        <state line="28" column="14" selection-start="1320" selection-end="1320" vertical-scroll-proportion="-0.16333938" vertical-offset="600" max-vertical-offset="2145" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/admin.py">
@@ -745,11 +680,7 @@
     </entry>
     <entry file="file:///Library/Python/2.7/site-packages/django/contrib/auth/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="360" column="6" selection-start="12682" selection-end="12682" vertical-scroll-proportion="0.08802178" vertical-offset="5303" max-vertical-offset="7995">
-          <folding>
-            <element signature="e#0#39#0" expanded="false" />
-          </folding>
-        </state>
+        <state line="360" column="6" selection-start="12682" selection-end="12682" vertical-scroll-proportion="0.08802178" vertical-offset="5303" max-vertical-offset="7995" />
       </provider>
     </entry>
     <entry file="file:///Library/Python/2.7/site-packages/django/forms/fields.py">
@@ -759,58 +690,37 @@
     </entry>
     <entry file="jar://$APPLICATION_HOME_DIR$/lib/pycharm.jar!/resources/html5-schema/web-forms.rnc">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="572" column="23" selection-start="13047" selection-end="13047" vertical-scroll-proportion="0.44615385" vertical-offset="8290" max-vertical-offset="8940">
-          <folding />
-        </state>
+        <state line="572" column="23" selection-start="13047" selection-end="13047" vertical-scroll-proportion="0.44615385" vertical-offset="8290" max-vertical-offset="8940" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate2.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="164" column="47" selection-start="7336" selection-end="7336" vertical-scroll-proportion="2.2467532" vertical-offset="38" max-vertical-offset="2820">
-          <folding />
-        </state>
+        <state line="164" column="47" selection-start="7336" selection-end="7336" vertical-scroll-proportion="2.2467532" vertical-offset="38" max-vertical-offset="2820" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/register.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="42" selection-start="334" selection-end="334" vertical-scroll-proportion="0.097402595" vertical-offset="0" max-vertical-offset="1078">
-          <folding />
-        </state>
+        <state line="7" column="42" selection-start="334" selection-end="334" vertical-scroll-proportion="0.097402595" vertical-offset="0" max-vertical-offset="1078" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/static/css/login.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="124" column="22" selection-start="3101" selection-end="3101" vertical-scroll-proportion="0.34845734" vertical-offset="1476" max-vertical-offset="3075">
-          <folding />
-        </state>
+        <state line="124" column="22" selection-start="3101" selection-end="3101" vertical-scroll-proportion="0.34845734" vertical-offset="1476" max-vertical-offset="3075" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/static/css/error.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="19" selection-start="276" selection-end="276" vertical-scroll-proportion="0.08166969" vertical-offset="0" max-vertical-offset="1102">
-          <folding />
-        </state>
+        <state line="6" column="19" selection-start="276" selection-end="276" vertical-scroll-proportion="0.08166969" vertical-offset="0" max-vertical-offset="1102" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/registration/login.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="42" selection-start="334" selection-end="334" vertical-scroll-proportion="0.097402595" vertical-offset="0" max-vertical-offset="1078">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleAsync.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="73" column="0" selection-start="3337" selection-end="3337" vertical-scroll-proportion="0.74953616" vertical-offset="287" max-vertical-offset="1395">
-          <folding />
-        </state>
+        <state line="7" column="42" selection-start="334" selection-end="334" vertical-scroll-proportion="0.097402595" vertical-offset="0" max-vertical-offset="1078" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchAsync.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="0" selection-start="81" selection-end="81" vertical-scroll-proportion="0.04174397" vertical-offset="0" max-vertical-offset="2400">
-          <folding />
-        </state>
+        <state line="3" column="0" selection-start="81" selection-end="81" vertical-scroll-proportion="0.04174397" vertical-offset="0" max-vertical-offset="2400" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Django_Strongs/settings.py">
@@ -822,68 +732,86 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/forms.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="20" selection-start="514" selection-end="514" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="435">
-          <folding />
-        </state>
+        <state line="20" column="20" selection-start="514" selection-end="514" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="435" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/account.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="24" column="45" selection-start="839" selection-end="839" vertical-scroll-proportion="-15.0" vertical-offset="0" max-vertical-offset="810">
-          <folding />
-        </state>
+        <state line="24" column="45" selection-start="839" selection-end="839" vertical-scroll-proportion="-15.0" vertical-offset="0" max-vertical-offset="810" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/bibles/osis.schlachter2000.v1.withoutnotes.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="66393" column="19" selection-start="3979792" selection-end="3979796" vertical-scroll-proportion="4.625" vertical-offset="996006" max-vertical-offset="1548060">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/strongNr.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="0" selection-start="58" selection-end="58" vertical-scroll-proportion="-1.25" vertical-offset="0" max-vertical-offset="540">
-          <folding />
-        </state>
+        <state line="66393" column="19" selection-start="3979792" selection-end="3979796" vertical-scroll-proportion="4.625" vertical-offset="996006" max-vertical-offset="1548060" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/bibleBooks_de.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="21" column="37" selection-start="560" selection-end="560" vertical-scroll-proportion="-11.666667" vertical-offset="0" max-vertical-offset="1065">
-          <folding />
-        </state>
-      </provider>
       <provider editor-type-id="com.intellij.persistence.database.editor.CsvTableFileEditorProvider">
         <state />
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/initDb.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="40" column="44" selection-start="2181" selection-end="2181" vertical-scroll-proportion="0.0" vertical-offset="268" max-vertical-offset="4725">
-          <folding>
-            <marker date="1397819196000" expanded="true" signature="-1:-1" placeholder="..." />
-          </folding>
-        </state>
+        <state line="21" column="37" selection-start="560" selection-end="560" vertical-scroll-proportion="-11.666667" vertical-offset="0" max-vertical-offset="1065" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/python2.7/site-packages/django/contrib/admindocs/templates/admin_doc/view_detail.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="651">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="651" />
+      </provider>
+    </entry>
+    <entry file="file:///Library/Python/2.7/site-packages/django/core/handlers/base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="129" column="50" selection-start="5451" selection-end="5451" vertical-scroll-proportion="0.58678955" vertical-offset="1328" max-vertical-offset="4215" />
+      </provider>
+    </entry>
+    <entry file="file:///Library/Python/2.7/site-packages/django/contrib/auth/decorators.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="21" column="0" selection-start="874" selection-end="874" vertical-scroll-proportion="0.32258064" vertical-offset="0" max-vertical-offset="1065" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/static/js/tooltip.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="83" column="2" selection-start="2061" selection-end="2076" vertical-scroll-proportion="1.1025409" vertical-offset="0" max-vertical-offset="1320" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/python2.7/site-packages/pip/commands/search.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2070" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/initDb.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="36" column="0" selection-start="1810" selection-end="1810" vertical-scroll-proportion="-0.041246563" vertical-offset="540" max-vertical-offset="4770" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templatetags/strongs_extras.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="50" column="49" selection-start="2776" selection-end="2776" vertical-scroll-proportion="0.6874427" vertical-offset="0" max-vertical-offset="1091">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/static/js/infoSidebar.js">
+    <entry file="file://$PROJECT_DIR$/strongs/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="32" column="44" selection-start="987" selection-end="1164" vertical-scroll-proportion="0.0" vertical-offset="8" max-vertical-offset="1110">
+        <state line="96" column="42" selection-start="3714" selection-end="3714" vertical-scroll-proportion="0.70108694" vertical-offset="666" max-vertical-offset="1770">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
+    <entry file="file://$PROJECT_DIR$/strongs/grammar_parser.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="152" column="50" selection-start="7484" selection-end="7484" vertical-scroll-proportion="-45.541668" vertical-offset="1187" max-vertical-offset="2595">
+        <state line="52" column="0" selection-start="1872" selection-end="1872" vertical-scroll-proportion="0.33272228" vertical-offset="417" max-vertical-offset="1530" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tools/extend.strongs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="3" column="0" selection-start="91" selection-end="91" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="135">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/static/css/newDesign.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="208" column="20" selection-start="5195" selection-end="5195" vertical-scroll-proportion="0.5019084" vertical-offset="2594" max-vertical-offset="6840">
           <folding />
         </state>
       </provider>
@@ -895,78 +823,81 @@
         </state>
       </provider>
     </entry>
-    <entry file="file:///Library/Python/2.7/site-packages/django/core/handlers/base.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="129" column="50" selection-start="5451" selection-end="5451" vertical-scroll-proportion="0.58678955" vertical-offset="1328" max-vertical-offset="4215">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///Library/Python/2.7/site-packages/django/contrib/auth/decorators.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="21" column="0" selection-start="874" selection-end="874" vertical-scroll-proportion="0.32258064" vertical-offset="0" max-vertical-offset="1065">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="96" column="42" selection-start="3714" selection-end="3714" vertical-scroll-proportion="0.0" vertical-offset="668" max-vertical-offset="1770">
-          <folding>
-            <element signature="e#24#52#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/static/js/tooltip.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="83" column="2" selection-start="2061" selection-end="2076" vertical-scroll-proportion="1.1025409" vertical-offset="0" max-vertical-offset="1320">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templatetags/strongs_extras.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="0" selection-start="881" selection-end="881" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="840">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/urls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="109" selection-start="611" selection-end="611" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="810">
+        <state line="46" column="90" selection-start="2445" selection-end="2445" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="840">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleAsync.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="47" selection-start="420" selection-end="420" vertical-scroll-proportion="-4.375" vertical-offset="0" max-vertical-offset="2535">
           <folding>
-            <element signature="e#0#42#0" expanded="true" />
+            <marker date="1398367902000" expanded="true" signature="6358:7373" placeholder="{% for v in verses4 ... %}" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/views.py">
+    <entry file="file://$PROJECT_DIR$/strongs/static/js/infoSidebar.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="171" column="0" selection-start="7740" selection-end="7740" vertical-scroll-proportion="0.0" vertical-offset="2353" max-vertical-offset="7005">
-          <folding>
-            <element signature="e#24#79#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/static/css/newDesign.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="307" column="19" selection-start="6993" selection-end="6993" vertical-scroll-proportion="0.0" vertical-offset="4221" max-vertical-offset="6420">
+        <state line="61" column="41" selection-start="2043" selection-end="2043" vertical-scroll-proportion="0.0" vertical-offset="8" max-vertical-offset="1110">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="38" column="0" selection-start="2249" selection-end="2249" vertical-scroll-proportion="-7.5" vertical-offset="390" max-vertical-offset="2040">
+        <state line="164" column="35" selection-start="9180" selection-end="9180" vertical-scroll-proportion="-39.916668" vertical-offset="1502" max-vertical-offset="2580">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/static/js/jquery.matchHeight.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="17" column="27" selection-start="465" selection-end="465" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="3525">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/strongNr.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="15" selection-start="51" selection-end="51" vertical-scroll-proportion="-1.25" vertical-offset="0" max-vertical-offset="615">
+          <folding>
+            <element signature="e#315#340#0" expanded="true" />
+            <element signature="e#508#533#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="15" selection-start="120" selection-end="120" vertical-scroll-proportion="-3.125" vertical-offset="0" max-vertical-offset="3180">
+          <folding>
+            <element signature="e#364#388#0" expanded="true" />
+            <element signature="e#477#527#0" expanded="true" />
+            <element signature="e#1757#1781#0" expanded="true" />
+            <element signature="e#1870#1920#0" expanded="true" />
+            <element signature="e#3150#3174#0" expanded="true" />
+            <element signature="e#3263#3313#0" expanded="true" />
+            <element signature="e#4561#4585#0" expanded="true" />
+            <element signature="e#4674#4724#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="329" column="25" selection-start="17179" selection-end="17179" vertical-scroll-proportion="0.0" vertical-offset="4675" max-vertical-offset="7575">
+          <folding>
+            <element signature="e#24#79#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate3.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="115" column="97" selection-start="5366" selection-end="5366" vertical-scroll-proportion="0.5070422" vertical-offset="1185" max-vertical-offset="5415">
+        <state line="14" column="24" selection-start="896" selection-end="896" vertical-scroll-proportion="0.1971831" vertical-offset="0" max-vertical-offset="6390">
           <folding />
         </state>
       </provider>

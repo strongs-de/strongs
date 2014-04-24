@@ -6,7 +6,7 @@
 
 (function($) {
 
-    $.fn.matchHeight = function(byRow) {
+    $.fn.matchHeight = function(byRow, variant2) {
         if (this.length <= 1)
             return this;
 
@@ -16,16 +16,17 @@
         // keep track of this group so we can re-apply later on load and resize events
         $.fn.matchHeight._groups.push({
             elements: this,
-            byRow: byRow
+            byRow: byRow,
+            variant2: variant2
         });
 
         // match each element's height to the tallest element in the selection
-        $.fn.matchHeight._apply(this, byRow);
+        $.fn.matchHeight._apply(this, byRow, variant2);
 
         return this;
     };
 
-    $.fn.matchHeight._apply = function(elements, byRow) {
+    $.fn.matchHeight._apply = function(elements, byRow, variant2) {
         var $elements = $(elements),
             rows = [$elements];
 
@@ -43,7 +44,10 @@
             });
 
             // get the array of rows (based on element top position)
-            rows = _rows($elements);
+            if(variant2)
+                rows = _rows2($elements);
+            else
+                rows = _rows($elements);
 
             // revert the temporary forced style
             $elements.css({
@@ -58,7 +62,8 @@
 
         $.each(rows, function(key, row) {
             var $row = $(row),
-                maxHeight = 0;
+                maxHeight = 0,
+                yPos = 0;
 
             // iterate the row and find the max height
             $row.each(function(){
@@ -68,8 +73,10 @@
                 $that.css({ 'display': 'block', 'height': '' });
 
                 // find the max height (including padding, but not margin)
-                if ($that.outerHeight(false) > maxHeight)
+                if ($that.outerHeight(false) > maxHeight) {
                     maxHeight = $that.outerHeight(false);
+                    yPos = $that.offset().top;
+                }
             });
 
             // iterate the row and apply the height to all elements
@@ -85,6 +92,10 @@
 
                 // set the height (accounting for padding and border)
                 $that.css('height', maxHeight - verticalPadding);
+
+                // set the padding if the yPos differs
+                if($that.offset().top < yPos)
+                    $that.css('margin-top', yPos - $that.offset().top);
             });
         });
 
@@ -123,7 +134,7 @@
 
     $.fn.matchHeight._update = function() {
         $.each($.fn.matchHeight._groups, function() {
-            $.fn.matchHeight._apply(this.elements, this.byRow);
+            $.fn.matchHeight._apply(this.elements, this.byRow, this.variant2);
         });
     };
 
@@ -138,13 +149,45 @@
     
     $(window).bind('load resize orientationchange', $.fn.matchHeight._update);
 
+    /**
+     * Return an array of rows. A row are all elements with the same id.
+     *
+     * @param elements
+     * @private
+     */
+    var _rows = function(elements) {
+        var rows = [],
+            $elements = $(elements);
+
+        $elements.each(function() {
+            var that = $(this);
+            if(rows.length == 0) {
+                rows.push(that);
+            } else {
+                var id = that.attr('id'),
+                    added = false;
+                for(i = 0; i < rows.length; ++i) {
+                    if(rows[i].attr('id') === id) {
+                        rows[i] = rows[i].add(that);
+                        added = true;
+                        break;
+                    }
+                }
+                if(!added) {
+                    rows.push(that);
+                }
+            }
+        });
+        return rows;
+    }
+
     /*
     *  rows utility function
     *  returns array of jQuery selections representing each row 
     *  (as displayed after float wrapping applied by browser)
     */
 
-    var _rows = function(elements) {
+    var _rows2 = function(elements) {
         var tolerance = 1,
             $elements = $(elements),
             lastTop = null,
