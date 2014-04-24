@@ -152,8 +152,30 @@ input:focus {
     background-size: contain;
 }
 
-.title {
-    margin-right: 15px;
+.switchTr {
+    display: none;
+    background-color: #f3efe1;
+    text-align: left;
+    position: absolute;
+    top: 1.75em;
+    right: 1.5em;
+    padding: 3px 6px 6px 3px;
+    -webkit-box-shadow: 4px 4px 4px 1px rgba(88,88,88,0.75);
+    -moz-box-shadow: 4px 4px 4px 1px rgba(88,88,88,0.75);
+    box-shadow: 4px 4px 4px 1px rgba(88,88,88,0.75);
+    border:1px solid rgba(155,155,155,0.75);
+}
+
+.switchTr > div {
+    color: #5BB05B;
+    text-decoration: none;
+    cursor: pointer;
+    width: 100%;
+}
+
+.switchTr > div:hover {
+    text-shadow: 1px 1px 1px rgba(91,176,91,0.3);
+    background-color: #e3dfd1;
 }
 
 .versenr {
@@ -185,6 +207,7 @@ input:focus {
     line-height: 131%;
     font-size: 130%;
     padding-bottom: 5px;
+    z-index: 800;
 }
 
 .copyright {

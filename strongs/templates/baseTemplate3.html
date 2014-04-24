@@ -90,6 +90,17 @@
 {#                initStrongLinks();#}
             }
 
+            function switchTranslation(column, translation) {
+                var url = location.href;
+                url = url + "trans/"+column+"_"+translation+"/";
+                $('.container').load(url, function( response, status, xhr ) {
+                    if ( status != "error" ) {
+                        register_title_hover();
+                    }
+                });
+
+            }
+
             $(document).ready(function() {
                 $('#searchId').keydown(function(e) {
                     if(e.keyCode == 13)
@@ -198,7 +209,47 @@
                         versDiv = $(this);
                     }
                 });
+
+                $('.titleTr').click(function(e) {
+                    $('.switchTr').css( "display", "none" );
+                    $('#switchTr' + $(this).attr('_hmnu')).css( "display", "block" );
+                });
+
+                register_title_hover();
             });
+
+            function register_title_hover() {
+                var title_delayIn = 0;
+                var title_delayOut = 0;
+                var title = -1;
+                $('.titleTr').hover (
+                    function() {
+                        var hmnu = $(this).attr('_hmnu');
+                        title_delayIn = 1;
+
+                        if (title == hmnu) {
+                            title_delayOut = 0;
+                        }
+
+                        window.setTimeout(function () {
+                            if (title_delayIn) {
+                                $('.switchTr').css( "display", "none" );
+                                $('#switchTr' + hmnu).css( "display", "block" );
+                            }
+                        }, 300);
+                    }, function() {
+                        var hmnu = $(this).attr('_hmnu');
+                        title_delayIn = 0;
+                        title_delayOut = 1;
+                        title = hmnu;
+                        window.setTimeout(function () {
+                            if (title_delayOut) {
+                                $('#switchTr' + hmnu).css( "display", "none" );
+                            }
+                        }, 500);
+                    }
+                );
+            }
         </script>
         <script src="{{ STATIC_URL }}js/autocomplete.js"></script>
         <script src="{{ STATIC_URL }}js/tooltip.js"></script>
