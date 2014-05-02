@@ -378,8 +378,21 @@ def search_strong(request, strong, templateName, page='1'):
             # search4.append(s4[0])
 
         pagecnt = max(1, int(math.ceil(count * 1.0 / num)))
+
+        # select the current verse list if user is logged in
+        versLists = []
+        versList = None
+        versListItems = []
+        if request.user.is_authenticated():
+            versLists = BibleVersList.objects.filter(user=request.user).order_by('-lastchanged')
+            if versLists.count() <= 0:
+                versList = BibleVersList(lastchanged=_get_date(), title='Neue Versliste', user=request.user).save()
+            else:
+                versList = versLists[0]
+                versListItems = BibleVersNote.objects.filter(user=request.user, versList=versList).order_by('order')
+                
         # return render(request, 'strongs/search.html', {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': strong, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses': izip_longest(search1, search2, search3, search4)})
-        return render(request, templateName, {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': strong, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses1': search1, 'verses2': search2, 'verses3': search3, 'verses4': search4})
+        return render(request, templateName, {'versLists': versLists, 'versListItems': versListItems, 'versList': versList, 'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': strong, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses1': search1, 'verses2': search2, 'verses3': search3, 'verses4': search4})
     else:
         # return HttpResponse('No verses found for strong number ' + strong)
         alt = 'H' + strong[1:]
