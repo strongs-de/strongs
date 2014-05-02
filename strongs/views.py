@@ -259,7 +259,7 @@ def bible(request, bible_book, templateName, column=None, translation=None):
     if bible_book.isdigit():
         return strongs(request, bible_book)
 
-    regex = re.compile(r"([0-9]?\\.? ?[a-zA-ZäöüÄÖÜ]+)\s?([0-9]+)?,?([0-9]+)?", re.UNICODE)
+    regex = re.compile(r"([0-9]?\.?\s?[a-zA-ZäöüÄÖÜ]+)\s?([0-9]+)?,?([0-9]+)?$", re.UNICODE)
     if regex is not None:
         s = regex.search(bible_book)
         if s is not None and len(s.groups()) > 0:

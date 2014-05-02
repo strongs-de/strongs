@@ -10,16 +10,14 @@ abbr {
 body {
     background-color: #5BB05B;
     /*background-color: #f3efe1;*/
-    color: rgb(132, 128, 114);
+    /*color: rgb(132, 128, 114);*/
+    color: #504C3D;
     overflow: hidden;
     font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;
     font-family: "Lucida Grande","Lucida Sans Unicode","Lucida Sans",Geneva,Verdana,sans-serif;
 }
 
 a, a:visited {
-    color: #5BB05B;
-    color: rgb(69, 65, 52);
-    color: black;
     text-decoration: none;
 }
 
@@ -43,24 +41,15 @@ input[type=email],
 input[type=date] {
 	border: 1px solid #ddd;
 	padding: 7px 10px;
-	/*font-weight: bold;*/
 	text-shadow: 0 1px 1px rgba(255,255,255,0.8);
     font-size: 120%;
 	color: #666;
 	width: 300px;
-	/*background: #ffffff;*/
-	/*background: -moz-linear-gradient(top, #ffffff 0%, #f7f7f7 7%, #f7f7f7 22%, #ffffff 100%);*/
-	/*background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(7%,#f7f7f7), color-stop(22%,#f7f7f7), color-stop(100%,#ffffff));*/
-	/*background: -webkit-linear-gradient(top, #ffffff 0%,#f7f7f7 7%,#f7f7f7 22%,#ffffff 100%);*/
-	/*background: -o-linear-gradient(top, #ffffff 0%,#f7f7f7 7%,#f7f7f7 22%,#ffffff 100%);*/
-	/*background: -ms-linear-gradient(top, #ffffff 0%,#f7f7f7 7%,#f7f7f7 22%,#ffffff 100%);*/
-	/*background: linear-gradient(top, #ffffff 0%,#f7f7f7 7%,#f7f7f7 22%,#ffffff 100%);*/
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ffffff',GradientType=0 );
 	box-shadow: 0px 1px 1px rgba(255,255,255,0.7), 1px 1px 2px rgba(0,0,0,0.1) inset;
 }
 
 input:focus {
-	/*background: rgba(155, 255, 155, 0.05);*/
     border: 1px solid #aaa;
 	outline: none;
 }
@@ -155,19 +144,13 @@ input:focus {
 .switchTr {
     display: none;
     background-color: #f3efe1;
-    text-align: left;
     position: absolute;
-    /*top: 1.75em;*/
     top: 0;
     margin-top: -1px;
     margin-right: 27px;
     text-align: right;
-    /*right: 1.5em;*/
     right: 3px;
     padding: 0px 3px 3px 3px;
-    /*-webkit-box-shadow: 4px 4px 4px 1px rgba(88,88,88,0.75);*/
-    /*-moz-box-shadow: 4px 4px 4px 1px rgba(88,88,88,0.75);*/
-    /*box-shadow: 4px 4px 4px 1px rgba(88,88,88,0.75);*/
     border:1px solid rgba(155,155,155,0.75);
 }
 
@@ -197,7 +180,7 @@ input:focus {
 }
 
 .sb-strong {
-    color: rgb(80, 76, 61);
+    color: #0f0b07;
     cursor: pointer;
 }
 
