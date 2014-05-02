@@ -66,11 +66,15 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="searchNew.html" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="searchNew.html" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="76" column="31" selection-start="3856" selection-end="3856" vertical-scroll-proportion="-11.25" vertical-offset="870" max-vertical-offset="3165">
-              <folding />
+            <state line="15" column="63" selection-start="501" selection-end="501" vertical-scroll-proportion="0.35771066" vertical-offset="0" max-vertical-offset="3165">
+              <folding>
+                <element signature="e#1887#1954#0" expanded="true" />
+                <element signature="e#3297#3364#0" expanded="true" />
+                <element signature="e#4725#4792#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -87,8 +91,13 @@
       <file leaf-file-name="bibleNew.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="115" column="59" selection-start="6865" selection-end="6865" vertical-scroll-proportion="-16.166666" vertical-offset="1337" max-vertical-offset="2580">
-              <folding />
+            <state line="7" column="63" selection-start="369" selection-end="386" vertical-scroll-proportion="-1.25" vertical-offset="75" max-vertical-offset="2580">
+              <folding>
+                <element signature="e#238#262#0" expanded="true" />
+                <element signature="e#2525#2592#0" expanded="true" />
+                <element signature="e#4697#4764#0" expanded="true" />
+                <element signature="e#6896#6963#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -111,10 +120,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="views.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="views.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="261" column="78" selection-start="11818" selection-end="11818" vertical-scroll-proportion="0.1921875" vertical-offset="3462" max-vertical-offset="7440">
+            <state line="261" column="78" selection-start="11818" selection-end="11818" vertical-scroll-proportion="0.0" vertical-offset="3462" max-vertical-offset="7440">
               <folding />
             </state>
           </provider>
@@ -204,10 +213,10 @@
         <option value="$PROJECT_DIR$/tools/extend.strongs.py" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/searchAsync.html" />
         <option value="$PROJECT_DIR$/strongs/templates/baseTemplate3.html" />
-        <option value="$PROJECT_DIR$/strongs/templates/strongs/searchNew.html" />
         <option value="$PROJECT_DIR$/strongs/static/css/newDesign.css" />
-        <option value="$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html" />
         <option value="$PROJECT_DIR$/strongs/views.py" />
+        <option value="$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html" />
+        <option value="$PROJECT_DIR$/strongs/templates/strongs/searchNew.html" />
       </list>
     </option>
   </component>
@@ -933,13 +942,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="76" column="31" selection-start="3856" selection-end="3856" vertical-scroll-proportion="-11.25" vertical-offset="870" max-vertical-offset="3165">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/urls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="31" column="19" selection-start="1411" selection-end="1417" vertical-scroll-proportion="-8.538462" vertical-offset="213" max-vertical-offset="840">
@@ -954,17 +956,33 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html">
+    <entry file="file://$PROJECT_DIR$/strongs/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="115" column="59" selection-start="6865" selection-end="6865" vertical-scroll-proportion="-16.166666" vertical-offset="1337" max-vertical-offset="2580">
+        <state line="261" column="78" selection-start="11818" selection-end="11818" vertical-scroll-proportion="0.0" vertical-offset="3462" max-vertical-offset="7440">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/views.py">
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="261" column="78" selection-start="11818" selection-end="11818" vertical-scroll-proportion="0.1921875" vertical-offset="3462" max-vertical-offset="7440">
-          <folding />
+        <state line="7" column="63" selection-start="369" selection-end="386" vertical-scroll-proportion="-1.25" vertical-offset="75" max-vertical-offset="2580">
+          <folding>
+            <element signature="e#238#262#0" expanded="true" />
+            <element signature="e#2525#2592#0" expanded="true" />
+            <element signature="e#4697#4764#0" expanded="true" />
+            <element signature="e#6896#6963#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="15" column="63" selection-start="501" selection-end="501" vertical-scroll-proportion="0.35771066" vertical-offset="0" max-vertical-offset="3165">
+          <folding>
+            <element signature="e#1887#1954#0" expanded="true" />
+            <element signature="e#3297#3364#0" expanded="true" />
+            <element signature="e#4725#4792#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
