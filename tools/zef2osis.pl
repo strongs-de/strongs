@@ -6,11 +6,11 @@
 
 # Copyright (c) 2007-2008 CrossWire Bible Society <http://www.crosswire.org/>
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-# 
+#
 #     * Redistributions of source code must retain the above copyright
 #        notice, this list of conditions and the following disclaimer.
 #     * Redistributions in binary form must reproduce the above copyright
@@ -21,7 +21,7 @@
 #       its contributors may be used to endorse or promote products
 #       derived from this software without specific prior written
 #       permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
 # IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 # TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -67,7 +67,7 @@ if (scalar(@ARGV) < 2) {
 $osisWork = $ARGV[0];
 
 if ($ARGV[2] eq "-o") {
-    $outputFilename = "$ARGV[3];"
+    $outputFilename = "$ARGV[3]";
 }
 else {
     $outputFilename = "$osisWork.osis.xml";
@@ -79,7 +79,7 @@ $year += 1900;
 $mon++;
 $date = sprintf("%04d\-%02d\-%02d", $year, $mon, $mday);
 
-open (INF, $ARGV[1]);
+open (INF, '<:encoding(UTF-8)', $ARGV[1]);
 @data = <INF>;
 close (INF);
 
@@ -126,14 +126,15 @@ foreach $line (@data) {
 	    $line = delempty("BIBLEBOOK", $line);
 	    $line = delempty("CHAPTER", $line);
 	    $line = delempty("VERS", $line);
+        $line = delempty("gr", $line);
 	    $i--;
 	}
-	
+
 	$line =~ s/#FF0000/red/g;
 
 	$line =~ s/<STYLE css=\"color:red\">([^<]+?)<\/STYLE>/<q who="Jesus">$1<\/q>/g;
 	$line =~ s/<STYLE css=\"font-style:italic\;color:red\">([^<]+?)<\/STYLE>/<q who="Jesus"><hi type="italic">$1<\/hi><\/q>/g;
-	
+
 	$line =~ s/\;? ?color:\#[0-9a-fA-F]{6}\;?//g;
 
 	$line =~ s/<STYLE css=\"font\-weight:bold\">(.+?)<\/STYLE>/<hi type="bold">$1<\/hi>/g;
@@ -150,14 +151,14 @@ foreach $line (@data) {
 	    $line =~ s/<CHAPTER .*?cnumber=\"(\d+)\".*?>/<chapter osisID="$book.$1">/;
 	    $chap = $1;
 	}
-	
+
 	$line =~ s/<VERS vnumber=\"0\">(.+?)<\/VERS>/<p>$1<\/p>/g;
-	
+
 	if ($line =~ /<VERS /) {
 	    $line =~ s/<VERS .*?vnumber=\"(\d+)\".*?>/<verse osisID="$book.$chap.$1">/;
 	    $vers = $1;
 	}
-	
+
 	$line =~ s/<\/BIBLEBOOK>/<\/div>/g;
 	$line =~ s/<\/CHAPTER>/<\/chapter>/g;
 	$line =~ s/<\/VERS>/<\/verse>/g;
@@ -173,8 +174,11 @@ foreach $line (@data) {
 	$line =~ s/<DIV><NOTE type="(x-studynote|x-bold)">(.+?)<\/NOTE><\/DIV>/<note>$2<\/note>/g;
 	$line =~ s/<DIV><NOTE type="(x-studynote|x-bold)">(.+?)<\/NOTE><\/DIV>/<note>$2<\/note>/g;
 
-	
+    $line =~ s/<gr str="([^"]+)">([^<]+?)<\/gr>/<w gloss="s:$1">$2<\/w>/g;
+    $line =~ s/<gr str="([^"]+)" rmac="([^"]+)">(.+?)<\/gr>/<w gloss="s:$1" morph="$2">$3<\/w>/g;
+
 	$line =~ s/ <\/hi>/<\/hi> /g;
+    # $line =~ s/ <\/w>/<\/w> /g;
 
 	if ($line !~ /^\s*$/) {
 	    print OUTF "$line\n";
@@ -186,7 +190,7 @@ foreach $line (@data) {
     }
     elsif ($line =~ /<\/INFORMATION>/) {
 	print OUTF "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<osis xmlns=\"http://www.bibletechnologies.net/2003/OSIS/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.bibletechnologies.net/2003/OSIS/namespace http://www.bibletechnologies.net/osisCore.$osisVersion.xsd\">\n<osisText osisRefWork=\"Bible\" xml:lang=\"$lang\" osisIDWork=\"$osisWork\">\n<header>\n<revisionDesc><date>$date<\/date><p>initial OSIS 2.1.1 version<\/p><\/revisionDesc>\n<work osisWork=\"$osisWork\">\n$hd_title$hd_contributor$hd_creator<creator role=\"encoder\">zef2osis.pl from http:\/\/www.crosswire.org<\/creator>\n<date><\/date>\n$hd_description$hd_publisher<type type=\"OSIS\">Bible<\/type>\n<identifier type=\"OSIS\">$osisWork<\/identifier>\n$hd_source<language type=\"IETF\">$lang<\/language>\n$hd_rights<scope><\/scope>\n<refSystem>Bible<\/refSystem>\n<\/work>\n<\/header>\n";
-	
+
 	$pr = 1;
     }
     else {

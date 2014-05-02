@@ -170,38 +170,37 @@ Seite {{ pageact }}/{{ pagecnt }}
                 return quoteOpen ? false : out;
             }
             function highLight(substring, block) {
-               $(block).find(".search-highlight").each(function () {
-                  $(this).outerHtml($(this).html());
-               });
-               // now the block is free from previous highlights
+                if($(block).length > 0) {
+                    $(block).find(".search-highlight").each(function () {
+                        $(this).outerHtml($(this).html());
+                    });
+                    // now the block is free from previous highlights
 
-               substrings = shlex(substring.replace(/&quot;/g, '"'));
-               if(substrings === false) substrings = [substring.replace(/&quot;/g, '"')];
-               else substrings.forEach(function(e, i){return e.replace(/"/g, "").replace(/'/g, "");});
-               for(i = 0; i < substrings.length; ++i) {
-                 $(block).html($(block).html().replace(new RegExp("\\s" + substrings[i], 'gi'), function(match, text, urlId){
-                    return " <span class='search-highlight'>" + match.substring(1) + '</span>'
-                 }));
-                 $(block).html($(block).html().replace(new RegExp(">" + substrings[i], 'gi'), function(match, text, urlId){
-                    return "><span class='search-highlight'>" + match.substring(1) + '</span>'
-                 }));
-               }
+                    substrings = shlex(substring.replace(/&quot;/g, '"'));
+                    if(substrings === false) substrings = [substring.replace(/&quot;/g, '"')];
+                    else substrings.forEach(function(e, i){return e.replace(/"/g, "").replace(/'/g, "");});
 
-               // check if it is a strong number
-{#               var regex = new RegExp("([GHgh])([0-9]{1,4})", "g")#}
-               var regex = new RegExp("([GHgh])([\\d\\-HGhg]+)", "g")
-               var result = regex.exec(substring);
-               if(result != null) {
-                  $('.strong-' + result[2]).addClass('search-highlight');
-                  // do matchrowheight for verses
-                  $('.verse').matchHeight(true);
-               }
+                    for(i = 0; i < substrings.length; ++i) {
+                        $(block).each(function() {
+                            $(this).html($(this).html().replace(new RegExp("\\s" + substrings[i], 'gi'), function(match, text, urlId){
+                                return " <span class='search-highlight'>" + match.substring(1) + '</span>'
+                            }));
+                            $(this).html($(this).html().replace(new RegExp(">" + substrings[i], 'gi'), function(match, text, urlId){
+                                return "><span class='search-highlight'>" + match.substring(1) + '</span>'
+                            }));
+                        });
+                    }
+
+                    // check if it is a strong number
+                    var regex = new RegExp("([GHgh])([\\d\\-HGhg]+)", "g")
+                    var result = regex.exec(substring);
+                    if(result != null) {
+                        $('.strong-' + result[2]).addClass('search-highlight');
+                        // do matchrowheight for verses
+                        $('.verse').matchHeight(true);
+                    }
+                }
             }
-
-            highLight("{{ search }}", ".container");
-
-            // insert matchrowheight
-            $('.tr').matchHeight(true, true);
         </script>
     {% endif %}
 {% endblock %}
