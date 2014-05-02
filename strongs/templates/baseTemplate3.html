@@ -309,9 +309,11 @@
                 register_title_hover();
 
                 // call highLight if exists
-                if(highLight !== undefined) {
+                try {
                     highLight('{{ search }}', '.content');
                     $('.tr').matchHeight(true, true);
+                } catch(ex) {
+                    // do nothing, the function highLight seems to not exist.
                 }
             }
 

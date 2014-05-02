@@ -66,10 +66,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="searchNew.html" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="searchNew.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="203" column="0" selection-start="9981" selection-end="9981" vertical-scroll-proportion="0.83002836" vertical-offset="2459" max-vertical-offset="3165">
+            <state line="196" column="40" selection-start="9735" selection-end="9735" vertical-scroll-proportion="-75.041664" vertical-offset="1139" max-vertical-offset="3165">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="bibleNew.html" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="164" column="35" selection-start="9180" selection-end="9180" vertical-scroll-proportion="-24.416666" vertical-offset="1874" max-vertical-offset="2580">
               <folding />
             </state>
           </provider>
@@ -93,10 +102,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="views.py" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="views.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/strongs/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="434" column="232" selection-start="23914" selection-end="23914" vertical-scroll-proportion="0.0" vertical-offset="5551" max-vertical-offset="7245">
+            <state line="434" column="128" selection-start="23810" selection-end="23810" vertical-scroll-proportion="0.62761503" vertical-offset="5730" max-vertical-offset="7245">
               <folding />
             </state>
           </provider>
@@ -105,7 +114,7 @@
       <file leaf-file-name="baseTemplate3.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate3.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="313" column="53" selection-start="14141" selection-end="14141" vertical-scroll-proportion="-4.5" vertical-offset="4587" max-vertical-offset="6555">
+            <state line="313" column="53" selection-start="14117" selection-end="14117" vertical-scroll-proportion="-157.625" vertical-offset="912" max-vertical-offset="6585">
               <folding />
             </state>
           </provider>
@@ -174,13 +183,13 @@
         <option value="$PROJECT_DIR$/strongs/templates/strongs/bibleAsync.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html" />
         <option value="$PROJECT_DIR$/strongs/static/js/jquery.matchHeight.js" />
-        <option value="$PROJECT_DIR$/strongs/views.py" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/strongNr.html" />
         <option value="$PROJECT_DIR$/strongs/models.py" />
         <option value="$PROJECT_DIR$/tools/extend.strongs.py" />
-        <option value="$PROJECT_DIR$/strongs/templates/baseTemplate3.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/searchNew.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/searchAsync.html" />
+        <option value="$PROJECT_DIR$/strongs/templates/baseTemplate3.html" />
+        <option value="$PROJECT_DIR$/strongs/views.py" />
       </list>
     </option>
   </component>
@@ -792,11 +801,6 @@
         <state line="46" column="90" selection-start="2445" selection-end="2445" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="840" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="164" column="35" selection-start="9180" selection-end="9180" vertical-scroll-proportion="0.8888889" vertical-offset="1500" max-vertical-offset="2580" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleAsync.html">
       <provider selected="true" editor-type-id="text-editor">
         <state line="7" column="47" selection-start="420" selection-end="420" vertical-scroll-proportion="0.0" vertical-offset="105" max-vertical-offset="2535" />
@@ -898,13 +902,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="434" column="232" selection-start="23914" selection-end="23914" vertical-scroll-proportion="0.0" vertical-offset="5551" max-vertical-offset="7245">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchAsync.html">
       <provider selected="true" editor-type-id="text-editor">
         <state line="110" column="0" selection-start="5271" selection-end="5271" vertical-scroll-proportion="-25.666666" vertical-offset="1034" max-vertical-offset="1740">
@@ -923,14 +920,28 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate3.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="313" column="53" selection-start="14141" selection-end="14141" vertical-scroll-proportion="-4.5" vertical-offset="4587" max-vertical-offset="6555">
+        <state line="313" column="53" selection-start="14117" selection-end="14117" vertical-scroll-proportion="-157.625" vertical-offset="912" max-vertical-offset="6585">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="203" column="0" selection-start="9981" selection-end="9981" vertical-scroll-proportion="0.83002836" vertical-offset="2459" max-vertical-offset="3165">
+        <state line="196" column="40" selection-start="9735" selection-end="9735" vertical-scroll-proportion="-75.041664" vertical-offset="1139" max-vertical-offset="3165">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="164" column="35" selection-start="9180" selection-end="9180" vertical-scroll-proportion="-24.416666" vertical-offset="1874" max-vertical-offset="2580">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="434" column="128" selection-start="23810" selection-end="23810" vertical-scroll-proportion="0.62761503" vertical-offset="5730" max-vertical-offset="7245">
           <folding />
         </state>
       </provider>
