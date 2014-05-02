@@ -178,7 +178,7 @@ Seite {{ pageact }}/{{ pagecnt }}
 
                     substrings = shlex(substring.replace(/&quot;/g, '"'));
                     if(substrings === false) substrings = [substring.replace(/&quot;/g, '"')];
-                    else substrings.forEach(function(e, i){return e.replace(/"/g, "").replace(/'/g, "");});
+                    else substrings.forEach(function(e, i){substrings[i] = e.replace(/"/g, "").replace(/'/g, "");});
 
                     for(i = 0; i < substrings.length; ++i) {
                         $(block).each(function() {
