@@ -259,7 +259,7 @@ def bible(request, bible_book, templateName, column=None, translation=None):
     if bible_book.isdigit():
         return strongs(request, bible_book)
 
-    regex = re.compile(u"([0-9]?\\.? ?[a-zA-ZäöüÄÖÜ]+)\s?([0-9]+)?,?([0-9]+)?", re.UNICODE)
+    regex = re.compile(r"([0-9]?\\.? ?[a-zA-ZäöüÄÖÜ]+)\s?([0-9]+)?,?([0-9]+)?", re.UNICODE)
     if regex is not None:
         s = regex.search(bible_book)
         if s is not None and len(s.groups()) > 0:
@@ -330,8 +330,8 @@ def bible(request, bible_book, templateName, column=None, translation=None):
                 # Try to search for this word
                 return False
         else:
-            # return HttpResponse('Keine Bibelstelle oder Strong Nummer eingegeben1!')
-            return render(request, 'strongs/error.html', {'message': 'Es wurde im Suchfeld nichts eingegeben!', 'solution':u'Bitte gebe in dem Suchfeld eine Bibelstelle, einen beliebigen Suchbegriff oder eine<br/>Strong-Nummer (G = griechisch oder H = hebräisch, z.B. "G4506") ein.'})
+            # Try to search for the string
+            return sync_search(request, bible_book, 1)
     else:
         return render(request, 'strongs/error.html', {'message': 'Es ist ein Fehler aufgetreten!', 'solution':u'Bitte probiere es später noch einmal.<br/>Sollte der Fehler noch immer bestehen, gib uns bitte unter info@strongs.de bescheid!'})
 
