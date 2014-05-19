@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf8 -*-
 from django.conf.urls import patterns, url
 from strongs import views
 from django.contrib.auth.views import login, logout_then_login

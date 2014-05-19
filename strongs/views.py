@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf8 -*-
 from django.shortcuts import render, render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
 from models import BibleBook, BibleTranslation, BibleVers, StrongNr, BibleText, BibleVersList, BibleVersNote, UserData
@@ -122,7 +122,7 @@ def strongs(request, strong_id, vers, word):
     grammar = None
     greek = None
     pronounciation = None
-    regex = re.compile(u"([0-9]?\\.? ?[a-zA-ZäöüÄÖÜ]+)\s?([0-9]+)?,?([0-9]+)?")
+    regex = re.compile(r"([0-9]?\.?\s?[^0-9\s]+)\s?([0-9]+)?,?([0-9]+)?$", re.UNICODE)
     if regex is not None:
         v = regex.search(vers)
         if v is not None and len(v.groups()) > 0:
@@ -259,7 +259,7 @@ def bible(request, bible_book, templateName, column=None, translation=None):
     if bible_book.isdigit():
         return strongs(request, bible_book)
 
-    regex = re.compile(r"([0-9]?\.?\s?[a-zA-ZäöüÄÖÜ]+)\s?([0-9]+)?,?([0-9]+)?$", re.UNICODE)
+    regex = re.compile(r"([0-9]?\.?\s?[^0-9\s]+)\s?([0-9]+)?,?([0-9]+)?$", re.UNICODE)
     if regex is not None:
         s = regex.search(bible_book)
         if s is not None and len(s.groups()) > 0:

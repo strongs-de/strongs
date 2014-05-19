@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 # import xml.etree.ElementTree as ET
 import xml.etree.cElementTree as ET
 import sqlite3 as sql
