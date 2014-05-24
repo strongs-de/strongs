@@ -87,7 +87,7 @@ def my_account(request):
 
 def custom_login(request):
     if request.user.is_authenticated():
-        return HttpResponseRedirect('/account/')
+        return HttpResponseRedirect('/')
     else:
         return login(request)
 

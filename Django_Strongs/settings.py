@@ -107,4 +107,4 @@ STATICFILES_DIRS = (
 # Other settings
 LOGIN_URL = '/login/'
 LOGOUT_URL = '/logout/'
-LOGIN_REDIRECT_URL = '/account/'
+LOGIN_REDIRECT_URL = '/'

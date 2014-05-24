@@ -283,7 +283,7 @@ input:focus {
     color: red;
 }
 
-.add-to-verslist, .remove-from-verslist, #prev_chapter, #next_chapter {
+.add-to-verslist, .remove-from-verslist, #prev_chapter, #next_chapter, .tooltip {
     cursor: pointer;
 }
 
