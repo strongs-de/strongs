@@ -356,6 +356,8 @@ def search_strong(request, strong, templateName, page='1', column=None, translat
         heb = True
     elif strong[0].upper() == 'G':
         search1 = BibleText.objects.filter(vers__bookNr__nr__gte=40, versText__icontains=search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[0]))
+    else:
+        return sync_search(request, strong, page)
 
     if search1.count() > 0:
         search2, search3, search4 = [], [], []

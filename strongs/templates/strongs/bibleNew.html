@@ -21,7 +21,7 @@
                             {% if user.is_authenticated %}
                                 <a class="tooltip" title="Hinzufügen zur Versliste:<br/>
                                     {% for vl in versLists %}
-                                        <a class='add-to-verslist' onclick='addVersToList(this)' href='#' data='{{v.vers.bookNr.nr}}_{{v.vers.chapterNr}}_{{v.vers.versNr}}/{{ vl.id }}'>
+                                        <a class='add-to-verslist' onclick='addVersToList(this)' data='{{v.vers.bookNr.nr}}_{{v.vers.chapterNr}}_{{v.vers.versNr}}/{{ vl.id }}'>
                                             <span class='pad-left glyphter logogreen'>e</span>{{ vl.title }}</a><br/>
                                     {% endfor %}" href="#">
                             {% endif %}
@@ -57,7 +57,7 @@
                             {% if user.is_authenticated %}
                                 <a class="tooltip" title="Hinzufügen zur Versliste:<br/>
                                     {% for vl in versLists %}
-                                        <a class='add-to-verslist' onclick='addVersToList(this)' href='#' data='{{v.vers.bookNr.nr}}_{{v.vers.chapterNr}}_{{v.vers.versNr}}/{{ vl.id }}'>
+                                        <a class='add-to-verslist' onclick='addVersToList(this)' data='{{v.vers.bookNr.nr}}_{{v.vers.chapterNr}}_{{v.vers.versNr}}/{{ vl.id }}'>
                                             <span class='pad-left glyphter logogreen'>e</span>{{ vl.title }}</a><br/>
                                     {% endfor %}" href="#">
                             {% endif %}
@@ -93,7 +93,7 @@
                             {% if user.is_authenticated %}
                                 <a class="tooltip" title="Hinzufügen zur Versliste:<br/>
                                     {% for vl in versLists %}
-                                        <a class='add-to-verslist' onclick='addVersToList(this)' href='#' data='{{v.vers.bookNr.nr}}_{{v.vers.chapterNr}}_{{v.vers.versNr}}/{{ vl.id }}'>
+                                        <a class='add-to-verslist' onclick='addVersToList(this)' data='{{v.vers.bookNr.nr}}_{{v.vers.chapterNr}}_{{v.vers.versNr}}/{{ vl.id }}'>
                                             <span class='pad-left glyphter logogreen'>e</span>{{ vl.title }}</a><br/>
                                     {% endfor %}" href="#">
                             {% endif %}
@@ -129,7 +129,7 @@
                             {% if user.is_authenticated %}
                                 <a class="tooltip" title="Hinzufügen zur Versliste:<br/>
                                     {% for vl in versLists %}
-                                        <a class='add-to-verslist' onclick='addVersToList(this)' href='#' data='{{v.vers.bookNr.nr}}_{{v.vers.chapterNr}}_{{v.vers.versNr}}/{{ vl.id }}'>
+                                        <a class='add-to-verslist' onclick='addVersToList(this)' data='{{v.vers.bookNr.nr}}_{{v.vers.chapterNr}}_{{v.vers.versNr}}/{{ vl.id }}'>
                                             <span class='pad-left glyphter logogreen'>e</span>{{ vl.title }}</a><br/>
                                     {% endfor %}" href="#">
                             {% endif %}

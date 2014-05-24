@@ -34,9 +34,9 @@
             </div>
             <div class="nav-ele">
                 <span class="navbuttons">
-                    <a class="glyphter" id="prev_chapter" href="#">Z</a>
+                    <a class="glyphter" id="prev_chapter">Z</a>
                     {%if pagecnt > 0 %}{% block pagenum %}{% endblock %}{% endif %}
-                    <a class="glyphter" id="next_chapter" href="#">a</a>
+                    <a class="glyphter" id="next_chapter">a</a>
                 </span>
             </div>
             <div class="nav-ele"></div>
@@ -73,7 +73,7 @@
             <div class="versList" id="{{ versList.id }}">
                 <ul class="versListItems">
                     {% for vli in versListItems %}
-                        <li class="versListItem"><a href="/{{ vli.vers }}">{{ vli.vers }}</a><a data="{{vli.vers.bookNr.nr}}_{{vli.vers.chapterNr}}_{{vli.vers.versNr}}" class="remove-from-verslist" href="#">X</a></li>
+                        <li class="versListItem"><a href="/{{ vli.vers }}">{{ vli.vers }}</a><a data="{{vli.vers.bookNr.nr}}_{{vli.vers.chapterNr}}_{{vli.vers.versNr}}" class="remove-from-verslist">X</a></li>
                     {% endfor %}
                 </ul>
                 <input type="text" class="versListTitle" value="{{ versList.title }}" />
@@ -220,7 +220,7 @@
                   }
 
                   // search for search text with page number
-                  regex = new RegExp("(.*)/([^/]*)/([\\d]+)/(.*)", "g");
+                  regex = new RegExp("(.*://.*)/([^/]*)/([\\d]+)/(.*)", "g");
                   result = regex.exec(url);
                   if(result != null) {
                     // ULR is search string with page number specified
@@ -255,11 +255,13 @@
 
                 // Handle next and previous buttons
                 $('#next_chapter').click(function(e) {
-                  navigate(true);
+                    navigate(true);
+                    e.preventDefault();
                 });
 
                 $('#prev_chapter').click(function(e) {
-                  navigate(false);
+                    navigate(false);
+                    e.preventDefault();
                 });
 
                 // add key listener for search
@@ -297,7 +299,7 @@
                 $('a.remove-from-verslist').click(removeVersFromList);
 
                 // insert remove verslist action
-                $('.versListRemove').click(removeVersList);
+                $('.versListRemove').click(removeVerslist);
 
                 // add key listener for saving the verslist title
                 $('.versListTitle').keyup(function(ev) {
@@ -333,7 +335,7 @@
                     arr = $(me).attr('data').split('/')[0].split('_');
                     vlId = $(me).attr('data').split('/')[1];
                     if(arr.length >= 3 && vlId !== undefined && $('.versList#' + vlId).length > 0) {
-                        ele = $('.versListItems').append('<li class="versListItem"><a href="/' + shortBooks[arr[0] - 1] + arr[1] + ',' + arr[2] + '">' + shortBooks[arr[0] - 1] + ' ' + arr[1] + ',' + arr[2] + '</a><a data="' + $(me).attr('data').split('/')[0] + '" class="remove-from-verslist" href="#">X</a></li>');
+                        ele = $('.versListItems').append('<li class="versListItem"><a href="/' + shortBooks[arr[0] - 1] + arr[1] + ',' + arr[2] + '">' + shortBooks[arr[0] - 1] + ' ' + arr[1] + ',' + arr[2] + '</a><a data="' + $(me).attr('data').split('/')[0] + '" class="remove-from-verslist">X</a></li>');
                         ele.find('a.remove-from-verslist').click(removeVersFromList);
                     }
                 }
