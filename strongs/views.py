@@ -344,8 +344,10 @@ def async_search_strong(request, strong, page='1'):
     return search_strong(request, strong, 'strongs/searchAsync.html', page)
 
 
-def search_strong(request, strong, templateName, page='1'):
+def search_strong(request, strong, templateName, page='1', column=None, translation=None):
     nr = strong[1:]
+
+    bible_order = bible_translation_order(request, column, translation)
 
     search = "<gr str=\"" + str(nr) + "\""
     heb = False
@@ -367,9 +369,21 @@ def search_strong(request, strong, templateName, page='1'):
         verses = search1.values('vers')
 
         # for x in search1:
-        search2 = BibleText.objects.filter(translationIdentifier__identifier=BIBLES_IN_VIEW[1], vers=verses)
-        search3 = BibleText.objects.filter(translationIdentifier__identifier=BIBLES_IN_VIEW[2], vers=verses)
-        search4 = BibleText.objects.filter(translationIdentifier__identifier=BIBLES_IN_VIEW[3], vers=verses)
+        if bible_order[1] == 0:
+            search2 = search1
+            search1 = BibleText.objects.filter(translationIdentifier__identifier=BIBLES_IN_VIEW[bible_order[0]], vers=verses)
+        else:
+            search2 = BibleText.objects.filter(translationIdentifier__identifier=BIBLES_IN_VIEW[bible_order[1]], vers=verses)
+        if bible_order[2] == 0:
+            search3 = search1
+            search1 = BibleText.objects.filter(translationIdentifier__identifier=BIBLES_IN_VIEW[bible_order[0]], vers=verses)
+        else:
+            search3 = BibleText.objects.filter(translationIdentifier__identifier=BIBLES_IN_VIEW[bible_order[2]], vers=verses)
+        if bible_order[3] == 0:
+            search4 = search1
+            search1 = BibleText.objects.filter(translationIdentifier__identifier=BIBLES_IN_VIEW[bible_order[0]], vers=verses)
+        else:
+            search4 = BibleText.objects.filter(translationIdentifier__identifier=BIBLES_IN_VIEW[bible_order[3]], vers=verses)
         # if s2.count() > 0:
             # search2.append(s2[0])
         # if s3.count() > 0:
@@ -392,7 +406,7 @@ def search_strong(request, strong, templateName, page='1'):
                 versListItems = BibleVersNote.objects.filter(user=request.user, versList=versList).order_by('order')
 
         # return render(request, 'strongs/search.html', {'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': strong, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses': izip_longest(search1, search2, search3, search4)})
-        return render(request, templateName, {'versLists': versLists, 'versListItems': versListItems, 'versList': versList, 'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': strong, 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses1': search1, 'verses2': search2, 'verses3': search3, 'verses4': search4})
+        return render(request, templateName, {'versLists': versLists, 'versListItems': versListItems, 'versList': versList, 'count': count, 'pageact': idx2 / num, 'pagecnt': pagecnt, 'search': strong, 'translation1': BIBLE_NAMES_IN_VIEW[bible_order[0]], 'translation2': BIBLE_NAMES_IN_VIEW[bible_order[1]], 'translation3': BIBLE_NAMES_IN_VIEW[bible_order[2]], 'translation4': BIBLE_NAMES_IN_VIEW[bible_order[3]], 'verses1': search1, 'verses2': search2, 'verses3': search3, 'verses4': search4, 'bible_hint1': BIBLE_HINTS_IN_VIEW[bible_order[0]], 'bible_hint2': BIBLE_HINTS_IN_VIEW[bible_order[1]], 'bible_hint3': BIBLE_HINTS_IN_VIEW[bible_order[2]], 'bible_hint4': BIBLE_HINTS_IN_VIEW[bible_order[3]]})
     else:
         # return HttpResponse('No verses found for strong number ' + strong)
         alt = 'H' + strong[1:]

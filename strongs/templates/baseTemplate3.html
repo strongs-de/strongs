@@ -114,6 +114,14 @@
             }
 
             function initSite() {
+                // call highLight if exists
+                try {
+                    highLight('{{ search }}', '.content');
+                    $('.tr').matchHeight(true, true);
+                } catch(ex) {
+                    // do nothing, the function highLight seems to not exist.
+                }
+
                 initTooltips();
                 initStrongLinks();
 
@@ -307,14 +315,6 @@
                 });
 
                 register_title_hover();
-
-                // call highLight if exists
-                try {
-                    highLight('{{ search }}', '.content');
-                    $('.tr').matchHeight(true, true);
-                } catch(ex) {
-                    // do nothing, the function highLight seems to not exist.
-                }
             }
 
             function removeVersFromList() {

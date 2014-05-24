@@ -40,6 +40,7 @@ urlpatterns = patterns('',
 
     # Search for string
     url(r'^(?P<srch>.+)/(?P<page>\d+)/trans/(?P<column>\d+)_(?P<translation>\d+)/$', views.async_search, name='async_search'),
+    url(r'^(?P<srch>.+)/(?P<page>\d+)/trans/(?P<column>\d+)_(?P<translation>\d+)/$', views.sync_search, name='sync_search'),
     url(r'^(?P<srch>.+)/(?P<page>\d+)/$', views.sync_search, name='sync_search'),
     url(r'^async/(?P<srch>.+)/(?P<page>\d+)/$', views.async_search, name='async_search'),
 
