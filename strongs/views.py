@@ -322,10 +322,10 @@ def bible(request, bible_book, templateName, column=None, translation=None):
 
                     else:
                         # return HttpResponse('No verses found')
-                        return render(request, 'strongs/error.html', {'message': u'Die Bibelstelle konnte nicht geladen werden!', 'solution':u'Versuche es bitte später noch einmal.<br/>Sollte der Fehler noch immer bestehen, gib uns bitte unter info@strongs.de bescheid!'})
+                        return render(request, 'strongs/error.html', {'search': bible_book, 'message': u'Die Bibelstelle konnte nicht geladen werden!', 'solution':u'Versuche es bitte später noch einmal.<br/>Sollte der Fehler noch immer bestehen, gib uns bitte unter info@strongs.de bescheid!'})
                 else:
                     # return HttpResponse('No translation found')
-                    return render(request, 'strongs/error.html', {'message': u'Die Übersetzungen konnten nicht geladen werden!', 'solution':'Probiere es bitte später noch einmal.<br/>Sollte der Fehler noch immer bestehen, gib uns bitte unter info@strongs.de bescheid!'})
+                    return render(request, 'strongs/error.html', {'search': bible_book, 'message': u'Die Übersetzungen konnten nicht geladen werden!', 'solution':'Probiere es bitte später noch einmal.<br/>Sollte der Fehler noch immer bestehen, gib uns bitte unter info@strongs.de bescheid!'})
             else:
                 # Try to search for this word
                 return False
@@ -333,7 +333,7 @@ def bible(request, bible_book, templateName, column=None, translation=None):
             # Try to search for the string
             return sync_search(request, bible_book, 1)
     else:
-        return render(request, 'strongs/error.html', {'message': 'Es ist ein Fehler aufgetreten!', 'solution':u'Bitte probiere es später noch einmal.<br/>Sollte der Fehler noch immer bestehen, gib uns bitte unter info@strongs.de bescheid!'})
+        return render(request, 'strongs/error.html', {'search': bible_book, 'message': 'Es ist ein Fehler aufgetreten!', 'solution':u'Bitte probiere es später noch einmal.<br/>Sollte der Fehler noch immer bestehen, gib uns bitte unter info@strongs.de bescheid!'})
 
 
 def sync_search_strong(request, strong, page='1'):
@@ -414,7 +414,7 @@ def search_strong(request, strong, templateName, page='1', column=None, translat
         alt = 'H' + strong[1:]
         if heb:
             alt = 'G' + strong[1:]
-        return render(request, 'strongs/error.html', {'message': 'Keine Verse mit dieser Strong-Nummer gefunden!', 'solution':u'Scheinbar existiert die Strong-Nummer ' + strong + ' nicht!<br/>Korrigiere deine Eingabe, oder probiere es einmal mit <a href="/' + alt + '">' + alt + '</a>.'})
+        return render(request, 'strongs/error.html', {'search': strong, 'message': 'Keine Verse mit dieser Strong-Nummer gefunden!', 'solution':u'Scheinbar existiert die Strong-Nummer ' + strong + ' nicht!<br/>Korrigiere deine Eingabe, oder probiere es einmal mit <a href="/' + alt + '">' + alt + '</a>.'})
 
 
 def sync_search(request, srch, page):
@@ -470,7 +470,7 @@ def search(request, search, page, templateName, column=None, translation=None):
         # return HttpResponse('Found ' + str(search1.count()) + ' verses')
     else:
         # return HttpResponse('No book found for %s' % search)
-        return render(request, 'strongs/error.html', {'message': 'Diese Suche lieferte keine Ergebnisse zurück!', 'solution':u'Bitte verwende einen anderen Suchbegriff, oder verwende nur einen Teil des Wortes als Suchbegriff.<br/>Hinweis: Das Wort muss nicht vollständig ausgeschrieben sein!'})
+        return render(request, 'strongs/error.html', {'search': search, 'message': 'Diese Suche lieferte keine Ergebnisse zurück!', 'solution':u'Bitte verwende einen anderen Suchbegriff, oder verwende nur einen Teil des Wortes als Suchbegriff.<br/>Hinweis: Das Wort muss nicht vollständig ausgeschrieben sein!'})
 
 def element_to_string(element):
     s = element.text or ""

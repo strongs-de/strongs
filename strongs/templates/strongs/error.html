@@ -1,20 +1,64 @@
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/newDesign.css" />
-        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/error.css" />
-        <!--[if lte IE 7]><style>.main{display:none;} .support-note .note-ie{display:block;}</style><![endif]-->
+        <link href="{{ STATIC_URL }}css/glyphter.css" rel="stylesheet">
+        <link href="{{ STATIC_URL }}css/newDesign.css" rel="stylesheet">
+        <link href="{{ STATIC_URL }}css/error.css" rel="stylesheet">
     </head>
     <body>
-    {% autoescape off %}
-        <div class="center">
-            <h1 class="error">{{ message }}</h1>
-            <h3>
-                {{ solution }}
-            </h3>
-            <br/>
-            <br/>
-            <h2><a href="/">Hier</a> geht's zurück zur <a href="/">Hauptseite</a>.</h2>
-        </div>
-    {% endautoescape %}
+        {% autoescape off %}
+            <!-- Menubar ... -->
+            <nav class="nav">
+                <a href="/" class="navbar-brand"><img src="{{ STATIC_URL }}images/logo.png"></a>
+                <div class="nav-ele" id="center-div"></div>
+                <div class="nav-ele">
+                    <input type="text" class="search" id="searchId" placeholder="Suchen" value="{{ search }}" />
+                </div>
+                <div class="nav-ele">
+                    <span class="navbuttons">
+                        <a class="glyphter" id="prev_chapter">Z</a>
+                        {%if pagecnt > 0 %}{% block pagenum %}{% endblock %}{% endif %}
+                        <a class="glyphter" id="next_chapter">a</a>
+                    </span>
+                </div>
+                <div class="nav-ele"></div>
+                <div class="nav-ele"></div>
+                <div class="nav-ele">
+                    <a href="/">Home</a>
+                </div><div class="nav-ele">
+                    {% if user.is_authenticated %}
+                        <a href="/account/">Mein Konto</a> </div><div class="nav-ele"><a href="/logout/">{{user.username}} abmelden</a>
+                    {% else %}
+                        <a href="/login/">Anmelden</a>
+                    {% endif %}
+                </div>
+            </nav>
+            <!-- ... Menubar -->
+
+            <div class="center">
+                <h1 class="error">{{ message }}</h1>
+                <h3>
+                    {{ solution }}
+                </h3>
+                <br/>
+                <br/>
+                <h2><a href="/">Hier</a> geht's zurück zur <a href="/">Hauptseite</a>.</h2>
+            </div>
+
+            <script src="{{ STATIC_URL }}js/jquery-1.10.2.min.js"></script>
+            <script>
+                function doSearch(string) {
+                    var path = '/' + string;
+                    location.href=path;
+                }
+
+                $(document).ready(function() {
+                    // Key listener for search field
+                    $('#searchId').keydown(function(e) {
+                        if(e.keyCode == 13)
+                            doSearch($('#searchId').val())
+                    });
+                });
+            </script>
+        {% endautoescape %}
     </body>
 </html>
