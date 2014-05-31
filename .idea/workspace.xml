@@ -29,7 +29,7 @@
       <file leaf-file-name="error.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/error.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="44" column="18" selection-start="1947" selection-end="2519" vertical-scroll-proportion="-27.5" vertical-offset="0" max-vertical-offset="1035">
+            <state line="44" column="18" selection-start="1947" selection-end="2519" vertical-scroll-proportion="0.0" vertical-offset="660" max-vertical-offset="1035">
               <folding />
             </state>
           </provider>
@@ -38,7 +38,7 @@
       <file leaf-file-name="error.css" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/static/css/error.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="6" column="19" selection-start="276" selection-end="276" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="555">
+            <state line="6" column="19" selection-start="276" selection-end="276" vertical-scroll-proportion="0.0" vertical-offset="90" max-vertical-offset="555">
               <folding />
             </state>
           </provider>
@@ -47,16 +47,16 @@
       <file leaf-file-name="register.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/register.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="57" column="86" selection-start="2266" selection-end="2285" vertical-scroll-proportion="-22.416666" vertical-offset="317" max-vertical-offset="1395">
+            <state line="57" column="86" selection-start="2266" selection-end="2285" vertical-scroll-proportion="0.0" vertical-offset="317" max-vertical-offset="1395">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="login.html" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="login.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/registration/login.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="49" column="53" selection-start="2006" selection-end="2006" vertical-scroll-proportion="0.37384045" vertical-offset="332" max-vertical-offset="1470">
+            <state line="49" column="53" selection-start="2006" selection-end="2006" vertical-scroll-proportion="-14.291667" vertical-offset="392" max-vertical-offset="1470">
               <folding />
             </state>
           </provider>
@@ -74,7 +74,7 @@
       <file leaf-file-name="baseTemplate3.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate3.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="86" column="71" selection-start="3973" selection-end="4036" vertical-scroll-proportion="-17.875" vertical-offset="861" max-vertical-offset="6615">
+            <state line="301" column="54" selection-start="13566" selection-end="13566" vertical-scroll-proportion="-8.625" vertical-offset="4308" max-vertical-offset="6615">
               <folding />
             </state>
           </provider>
@@ -83,16 +83,16 @@
       <file leaf-file-name="views.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strongs/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="324" column="61" selection-start="16553" selection-end="16558" vertical-scroll-proportion="0.0" vertical-offset="4167" max-vertical-offset="7680">
+            <state line="324" column="61" selection-start="16553" selection-end="16558" vertical-scroll-proportion="0.0" vertical-offset="4860" max-vertical-offset="8010">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="newDesign.css" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="newDesign.css" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/strongs/static/css/newDesign.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="402" column="16" selection-start="8701" selection-end="8701" vertical-scroll-proportion="0.0" vertical-offset="5513" max-vertical-offset="8895">
+            <state line="137" column="49" selection-start="3301" selection-end="3301" vertical-scroll-proportion="0.3212341" vertical-offset="1701" max-vertical-offset="8895">
               <folding />
             </state>
           </provider>
@@ -142,14 +142,14 @@
         <option value="$PROJECT_DIR$/strongs/templates/strongs/searchNew.html" />
         <option value="$PROJECT_DIR$/strongs/static/js/infoSidebar.js" />
         <option value="$PROJECT_DIR$/strongs/static/css/bible.css" />
-        <option value="$PROJECT_DIR$/strongs/templates/baseTemplate3.html" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/bibleNew.html" />
         <option value="$PROJECT_DIR$/Django_Strongs/settings.py" />
         <option value="$PROJECT_DIR$/strongs/views.py" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/error.html" />
-        <option value="$PROJECT_DIR$/strongs/static/css/newDesign.css" />
         <option value="$PROJECT_DIR$/strongs/templates/strongs/register.html" />
         <option value="$PROJECT_DIR$/strongs/templates/registration/login.html" />
+        <option value="$PROJECT_DIR$/strongs/templates/baseTemplate3.html" />
+        <option value="$PROJECT_DIR$/strongs/static/css/newDesign.css" />
       </list>
     </option>
   </component>
@@ -398,27 +398,7 @@
       <option name="PARAMETERS" value="" />
       <method />
     </configuration>
-    <configuration default="true" type="Python.DjangoServer" factoryName="Django server">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="Django_Strongs" />
-      <option name="launchJavascriptDebuger" value="false" />
-      <option name="port" value="8000" />
-      <option name="host" value="" />
-      <option name="additionalOptions" value="" />
-      <option name="browserUrl" value="" />
-      <option name="runTestServer" value="false" />
-      <option name="runNoReload" value="false" />
-      <option name="useCustomRunCommand" value="false" />
-      <option name="customRunCommand" value="" />
+    <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug" singleton="true">
       <method />
     </configuration>
     <configuration default="true" type="tests" factoryName="Unittests">
@@ -444,7 +424,27 @@
       <option name="USE_PARAM" value="false" />
       <method />
     </configuration>
-    <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug" singleton="true">
+    <configuration default="true" type="Python.DjangoServer" factoryName="Django server">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="Django_Strongs" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <option name="port" value="8000" />
+      <option name="host" value="" />
+      <option name="additionalOptions" value="" />
+      <option name="browserUrl" value="" />
+      <option name="runTestServer" value="false" />
+      <option name="runNoReload" value="false" />
+      <option name="useCustomRunCommand" value="false" />
+      <option name="customRunCommand" value="" />
       <method />
     </configuration>
     <configuration default="true" type="tests" factoryName="Doctests">
@@ -607,11 +607,11 @@
       <window_info id="Documentation" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" x="100" y="100" width="1720" height="1000" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3286219" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3286219" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -841,9 +841,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/grammar_parser.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="22" selection-start="22" selection-end="22" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1530">
-          <folding />
-        </state>
+        <state line="0" column="22" selection-start="22" selection-end="22" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1530" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/searchNew.html">
@@ -862,16 +860,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/static/js/infoSidebar.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="63" column="41" selection-start="2136" selection-end="2136" vertical-scroll-proportion="0.85027224" vertical-offset="8" max-vertical-offset="1110">
-          <folding />
-        </state>
+        <state line="63" column="41" selection-start="2136" selection-end="2136" vertical-scroll-proportion="0.85027224" vertical-offset="8" max-vertical-offset="1110" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="22" selection-start="22" selection-end="22" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1755">
-          <folding />
-        </state>
+        <state line="0" column="22" selection-start="22" selection-end="22" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1755" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/static/css/error.css">
@@ -888,13 +882,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate3.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="86" column="71" selection-start="3973" selection-end="4036" vertical-scroll-proportion="-17.875" vertical-offset="861" max-vertical-offset="6615">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/static/css/login.css">
       <provider selected="true" editor-type-id="text-editor">
         <state line="169" column="0" selection-start="306" selection-end="4020" vertical-scroll-proportion="0.0" vertical-offset="1973" max-vertical-offset="3075">
@@ -902,30 +889,37 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strongs/static/css/newDesign.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="402" column="16" selection-start="8701" selection-end="8701" vertical-scroll-proportion="0.0" vertical-offset="5513" max-vertical-offset="8895">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/error.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="44" column="18" selection-start="1947" selection-end="2519" vertical-scroll-proportion="-27.5" vertical-offset="0" max-vertical-offset="1035">
+        <state line="44" column="18" selection-start="1947" selection-end="2519" vertical-scroll-proportion="0.0" vertical-offset="660" max-vertical-offset="1035">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/strongs/register.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="57" column="86" selection-start="2266" selection-end="2285" vertical-scroll-proportion="-22.416666" vertical-offset="317" max-vertical-offset="1395">
+        <state line="57" column="86" selection-start="2266" selection-end="2285" vertical-scroll-proportion="0.0" vertical-offset="317" max-vertical-offset="1395">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strongs/templates/registration/login.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="49" column="53" selection-start="2006" selection-end="2006" vertical-scroll-proportion="0.37384045" vertical-offset="332" max-vertical-offset="1470">
+        <state line="49" column="53" selection-start="2006" selection-end="2006" vertical-scroll-proportion="-14.291667" vertical-offset="392" max-vertical-offset="1470">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/templates/baseTemplate3.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="301" column="54" selection-start="13566" selection-end="13566" vertical-scroll-proportion="-8.625" vertical-offset="4308" max-vertical-offset="6615">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strongs/static/css/newDesign.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="137" column="49" selection-start="3301" selection-end="3301" vertical-scroll-proportion="0.3212341" vertical-offset="1701" max-vertical-offset="8895">
           <folding />
         </state>
       </provider>

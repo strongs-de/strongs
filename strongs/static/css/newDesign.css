@@ -145,9 +145,9 @@ input:focus {
     display: none;
     background-color: #f3efe1;
     position: absolute;
-    top: 0;
+    top: 6px;
     margin-top: -1px;
-    margin-right: 27px;
+    margin-right: 33px;
     text-align: right;
     right: 3px;
     padding: 0px 3px 3px 3px;
