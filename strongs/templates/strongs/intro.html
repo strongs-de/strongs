@@ -1,0 +1,9 @@
+{% extends "strongs/bibleNew.html" %}
+{% block content_addon %}
+    {% autoescape off %}
+        <div class="transparent"></div>
+        <img src="{{ STATIC_URL }}images/info_search.png" id="info-balloon-search" />
+        <img src="{{ STATIC_URL }}images/info_sidebar.png" id="info-balloon-sidebar" />
+        <img src="{{ STATIC_URL }}images/info_translations.png" id="info-balloon-translations" />
+    {% endautoescape %}
+{% endblock %}
