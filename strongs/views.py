@@ -31,7 +31,9 @@ BIBLE_HINTS_IN_VIEW = ['', '<br/>Bibeltext der Schlachter Übersetzung<br/>Copyr
 
 # Create your views here.
 def index(request):
-    return sync_bible(request, 'joh1')
+    return bible(request, "joh", 'strongs/intro.html')
+    # return render(request, 'strongs/intro.html')
+    # return render_to_response('strongs/intro.html')
 
 def async_index(request, column=None, translation=None):
     return async_bible(request, 'joh1', column, translation)
