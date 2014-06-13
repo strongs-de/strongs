@@ -24,9 +24,9 @@ from strongs.utils import set_cookies
 import time
 
 
-BIBLES_IN_VIEW = ['ELB1905STR', 'SCH2000', 'LUTH1912', u'NGÜ']
-BIBLE_NAMES_IN_VIEW = ['Elberfelder 1905', 'Schlachter 2000', 'Luther 1912', u'Neue Genfer Übersetzung']
-BIBLE_HINTS_IN_VIEW = ['', '<br/>Bibeltext der Schlachter Übersetzung<br/>Copyright &copy; 2000 Genfer Bibelgesellschaft<br/>Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>', '', '<br/>Bibeltext der Neuen Genfer Übersetzung – Neues Testament und Psalmen<br/>Copyright &copy; 2011 Genfer Bibelgesellschaft<br/>Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>']
+BIBLES_IN_VIEW = ['ELB1905STR', 'SCH2000', 'LUTH1912', u'NGÜ', 'ILGRDE']
+BIBLE_NAMES_IN_VIEW = ['Elberfelder 1905', 'Schlachter 2000', 'Luther 1912', u'Neue Genfer Übersetzung', 'Interlinear']
+BIBLE_HINTS_IN_VIEW = ['', '<br/>Bibeltext der Schlachter Übersetzung<br/>Copyright &copy; 2000 Genfer Bibelgesellschaft<br/>Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>', '', '<br/>Bibeltext der Neuen Genfer Übersetzung – Neues Testament und Psalmen<br/>Copyright &copy; 2011 Genfer Bibelgesellschaft<br/>Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>', '']
 
 
 # Create your views here.
@@ -485,8 +485,8 @@ def element_to_string(element):
 def initDb(request):
     s = ''
     # s += init_bible_books()
-    s += insert_osis_bibles()
-    # s += insert_bible_vers()
+    # s += insert_osis_bibles()
+    s += insert_bible_vers()
     # s += init_strong_grammar()
     return HttpResponse(s)
 
