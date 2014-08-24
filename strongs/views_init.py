@@ -1,10 +1,21 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf8 -*-
+from itertools import izip_longest
+import re
+import string
+from xml.etree import ElementTree as ElementTree
+from django.http import HttpResponse
+from strongs.models import BibleTranslation, BibleBook, BibleVers, BibleText, StrongNr
+
 __author__ = 'mirkohecky'
 
-from models import BibleTranslation, BibleVers, StrongNr, BibleBook, BibleText
-import xml.etree.ElementTree as ElementTree
-import re, string
-from itertools import izip_longest
+
+def initDb(request):
+    s = ''
+    # s += init_bible_books()
+    # s += insert_osis_bibles()
+    s += insert_bible_vers()
+    # s += init_strong_grammar()
+    return HttpResponse(s)
 
 
 def element_to_string(element, until_child_is=None):
@@ -90,6 +101,7 @@ def insert_osis_bibles():
                     # break
 
     return s
+
 
 def __insert(translation, book, chapter, vers, text):
     '''
@@ -196,60 +208,6 @@ def insert_bible_vers():
             s += ' -> inserted book nr ' + book.get('bnumber') + ' with ' + str(chapterCount)  + ' chapters and ' + str(versCount) + ' verses.<br>'
     return ''
 
-# def insert_bible_translations():
-#     ####################################################
-#     # Insert book names if they does not exist
-
-#     s = ''
-
-#     # FILE = './GER_SCH1951_STRONG.xml'
-#     FILES = ('./GER_ELB1905_STRONG.xml', './GER_LUTH1912.xml', './GER_ILGRDE.xml', './GER_SCH2000.xml', './GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml')
-
-#     for FILE in FILES:
-#         ####################################################
-#         # Insert bibles from zefanja xml
-#         baum = ElementTree.parse(FILE)
-#         root = baum.getroot()
-#         identifier = root.findtext('INFORMATION/identifier')
-#         language = root.findtext('INFORMATION/language')
-#         title = root.findtext('INFORMATION/title')
-
-#         # Ask if this translation does already exist
-#         tr = BibleTranslation.objects.filter(identifier=identifier)
-#         if tr.count() <= 0:
-#             tr = BibleTranslation(identifier=identifier, name=title, language=language)
-#             tr.save()
-#             s += ' -> created new translation ' + identifier + '.<br>'
-#         else:
-#             tr = tr[0]
-
-#         # Insert verses
-#         for book in root.findall('BIBLEBOOK'):
-#             chapterCount = 0
-
-#             # Does this book already exist
-#             tb = BibleBook.objects.filter(bookNr=book.get('bnumber'), language='de')
-#             if tb.count() <= 0:
-#                 tb = BibleBook(bookNr=int(book.get('bnumber')), language='de')
-#                 tb.save()
-#             else:
-#                 tb = tb[0]
-
-#             for chapter in book.findall('CHAPTER'):
-#                 chapterCount += 1
-#                 versCount = 0
-#                 for vers in chapter.findall("VERS"):
-#                     versCount += 1
-#                     # select vers from db
-#                     tv = BibleVers.objects.filter(bibleTranslation=tr, bibleBook=tb, bibleChapter=chapter.get('cnumber'), bibleVers=vers.get('vnumber'))
-#                     if tv.count() <= 0:
-#                         tv = BibleVers(bibleTranslation=tr, bibleBook=tb, bibleChapter=chapter.get('cnumber'), bibleVers=vers.get('vnumber'), versText=element_to_string(vers))
-#                         tv.save()
-#                     else:
-#                         tv = tv[0]
-#             s += ' -> inserted book nr ' + book.get('bnumber') + ' with ' + str(chapterCount)  + ' chapters and ' + str(versCount) + ' verses.<br>'
-#     return s
-
 
 def init_strong_grammar():
     greekStrongVerses = BibleText.objects.filter(versText__icontains='<gr rmac=', translationIdentifier=BibleTranslation.objects.filter(identifier='GNTTR'))
@@ -314,3 +272,64 @@ def init_bible_books():
             bookNames.save()
             s += '<br>'
     return s
+
+
+
+# def insert_bible_translations():
+#     ####################################################
+#     # Insert book names if they does not exist
+
+#     s = ''
+
+#     # FILE = './GER_SCH1951_STRONG.xml'
+#     FILES = ('./GER_ELB1905_STRONG.xml', './GER_LUTH1912.xml', './GER_ILGRDE.xml', './GER_SCH2000.xml', './GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml')
+
+#     for FILE in FILES:
+#         ####################################################
+#         # Insert bibles from zefanja xml
+#         baum = ElementTree.parse(FILE)
+#         root = baum.getroot()
+#         identifier = root.findtext('INFORMATION/identifier')
+#         language = root.findtext('INFORMATION/language')
+#         title = root.findtext('INFORMATION/title')
+
+#         # Ask if this translation does already exist
+#         tr = BibleTranslation.objects.filter(identifier=identifier)
+#         if tr.count() <= 0:
+#             tr = BibleTranslation(identifier=identifier, name=title, language=language)
+#             tr.save()
+#             s += ' -> created new translation ' + identifier + '.<br>'
+#         else:
+#             tr = tr[0]
+
+#         # Insert verses
+#         for book in root.findall('BIBLEBOOK'):
+#             chapterCount = 0
+
+#             # Does this book already exist
+#             tb = BibleBook.objects.filter(bookNr=book.get('bnumber'), language='de')
+#             if tb.count() <= 0:
+#                 tb = BibleBook(bookNr=int(book.get('bnumber')), language='de')
+#                 tb.save()
+#             else:
+#                 tb = tb[0]
+
+#             for chapter in book.findall('CHAPTER'):
+#                 chapterCount += 1
+#                 versCount = 0
+#                 for vers in chapter.findall("VERS"):
+#                     versCount += 1
+#                     # select vers from db
+#                     tv = BibleVers.objects.filter(bibleTranslation=tr, bibleBook=tb, bibleChapter=chapter.get('cnumber'), bibleVers=vers.get('vnumber'))
+#                     if tv.count() <= 0:
+#                         tv = BibleVers(bibleTranslation=tr, bibleBook=tb, bibleChapter=chapter.get('cnumber'), bibleVers=vers.get('vnumber'), versText=element_to_string(vers))
+#                         tv.save()
+#                     else:
+#                         tv = tv[0]
+#             s += ' -> inserted book nr ' + book.get('bnumber') + ' with ' + str(chapterCount)  + ' chapters and ' + str(versCount) + ' verses.<br>'
+#     return s
+
+
+
+
+

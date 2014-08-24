@@ -276,8 +276,10 @@
                 document.onkeypress = function(evt) {
                   var evt  = (evt) ? evt : ((event) ? event : null);
                   var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
-                  if(node.type != "text" && node.type != "password" && node.type != "email" && !evt.metaKey && !evt.ctrlKey && !evt.altKey)
+                  if(node.type != "text" && node.type != "password" && node.type != "email" && !evt.metaKey && !evt.ctrlKey && !evt.altKey) {
+                    $('#searchId').val('');
                     $("#searchId").focus();
+                  }
                 };
 
                 // find all empty verses and add there vers-number to the previous vers (e.g. vers 16-17)

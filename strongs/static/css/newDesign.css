@@ -15,6 +15,8 @@ body {
     overflow: hidden;
     font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;
     font-family: "Lucida Grande","Lucida Sans Unicode","Lucida Sans",Geneva,Verdana,sans-serif;
+    /*font-family: "Lato", "arial", "sans-serif";
+    font-size: 12px;*/
 }
 
 a, a:visited {
