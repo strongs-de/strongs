@@ -7,11 +7,9 @@
                 <span class="title" style="cursor: pointer;">{{ translation1 }}{% block results1 %}{% endblock %}</span>
                 <span class="glyphter" style="font-size: 150%; margin: 0px 15px 0px 3px; cursor: pointer;">b</span>
                 <div id="switchTr1" class="switchTr">
-                    <div onclick="switchTranslation(0, 0)">Elberfelder 1905</div>
-                    <div onclick="switchTranslation(0, 1)">Schlachter 2000</div>
-                    <div onclick="switchTranslation(0, 2)">Luther 1912</div>
-                    <div onclick="switchTranslation(0, 3)">Neue Genfer Übersetzung</div>
-                    <div onclick="switchTranslation(0, 4)">Interlinear</div>
+                    {% for trOption in trOptions %}
+                        <div onclick="switchTranslation(0, {% cycle 0 1 2 3 4 5 6 7 %})">{{trOption}}</div>
+                    {% endfor %}
                 </div>
             </div>
             <div class="content">
@@ -43,11 +41,9 @@
                 <span class="title" style="cursor: pointer;">{{ translation2 }}{% block results2 %}{% endblock %}</span>
                 <span class="glyphter" style="font-size: 150%; margin: 0px 15px 0px 3px; cursor: pointer;">b</span>
                 <div id="switchTr2" class="switchTr">
-                    <div onclick="switchTranslation(1, 0)">Elberfelder 1905</div>
-                    <div onclick="switchTranslation(1, 1)">Schlachter 2000</div>
-                    <div onclick="switchTranslation(1, 2)">Luther 1912</div>
-                    <div onclick="switchTranslation(1, 3)">Neue Genfer Übersetzung</div>
-                    <div onclick="switchTranslation(1, 4)">Interlinear</div>
+                    {% for trOption in trOptions %}
+                        <div onclick="switchTranslation(0, {% cycle 0 1 2 3 4 5 6 7 %})">{{trOption}}</div>
+                    {% endfor %}
                 </div>
             </div>
             <div class="content">
@@ -79,11 +75,9 @@
                 <span class="title" style="cursor: pointer;">{{ translation3 }}{% block results3 %}{% endblock %}</span>
                 <span class="glyphter" style="font-size: 150%; margin: 0px 15px 0px 3px; cursor: pointer;">b</span>
                 <div id="switchTr3" class="switchTr">
-                    <div onclick="switchTranslation(2, 0)">Elberfelder 1905</div>
-                    <div onclick="switchTranslation(2, 1)">Schlachter 2000</div>
-                    <div onclick="switchTranslation(2, 2)">Luther 1912</div>
-                    <div onclick="switchTranslation(2, 3)">Neue Genfer Übersetzung</div>
-                    <div onclick="switchTranslation(2, 4)">Interlinear</div>
+                    {% for trOption in trOptions %}
+                        <div onclick="switchTranslation(0, {% cycle 0 1 2 3 4 5 6 7 %})">{{trOption}}</div>
+                    {% endfor %}
                 </div>
             </div>
             <div class="content">
@@ -115,11 +109,9 @@
                 <span class="title" style="cursor: pointer;">{{ translation4 }}{% block results4 %}{% endblock %}</span>
                 <span class="glyphter" style="font-size: 150%; margin: 0px 15px 0px 3px; cursor: pointer;">b</span>
                 <div id="switchTr4" class="switchTr">
-                    <div onclick="switchTranslation(3, 0)">Elberfelder 1905</div>
-                    <div onclick="switchTranslation(3, 1)">Schlachter 2000</div>
-                    <div onclick="switchTranslation(3, 2)">Luther 1912</div>
-                    <div onclick="switchTranslation(3, 3)">Neue Genfer Übersetzung</div>
-                    <div onclick="switchTranslation(3, 4)">Interlinear</div>
+                    {% for trOption in trOptions %}
+                        <div onclick="switchTranslation(0, {% cycle 0 1 2 3 4 5 6 7 %})">{{trOption}}</div>
+                    {% endfor %}
                 </div>
             </div>
             <div class="content">

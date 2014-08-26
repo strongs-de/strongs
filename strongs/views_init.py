@@ -5,16 +5,18 @@ import string
 from xml.etree import ElementTree as ElementTree
 from django.http import HttpResponse
 from strongs.models import BibleTranslation, BibleBook, BibleVers, BibleText, StrongNr
+from os import path
 
 __author__ = 'mirkohecky'
 
 
 def initDb(request):
     s = ''
-    # s += init_bible_books()
-    # s += insert_osis_bibles()
+    s += init_bible_books()
+    if path.exists('bibles/osis.NGU.xml'):
+      s += insert_osis_bibles()
     s += insert_bible_vers()
-    # s += init_strong_grammar()
+    s += init_strong_grammar()
     return HttpResponse(s)
 
 
@@ -147,8 +149,10 @@ def insert_bible_vers():
     ####################################################
     # Insert book names if they does not exist
 
-    # FILES = ['./bibles/GER_SCH1951_STRONG.xml', './bibles/GER_ELB1905_STRONG.xml', './bibles/GER_LUTH1912.xml', './bibles/GER_ILGRDE.xml', './bibles/GER_SCH2000.xml', './bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml', './bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml']
-    FILES = ['./bibles/GER_ELB1905_STRONG.xml', './bibles/GER_LUTH1912.xml', './bibles/GER_ILGRDE.xml', './bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml']
+    if not path.exists('bibles/osis.NGU.xml'):
+      FILES = ['./bibles/GER_SCH1951_STRONG.xml', './bibles/GER_ELB1905_STRONG.xml', './bibles/GER_LUTH1912.xml', './bibles/GER_ILGRDE.xml', './bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml']
+    else:
+      FILES = ['./bibles/GER_ELB1905_STRONG.xml', './bibles/GER_LUTH1912.xml', './bibles/GER_ILGRDE.xml', './bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml']
     # FILE = './GER_SCH1951_STRONG.xml'
     # FILE = './GER_ELB1905_STRONG.xml'
     # FILE = './GER_LUTH1912.xml'
@@ -328,8 +332,3 @@ def init_bible_books():
 #                         tv = tv[0]
 #             s += ' -> inserted book nr ' + book.get('bnumber') + ' with ' + str(chapterCount)  + ' chapters and ' + str(versCount) + ' verses.<br>'
 #     return s
-
-
-
-
-
