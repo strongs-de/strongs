@@ -18,6 +18,17 @@ Quick-Start
 - To run the server locally run ```python manage.py runserver```
 - Now you can visit the page at [http://localhost:8000/](http://localhost:8000/)
 
+How to contribute
+=================
+If you want to contribute, you're welcome! To start developing, create a fork of this repository. Then you can make your extension or bug fix and create a pull request. After I've reviewed your changes, I will integrate them into the main repository and make it public!
+If you want to know more about the fork and pull-request development you can read this [article from github](https://guides.github.com/introduction/flow/index.html) itself.
+
+There are some features we wish to add in the futures. If you want to pick one - do it!
+
+- Extend the layout into a stunning responsive one (especially for mobile)
+- Add multi-language support
+- Add possibility to comment your verse-lists
+- Add possibility to comment single verses (internally create a 1-verse verselist and allow to comment it). This should not be shown in the verslist combo.
 
 Bible-Licenses
 ===================
