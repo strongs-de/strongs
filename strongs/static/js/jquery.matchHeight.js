@@ -105,7 +105,7 @@
     /*
     *  _applyDataApi will apply matchHeight to all elements with a data-match-height attribute
     */
-   
+
     $.fn.matchHeight._applyDataApi = function() {
         var groups = {};
 
@@ -126,10 +126,10 @@
         });
     };
 
-    /* 
+    /*
     *  _update function will re-apply matchHeight to all groups with the correct options
     */
-   
+
     $.fn.matchHeight._groups = [];
 
     $.fn.matchHeight._update = function() {
@@ -138,7 +138,7 @@
         });
     };
 
-    /* 
+    /*
     *  bind events
     */
 
@@ -146,7 +146,7 @@
     $($.fn.matchHeight._applyDataApi);
 
     // update heights on load and resize events
-    
+
     $(window).bind('load resize orientationchange', $.fn.matchHeight._update);
 
     /**
@@ -161,19 +161,19 @@
 
         $elements.each(function() {
             var that = $(this);
-            if(rows.length == 0) {
+            if(rows.length == 0 && that.css('visibility') != 'hidden') {
                 rows.push(that);
             } else {
                 var id = that.attr('id'),
                     added = false;
                 for(i = 0; i < rows.length; ++i) {
-                    if(rows[i].attr('id') === id) {
+                    if(rows[i].attr('id') === id && that.css('visibility') != 'hidden') {
                         rows[i] = rows[i].add(that);
                         added = true;
                         break;
                     }
                 }
-                if(!added) {
+                if(!added && that.css('visibility') != 'hidden') {
                     rows.push(that);
                 }
             }
@@ -183,7 +183,7 @@
 
     /*
     *  rows utility function
-    *  returns array of jQuery selections representing each row 
+    *  returns array of jQuery selections representing each row
     *  (as displayed after float wrapping applied by browser)
     */
 
@@ -199,7 +199,7 @@
                 top = $that.offset().top - parseInt($that.css('margin-top'), 10),
                 lastRow = rows.length > 0 ? rows[rows.length - 1] : null;
 
-            if (lastRow === null) {
+            if (lastRow === null && $that.css('visibility') != 'hidden') {
                 // first item on the row, so just push it
                 rows.push($that);
             } else {
@@ -213,7 +213,7 @@
                         break;
                     }
                 }
-                if(!added) {
+                if(!added && $that.css('visibility') != 'hidden') {
                     // otherwise start a new row group
                     rows.push($that);
                 }
