@@ -87,18 +87,13 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
-
-STATIC_ROOT = '/home/strongs/webapps/beta_static_media/'
-
+# Because the static root directory is another for the live site and the beta
+# site, we define it in another seperate file that is not part of the repository.
+# This file contains only the STATIC_ROOT declaration just like one of the following
+# lines:
+# STATIC_ROOT = '/home/strongs/webapps/beta_static_media/' # for the beta site
+# STATIC_ROOT = '/home/strongs/webapps/static_media/' # for the live site
 STATIC_URL = '/static/'
-#SITE_ROOT = os.path.abspath(os.path.dirname(__file__))
-#STATIC_ROOT = os.path.join(SITE_ROOT, 'strongs/static')
-#SITE_STATIC_ROOT = os.path.join(SITE_ROOT, 'local_static')
-# Additional locations of static files
-#STATICFILES_DIRS = (
-                    # Don't forget to use absolute paths, not relative paths.
-                    #                    ('', SITE_STATIC_ROOT),
-#                    )
 
 # Other settings
 LOGIN_URL = '/login/'
