@@ -1,3 +1,5 @@
 *.pyc
 .Python
 *.sqlite3
+static_media
+static_root.py

@@ -8,6 +8,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
+import static_root
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -93,6 +95,7 @@ USE_TZ = True
 # lines:
 # STATIC_ROOT = '/home/strongs/webapps/beta_static_media/' # for the beta site
 # STATIC_ROOT = '/home/strongs/webapps/static_media/' # for the live site
+STATIC_ROOT = static_root.STATIC_ROOT()
 STATIC_URL = '/static/'
 
 # Other settings
