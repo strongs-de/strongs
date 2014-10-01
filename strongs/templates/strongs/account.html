@@ -1,6 +1,10 @@
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/login.css" />
+        <link href="{{ STATIC_URL }}css/glyphter.css" rel="stylesheet">
+        <!-- <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/login.css" /> -->
+        <link href="{{ STATIC_URL }}css/newDesign.css" rel="stylesheet">
+        <link href="{{ STATIC_URL }}css/tooltipster.css" rel="stylesheet">
+        <link href="{{ STATIC_URL }}css/themes/tooltipster-shadow.css" rel="stylesheet">
 		<!--[if lte IE 7]><style>.main{display:none;} .support-note .note-ie{display:block;}</style><![endif]-->
 		<style>
 			@import url(http://fonts.googleapis.com/css?family=Raleway:400,700);
@@ -18,13 +22,36 @@
 		</style>
     </head>
     <body>
-        <nav>
-            <a href="/"><img src="{{ STATIC_URL }}images/logo.png"></a></a>
-            <p>
-                <a href="/">Home</a>
-                <a href="/logout/">Logout</a>
-            </p>
+        <!-- Menubar ... -->
+        <nav class="nav">
+            <a href="/" class="navbar-brand hide-vga hide-small"><img src="{{ STATIC_URL }}images/logo.png"></a>
+            <div class="nav-ele" id="center-div"></div>
+            <div class="nav-ele">
+                <input type="text" class="search" id="searchId" placeholder="Suchen" value="{{ search }}" />
+            </div>
+            <div class="nav-ele" style="padding-top:5px">
+                <span class="navbuttons">
+                    <a class="glyphter" id="prev_chapter">Z</a>
+                    {%if pagecnt > 0 %}{% block pagenum %}{% endblock %}{% endif %}
+                    <a class="glyphter" id="next_chapter">a</a>
+                </span>
+            </div>
+            <div class="nav-ele hide-vga hide-small"></div>
+            <div class="nav-ele hide-vga hide-small" style="padding-top:5px">
+                <a href="#" style="font-size:200%" class="glyphter tooltip" title="<div class='nav-ele'><a href='/'>Home</a></div> <br/> <div class='nav-ele'><a href='https://github.com/strongs-de/strongs' target='_blank'>Fork me on Github</a></div> <br/> <div class='nav-ele'><a href='http://blog.strongs.de/impressum'>Impressum</a></div>">
+                    G
+                </a>
+            </div><div class="nav-ele hide-vga" style="padding-top:5px">
+                {% if user.is_authenticated %}
+                    <a href="#" style="font-size:170%" class="glyphter tooltip" title="<div class='nav-ele'><a href='/account/'>Mein Konto</a></div> <br/> <div class='nav-ele'><a href='/logout/'>{{user.username}} abmelden</a></div>">
+                        X
+                    </a>
+                {% else %}
+                    <a href="/login/" class="glyphter tooltip" style="font-size:170%;" title="<div class='nav-ele'><a href='/login/'>Anmelden</a></div> <br/> <div class='nav-ele'><a href='/register/'>Registrieren</a></div>">X</a>
+                {% endif %}
+            </div>
         </nav>
+        <!-- ... Menubar -->
 
         <form class="form-4" method="POST" action="">
             {% csrf_token %}
@@ -34,16 +61,71 @@
             <h4 class="error">Fehler: {{ error }}</h4><br/>
             {% endif %}
 
-            <label for="id_first_name">Vorname:</label><input placeholder="Vorname" id="id_first_name" maxlength="75" name="first_name" type="text" value="{{ fn }}" />
-            <label for="id_last_name">Nachname:</label><input placeholder="Nachname" id="id_last_name" maxlength="75" name="last_name" type="text" value="{{ ln }}" />
-            <label for="id_email">E-Mail-Adresse:</label><input placeholder="E-Mail-Adresse" id="id_email" maxlength="75" name="email" type="email" value="{{ email }}" />
-            <label for="id_username">Benutzername:</label><input placeholder="Benutzername" id="id_username" maxlength="30" name="username" type="text" value="{{ un }}" />
+            <!-- <label for="id_user-first_name">Vorname:</label><input class="form_input" placeholder="Vorname" id="id_first_name" maxlength="75" name="first_name" type="text">
+            <label for="id_user-last_name">Nachname:</label><input class="form_input" placeholder="Nachname" id="id_user-last_name" maxlength="75" name="user-last_name" type="text">
+            <label for="id_user-email">E-Mail-Adresse:</label><input class="form_input" placeholder="E-Mail-Adresse" id="id_user-email" maxlength="75" name="user-email" type="email">
+            <label for="id_user-username">Benutzername:</label><input class="form_input" placeholder="Benutzername" id="id_user-username" maxlength="30" name="user-username" type="text">
+            <br>
+            <span class="helptext">Erforderlich. 30 Zeichen oder weniger. Nur alphanumerische Zeichen (Buchstaben, Ziffern und @/./+/-/_) sind erlaubt.</span>
+            <label for="id_user-password">Passwort:</label><input class="form_input" placeholder="Passwort" id="id_user-password" maxlength="30" name="user-password" type="password">
+            <label for="id_user-password">Passwort wiederholen:</label><input class="form_input" placeholder="Passwort wiederholen" id="id_user-password2" maxlength="30" name="user-password2" type="password"> -->
+
+            <label for="id_first_name">Vorname:</label><input class="form_input" placeholder="Vorname" id="id_first_name" maxlength="75" name="first_name" type="text" value="{{ fn }}" />
+            <label for="id_last_name">Nachname:</label><input class="form_input" placeholder="Nachname" id="id_last_name" maxlength="75" name="last_name" type="text" value="{{ ln }}" />
+            <label for="id_email">E-Mail-Adresse:</label><input class="form_input" placeholder="E-Mail-Adresse" id="id_email" maxlength="75" name="email" type="email" value="{{ email }}" />
+            <label for="id_username">Benutzername:</label><input class="form_input" placeholder="Benutzername" id="id_username" maxlength="30" name="username" type="text" value="{{ un }}" />
             <br>
             <span class="helptext">Hinweis: Passwort nur dann eingeben, wenn es geändert werden soll.</span><br/><br/>
-            <label for="id_password">Passwort:</label><input placeholder="Passwort" id="id_password" maxlength="30" name="password" type="password" />
-            <label for="id_password">Passwort wiederholen:</label><input placeholder="Passwort wiederholen" id="id_password2" maxlength="30" name="password2" type="password" />
+            <label for="id_user-password">Passwort:</label><input class="form_input" class="form_input" placeholder="Passwort" id="id_user-password" maxlength="30" name="user-password" type="password">
+            <label for="id_user-password">Passwort wiederholen:</label><input class="form_input" class="form_input" placeholder="Passwort wiederholen" id="id_user-password2" maxlength="30" name="user-password2" type="password">
 
             <input type="submit" value="Änderungen speichern">
+            <input type="hidden" name="next" value="{{ next }}" />
         </form>
+
+
+        <script src="{{ STATIC_URL }}js/jquery-1.10.2.min.js"></script>
+        <script src="{{ STATIC_URL }}js/jquery.tooltipster.min.js"></script>
+        <!-- For Autocomplete staff ... -->
+        <link href="{{ STATIC_URL }}css/jquery-ui.css" rel="stylesheet">
+        <script src="{{ STATIC_URL }}js/jquery-ui.js"></script>
+        <script src="{{ STATIC_URL }}js/autocomplete.js"></script>
+        <!-- ... for Autocomplete staff -->
+        <script>
+            function doSearch(string) {
+                var path = '/' + string;
+                location.href=path;
+            }
+
+            function initTooltips() {
+                // Activate tooltipster
+                $('.tooltip').tooltipster({
+                    contentAsHTML: true,
+                    interactive: true,
+                    maxWidth: 500,
+                    theme: 'tooltipster-shadow'
+                });
+            }
+
+            $(document).ready(function() {
+                initTooltips();
+
+                // Key listener for search field
+                $('#searchId').keydown(function(e) {
+                    if(e.keyCode == 13)
+                        doSearch($('#searchId').val())
+                });
+
+                // add key listener for search
+                document.onkeypress = function(evt) {
+                  var evt  = (evt) ? evt : ((event) ? event : null);
+                  var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+                  if(node.type != "text" && node.type != "password" && node.type != "email" && !evt.metaKey && !evt.ctrlKey && !evt.altKey) {
+                    $('#searchId').val('');
+                    $("#searchId").focus();
+                  }
+                };
+            });
+        </script>
     </body>
 </html>

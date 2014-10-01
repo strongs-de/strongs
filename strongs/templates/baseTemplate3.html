@@ -32,7 +32,7 @@
             <div class="nav-ele">
                 <input type="text" class="search" id="searchId" placeholder="Suchen" value="{{ search }}" />
             </div>
-            <div class="nav-ele">
+            <div class="nav-ele" style="padding-top:5px">
                 <span class="navbuttons">
                     <a class="glyphter" id="prev_chapter">Z</a>
                     {%if pagecnt > 0 %}{% block pagenum %}{% endblock %}{% endif %}
@@ -40,18 +40,18 @@
                 </span>
             </div>
             <div class="nav-ele hide-vga hide-small"></div>
-            <div class="nav-ele hide-vga hide-small"></div>
-            <div class="nav-ele hide-vga hide-small">
-                <a href="/">Home</a>
-            </div><div class="nav-ele hide-vga">
+            <div class="nav-ele hide-vga hide-small" style="padding-top:5px">
+                <a href="#" style="font-size:200%" class="glyphter tooltip" title="<div class='nav-ele'><a href='/'>Home</a></div> <br/> <div class='nav-ele'><a href='https://github.com/strongs-de/strongs' target='_blank'>Fork me on Github</a></div> <br/> <div class='nav-ele'><a href='http://blog.strongs.de/impressum'>Impressum</a></div>">
+                    G
+                </a>
+            </div><div class="nav-ele hide-vga" style="padding-top:5px">
                 {% if user.is_authenticated %}
-                    <a href="/account/">Mein Konto</a> </div><div class="nav-ele"><a href="/logout/">{{user.username}} abmelden</a>
+                    <a href="#" style="font-size:170%" class="glyphter tooltip" title="<div class='nav-ele'><a href='/account/'>Mein Konto</a></div> <br/> <div class='nav-ele'><a href='/logout/'>{{user.username}} abmelden</a></div>">
+                        X
+                    </a>
                 {% else %}
-                    <a href="/login/">Anmelden</a>
+                    <a href="/login/" class="glyphter tooltip" style="font-size:170%;" title="<div class='nav-ele'><a href='/login/'>Anmelden</a></div> <br/> <div class='nav-ele'><a href='/register/'>Registrieren</a></div>">X</a>
                 {% endif %}
-            </div>
-            <div class="nav-ele hide-vga hide-small">
-              <iframe src="http://ghbtns.com/github-btn.html?user=strongs-de&repo=strongs&type=fork" allowtransparency="true" frameborder="0" scrolling="0" width="53" height="20"></iframe>
             </div>
         </nav>
         <!-- ... Menubar -->

@@ -498,7 +498,7 @@ label:hover ~ input {
     position: absolute;
     right: 0px;
     top: 0px;
-    height: 53px;
+    height: 33px;
     width: 23px;
     -moz-border-bottom-colors: none;
     -moz-border-left-colors: none;
@@ -509,13 +509,13 @@ label:hover ~ input {
     cursor: pointer;
     display: inline-block;
     margin-top: 0;
-    padding: 0px 16px;
+    padding: 10px 16px;
     padding-left: 9px;
     text-align: center;
     text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
     vertical-align: middle;
     font-family: "Glyphter";
-    font-size: 350%;
+    font-size: 250%;
     font-weight: bold;
     line-height: normal;
     float: left;
