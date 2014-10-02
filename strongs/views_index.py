@@ -5,7 +5,8 @@ __author__ = 'mirkohecky'
 
 
 def index(request):
-    return bible(request, "joh", 'strongs/intro.html')
+    return bible(request, "joh", 'strongs/bibleNew.html')
+    # return bible(request, "joh", 'strongs/intro.html')
     # return render(request, 'strongs/intro.html')
     # return render_to_response('strongs/intro.html')
 
