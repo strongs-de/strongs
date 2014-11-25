@@ -120,11 +120,11 @@ input:focus {
     overflow: auto;
     background-color: rgba(255,255,255,.95);
     background-color: #f3efe1;
-    border-left: 10px solid #5BB05B;
-    border-right: 10px solid #5BB05B;
+    /*border-left: 10px solid #5BB05B;*/
+    /*border-right: 10px solid #5BB05B;*/
     padding-top: 10px;
-    width: 99%;
-    margin-right: -10px;
+    width: 100%;
+    margin-right: 0px;
 }
 
 .tr {
