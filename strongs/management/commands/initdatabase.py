@@ -1,4 +1,4 @@
-# -*- coding: iso-8859-1 -*-
+# -*- coding: utf8 -*-
 from django.core.management.base import BaseCommand, CommandError
 from strongs.models import BibleTranslation, BibleBook, BibleVers, BibleText, StrongNr
 from os import path
@@ -14,12 +14,20 @@ class Command(BaseCommand):
         return
 
     def handle(self, *args, **options):
-        # self.stdout.write('start initializing the database ...')
+        self.stdout.write('******************************')
+        self.stdout.write('* STRONGS DE - INIT DATABASE *')
+        self.stdout.write('******************************')
         self.init_bible_books()
+        self.stdout.write('******************************')
         if path.exists('bibles/osis.NGU.xml'):
           self.insert_osis_bibles()
+          self.stdout.write('******************************')
         self.insert_bible_vers()
+        self.stdout.write('******************************')
         self.init_strong_grammar()
+        self.stdout.write('******************************')
+        self.stdout.write('* STRONGS DE - DONE          *')
+        self.stdout.write('******************************')
 
     def element_to_string(self, element, until_child_is=None):
         s = element.text or ""
@@ -35,9 +43,9 @@ class Command(BaseCommand):
     def insert_osis_bibles(self):
         BOOKS = ['Gen', 'Exod', 'Lev', 'Num', 'Deut', 'Josh', 'Judg', 'Ruth', '1Sam', '2Sam', '1Kgs', '2Kgs', '1Chr', '2Chr', 'Ezra', 'Neh', 'Esth', 'Job', 'Ps', 'Prov', 'Eccl', 'Song', 'Isa', 'Jer', 'Lam', 'Ezek', 'Dan', 'Hos', 'Joel', 'Amos', 'Obad', 'Jonah', 'Mic', 'Nah', 'Hab', 'Zeph', 'Hag', 'Zech', 'Mal', 'Matt', 'Mark', 'Luke', 'John', 'Acts', 'Rom', '1Cor', '2Cor', 'Gal', 'Eph', 'Phil', 'Col', '1Thess', '2Thess', '1Tim', '2Tim', 'Titus', 'Phlm', 'Heb', 'Jas', '1Pet', '2Pet', '1John', '2John', '3John', 'Jude', 'Rev']
         FILES = ['./bibles/osis.NGU.xml', './bibles/osis.psalmenNGU.xml', './bibles/osis.schlachter2000.v1.withoutnotes.xml']
-        IDENTIFIER = [u'NGÜ', u'NGÜ', 'SCH2000']
+        IDENTIFIER = [u'NGÃœ', u'NGÃœ', 'SCH2000']
         LANGS = ['GER', 'GER', 'GER']
-        TITLES = [u'Neue Genfer Übersetzung', u'Neue Genfer Übersetzung', 'Schlachter 2000']
+        TITLES = [u'Neue Genfer Ãœbersetzung', u'Neue Genfer Ãœbersetzung', 'Schlachter 2000']
         NEEDS_CHAPTERS = [False, False, True]
         lists = izip_longest(FILES, IDENTIFIER, LANGS, TITLES, NEEDS_CHAPTERS)
         for FILE, identifier, lang, title, needs_chapter in lists:
@@ -56,7 +64,7 @@ class Command(BaseCommand):
                 if tr.count() <= 0:
                     tr = BibleTranslation(identifier=identifier, name=title, language=lang)
                     tr.save()
-                    # self.stdout.write(' -> created new translation ' + identifier + '.')
+                    self.stdout.write(' -> created new translation ' + identifier + '.')
                 else:
                     tr = tr[0]
 
@@ -143,13 +151,13 @@ class Command(BaseCommand):
 
 
     def insert_bible_vers(self):
-        # self.stdout.write('Start parsing ...')
+        self.stdout.write('Start parsing ...')
 
         ####################################################
         # Insert book names if they does not exist
 
         if not path.exists('bibles/osis.NGU.xml'):
-          FILES = ['./bibles/GER_SCH1951_STRONG.xml', './bibles/GER_ELB1905_STRONG.xml', './bibles/GER_LUTH1912.xml', './bibles/GER_ILGRDE.xml', './bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml']
+          FILES = ['./bibles/GER_ILGRDE.xml', './bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml', './bibles/GER_LUTH1912.xml', './bibles/GER_ELB1905_STRONG.xml', './bibles/GER_SCH1951_STRONG.xml']
         else:
           FILES = ['./bibles/GER_ELB1905_STRONG.xml', './bibles/GER_LUTH1912.xml', './bibles/GER_ILGRDE.xml', './bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml']
         # FILE = './GER_SCH1951_STRONG.xml'
@@ -168,30 +176,47 @@ class Command(BaseCommand):
             language = root.findtext('INFORMATION/language')
             title = root.findtext('INFORMATION/title')
 
+            self.stdout.write(identifier + ':')
+
             # Ask if this translation does already exist
             tr = BibleTranslation.objects.filter(identifier=identifier)
+            # self.stdout.write('1')
             if tr.count() <= 0:
+                # self.stdout.write('2')
                 tr = BibleTranslation(identifier=identifier, name=title, language=language)
+                # self.stdout.write('3')
                 tr.save()
-                # self.stdout.write(' -> created new translation ' + identifier + '.')
+                # self.stdout.write('4')
+                self.stdout.write(' -> created new translation ' + identifier + '.')
+                # self.stdout.write('5')
             else:
+                # self.stdout.write('-2')
                 tr = tr[0]
+            # self.stdout.write('6')
 
             # Insert verses
             for book in root.findall('BIBLEBOOK'):
+                # self.stdout.write('a')
                 chapterCount = 0
 
                 # Does this book already exist
+                # self.stdout.write('b')
                 tb = BibleBook.objects.filter(nr=book.get('bnumber'))
+                # self.stdout.write('c')
                 if tb.count() <= 0:
+                    # self.stdout.write('d')
                     tb = BibleBook(nr=int(book.get('bnumber')), name='', alternativeNames='')
+                    # self.stdout.write('e')
                     tb.save()
                 else:
+                    # self.stdout.write('-d')
                     tb = tb[0]
+                # self.stdout.write('f')
 
+                versCount = 0
+                # self.stdout.write('g')
                 for chapter in book.findall('CHAPTER'):
                     chapterCount += 1
-                    versCount = 0
                     for vers in chapter.findall("VERS"):
                         versCount += 1
 
@@ -208,8 +233,8 @@ class Command(BaseCommand):
                         if dbVers.count() <= 0:
                             dbVers = BibleText(translationIdentifier=tr, vers=v, versText=self.element_to_string(vers))
                             dbVers.save()
-                # self.stdout.write(' -> inserted book nr ' + book.get('bnumber') + ' with ' + str(chapterCount)  + ' chapters and ' + str(versCount) + ' verses.')
-        return ''
+                self.stdout.write(' -> inserted book nr ' + book.get('bnumber') + ' with ' + str(chapterCount)  + ' chapters and ' + str(versCount) + ' verses.')
+        self.stdout.write('done parsing!')
 
 
     def init_strong_grammar(self):
@@ -264,14 +289,15 @@ class Command(BaseCommand):
                 bookNames.nr = bookNr
                 bookNames.language = 'de'
                 bookNames.name = ele[0]
-                # self.stdout.write(ele[0] + ' (', ending='')
+                self.stdout.write(ele[0] + ' (', ending='')
                 if len(ele) > 1:
                     bookNames.short_name = ele[1]
-                    # self.stdout.write(ele[1], ending='')
-                # self.stdout.write(')', ending='')
+                    self.stdout.write(ele[1], ending='')
+                self.stdout.write(')', ending='')
                 if len(ele) > 2:
                     bookNames.alternativeNames = ',' + string.join(ele[2:], ',') + ','
-                    # self.stdout.write(' [' + bookNames.alternativeNames + ']')
+                    # self.stdout.write(' [' + bookNames.alternativeNames.encode('ascii') + ']', ending='')
+                self.stdout.write('')
                 bookNames.save()
         return s
 

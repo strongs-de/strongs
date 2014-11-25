@@ -12,7 +12,7 @@ body {
     /*background-color: #f3efe1;*/
     /*color: rgb(132, 128, 114);*/
     color: #504C3D;
-    overflow: hidden;
+    /*overflow: hidden;*/
     font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;
     font-family: "Lucida Grande","Lucida Sans Unicode","Lucida Sans",Geneva,Verdana,sans-serif;
     /*font-family: "Lato", "arial", "sans-serif";
@@ -69,6 +69,8 @@ input:focus {
     width: 100%;
     height: 53px;
     /*float: left;*/
+    z-index: 1;
+    border-bottom: 10px solid #5BB05B;
 }
 
 .nav-ele {
@@ -110,15 +112,16 @@ input:focus {
  ***********************************************************************************************************************/
 
 .container {
-    position: fixed;
+    /*position: fixed;*/
     left: 0;
-    top: 53px;
+    margin-top: 63px;
     /*width: 100%;*/
     height: 100%;
     overflow: auto;
     background-color: rgba(255,255,255,.95);
     background-color: #f3efe1;
-    border: 10px solid #5BB05B;
+    border-left: 10px solid #5BB05B;
+    border-right: 10px solid #5BB05B;
     padding-top: 10px;
     width: 99%;
     margin-right: -10px;
@@ -485,13 +488,14 @@ label:hover ~ input {
 
 
 #sb-slidebox {
-    position: absolute;
+    position: fixed;
     right: 0px;
     top: 0px;
     width: 25%;
     height: 100%;
     min-width: 300px;
     max-width: 400px;
+    z-index: 4;
 }
 
 #sb-button {

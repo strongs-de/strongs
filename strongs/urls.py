@@ -5,7 +5,7 @@ from django.contrib.auth.views import login, logout_then_login
 from strongs.views_account import my_account, register, custom_login
 from strongs.views_bible import async_bible, sync_bible
 from strongs.views_index import index, async_index
-from strongs.views_init import initDb
+# from strongs.views_init import initDb
 from strongs.views_search import async_search, async_search_strong, sync_search_strong, sync_search
 from strongs.views_strong_details import strongs
 from strongs.views_verslist import add_vers_to_list, remove_vers_from_list, set_verslist_title, create_verslist, \
@@ -13,7 +13,7 @@ from strongs.views_verslist import add_vers_to_list, remove_vers_from_list, set_
 
 urlpatterns = patterns('',
     # db initialization
-    url(r'^initDb$', initDb, name='initDb'),
+    # url(r'^initDb$', initDb, name='initDb'),
 
     # User management
     url(r'^login/$', custom_login),
@@ -57,5 +57,3 @@ urlpatterns = patterns('',
     url(r'^async/(?P<bible_book>.+)/$', async_bible, name='async_bible'),
     url(r'^(?P<bible_book>.+)/$', sync_bible, name='sync_bible')
 )
-
-
