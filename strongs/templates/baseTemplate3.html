@@ -20,6 +20,8 @@
         <link href="{{ STATIC_URL }}css/tooltipster.css" rel="stylesheet">
         <link href="{{ STATIC_URL }}css/themes/tooltipster-shadow.css" rel="stylesheet">
 
+        <link href="http://code.jboxcdn.com/0.3.2/jBox.css" rel="stylesheet">
+
         {% block header %}
         {% endblock %}
     </head>
@@ -29,22 +31,24 @@
         <nav class="nav">
             <a href="/" class="navbar-brand hide-vga hide-small"><img src="{{ STATIC_URL }}images/logo.png"></a>
             <div class="nav-ele" id="center-div"></div>
-            <div class="nav-ele">
-                <input type="text" class="search" id="searchId" placeholder="Suchen" value="{{ search }}" />
+            <div class="nav-ele search-nav-ele">
+                <form id="search-form" onsubmit="doSearch($('#searchId').val()); return false;">
+                    <input type="text" class="search" id="searchId" placeholder="Suchen" value="{{ search }}" />
+                </form>
             </div>
-            <div class="nav-ele" style="padding-top:5px">
+            <div class="nav-ele navigator-nav-ele">
                 <span class="navbuttons">
                     <a class="glyphter" id="prev_chapter">Z</a>
                     {%if pagecnt > 0 %}{% block pagenum %}{% endblock %}{% endif %}
                     <a class="glyphter" id="next_chapter">a</a>
                 </span>
             </div>
-            <div class="nav-ele hide-vga hide-small"></div>
-            <div class="nav-ele hide-vga hide-small" style="padding-top:5px">
+            <!-- <div class="nav-ele hide-vga hide-small"></div> -->
+            <div class="nav-ele hide-vga hide-small">
                 <a href="#" style="font-size:200%" class="glyphter tooltip" title="<div class='nav-ele'><a href='/'>Home</a></div> <br/> <div class='nav-ele'><a href='http://blog.strongs.de' target='_blank'>Blog</a></div> <br/> <div class='nav-ele'><a href='https://github.com/strongs-de/strongs' target='_blank'>Fork me on Github</a></div> <br/> <div class='nav-ele'><a href='http://blog.strongs.de/impressum'>Impressum</a></div>">
                     G
                 </a>
-            </div><div class="nav-ele hide-vga" style="padding-top:5px">
+            </div><div class="nav-ele hide-vga">
                 {% if user.is_authenticated %}
                     <a href="#" style="font-size:170%" class="glyphter tooltip" title="<div class='nav-ele'><a href='/account/'>Mein Konto</a></div> <br/> <div class='nav-ele'><a href='/logout/'>{{user.username}} abmelden</a></div>">
                         X
@@ -117,6 +121,7 @@
         <script src="{{ STATIC_URL }}js/infoSidebar.js"></script>
 
         <!-- Tooltipster -->
+        <script src="http://code.jboxcdn.com/0.3.2/jBox.min.js"></script>
         <script src="{{ STATIC_URL }}js/jquery.tooltipster.min.js"></script>
         <script>
 {#            jQuery.fn.outerHTML = function(s) {#}
@@ -148,10 +153,10 @@
                 initStrongLinks();
 
                 // Key listener for search field
-                $('#searchId').keydown(function(e) {
-                    if(e.keyCode == 13)
-                        doSearch($('#searchId').val())
-                });
+                // $('#searchId').keydown(function(e) {
+                //     if(e.keyCode == 13)
+                //         doSearch($('#searchId').val());
+                // });
 
                 // Autocomplete for vers lists
                 $('.versListTitle').autocomplete({

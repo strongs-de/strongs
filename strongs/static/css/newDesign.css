@@ -12,7 +12,7 @@ body {
     /*background-color: #f3efe1;*/
     /*color: rgb(132, 128, 114);*/
     color: #504C3D;
-    overflow: hidden;
+    /*overflow: hidden;*/
     font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;
     font-family: "Lucida Grande","Lucida Sans Unicode","Lucida Sans",Geneva,Verdana,sans-serif;
     /*font-family: "Lato", "arial", "sans-serif";
@@ -69,8 +69,8 @@ input:focus {
     width: 100%;
     height: 53px;
     /*float: left;*/
-    /*z-index: 1;
-    border-bottom: 10px solid #5BB05B;*/
+    z-index: 1;
+    border-bottom: 10px solid #5BB05B;
 }
 
 .nav-ele {
@@ -112,20 +112,20 @@ input:focus {
  ***********************************************************************************************************************/
 
 .container {
-    position: fixed;
+    /*position: fixed;*/
     left: 0;
-    top: 53px;
+    margin-top: 63px;
     /*width: 100%;*/
     height: 100%;
-    overflow: auto;
+    overflow: hidden;
     background-color: rgba(255,255,255,.95);
     background-color: #f3efe1;
     /*border-left: 10px solid #5BB05B;*/
     /*border-right: 10px solid #5BB05B;*/
-    border: 10px solid #5BB05B;
+    /*border: 10px solid #5BB05B;*/
     padding-top: 10px;
-    width: 99%;
-    margin-right: -10px;
+    width: 100%;
+    margin-right: 0px;
 }
 
 .tr {
@@ -487,7 +487,7 @@ label:hover ~ input {
  *                                                                                              INFO SIDEBAR
  ***********************************************************************************************************************/
 
-
+/*
 #sb-slidebox {
     position: absolute;
     right: 0px;
@@ -496,9 +496,10 @@ label:hover ~ input {
     height: 100%;
     min-width: 300px;
     max-width: 400px;
-    /*z-index: 4;*/
-}
+    /*z-index: 4;* /
+}*/
 
+/*
 #sb-button {
     position: absolute;
     right: 0px;
@@ -529,8 +530,8 @@ label:hover ~ input {
     z-index: 2;
     border: 1px solid #5BB05B;
     border-radius: 14px 0 0 14px;
-}
-
+}*/
+/*
 .sb-menu {
 	position: absolute;
 	top: 0px;
@@ -547,12 +548,57 @@ label:hover ~ input {
 	-webkit-transform: translate3d(100%, 0, 0);
 	transform: translate3d(100%, 0, 0);
     font-size: 110%;
+}*/
+
+
+
+
+#sb-slidebox {
+    position: fixed;
+    right: -300px;
+    top: 0px;
+    /*width: 25%;*/
+    height: 100%;
+    width: 300px;
+    /*max-width: 400px;*/
+    z-index: 4;
+    clear: none;
+    float: left;
+    transition: 0.3s ease-in-out;
+}
+
+#sb-button {
+    float: left;
+    clear: none;
+    font-family: "Glyphter";
+    font-size: 250%;
+    padding: 10px 16px;
+    padding-left: 9px;
+    cursor: pointer;
+    width: 23px;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+    color: #5BB05B;
+    z-index: 2;
+    border: 1px solid #5BB05B;
+    border-radius: 14px 0 0 14px;
+    margin-left: -50px;
+}
+
+.sb-menu {
+    left: 0;
+    z-index: 3;
+    height: 100%;
+    border: 5px solid #5BB05B;
+    background-color: #f3efe1;
+    color: rgb(0, 0, 0);
+    overflow:scroll;
+    font-size: 110%;
 }
 
 #info-content {
     margin-left: 10px;
     margin-right: 10px;
-}
+}/*
 
 .sb-menu-open .sb-menu {
 	-webkit-transform: translate3d(0, 0, 0);
@@ -562,7 +608,7 @@ label:hover ~ input {
 .sb-menu-open .sb-button {
 	-webkit-transform: translate3d(-300px, 0, 0);
 	transform: translate3d(-300px, 0, 0);
-}
+}*/
 
 /* Fallback example for browsers that don't support 3D transforms and/or no JS */
 .no-csstransforms3d .sb-menu,
@@ -616,7 +662,7 @@ label:hover ~ input {
 
 
 
-@media (max-width: 1024px) {
+@media (max-width: 1280px) {
     .hide-xga {
         visibility: hidden;
         height:0px;width:0px;
@@ -627,12 +673,17 @@ label:hover ~ input {
     .tr {
         width:32%;
     }
+    .titleTr {
+        width:31%;
+    }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 1024px) {
     .hide-vga {
         visibility: hidden;
         height:0px;width:0px;
+        padding: 0; margin: 0;
+        display: none;
     }
     #searchId {
         width:250px;
@@ -648,5 +699,95 @@ label:hover ~ input {
     }
     .tr {
         width:49%;
+    }
+    .titleTr {
+        width:48%;
+    }
+}
+
+
+@media (max-width: 640px) {
+    .hide-small {
+        visibility: hidden;
+        height:0px;width:0px;
+        padding: 0; margin: 0;
+        display: none;
+    }
+    .hide-small .verse, .hide-small .content, .hide-small .copyright {
+        height:0px;width:0px; padding:0; margin:0;
+    }
+    .tr {
+        width:99%;
+    }
+    .titleTr {
+        width:99%;
+        background: none;
+    }
+
+    #sb-button {
+        /*padding-top:7px;*/
+        /*top: 100%;*/
+        border-radius: 14px 14px 0 0;
+        /*left: 50% !important;*/
+        /*right: 0;*/
+        /*top: -50px;*/
+        /*margin-left: -12px;*/
+        margin-left: auto;
+        margin-right: auto;
+        float: none;
+    }
+
+    #sb-menu {
+        /*margin-top: 53px !important;*/
+    }
+
+    #sb-slidebox {
+        top: 100% !important;
+        left: 0;
+        width: 100%;
+        right: 0;
+        height: 50%;
+        margin-top: -53px;
+    }
+
+    #sb-slidebox.sb-menu-open {
+        top: 50% !important;
+    }
+
+    .search-nav-ele {
+        width: 50%;
+        padding: 0;
+        /*vertical-align: top;*/
+    }
+
+    #searchId {
+        width: 100%;
+    }
+
+    .nav {
+        height: 38px;
+    }
+
+    .navigator-nav-ele {
+        padding-left: 30px;
+    }
+
+    #center-div {
+        /*display: none;*/
+        padding-top: 38px;
+    }
+
+    .container {
+        margin-top: 48px;
+    }
+
+    .titleTr {
+        top: 45px;
+    }
+}
+
+@media (min-width: 640px) {
+    #sb-slidebox.sb-menu-open {
+        right: 0px;
     }
 }
