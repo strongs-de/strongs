@@ -20,7 +20,7 @@ function animateCloseInfobox() {
             $('#sb-slidebox').removeClass('sb-menu-open');
 
             // remove anchor link
-            parent.location.hash = '';
+            parent.location.hash = '#/';
         }
     }, 25);
 }
@@ -117,7 +117,7 @@ function initStrongLinks() {
 
 $(function() {
     // If there is a strong-number given (as anchor in url) open the sidebar
-    if(parent.location.hash.length > 1) {
+    if(parent.location.hash.length > 1 && parent.location.hash != '#/') {
         var anchor = parent.location.hash.substring(1);
         var arr = anchor.split('/');
         loadStrong(arr[0], arr[1], arr[2]);
