@@ -7,7 +7,9 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
-    ports:
-      - "8000:8000"
+    expose:
+      - 8000
+    environment:
+      VIRTUAL_HOST: test2.wordsabout.de
 #    depends_on:
 #      - db
