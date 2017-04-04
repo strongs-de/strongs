@@ -2,11 +2,12 @@ version: '2'
 services:
   db:
     image: postgres
+    container_name: strongs_de_db
     networks:
       - back-end
   web:
     build: .
-    container_name: strongs_de
+    container_name: strongs_de_web
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
@@ -14,6 +15,7 @@ services:
       - 8000
     environment:
       VIRTUAL_HOST: test2.wordsabout.de
+      VIRTUAL_PORT: 8000
     depends_on:
       - db
     networks:
