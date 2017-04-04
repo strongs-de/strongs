@@ -1,9 +1,12 @@
 version: '2'
 services:
-#  db:
-#    image: postgres
+  db:
+    image: postgres
+    networks:
+      - back-end
   web:
     build: .
+    container_name: strongs_de
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
@@ -11,5 +14,15 @@ services:
       - 8000
     environment:
       VIRTUAL_HOST: test2.wordsabout.de
-#    depends_on:
-#      - db
+    depends_on:
+      - db
+    networks:
+      - nginx-proxy
+      - back-end
+
+networks:
+  nginx-proxy:
+    external:
+      name: nginx-proxy
+  back-end:
+    driver: bridge
