@@ -98,7 +98,8 @@ USE_X_FORWARDED_HOST = True
 # lines:
 # STATIC_ROOT = '/home/strongs/webapps/beta_static_media/' # for the beta site
 # STATIC_ROOT = '/home/strongs/webapps/static_media/' # for the live site
-STATIC_ROOT = static_root.STATIC_ROOT()
+# STATIC_ROOT = static_root.STATIC_ROOT()
+STATIC_ROOT = './static_media/'
 STATIC_URL = '/static/'
 
 # Other settings

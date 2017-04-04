@@ -8,20 +8,20 @@ We host the source code of the bible study page www.strongs.de. We want to give 
 Until now this site is only available in german. We do have the aim (and we have many other great ideas) to support other languages as well, but this is a question how it is requested by our users.
 
 
+Prerequisits
+============
+
+- Docker
+
 Quick-Start
 ===========
 
-- Install python 2.7.x and django 1.7.x (```pip install Django==1.7```) if you don't have already
-- Download the source code
-- Go to the main repo directory (the directory with the **manage.py** file in it)
-- Download the sqlite database file from the [release section](https://github.com/strongs-de/strongs/releases)
-- Create a new file named **static_root.py** in the directory **myproject** and insert the following contents: 
-```python
-def STATIC_ROOT():
-  return './static_media/'
-```
-- You need to do this, because our different sites (live and beta) uses different static folders, so we decided to source this declaration out
-- To run the server locally run ```python manage.py runserver```
+- Clone this repo: `git clone https://github.com/strongs-de/strongs`
+- Create the docker image: `docker-compose -f docker-compose.yml build`
+- Run initialization steps (only once):
+  - `docker-compose run web python manage.py syncdb`
+  - `docker-compose run web python manage.py initdatabase`
+- Run the project: `docker-compose up -d`
 - Now you can visit the page at [http://localhost:8000/](http://localhost:8000/)
 
 How to contribute
