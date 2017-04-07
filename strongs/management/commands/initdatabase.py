@@ -5,6 +5,7 @@ from os import path
 from xml.etree import ElementTree as ElementTree
 import re
 import string
+from itertools import izip_longest
 
 
 class Command(BaseCommand):
@@ -102,14 +103,14 @@ class Command(BaseCommand):
                             if vnumber > 1:
                                 # The first verse can be found in the parent chapter tag-text
                                 # __insert(tr, tb, cnumber, 1, chapter.text)
-                                __insert(tr, tb, cnumber, 1, self.element_to_string(chapter, ['{http://www.bibletechnologies.net/2003/OSIS/namespace}div', '{http://www.bibletechnologies.net/2003/OSIS/namespace}verse']))
+                                self.__insert(tr, tb, cnumber, 1, self.element_to_string(chapter, ['{http://www.bibletechnologies.net/2003/OSIS/namespace}div', '{http://www.bibletechnologies.net/2003/OSIS/namespace}verse']))
                             actchapter = cnumber
 
-                        __insert(tr, tb, cnumber, vnumber, text)
+                        self.__insert(tr, tb, cnumber, vnumber, text)
                         # s += bookname + str(cnumber) + ',' + str(vnumber) + ': ' + text
                         # break
 
-        return s
+        # return s
 
 
     def __insert(self, translation, book, chapter, vers, text):
@@ -147,7 +148,7 @@ class Command(BaseCommand):
 
             if numverses > 1:
                 for i in range(1, numverses):
-                    __insert(translation, book, chapter, vers+i, '')
+                    self.__insert(translation, book, chapter, vers+i, '')
 
 
     def insert_bible_vers(self):
@@ -242,6 +243,7 @@ class Command(BaseCommand):
         s = 'initStrongGrammar: ' + str(greekStrongVerses.count()) + ' verses found!'
         sgreek = ElementTree.parse("./strongsgreek.xml").getroot()
         entries = sgreek.findall(".//entries/entry")
+        self.stdout.write('count: %s' % s)
         for vers in greekStrongVerses:
             # get the vers in another translation
             # trWord = BibleTranslation.objects.filter(identifier='ELB1905STR')
@@ -268,7 +270,10 @@ class Command(BaseCommand):
                                 translit = onegreek.find("./greek").get("translit")
                                 break
                         strong = StrongNr(pronounciation=translit, strongNr=int(one[1]), grammar=one[0], translationIdentifier=vers.translationIdentifier, greek=one[2], vers=bvers[0])
-                        strong.save()
+                        try:
+                            strong.save()
+                        except Exception as exc:
+                            self.stdout.write(str(exc))
         return s
 
 

@@ -3,6 +3,8 @@ services:
   db:
     image: postgres
     container_name: strongs_de_db
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
     networks:
       - back-end
   web:
