@@ -144,12 +144,16 @@ input:focus {
     height: 23px;
     width: 24.5%;
     float: left;
-    top: 63px;
+    top: 58px;
     color: #5BB05B;
     background-image: url("../images/navbg.png");
     background-repeat: repeat-x;
     background-position: top;
     background-size: contain;
+}
+
+.titleTr .title {
+    margin-top: 5px;
 }
 
 .switchTr {
@@ -191,8 +195,10 @@ input:focus {
 }
 
 .sb-strong {
-    color: #0f0b07;
+    /*color: #0f0b07;*/
+    border-bottom: 1px dotted #bbb;
     cursor: pointer;
+    margin: 0px 1px 0px 1px;
 }
 
 .sb-strong:hover {
@@ -732,7 +738,7 @@ label:hover ~ input {
     }
     .titleTr {
         width:99%;
-        background: none;
+        /*background: none;*/
     }
 
     #sb-button {
@@ -794,7 +800,7 @@ label:hover ~ input {
     }
 
     .titleTr {
-        top: 45px;
+        top: 43px;
     }
 
     #tr1, #tr2, #tr3 {
