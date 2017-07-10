@@ -17,7 +17,13 @@ Quick-Start
 ===========
 
 - Clone this repo: `git clone https://github.com/strongs-de/strongs`
-- Create the docker image: `docker-compose -f docker-compose.yml build`
+- Create a file `.env` in the source directory to set the docker-compose varaibles:
+```
+CONTAINER_NAME_DB=strongs_de_db
+CONTAINER_NAME_WEB=strongs_de_web
+URL=your.url
+```
+- Create the docker image: `docker-compose build`
 - Run initialization steps (only once):
   - `docker-compose run web python manage.py syncdb`
   - `docker-compose run web python manage.py initdatabase`
