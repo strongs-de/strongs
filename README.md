@@ -25,9 +25,18 @@ URL=your.url
 ```
 - Create the docker image: `docker-compose build`
 - Run initialization steps (only once):
+  - `docker-compose up -d`
   - `docker-compose run web python manage.py syncdb`
-  - `docker-compose run web python manage.py initdatabase`
-- Run the project: `docker-compose up -d`
+  <!-- - `docker-compose run web python manage.py initdatabase` -->
+  - Initialize bible books: `docker-compose run web python manage.py init_bible_books`
+  - Add some bible translations:
+    - `docker-compose run web python manage.py add_bible bibles/GER_ELB1905_STRONG.xml`
+    - `docker-compose run web python manage.py add_bible bibles/GER_ILGRDE.xml`
+    - `docker-compose run web python manage.py add_bible bibles/GER_LUTH1912.xml`
+    - `docker-compose run web python manage.py add_bible bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml`
+    - ...
+  - Create strong reference: `docker-compose run web python manage.py init_strong_grammar`
+- Restart the project: `docker-compose restart`
 - Now you can visit the page at [http://localhost:8000/](http://localhost:8000/)
 
 How to contribute

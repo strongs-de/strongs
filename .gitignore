@@ -8,3 +8,4 @@ bibles/osis.psalmenNGU.xml
 bibles/osis.schlachter2000.v1.withoutnotes.xml
 
 \.env
+pgdata
