@@ -1,9 +1,8 @@
 # -*- coding: utf8 -*-
 import string
-
 from django.core.management.base import BaseCommand
-
 from strongs.models import BibleBook
+from progressbar import print_progress
 
 
 class Command(BaseCommand):
@@ -28,13 +27,9 @@ class Command(BaseCommand):
                 bookNames.nr = bookNr
                 bookNames.language = 'de'
                 bookNames.name = ele[0]
-                self.stdout.write(ele[0] + ' (', ending='')
                 if len(ele) > 1:
                     bookNames.short_name = ele[1]
-                    self.stdout.write(ele[1], ending='')
-                self.stdout.write(')', ending='')
                 if len(ele) > 2:
                     bookNames.alternativeNames = ',' + string.join(ele[2:], ',') + ','
-                    # self.stdout.write(' [' + bookNames.alternativeNames.encode('ascii') + ']', ending='')
-                self.stdout.write('')
                 bookNames.save()
+            print_progress(bookNr, 66)
