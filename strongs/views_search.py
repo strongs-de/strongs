@@ -18,7 +18,7 @@ def search(request, search, page, templateName, column=None, translation=None):
         searches = map(lambda s: s.decode('UTF8').replace('"', '').replace("'", ''), shlex.split(search.encode('utf8')))
     except:
         pass
-    tag_search = reduce(operator.and_, (Q(versText__contains=" " + x) | Q(versText__contains=">" + x) for x in searches))
+    tag_search = reduce(operator.and_, (Q(versText__icontains=" " + x) | Q(versText__icontains=">" + x) for x in searches))
 
     bible_order = bible_translation_order(request, column, translation)
 
