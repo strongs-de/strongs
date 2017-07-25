@@ -96,6 +96,9 @@ class Command(BaseCommand):
             chapters = root.findall('.//{http://www.bibletechnologies.net/2003/OSIS/namespace}chapter')
             actbook = ''
             actchapter = 0
+            overallchaptercount = 0
+            # booknr = 0
+            # chapterlist = []
             tb = None
             for chapter in chapters:
                 versesinchapter = chapter.findall('.//{http://www.bibletechnologies.net/2003/OSIS/namespace}verse')
@@ -116,6 +119,7 @@ class Command(BaseCommand):
                         else:
                             tb = tb[0]
                         actbook = bookname
+                        # booknr += 1
 
                     # check for existance of the first vers in this chapter,
                     # cause in Schlachter 2000 the first vers isn't encapsulated
@@ -125,10 +129,15 @@ class Command(BaseCommand):
                             # The first verse can be found in the parent chapter tag-text
                             __insert(tr, tb, cnumber, 1, self.element_to_string(chapter, ['{http://www.bibletechnologies.net/2003/OSIS/namespace}div', '{http://www.bibletechnologies.net/2003/OSIS/namespace}verse']))
                         actchapter = cnumber
+                        # dictindex = '%s_%s' % (booknr, cnumber)
+                        # if dictindex not in chapterlist:
+                        #     chapterlist.append(dictindex)
 
                     __insert(tr, tb, cnumber, vnumber, text)
+
+                overallchaptercount += 1
                 sys.stdout.write('Insert book %s ...' % actbook)
-                print_progress(cnumber, len(chapters))
+                print_progress(overallchaptercount, len(chapters))
 
     def element_to_string(self, element, until_child_is=None):
         s = element.text or ""
