@@ -23,10 +23,10 @@ def search(request, search, page, templateName, column=None, translation=None):
     bible_order = bible_translation_order(request, column, translation)
 
     # Try to search for this word
-    search1 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[0]]))
-    search2 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[1]]))
-    search3 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[2]]))
-    search4 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[3]]))
+    search1 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[0]])).order_by('vers__bookNr', 'vers__chapterNr', 'vers__versNr')
+    search2 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[1]])).order_by('vers__bookNr', 'vers__chapterNr', 'vers__versNr')
+    search3 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[2]])).order_by('vers__bookNr', 'vers__chapterNr', 'vers__versNr')
+    search4 = BibleText.objects.filter(tag_search, translationIdentifier=BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[3]])).order_by('vers__bookNr', 'vers__chapterNr', 'vers__versNr')
     if search1.count() > 0 or search2.count() > 0 or search3.count() > 0 or search4.count() > 0:
         # only show the first 200 items
         num = 30
