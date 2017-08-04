@@ -3,3 +3,9 @@
 *.sqlite3
 static_media
 static_root.py
+bibles/osis.NGU.xml
+bibles/osis.psalmenNGU.xml
+bibles/osis.schlachter2000.v1.withoutnotes.xml
+
+\.env
+pgdata

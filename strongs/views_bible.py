@@ -53,10 +53,10 @@ def bible(request, bible_book, templateName, column=None, translation=None):
                 tr3 = BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[2]])
                 tr4 = BibleTranslation.objects.filter(identifier=BIBLES_IN_VIEW[bible_order[3]])
                 if tr1.count() > 0 and tr2.count() > 0 and tr3.count() > 0 and tr4.count() > 0:
-                    verses1 = BibleText.objects.filter(translationIdentifier=tr1, vers__bookNr=book, vers__chapterNr=chapter)
-                    verses2 = BibleText.objects.filter(translationIdentifier=tr2, vers__bookNr=book, vers__chapterNr=chapter)
-                    verses3 = BibleText.objects.filter(translationIdentifier=tr3, vers__bookNr=book, vers__chapterNr=chapter)
-                    verses4 = BibleText.objects.filter(translationIdentifier=tr4, vers__bookNr=book, vers__chapterNr=chapter)
+                    verses1 = BibleText.objects.filter(translationIdentifier=tr1, vers__bookNr=book, vers__chapterNr=chapter).order_by('vers__versNr')
+                    verses2 = BibleText.objects.filter(translationIdentifier=tr2, vers__bookNr=book, vers__chapterNr=chapter).order_by('vers__versNr')
+                    verses3 = BibleText.objects.filter(translationIdentifier=tr3, vers__bookNr=book, vers__chapterNr=chapter).order_by('vers__versNr')
+                    verses4 = BibleText.objects.filter(translationIdentifier=tr4, vers__bookNr=book, vers__chapterNr=chapter).order_by('vers__versNr')
                     if verses1.count() > 0 or verses2.count() > 0 or verses3.count() > 0 or verses4.count() > 0:
                         # return render(request, 'strongs/bible.html', {'vers': s.group(3), 'search': book[0].name + ' ' + str(chapter), 'translation1': BIBLE_NAMES_IN_VIEW[0], 'translation2': BIBLE_NAMES_IN_VIEW[1], 'translation3': BIBLE_NAMES_IN_VIEW[2], 'translation4': BIBLE_NAMES_IN_VIEW[3], 'verses': izip_longest(verses1, verses2, verses3, verses4)})
                         srch = book[0].name + ' ' + str(chapter)

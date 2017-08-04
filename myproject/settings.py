@@ -8,8 +8,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
-import static_root
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -61,10 +59,17 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'local': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    },
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'HOST': 'db',
+        'PORT': 5432,
+     }
 }
 
 # Internationalization
@@ -91,7 +96,8 @@ USE_X_FORWARDED_HOST = True
 # lines:
 # STATIC_ROOT = '/home/strongs/webapps/beta_static_media/' # for the beta site
 # STATIC_ROOT = '/home/strongs/webapps/static_media/' # for the live site
-STATIC_ROOT = static_root.STATIC_ROOT()
+# STATIC_ROOT = static_root.STATIC_ROOT()
+STATIC_ROOT = './static_media/'
 STATIC_URL = '/static/'
 
 # Other settings

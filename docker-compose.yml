@@ -1,0 +1,34 @@
+version: '2'
+services:
+  db:
+    image: postgres
+    container_name: ${CONTAINER_NAME_DB}
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    networks:
+      - back-end
+  web:
+    build: .
+    container_name: ${CONTAINER_NAME_WEB}
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    expose:
+      - 8000
+    environment:
+      VIRTUAL_HOST: ${URL}
+      VIRTUAL_PORT: 8000
+    depends_on:
+      - db
+    networks:
+      - nginx-proxy
+      - back-end
+
+networks:
+  nginx-proxy:
+    external:
+      name: nginx-proxy
+  back-end:
+    driver: bridge
