@@ -15,7 +15,7 @@ if not path.exists('bibles/osis.NGU.xml'):
   BIBLE_NAMES_IN_VIEW = ['Elberfelder 1905', 'Schlachter 1951', 'Luther 1912', 'Interlinear']
   BIBLE_HINTS_IN_VIEW = ['', '', '', '', '']
 else:
-  BIBLES_IN_VIEW = ['ELB1905STR', 'SCH2000', 'LUTH1912', u'NGÜ', 'ILGRDE']
+  BIBLES_IN_VIEW = ['ELB1905STR', 'SCH2000', 'LUTH1912', u'NGU', 'ILGRDE']
   BIBLE_NAMES_IN_VIEW = ['Elberfelder 1905', 'Schlachter 2000', 'Luther 1912', u'Neue Genfer Übersetzung', 'Interlinear']
   BIBLE_HINTS_IN_VIEW = ['', '<br/>Bibeltext der Schlachter Übersetzung<br/>Copyright &copy; 2000 Genfer Bibelgesellschaft<br/>Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>', '', '<br/>Bibeltext der Neuen Genfer Übersetzung – Neues Testament und Psalmen<br/>Copyright &copy; 2011 Genfer Bibelgesellschaft<br/>Wiedergegeben mit freundlicher Genehmigung. Alle Rechte vorbehalten.<br/>', '']
 
