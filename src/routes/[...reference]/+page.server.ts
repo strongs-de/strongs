@@ -1,4 +1,4 @@
-import { error, redirect } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import { bookById } from '$lib/bible/books';
 import { bookName, bookShortName } from '$lib/bible/book-names';
 import {
@@ -13,6 +13,12 @@ import { getDb } from '$lib/server/db';
 import { addColumn, readColumns, removeColumn, setColumn, writeColumns } from '$lib/server/columns';
 import { loadChapter } from '$lib/server/repositories/chapter';
 import { bookCoverage, chapterCount, listBibles } from '$lib/server/repositories/resources';
+import {
+	addVerseToList,
+	findVerseList,
+	listVerseLists,
+	markedVerses
+} from '$lib/server/repositories/verse-lists';
 
 /**
  * The reader, and the resolver for everything that is not a named route.
@@ -24,7 +30,7 @@ import { bookCoverage, chapterCount, listBibles } from '$lib/server/repositories
  *   2. a verse reference  → /Joh3,16
  *   3. anything else      → the search page
  */
-export async function load({ params, cookies, url, setHeaders }) {
+export async function load({ params, cookies, url, setHeaders, locals }) {
 	const raw = decodeURIComponent(params.reference ?? '').replace(/\/+$/, '');
 
 	// Legacy paths from the previous site: /async/Joh3 and /Joh3/trans/0_2/ variants.
@@ -82,8 +88,18 @@ export async function load({ params, cookies, url, setHeaders }) {
 	const coverage = await bookCoverage(db, columns);
 	const byId = new Map(bibles.map((resource) => [resource.id, resource]));
 
-	// Public scripture text never changes between deployments, so it is safe to cache at the edge.
-	setHeaders({ 'cache-control': 'public, max-age=0, s-maxage=3600' });
+	// Verse lists, so a signed-in reader can add a verse without leaving the chapter. The most recently
+	// used list is offered first, which is the one they are working in.
+	const lists = locals.user ? await listVerseLists(db, locals.user.id) : [];
+	const marked =
+		lists[0] !== undefined
+			? await markedVerses(db, lists[0].id, reference.book, reference.chapter)
+			: new Set<number>();
+
+	// Public scripture text is the same for everyone; a signed-in reader's page is not.
+	setHeaders({
+		'cache-control': locals.user ? 'private, no-store' : 'public, max-age=0, s-maxage=3600'
+	});
 
 	rememberLocation(cookies, reference);
 
@@ -110,7 +126,9 @@ export async function load({ params, cookies, url, setHeaders }) {
 			previous: previousChapter(reference.book, reference.chapter),
 			next: nextChapter(reference.book, reference.chapter),
 			maxChapter
-		}
+		},
+		lists: lists.map((list) => ({ id: list.id, title: list.title })),
+		markedVerses: [...marked]
 	};
 }
 
@@ -147,6 +165,28 @@ export const actions = {
 		const bibles = await listBibles(getDb());
 		writeColumns(cookies, removeColumn(readColumns(cookies, bibles), index));
 		return { success: true };
+	},
+
+	/** Adds the verse to a list straight from the reader, which is how notes get started. */
+	addToList: async ({ request, locals }) => {
+		if (!locals.user) redirect(303, '/login');
+
+		const form = await request.formData();
+		const listId = String(form.get('listId') ?? '');
+		const reference = parseReference(String(form.get('reference') ?? ''));
+		if (!reference?.verse) return fail(400, { error: 'reference' });
+
+		const db = getDb();
+		const list = await findVerseList(db, { id: listId, userId: locals.user.id });
+		if (!list) return fail(404, { error: 'list' });
+
+		await addVerseToList(db, list.id, {
+			book: reference.book,
+			chapter: reference.chapter,
+			verse: reference.verse
+		});
+
+		return { added: true };
 	}
 };
 

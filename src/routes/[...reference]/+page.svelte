@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { referencePath } from '$lib/bible/reference';
+	import { formatReference, referencePath } from '$lib/bible/reference';
 	import { bookName } from '$lib/bible/book-names';
 	import { t } from '$lib/i18n';
+	import AddToListButton from '$lib/components/AddToListButton.svelte';
 	import ColumnPicker from '$lib/components/ColumnPicker.svelte';
 	import StudySidebar from '$lib/components/StudySidebar.svelte';
 	import VerseText from '$lib/components/VerseText.svelte';
@@ -17,6 +18,7 @@
 	 * not — the job `jquery.matchHeight` used to do after paint, badly.
 	 */
 	const headings = $derived(new Map(data.chapter.headings));
+	const markedVerses = $derived(new Set(data.markedVerses));
 
 	/** Which column a reader is looking at on a phone, where only one fits. */
 	let mobileColumn = $state(0);
@@ -160,7 +162,15 @@
 										aria-label="Vers {cell.verse}"
 									>
 										{cell.verse}{#if cell.verseEnd && cell.verseEnd > cell.verse}-{cell.verseEnd}{/if}
-									</a>
+									</a>{#if columnIndex === 0 && data.lists.length > 0}<AddToListButton
+											reference={formatReference({
+												book: data.reference.book,
+												chapter: data.reference.chapter,
+												verse: cell.verse
+											})}
+											lists={data.lists}
+											marked={markedVerses.has(cell.verse)}
+										/>{/if}
 									<span
 										class="verse-text"
 										lang={data.columns[columnIndex]?.resource.language}

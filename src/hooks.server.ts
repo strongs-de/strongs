@@ -1,15 +1,28 @@
-import type { Handle } from '@sveltejs/kit';
+import { redirect, type Handle } from '@sveltejs/kit';
+import { getDb } from '$lib/server/db';
+import { resolveSession } from '$lib/server/auth/session';
 import { logger } from '$lib/server/logger';
 
 /**
- * Request pipeline.
+ * Request pipeline: resolve the session, guard the admin area, log slow requests.
  *
- * Resolves the session (filled in by the accounts phase) and logs slow requests, which is the cheapest
- * useful signal for spotting a query that has lost its index.
+ * The admin guard lives here rather than in each route so a new admin page cannot be added without
+ * protection by forgetting a check.
  */
 export const handle: Handle = async ({ event, resolve }) => {
-	event.locals.user = null;
-	event.locals.sessionId = null;
+	const session = await resolveSession(getDb(), event.cookies);
+	event.locals.user = session?.user ?? null;
+	event.locals.sessionId = session?.sessionId ?? null;
+
+	if (event.url.pathname.startsWith('/admin')) {
+		if (!event.locals.user) {
+			redirect(303, `/login?redirectTo=${encodeURIComponent(event.url.pathname)}`);
+		}
+		if (event.locals.user.role !== 'admin') {
+			// 404 rather than 403: the existence of the admin area is not worth confirming.
+			return new Response('Not found', { status: 404 });
+		}
+	}
 
 	const started = Date.now();
 	const response = await resolve(event);
