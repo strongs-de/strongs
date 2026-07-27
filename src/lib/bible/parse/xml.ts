@@ -11,7 +11,11 @@ import type { SourceInput } from './types.ts';
 import { asChunks } from './types.ts';
 
 export type XmlEvent =
-	| { type: 'open'; name: string; attributes: Record<string, string> }
+	/**
+	 * `selfClosing` matters for milestone markup: `<verse sID="…"/>` opens a verse whose text follows
+	 * as a sibling, so its immediate close event must not be treated as the end of the verse.
+	 */
+	| { type: 'open'; name: string; attributes: Record<string, string>; selfClosing: boolean }
 	| { type: 'text'; text: string }
 	| { type: 'close'; name: string };
 
@@ -36,7 +40,12 @@ export async function* readXml(input: SourceInput): AsyncGenerator<XmlEvent, voi
 		for (const [name, value] of Object.entries(node.attributes)) {
 			attributes[localName(name)] = typeof value === 'string' ? value : value.value;
 		}
-		queue.push({ type: 'open', name: localName(node.name), attributes });
+		queue.push({
+			type: 'open',
+			name: localName(node.name),
+			attributes,
+			selfClosing: node.isSelfClosing
+		});
 	});
 
 	parser.on('text', (text) => {

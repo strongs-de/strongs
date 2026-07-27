@@ -1,23 +1,23 @@
 /**
  * Command-line importer.
  *
- * Runs exactly the same parsers and the same ingester as the admin UI; it exists so seeding a fresh
- * database does not mean clicking through the upload wizard once per translation.
+ * Runs the same parsers and the same ingesters as the admin UI; it exists so seeding a fresh database
+ * does not mean clicking through the upload wizard once per resource.
  *
  *   pnpm data:import data/bibles/GER_ELB1905_STRONG.xml
+ *   pnpm data:import data/strongsgreek.xml
  *   pnpm data:import --id ELB1905 --name "Elberfelder 1905" data/bibles/GER_ELB1905_STRONG.xml
  *   pnpm data:import --format zefania path/to/file.xml
  */
 
 import { createReadStream } from 'node:fs';
-import { open, stat } from 'node:fs/promises';
-import { basename, resolve } from 'node:path';
-import { detectFormat, parserFor } from '../src/lib/bible/parse/index.ts';
+import { open, readdir, stat } from 'node:fs/promises';
+import { basename, join, resolve } from 'node:path';
+import { detectFormat } from '../src/lib/bible/parse/detect.ts';
 import { DETECTION_PREFIX_BYTES } from '../src/lib/bible/parse/detect.ts';
 import type { SourceFormat } from '../src/lib/bible/parse/types.ts';
 import { createDb } from '../src/lib/server/db/client.ts';
-import { refreshStrongStatisticsBlocking } from '../src/lib/server/db/statistics.ts';
-import { ingestBible } from '../src/lib/server/import/ingest-bible.ts';
+import { runImport } from '../src/lib/server/import/index.ts';
 
 type Options = {
 	file: string;
@@ -26,6 +26,7 @@ type Options = {
 	name?: string;
 	abbrev?: string;
 	language?: string;
+	target?: string;
 };
 
 function parseArguments(argv: string[]): Options {
@@ -59,19 +60,24 @@ function parseArguments(argv: string[]): Options {
 			case 'language':
 				options.language = value;
 				break;
+			case 'target':
+				options.target = value;
+				break;
 			default:
 				throw new Error(`unknown option --${key}`);
 		}
 	}
 
 	if (!options.file) {
-		throw new Error('usage: pnpm data:import [--format f] [--id id] [--name name] <file>');
+		throw new Error(
+			'usage: pnpm data:import [--format f] [--id id] [--name name] [--target resource] <file>'
+		);
 	}
 
 	return options as Options;
 }
 
-/** Reads the first chunk of the file for format detection without loading the whole thing. */
+/** Reads the head of the file for format detection, without loading the whole thing. */
 async function readPrefix(path: string): Promise<string> {
 	const handle = await open(path, 'r');
 	try {
@@ -83,11 +89,38 @@ async function readPrefix(path: string): Promise<string> {
 	}
 }
 
-async function* readChunks(path: string): AsyncIterable<string> {
-	// UTF-8 decoding across chunk boundaries is handled by the stream's encoding option.
-	for await (const chunk of createReadStream(path, { encoding: 'utf8', highWaterMark: 1 << 20 })) {
-		yield chunk as string;
+async function* readChunks(...paths: string[]): AsyncIterable<string> {
+	for (const path of paths) {
+		for await (const chunk of createReadStream(path, {
+			encoding: 'utf8',
+			highWaterMark: 1 << 20
+		})) {
+			yield chunk as string;
+		}
+		// Guarantee a line break between concatenated files, so the last line of one is not glued to
+		// the first line of the next.
+		yield '\n';
 	}
+}
+
+/**
+ * Expands a directory into the files it contains, sorted by name.
+ *
+ * Some resources are published as one file per book — the morphology data in `data/books` is 27 TSP
+ * files — and they have to be imported as a single overlay, in canonical order.
+ */
+async function resolveInputs(path: string): Promise<string[]> {
+	const info = await stat(path);
+	if (!info.isDirectory()) return [path];
+
+	const entries = await readdir(path, { withFileTypes: true });
+	const files = entries
+		.filter((entry) => entry.isFile() && /\.(tsp|usfm|sfm|usx|txt|xml|csv|tsv)$/i.test(entry.name))
+		.map((entry) => join(path, entry.name))
+		.sort();
+
+	if (files.length === 0) throw new Error(`no importable files found in ${path}`);
+	return files;
 }
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -98,11 +131,12 @@ if (!databaseUrl) {
 
 const options = parseArguments(process.argv.slice(2));
 const path = resolve(options.file);
-await stat(path); // fails loudly if the file is missing
+const inputs = await resolveInputs(path);
+if (inputs.length > 1) console.log(`reading ${inputs.length} files from ${options.file}`);
 
 const detection = options.format
 	? { format: options.format, reason: 'given on the command line' }
-	: detectFormat(await readPrefix(path), basename(path));
+	: detectFormat(await readPrefix(inputs[0]!), basename(inputs[0]!));
 
 if (!detection) {
 	console.error(
@@ -117,51 +151,49 @@ const { client, db } = createDb(databaseUrl, { max: 4 });
 const started = Date.now();
 
 try {
-	const stream = parserFor(detection.format)(readChunks(path));
-
 	let lastLine = '';
-	let lastBook = '';
-	const result = await ingestBible(db, stream, {
-		sourceFormat: detection.format,
+	let lastMessage = '';
+
+	const result = await runImport(db, {
+		format: detection.format,
+		input: readChunks(...inputs),
 		sourceFile: path,
+		...(options.target ? { targetResourceId: options.target } : {}),
 		overrides: {
 			...(options.id ? { id: options.id } : {}),
 			...(options.name ? { name: options.name } : {}),
 			...(options.abbrev ? { abbrev: options.abbrev } : {}),
 			...(options.language ? { language: options.language } : {})
 		},
-		onProgress: ({ verses, message }) => {
-			const line = `  ${verses.toLocaleString('de-DE')} verses${message ? ` — ${message}` : ''}`;
+		onProgress: ({ done, message }) => {
+			const line = `  ${done.toLocaleString('de-DE')}${message ? ` — ${message}` : ''}`;
 			if (line === lastLine) return;
 			lastLine = line;
-			// Overwrite one line on a terminal; in CI or a log file, print only when the book changes.
+			// Overwrite a single line on a terminal; in a log, print only when the label changes.
 			if (process.stdout.isTTY) process.stdout.write(`\r${line.padEnd(60)}`);
-			else if (message && message !== lastBook) {
-				lastBook = message;
+			else if (message && message !== lastMessage) {
+				lastMessage = message;
 				console.log(line);
 			}
 		}
 	});
 
 	if (process.stdout.isTTY) process.stdout.write('\n');
-	console.log(`refreshing Strong's statistics …`);
-	await refreshStrongStatisticsBlocking(db);
 
 	const seconds = ((Date.now() - started) / 1000).toFixed(1);
-	console.log(
-		`imported ${result.resourceId}: ${result.verseCount.toLocaleString('de-DE')} verses, ` +
-			`${result.wordCount.toLocaleString('de-DE')} tagged words in ${seconds}s`
-	);
+	const detail =
+		result.wordCount === undefined
+			? `${result.count.toLocaleString('de-DE')} entries`
+			: `${result.count.toLocaleString('de-DE')} verses, ${result.wordCount.toLocaleString('de-DE')} tagged words`;
+	console.log(`imported ${result.resourceId} (${result.kind}): ${detail} in ${seconds}s`);
 
 	if (result.warnings.length > 0) {
 		console.log(`\n${result.warnings.length} warning(s):`);
 		for (const warning of result.warnings.slice(0, 20)) console.log(`  - ${warning}`);
-		if (result.warnings.length > 20) {
-			console.log(`  … and ${result.warnings.length - 20} more`);
-		}
+		if (result.warnings.length > 20) console.log(`  … and ${result.warnings.length - 20} more`);
 	}
 } catch (error) {
-	process.stdout.write('\n');
+	if (process.stdout.isTTY) process.stdout.write('\n');
 	console.error('import failed:', error instanceof Error ? error.message : error);
 	process.exitCode = 1;
 } finally {

@@ -107,6 +107,8 @@ function detectDelimited(head: string, fileName: string): Detection | null {
 
 export function splitDelimited(line: string): string[] {
 	if (line.includes('\t')) return line.split('\t').map((field) => field.trim());
+	// The pipe is common in bible text dumps, where the text itself contains commas and semicolons.
+	if (line.includes('|')) return line.split('|').map((field) => field.trim());
 	if (line.includes(';')) return line.split(';').map((field) => field.trim());
 	if (line.includes(',')) return splitCsv(line);
 	// Verse-per-line files separate the reference from the text with whitespace only.

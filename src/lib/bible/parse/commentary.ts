@@ -1,0 +1,255 @@
+/**
+ * Commentary parsers.
+ *
+ * Commentaries have no single interchange format, so two shapes are accepted:
+ *
+ * **Delimited** — a reference and a body per row, which is what spreadsheet exports and most
+ * self-written commentaries look like. The body may contain HTML or Markdown-ish emphasis:
+ *
+ *   "Joh 3,16","Der bekannteste Vers der Bibel. **Also** meint hier: auf diese Weise."
+ *   Röm 8,28   Nicht alles ist gut, aber Gott wirkt in allem zum Guten.
+ *
+ * **ThML** — the format the Christian Classics Ethereal Library publishes, where commentary sections
+ * are `<div>` elements carrying a scripture reference:
+ *
+ *   <div class="Section" title="Commentary on John 3:16"><scripRef passage="John 3:16"/>…</div>
+ *
+ * Both produce entries keyed to a verse or verse range. Bodies are sanitised to a small set of tags:
+ * commentary text is displayed as HTML, and a commentary file is exactly the kind of upload that
+ * should not be able to inject script into the page.
+ */
+
+import { parseReference } from '../reference.ts';
+import { attribute, readXml } from './xml.ts';
+import { splitDelimited } from './detect.ts';
+import { readLines } from './usfm.ts';
+import type { ParseStream, ResourceMetadata, SourceInput } from './types.ts';
+
+export type CommentaryOptions = {
+	metadata?: Partial<ResourceMetadata>;
+};
+
+export function parseCommentaryCsv(
+	input: SourceInput,
+	options: CommentaryOptions = {}
+): ParseStream {
+	return parseDelimited(input, options);
+}
+
+async function* parseDelimited(input: SourceInput, options: CommentaryOptions): ParseStream {
+	let entries = 0;
+	let skipped = 0;
+
+	yield { type: 'metadata', metadata: commentaryMetadata(options) };
+
+	for await (const rawLine of readLines(input)) {
+		const line = rawLine.trim();
+		if (!line || line.startsWith('#')) continue;
+
+		const fields = splitDelimited(line);
+		if (fields.length < 2) {
+			skipped += 1;
+			continue;
+		}
+
+		const reference = parseReference(stripQuotes(fields[0]!));
+		const body = stripQuotes(fields.slice(1).join(' ')).trim();
+
+		if (!reference || !body) {
+			skipped += 1;
+			if (skipped <= 5) {
+				yield {
+					type: 'warning',
+					message: `skipped a commentary row without a usable reference: ${truncate(line)}`
+				};
+			}
+			continue;
+		}
+
+		entries += 1;
+		yield {
+			type: 'commentaryEntry',
+			entry: {
+				book: reference.book,
+				chapter: reference.chapter,
+				...(reference.verse !== undefined ? { verseStart: reference.verse } : {}),
+				...(reference.verseEnd !== undefined ? { verseEnd: reference.verseEnd } : {}),
+				bodyHtml: sanitizeHtml(body)
+			}
+		};
+
+		if (entries % 500 === 0) yield { type: 'progress', done: entries };
+	}
+
+	if (skipped > 5) {
+		yield { type: 'warning', message: `${skipped} rows in total could not be read` };
+	}
+	yield { type: 'progress', done: entries, total: entries };
+}
+
+export async function* parseCommentaryThml(input: SourceInput): ParseStream {
+	let entries = 0;
+	let title: string | undefined;
+
+	/** Reference of the section being read, and the HTML collected for it. */
+	let reference: ReturnType<typeof parseReference> | null = null;
+	let body = '';
+	let depth = 0;
+	let inTitle = false;
+
+	const flush = ():
+		| { book: number; chapter: number; verseStart?: number; verseEnd?: number; bodyHtml: string }
+		| undefined => {
+		const text = sanitizeHtml(body);
+		const current = reference;
+		reference = null;
+		body = '';
+		if (!current || !text) return undefined;
+
+		return {
+			book: current.book,
+			chapter: current.chapter,
+			...(current.verse !== undefined ? { verseStart: current.verse } : {}),
+			...(current.verseEnd !== undefined ? { verseEnd: current.verseEnd } : {}),
+			bodyHtml: text
+		};
+	};
+
+	for await (const event of readXml(input)) {
+		if (event.type === 'open') {
+			if (event.name === 'scripref' || event.name === 'scripcom') {
+				// A reference marker starts a new section; the previous one is complete.
+				const passage = attribute(event.attributes, 'passage', 'parsed', 'value');
+				const pending = flush();
+				if (pending) {
+					entries += 1;
+					yield { type: 'commentaryEntry', entry: pending };
+				}
+				reference = passage ? parseReference(normalizePassage(passage)) : null;
+				if (passage && !reference) {
+					yield { type: 'warning', message: `unreadable passage reference "${passage}"` };
+				}
+				continue;
+			}
+
+			if (event.name === 'title' && depth < 3) {
+				inTitle = true;
+				continue;
+			}
+
+			if (reference && KEEP_TAGS.has(event.name)) body += `<${event.name}>`;
+			depth += 1;
+			continue;
+		}
+
+		if (event.type === 'text') {
+			if (inTitle) title = (title ?? '') + event.text;
+			else if (reference) body += escapeHtml(event.text);
+			continue;
+		}
+
+		if (event.name === 'title') {
+			inTitle = false;
+			title = title?.replace(/\s+/g, ' ').trim() || undefined;
+			continue;
+		}
+
+		if (reference && KEEP_TAGS.has(event.name)) body += `</${event.name}>`;
+		depth = Math.max(0, depth - 1);
+	}
+
+	const pending = flush();
+	if (pending) {
+		entries += 1;
+		yield { type: 'commentaryEntry', entry: pending };
+	}
+
+	yield {
+		type: 'metadata',
+		metadata: commentaryMetadata({ metadata: title ? { name: title, abbrev: title } : {} })
+	};
+	yield { type: 'progress', done: entries, total: entries };
+}
+
+function commentaryMetadata(options: CommentaryOptions): ResourceMetadata {
+	const name = options.metadata?.name ?? 'Kommentar';
+	return {
+		id:
+			(options.metadata?.id ?? name)
+				.replace(/[^\w]+/g, '')
+				.toUpperCase()
+				.slice(0, 32) || 'COMMENTARY',
+		name,
+		abbrev: options.metadata?.abbrev ?? name,
+		language: options.metadata?.language ?? 'de',
+		...(options.metadata?.licenseHtml ? { licenseHtml: options.metadata.licenseHtml } : {})
+	};
+}
+
+/** "John 3:16" and "Joh 3,16-18" both parse; ThML uses English names and dots. */
+function normalizePassage(passage: string): string {
+	return passage
+		.trim()
+		.replace(/\.(?=\d)/g, ' ')
+		.replace(/\s+/g, ' ');
+}
+
+/** Inline formatting worth keeping from a commentary body. */
+const KEEP_TAGS = new Set(['p', 'br', 'em', 'i', 'strong', 'b', 'ul', 'ol', 'li', 'blockquote']);
+
+/**
+ * Reduces an untrusted body to plain text plus a small set of formatting tags.
+ *
+ * Everything is escaped first and only the allowed tags are put back, so no attribute — and therefore
+ * no event handler, style or URL — survives from the source.
+ */
+export function sanitizeHtml(value: string): string {
+	const escaped = escapeHtml(stripTags(value));
+	const withTags = escaped.replace(
+		/&lt;(\/?)(p|br|em|i|strong|b|ul|ol|li|blockquote)\s*\/?&gt;/gi,
+		(_match, slash: string, tag: string) => `<${slash}${tag.toLowerCase()}>`
+	);
+
+	return (
+		withTags
+			// Markdown-style emphasis is common in hand-written commentary files.
+			.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+			.replace(/(^|\s)\*([^*]+)\*/g, '$1<em>$2</em>')
+			.replace(/\s+/g, ' ')
+			.trim()
+	);
+}
+
+/** Removes tags that are not in the allow list, keeping their text content. */
+function stripTags(value: string): string {
+	return value.replace(/<\/?([a-zA-Z][\w-]*)\b[^>]*>/g, (match, tag: string) =>
+		KEEP_TAGS.has(tag.toLowerCase())
+			? `<${match.startsWith('</') ? '/' : ''}${tag.toLowerCase()}>`
+			: ' '
+	);
+}
+
+/**
+ * Escapes markup characters, leaving entities that are already escaped alone.
+ *
+ * A commentary body may arrive as plain text or as HTML, so `&lt;` in the source must survive as
+ * `&lt;` rather than being turned into `&amp;lt;` and displayed literally.
+ */
+function escapeHtml(value: string): string {
+	return value
+		.replace(/&(?!(?:[a-zA-Z][a-zA-Z0-9]{1,10}|#\d{1,6}|#x[0-9a-fA-F]{1,6});)/g, '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;');
+}
+
+function stripQuotes(value: string): string {
+	const trimmed = value.trim();
+	return trimmed.startsWith('"') && trimmed.endsWith('"')
+		? trimmed.slice(1, -1).replaceAll('""', '"')
+		: trimmed;
+}
+
+function truncate(value: string): string {
+	return value.length > 60 ? `${value.slice(0, 60)}…` : value;
+}
