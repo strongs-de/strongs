@@ -1,0 +1,248 @@
+/**
+ * Everything the study sidebar shows for a Strong's number.
+ *
+ * The old implementation loaded every verse containing the number, scanned each one with string
+ * searches and counted the renderings in Python — on every sidebar open. Here the dictionary entry is
+ * one indexed read and the statistics come from the materialised views, so the whole panel is four
+ * cheap queries regardless of how common the word is.
+ */
+
+import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
+import { strongLanguage, type StrongId } from '../../bible/strong.ts';
+import type { VerseSegment } from '../../bible/segments.ts';
+import type { Database } from '../db/client.ts';
+import { lexiconEntries, resources, verses, verseWords } from '../db/schema.ts';
+
+export type StrongEntry = {
+	strong: StrongId;
+	lemma: string;
+	transliteration: string | null;
+	pronunciation: string | null;
+	definitionHtml: string | null;
+	derivationHtml: string | null;
+	kjvDefinitionHtml: string | null;
+	seeAlso: string[];
+	language: 'grc' | 'hbo';
+};
+
+export type StrongGloss = {
+	display: string;
+	occurrences: number;
+};
+
+export type StrongOccurrence = {
+	book: number;
+	chapter: number;
+	verse: number;
+	segments: VerseSegment[];
+	/** Morphology of the word in this verse, where the source has it. */
+	morph: string | null;
+	lemma: string | null;
+};
+
+export type StrongStatistics = {
+	occurrences: number;
+	verseCount: number;
+};
+
+/** The dictionary entry, from whichever lexicon covers the number. */
+export async function loadStrongEntry(
+	db: Database,
+	strong: StrongId
+): Promise<StrongEntry | undefined> {
+	const [row] = await db
+		.select({
+			strong: lexiconEntries.strong,
+			lemma: lexiconEntries.lemma,
+			transliteration: lexiconEntries.transliteration,
+			pronunciation: lexiconEntries.pronunciation,
+			definitionHtml: lexiconEntries.definitionHtml,
+			derivationHtml: lexiconEntries.derivationHtml,
+			kjvDefinitionHtml: lexiconEntries.kjvDefinitionHtml,
+			seeAlso: lexiconEntries.seeAlso,
+			language: lexiconEntries.language
+		})
+		.from(lexiconEntries)
+		.innerJoin(resources, eq(resources.id, lexiconEntries.resourceId))
+		.where(and(eq(lexiconEntries.strong, strong), eq(resources.isPublic, true)))
+		.orderBy(asc(resources.sortOrder))
+		.limit(1);
+
+	return row;
+}
+
+/** How often the number occurs in a translation, and in how many verses. */
+export async function loadStrongStatistics(
+	db: Database,
+	strong: StrongId,
+	resourceId: string
+): Promise<StrongStatistics> {
+	const rows = await db.execute<{ occurrences: number; verse_count: number }>(sql`
+		select occurrences, verse_count
+		from strong_stats
+		where resource_id = ${resourceId} and strong = ${strong}
+	`);
+
+	const row = rows[0];
+	return {
+		occurrences: Number(row?.occurrences ?? 0),
+		verseCount: Number(row?.verse_count ?? 0)
+	};
+}
+
+/**
+ * How a translation renders the word, most frequent first — the "Übersetzt als" table.
+ */
+export async function loadStrongGlosses(
+	db: Database,
+	strong: StrongId,
+	resourceId: string,
+	limit = 12
+): Promise<StrongGloss[]> {
+	const rows = await db.execute<{ display: string; occurrences: number }>(sql`
+		select display, occurrences
+		from strong_glosses
+		where resource_id = ${resourceId} and strong = ${strong}
+		order by rank
+		limit ${limit}
+	`);
+
+	return rows.map((row) => ({ display: row.display, occurrences: Number(row.occurrences) }));
+}
+
+export type OccurrencePage = {
+	occurrences: StrongOccurrence[];
+	total: number;
+	page: number;
+	pageCount: number;
+};
+
+/**
+ * Verses containing the number, in canonical order, paginated.
+ *
+ * `distinct on` collapses a verse that contains the word several times into a single result, keeping
+ * the first occurrence's morphology — otherwise a verse using a word three times would fill three
+ * slots of the list.
+ */
+export async function loadStrongOccurrences(
+	db: Database,
+	strong: StrongId,
+	resourceId: string,
+	options: { page?: number; pageSize?: number } = {}
+): Promise<OccurrencePage> {
+	const pageSize = options.pageSize ?? 25;
+	const page = Math.max(1, options.page ?? 1);
+	const offset = (page - 1) * pageSize;
+
+	const [{ count } = { count: 0 }] = await db.execute<{ count: number }>(sql`
+		select count(distinct ${verseWords.verseId})::int as count
+		from ${verseWords}
+		where ${verseWords.resourceId} = ${resourceId} and ${verseWords.strong} = ${strong}
+	`);
+
+	const rows = await db.execute<{
+		book_id: number;
+		chapter: number;
+		verse: number;
+		segments: VerseSegment[];
+		morph: string | null;
+		lemma: string | null;
+	}>(sql`
+		select v.book_id, v.chapter, v.verse, v.segments, w.morph, w.lemma
+		from (
+			select distinct on (verse_id) verse_id, morph, lemma
+			from ${verseWords}
+			where resource_id = ${resourceId} and strong = ${strong}
+			order by verse_id, position
+		) w
+		join ${verses} v on v.id = w.verse_id
+		order by v.book_id, v.chapter, v.verse
+		limit ${pageSize} offset ${offset}
+	`);
+
+	return {
+		occurrences: rows.map((row) => ({
+			book: row.book_id,
+			chapter: row.chapter,
+			verse: row.verse,
+			segments: row.segments,
+			morph: row.morph,
+			lemma: row.lemma
+		})),
+		total: Number(count),
+		page,
+		pageCount: Math.max(1, Math.ceil(Number(count) / pageSize))
+	};
+}
+
+/**
+ * The word as it appears in the original-language text of a verse, with its morphology.
+ *
+ * This is what turns "Gott" in a German column into "θεός, noun nominative singular masculine" in the
+ * sidebar: the German word carries the Strong's number, and the Greek resource carries the form.
+ */
+export async function loadOriginalWord(
+	db: Database,
+	options: { strong: StrongId; book: number; chapter: number; verse: number }
+): Promise<
+	{ word: string; morph: string | null; lemma: string | null; resourceId: string } | undefined
+> {
+	const language = strongLanguage(options.strong) === 'greek' ? 'grc' : 'hbo';
+
+	const [row] = await db
+		.select({
+			word: verseWords.word,
+			morph: verseWords.morph,
+			lemma: verseWords.lemma,
+			resourceId: verseWords.resourceId
+		})
+		.from(verseWords)
+		.innerJoin(verses, eq(verses.id, verseWords.verseId))
+		.innerJoin(resources, eq(resources.id, verseWords.resourceId))
+		.where(
+			and(
+				eq(verseWords.strong, options.strong),
+				eq(verses.bookId, options.book),
+				eq(verses.chapter, options.chapter),
+				eq(verses.verse, options.verse),
+				eq(resources.language, language),
+				eq(resources.isPublic, true)
+			)
+		)
+		.orderBy(asc(verseWords.position))
+		.limit(1);
+
+	return row;
+}
+
+/**
+ * Which of the reader's translations to base the statistics on: the first selected one that actually
+ * carries Strong's numbers, since a translation without them has nothing to count.
+ */
+export async function pickStatisticsResource(
+	db: Database,
+	resourceIds: string[]
+): Promise<string | undefined> {
+	if (resourceIds.length === 0) return undefined;
+
+	const rows = await db
+		.select({ id: resources.id })
+		.from(resources)
+		.where(and(inArray(resources.id, resourceIds), eq(resources.hasStrongs, true)))
+		.orderBy(asc(resources.sortOrder));
+
+	const preferred = resourceIds.find((id) => rows.some((row) => row.id === id));
+	if (preferred) return preferred;
+
+	// None of the reader's columns has Strong's numbers; fall back to any translation that does.
+	const [fallback] = await db
+		.select({ id: resources.id })
+		.from(resources)
+		.where(
+			and(eq(resources.hasStrongs, true), eq(resources.kind, 'bible'), eq(resources.isPublic, true))
+		)
+		.orderBy(desc(resources.wordCount))
+		.limit(1);
+
+	return fallback?.id;
+}

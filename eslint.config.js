@@ -39,8 +39,12 @@ export default defineConfig(
 		}
 	},
 	{
-		// Override or add rule settings here, such as:
-		// 'svelte/button-has-type': 'error'
-		rules: {}
+		rules: {
+			// `resolve()` exists to prepend a configured base path and to type-check against known
+			// routes. This app is served from the root, and most of its URLs are scripture references
+			// built from data (`/Joh3,16`, `/G26`) rather than from the route table, so the rule cannot
+			// be satisfied meaningfully here.
+			'svelte/no-navigation-without-resolve': 'off'
+		}
 	}
 );
