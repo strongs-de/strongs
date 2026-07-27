@@ -1,11 +1,25 @@
-*.pyc
-.Python
-*.sqlite3
-static_media
-static_root.py
-bibles/osis.NGU.xml
-bibles/osis.psalmenNGU.xml
-bibles/osis.schlachter2000.v1.withoutnotes.xml
+node_modules
 
-\.env
-pgdata
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+# Playwright
+test-results

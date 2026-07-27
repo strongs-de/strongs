@@ -1,0 +1,82 @@
+# Production stack. This is the file Coolify deploys as a "Docker Compose" resource.
+#
+# For local development, run only the database with `pnpm db:start` (compose.dev.yaml) and the app
+# itself with `pnpm dev`.
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Coolify substitutes the domain assigned to this service.
+      ORIGIN: ${SERVICE_FQDN_APP:-http://localhost:3000}
+      DATABASE_URL: postgres://strongs:${SERVICE_PASSWORD_POSTGRES:?}@db:5432/strongs
+      SESSION_SECRET: ${SERVICE_BASE64_64_SESSION:?}
+      # Trust the reverse proxy in front of us when reconstructing scheme, host and client address.
+      PROTOCOL_HEADER: x-forwarded-proto
+      HOST_HEADER: x-forwarded-host
+      ADDRESS_HEADER: x-forwarded-for
+      XFF_DEPTH: '1'
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
+      MAIL_FROM: ${MAIL_FROM:-noreply@strongs.de}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-strongs.de}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      - uploads:/app/var/uploads
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: strongs
+      POSTGRES_PASSWORD: ${SERVICE_PASSWORD_POSTGRES:?}
+      POSTGRES_DB: strongs
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --locale=C.UTF-8'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U strongs -d strongs']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  backup:
+    image: prodrigestivill/postgres-backup-local:17-alpine
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: strongs
+      POSTGRES_USER: strongs
+      POSTGRES_PASSWORD: ${SERVICE_PASSWORD_POSTGRES:?}
+      SCHEDULE: '@daily'
+      BACKUP_KEEP_DAYS: '30'
+      BACKUP_KEEP_WEEKS: '8'
+      BACKUP_KEEP_MONTHS: '12'
+    volumes:
+      - backups:/backups
+
+volumes:
+  pgdata:
+  uploads:
+  backups:

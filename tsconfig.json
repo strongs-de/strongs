@@ -1,0 +1,26 @@
+{
+	"extends": "./.svelte-kit/tsconfig.json",
+	"compilerOptions": {
+		"rewriteRelativeImportExtensions": true,
+		"allowJs": true,
+		"checkJs": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"sourceMap": true,
+		"strict": true,
+		"moduleResolution": "bundler",
+		// Node runs the CLI scripts in scripts/ by stripping types, with no build step. That only
+		// works for syntax that erases cleanly, so enums, namespaces and parameter properties are
+		// banned and type-only imports must be marked as such.
+		"erasableSyntaxOnly": true,
+		"verbatimModuleSyntax": true,
+		"noUncheckedIndexedAccess": true
+	}
+	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
+	// except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
+	//
+	// To make changes to top-level options such as include and exclude, we recommend extending
+	// the generated config; see https://svelte.dev/docs/kit/configuration#typescript
+}

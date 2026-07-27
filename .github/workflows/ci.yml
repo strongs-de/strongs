@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'rewrite/**']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DATABASE_URL: postgres://strongs:strongs@localhost:5432/strongs
+  SESSION_SECRET: ci-secret-ci-secret-ci-secret-ci-secret-0123
+  ORIGIN: http://localhost:4173
+
+jobs:
+  check:
+    name: Lint, types and unit tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: strongs
+          POSTGRES_PASSWORD: strongs
+          POSTGRES_DB: strongs
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U strongs -d strongs"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run db:migrate
+      - run: pnpm run lint
+      - run: pnpm run check
+      - run: pnpm run test:unit --run
+
+  e2e:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: strongs
+          POSTGRES_PASSWORD: strongs
+          POSTGRES_DB: strongs
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U strongs -d strongs"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm run db:migrate
+      - run: pnpm run db:seed
+      - run: pnpm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  image:
+    name: Build container image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to Coolify
+    needs: [check, e2e, image]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    # Set COOLIFY_WEBHOOK (the resource's deploy webhook URL) and COOLIFY_TOKEN as repository
+    # secrets to enable deployment. Without them the step is skipped instead of failing.
+    env:
+      COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
+      COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+    steps:
+      - name: Trigger deployment
+        if: env.COOLIFY_WEBHOOK != ''
+        run: |
+          curl --fail --silent --show-error \
+            --request GET "$COOLIFY_WEBHOOK" \
+            --header "Authorization: Bearer $COOLIFY_TOKEN"

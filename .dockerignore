@@ -1,0 +1,19 @@
+.git
+.github
+.svelte-kit
+build
+node_modules
+test-results
+playwright-report
+var
+legacy
+docs
+
+# The bundled source bibles are ~37 MB and are only needed when seeding, which is done from a
+# checkout or through the admin UI — not from inside the image.
+data
+
+.env
+.env.*
+!.env.example
+*.log
