@@ -9,15 +9,15 @@ is complete.
 
 ## Stack
 
-| Layer    | Choice                                                            |
-| -------- | ----------------------------------------------------------------- |
-| App      | SvelteKit 2 / Svelte 5, TypeScript, `adapter-node`, Node 24       |
-| Styling  | Tailwind CSS 4                                                    |
-| Database | PostgreSQL 17 with Drizzle ORM, `unaccent` and `pg_trgm`          |
-| Search   | PostgreSQL full-text search with the German dictionary (stemming) |
-| Email    | Brevo transactional API                                           |
-| Hosting  | Docker Compose on Coolify                                         |
-| Tests    | Vitest (unit and component), Playwright (end to end)              |
+| Layer    | Choice                                                      |
+| -------- | ----------------------------------------------------------- |
+| App      | SvelteKit 2 / Svelte 5, TypeScript, `adapter-node`, Node 24 |
+| Styling  | Tailwind CSS 4                                              |
+| Database | PostgreSQL 17 with Drizzle ORM, `unaccent` and `pg_trgm`    |
+| Search   | PostgreSQL full-text search, German snowball stemming       |
+| Email    | Brevo transactional API                                     |
+| Hosting  | Docker Compose on Coolify                                   |
+| Tests    | Vitest (unit and component), Playwright (end to end)        |
 
 Code, identifiers, comments and documentation are English. German appears only in the UI message
 catalogue and in content data (book names, licence notices, lexicon entries).
