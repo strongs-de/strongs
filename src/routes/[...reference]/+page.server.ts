@@ -34,6 +34,13 @@ export async function load({ params, cookies, url, setHeaders }) {
 	const input = cleaned.trim();
 	if (!input) redirect(307, defaultLocation(cookies));
 
+	// Legacy paged search URLs: /Liebe/2/ meant page two of a search for "Liebe".
+	const paged = /^(.+)\/(\d{1,4})$/.exec(input);
+	if (paged && !parseReference(input)) {
+		const [, term, pageNumber] = paged;
+		redirect(301, `/search?q=${encodeURIComponent(term!)}&page=${pageNumber}`);
+	}
+
 	const strong = normalizeStrongId(input);
 	if (strong) redirect(301, `/${strong}`);
 

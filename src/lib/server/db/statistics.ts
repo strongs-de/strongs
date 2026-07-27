@@ -14,6 +14,7 @@ import type { Database } from './client.ts';
 export async function refreshStrongStatistics(db: Database): Promise<void> {
 	await db.execute(sql`refresh materialized view concurrently strong_stats`);
 	await db.execute(sql`refresh materialized view concurrently strong_glosses`);
+	await db.execute(sql`refresh materialized view concurrently search_terms`);
 }
 
 /**
@@ -23,4 +24,5 @@ export async function refreshStrongStatistics(db: Database): Promise<void> {
 export async function refreshStrongStatisticsBlocking(db: Database): Promise<void> {
 	await db.execute(sql`refresh materialized view strong_stats`);
 	await db.execute(sql`refresh materialized view strong_glosses`);
+	await db.execute(sql`refresh materialized view search_terms`);
 }
