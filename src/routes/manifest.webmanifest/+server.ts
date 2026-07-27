@@ -1,0 +1,26 @@
+import { json } from '@sveltejs/kit';
+
+/**
+ * Web app manifest, so the site can be installed on a phone — which is how a lot of Bible reading
+ * happens. Served from a route rather than as a static file so it stays in step with the theme.
+ */
+export function GET({ setHeaders }) {
+	setHeaders({ 'cache-control': 'public, max-age=86400' });
+
+	return json(
+		{
+			name: 'strongs.de — Die Bibel im Urtext studieren',
+			short_name: 'strongs.de',
+			description:
+				'Bibelübersetzungen parallel lesen, mit Strong-Nummern, Grammatik und Wörterbuch zum Urtext.',
+			start_url: '/',
+			scope: '/',
+			display: 'standalone',
+			lang: 'de',
+			background_color: '#ffffff',
+			theme_color: '#1c1917',
+			icons: [{ src: '/favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }]
+		},
+		{ headers: { 'content-type': 'application/manifest+json' } }
+	);
+}

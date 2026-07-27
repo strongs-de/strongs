@@ -9,9 +9,14 @@ import { sveltekit } from '@sveltejs/kit/vite';
  * Server configuration is read from `process.env` (see `src/lib/server/config.ts`) so the same code
  * works in the container, in the CLI scripts and under Vite. Vite exposes `.env` only through
  * `import.meta.env`, so it is copied across here for dev, build and preview.
+ *
+ * A variable already present in the environment wins over the file, which is the precedence everyone
+ * expects and what lets the end-to-end run point the build at its own database.
  */
 export default defineConfig(({ mode }) => {
-	Object.assign(process.env, loadEnv(mode, process.cwd(), ''));
+	for (const [key, value] of Object.entries(loadEnv(mode, process.cwd(), ''))) {
+		process.env[key] ??= value;
+	}
 
 	return {
 		plugins: [

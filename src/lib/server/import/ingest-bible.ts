@@ -270,9 +270,12 @@ async function writeVerses(
  * rows just written. Cheaper and more trustworthy than accumulating counters while streaming.
  */
 async function writeBookStatistics(db: Database, resourceId: string): Promise<void> {
+	// `chapter_count` is the highest chapter number present, not how many chapters exist. Navigation
+	// clamps against it, and a resource that covers only part of a book — a fixture, a single-chapter
+	// commentary sample, a partial translation — would otherwise be clamped below its own content.
 	await db.execute(sql`
 		insert into ${resourceBooks} (resource_id, book_id, chapter_count, verse_count)
-		select resource_id, book_id, count(distinct chapter)::int, count(*)::int
+		select resource_id, book_id, max(chapter)::int, count(*)::int
 		from ${verses}
 		where resource_id = ${resourceId}
 		group by resource_id, book_id

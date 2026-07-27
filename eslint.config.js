@@ -11,9 +11,8 @@ const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
 export default defineConfig(
 	includeIgnoreFile(gitignorePath),
 	{
-		// The Django application and the raw source data are kept for reference during the port and are
-		// not ours to lint; legacy/ alone carries jQuery and a bundled CKEditor.
-		ignores: ['legacy/**', 'data/**', 'drizzle/**']
+		// Neither the raw source data nor the generated migrations are ours to lint.
+		ignores: ['data/**', 'drizzle/**']
 	},
 	js.configs.recommended,
 	ts.configs.recommended,

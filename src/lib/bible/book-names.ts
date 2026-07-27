@@ -4,8 +4,7 @@
  * The German set is the runtime source of truth and is also what `pnpm db:seed` writes into the
  * `book_names` table for SQL-side joins. It merges every spelling the previous site accepted —
  * `data/bibleBooks_de.txt` (the Django seed) plus the `shortBooks` and `strBooks` arrays that lived
- * in `legacy/strongs/static/js/autocomplete.js` — so links people bookmarked years ago still
- * resolve. English aliases are included as a convenience; the German name always wins on conflict.
+ * in the old autocomplete.js — so links people bookmarked years ago still resolve. English aliases are included as a convenience; the German name always wins on conflict.
  *
  * `name` is the full display name, `short` the abbreviation used when formatting references.
  */

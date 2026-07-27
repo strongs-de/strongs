@@ -12,7 +12,7 @@
  *
  * The milestone style is the harder one: verse text is a sibling of the marker rather than its child,
  * so text has to be attributed to whichever verse is currently open. Chapters and books use the same
- * two styles. `legacy/strongs/management/commands/add_bible.py` only handled containers, and papered
+ * two styles. The Django importer only handled containers, and papered
  * over the gap with a special case that pulled the first verse of a chapter out of the chapter
  * element's own text.
  *

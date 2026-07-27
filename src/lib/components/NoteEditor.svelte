@@ -33,7 +33,11 @@
 <form
 	method="POST"
 	action="?/saveNote"
-	use:enhance={() => {
+	use:enhance={({ formData }) => {
+		// Read the editor at submit time. A contenteditable's `innerHTML` is not reactive, so binding it
+		// to the hidden field would send whatever the last render happened to see.
+		formData.set('note', editor?.innerHTML ?? html ?? '');
+
 		return async ({ update }) => {
 			await update({ reset: false });
 			dirty = false;
@@ -43,7 +47,8 @@
 	}}
 >
 	<input type="hidden" name="itemId" value={itemId} />
-	<input type="hidden" name="note" value={editor?.innerHTML ?? html ?? ''} />
+	<!-- Filled in by the submit handler above; the fallback covers a submit without JavaScript. -->
+	<input type="hidden" name="note" value={html ?? ''} />
 
 	<div class="mb-1 flex items-center gap-1">
 		<button

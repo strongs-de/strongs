@@ -92,7 +92,12 @@ export async function bookCoverage(
 	return coverage;
 }
 
-/** Highest chapter number a resource has for a book, for navigation bounds. */
+/**
+ * Highest chapter number any of the given resources has for a book, or 0 when none contains it.
+ *
+ * Navigation clamps against this, so it has to be the highest chapter *present*, not how many chapters
+ * exist — see the note in `ingest-bible.ts`.
+ */
 export async function chapterCount(
 	db: Database,
 	resourceIds: string[],

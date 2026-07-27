@@ -84,7 +84,7 @@ describe('OSIS', () => {
 	});
 
 	it('parses the milestone style, where text is a sibling of the marker', async () => {
-		// The style legacy/strongs/management/commands/add_bible.py could not read.
+		// The style the Django importer could not read (add_bible.py on the main branch).
 		const { verses } = await drain(
 			parseOsis(`<osis><osisText osisIDWork="X" xml:lang="de"><div type="book" osisID="John">
 				<chapter sID="John.3" osisID="John.3"/>

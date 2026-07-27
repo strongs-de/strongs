@@ -2,7 +2,7 @@
  * Structured verse content.
  *
  * A verse is a list of segments. Import parses the source markup once into this shape; the reader
- * renders it directly. That replaces `legacy/strongs/templatetags/strongs_extras.py`, which rebuilt
+ * renders it directly. That replaces the old `strongs_extras.py` template filter, which rebuilt
  * HTML on every request with a chain of string replacements — including a global
  * `s.replace(',', ', ')` that also rewrote commas inside HTML attributes and numbers.
  *

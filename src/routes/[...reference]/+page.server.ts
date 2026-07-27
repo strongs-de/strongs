@@ -59,6 +59,12 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 	const book = bookById(reference.book);
 	if (!book) error(404, 'Unbekanntes Buch');
 
+	// One URL per passage. "Joh 3,16", "1.Mose 1,1" and "Rev22" all name something that already has a
+	// canonical spelling, so they redirect to it instead of rendering under a second address — which
+	// keeps bookmarks, search results and the address bar in agreement.
+	const canonical = referencePath(reference);
+	if (canonical !== `/${input}`) redirect(301, `${canonical}${url.search}`);
+
 	const db = getDb();
 	const bibles = await listBibles(db);
 	if (bibles.length === 0) {
@@ -67,16 +73,17 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 
 	const columns = readColumns(cookies, bibles);
 
-	// Clamp the chapter to what the selected translations actually have, then redirect so the URL and
-	// the content agree. The old code silently rendered the next book instead.
-	const available = await chapterCount(db, columns, reference.book);
-	const maxChapter = Math.max(available, 1);
-	if (reference.chapter > maxChapter) {
-		const following = nextChapter(reference.book, maxChapter);
-		redirect(
-			302,
-			following ? referencePath(following) : referencePath({ ...reference, chapter: maxChapter })
-		);
+	/**
+	 * Highest chapter the selected translations have for this book; 0 when none of them contains it.
+	 *
+	 * A chapter beyond that is clamped to the last one *of the same book* rather than jumped to the
+	 * next book: the destination has to be a place that exists, or the redirect can bounce onwards and
+	 * loop. When the book is absent entirely there is nothing to clamp to, so the empty state is
+	 * rendered instead.
+	 */
+	const maxChapter = await chapterCount(db, columns, reference.book);
+	if (maxChapter > 0 && reference.chapter > maxChapter) {
+		redirect(302, referencePath({ book: reference.book, chapter: maxChapter }));
 	}
 
 	const chapter = await loadChapter(db, {

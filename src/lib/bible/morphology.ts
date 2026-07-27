@@ -2,7 +2,7 @@
  * Decoder for Robinson's Morphological Analysis Codes (RMAC), the parsing codes carried by the
  * Textus Receptus source in `data/bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml` (`<gr rmac="v-aai-3s">`).
  *
- * Replaces `legacy/strongs/grammar_parser.py`, which walked the code with hand-written index
+ * Replaces the old `grammar_parser.py`, which walked the code with hand-written index
  * arithmetic (`short[6 + add]`, which reads past the end of short codes) and returned German HTML
  * with inline tooltips. Here the code is decomposed into feature keys and the UI decides how to
  * render and translate them.

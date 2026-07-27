@@ -8,16 +8,18 @@ ENV PNPM_HOME=/pnpm CI=true
 ENV PATH=$PNPM_HOME:$PATH
 RUN corepack enable
 
-# Install with the lockfile first so dependency layers are cached independently of source changes.
+# Install with the lockfile first so the dependency layer is cached independently of source changes.
+# No BuildKit cache mounts: this has to build with a plain `docker build` as well, and the layer cache
+# already covers the case that matters.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 RUN pnpm run build
 
 # Reduce node_modules to production dependencies for the runtime stage. adapter-node's output still
-# needs them at runtime (notably the postgres driver and the argon2 native binding).
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm prune --prod
+# needs them at runtime, notably the postgres driver and the argon2 native binding.
+RUN pnpm prune --prod
 
 # ---- runtime ----------------------------------------------------------------
 FROM node:24-bookworm-slim AS runtime

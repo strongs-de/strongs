@@ -38,9 +38,9 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run db:migrate
       - run: pnpm run lint
       - run: pnpm run check
+      # Unit tests need no database: the domain layer and the parsers do no I/O.
       - run: pnpm run test:unit --run
 
   e2e:
@@ -66,8 +66,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm run db:migrate
-      - run: pnpm run db:seed
+      # Creates its own database, migrates and seeds the fixture, then runs against a production build.
       - run: pnpm run test:e2e
       - uses: actions/upload-artifact@v4
         if: failure()

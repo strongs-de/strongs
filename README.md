@@ -4,8 +4,7 @@ Bible study site with parallel translations, Strong's numbers, Greek and Hebrew 
 morphology, cross references and verse lists.
 
 This is version 2: a rewrite in SvelteKit and PostgreSQL, self-hosted with Docker. The original
-Django application lives in `legacy/` for reference during the port and is removed once the rewrite
-is complete.
+Python 2 / Django application is still on the `main` branch.
 
 ## Stack
 
@@ -31,11 +30,11 @@ pnpm install
 cp .env.example .env      # defaults already match the dev database
 pnpm db:start             # PostgreSQL 17 in Docker on port 5432
 pnpm db:migrate           # apply migrations
-pnpm db:seed              # canonical books and German book names
 pnpm dev
 ```
 
-Import the bundled translations (each takes a minute or two):
+The site now runs but has no scripture in it. Import the bundled sources — about two minutes in total
+for 109,428 verses and 750,000 tagged words:
 
 ```sh
 pnpm data:import data/bibles/GER_ELB1905_STRONG.xml
@@ -44,23 +43,27 @@ pnpm data:import data/bibles/GER_LUTH1912.xml
 pnpm data:import data/bibles/GER_ILGRDE.xml
 pnpm data:import data/bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml
 pnpm data:import data/strongsgreek.xml
-pnpm data:import data/books                   # Robinson morphology (TSP)
+pnpm data:import --target GNTTR data/books    # Robinson morphology, as an overlay
 ```
 
 Everything the CLI does is also available in the admin UI at `/admin`; the CLI just avoids clicking
-through the wizard five times. See [docs/importing.md](docs/importing.md) for the supported formats.
+through the wizard seven times. To reach `/admin`, set `BOOTSTRAP_ADMIN_EMAIL` in `.env` and register
+with that address. See [docs/importing.md](docs/importing.md) for the supported formats and the
+warnings the bundled files produce.
 
 ### Useful scripts
 
-| Command            | Purpose                                       |
-| ------------------ | --------------------------------------------- |
-| `pnpm dev`         | dev server with HMR                           |
-| `pnpm check`       | `svelte-check` and TypeScript diagnostics     |
-| `pnpm lint`        | Prettier and ESLint                           |
-| `pnpm test:unit`   | Vitest in watch mode                          |
-| `pnpm test`        | unit and end-to-end tests once                |
-| `pnpm db:generate` | generate a migration after editing the schema |
-| `pnpm db:studio`   | Drizzle Studio                                |
+| Command            | Purpose                                                            |
+| ------------------ | ------------------------------------------------------------------ |
+| `pnpm dev`         | dev server with HMR                                                |
+| `pnpm check`       | `svelte-check` and TypeScript diagnostics                          |
+| `pnpm lint`        | Prettier and ESLint                                                |
+| `pnpm test:unit`   | Vitest in watch mode; needs no database                            |
+| `pnpm test:e2e`    | Playwright against a production build and its own fixture database |
+| `pnpm test`        | both, once                                                         |
+| `pnpm db:generate` | generate a migration after editing the schema                      |
+| `pnpm db:seed`     | small fixture used by the end-to-end tests                         |
+| `pnpm db:studio`   | Drizzle Studio                                                     |
 
 ## Deployment
 
@@ -80,7 +83,8 @@ In Coolify, add a **Docker Compose** resource pointing at this repository, assig
 Migrations run automatically on container start. Pushes to `main` trigger a deploy through the
 Coolify webhook once `COOLIFY_WEBHOOK` and `COOLIFY_TOKEN` are set as repository secrets.
 
-Backup, restore and upgrade procedures are in [docs/operations.md](docs/operations.md).
+Backup, restore and upgrade procedures are in [docs/operations.md](docs/operations.md); the design and
+the reasoning behind it are in [docs/architecture.md](docs/architecture.md).
 
 ## Licences
 

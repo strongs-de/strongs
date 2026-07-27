@@ -6,7 +6,6 @@ node_modules
 test-results
 playwright-report
 var
-legacy
 docs
 
 # The bundled source bibles are ~37 MB and are only needed when seeding, which is done from a
