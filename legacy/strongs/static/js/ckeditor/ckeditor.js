@@ -14998,12 +14998,10 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 		CKEDITOR.ui.panel.block = CKEDITOR.tools.createClass({
 			$: function (a, b) {
 				this.element = a.append(
-					a
-						.getDocument()
-						.createElement('div', {
-							attributes: { tabindex: -1, class: 'cke_panel_block' },
-							styles: { display: 'none' }
-						})
+					a.getDocument().createElement('div', {
+						attributes: { tabindex: -1, class: 'cke_panel_block' },
+						styles: { display: 'none' }
+					})
 				);
 				b && CKEDITOR.tools.extend(this, b);
 				this.element.setAttributes({
@@ -17058,22 +17056,20 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 					};
 				})();
 			if (l) {
-				var b = CKEDITOR.document
-						.getBody()
-						.append(
-							CKEDITOR.dom.element.createFromHtml(
-								u.output({
-									content: l,
-									id: a.id,
-									langDir: a.lang.dir,
-									langCode: a.langCode,
-									name: a.name,
-									style: 'display:none;z-index:' + (i.baseFloatZIndex - 1),
-									topId: a.ui.spaceId('top'),
-									voiceLabel: a.lang.editorPanel + ', ' + a.name
-								})
-							)
-						),
+				var b = CKEDITOR.document.getBody().append(
+						CKEDITOR.dom.element.createFromHtml(
+							u.output({
+								content: l,
+								id: a.id,
+								langDir: a.lang.dir,
+								langCode: a.langCode,
+								name: a.name,
+								style: 'display:none;z-index:' + (i.baseFloatZIndex - 1),
+								topId: a.ui.spaceId('top'),
+								voiceLabel: a.lang.editorPanel + ', ' + a.name
+							})
+						)
+					),
 					p = CKEDITOR.tools.eventsBuffer(500, o),
 					e = CKEDITOR.tools.eventsBuffer(100, o);
 				b.unselectable();
@@ -20972,13 +20968,11 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 							],
 							isDebug: !1
 						}),
-						CKEDITOR.document
-							.getHead()
-							.append(
-								CKEDITOR.document.createElement('script', {
-									attributes: { type: 'text/javascript', async: 'true', src: c }
-								})
-							))
+						CKEDITOR.document.getHead().append(
+							CKEDITOR.document.createElement('script', {
+								attributes: { type: 'text/javascript', async: 'true', src: c }
+							})
+						))
 					: CKEDITOR.fireOnce('scaytReady');
 				return null;
 			},

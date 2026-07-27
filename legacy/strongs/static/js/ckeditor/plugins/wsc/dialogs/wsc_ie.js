@@ -88,13 +88,11 @@ CKEDITOR.dialog.add('checkspell', function (a) {
 			b.setHtml(k);
 			b.getChild(2).setStyle('height', this._.contentSize.height + 'px');
 			'function' != typeof window.doSpell &&
-				CKEDITOR.document
-					.getHead()
-					.append(
-						CKEDITOR.document.createElement('script', {
-							attributes: { type: 'text/javascript', src: l }
-						})
-					);
+				CKEDITOR.document.getHead().append(
+					CKEDITOR.document.createElement('script', {
+						attributes: { type: 'text/javascript', src: l }
+					})
+				);
 			b = a.getData();
 			CKEDITOR.document.getById(g).setValue(b);
 			e = window.setInterval(c(this, i), 250);

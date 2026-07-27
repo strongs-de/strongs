@@ -14,10 +14,7 @@ export const prerender = false;
 export async function GET() {
 	try {
 		await getDb().execute(sql`select 1`);
-		return Response.json(
-			{ status: 'ok' },
-			{ headers: { 'cache-control': 'no-store' } }
-		);
+		return Response.json({ status: 'ok' }, { headers: { 'cache-control': 'no-store' } });
 	} catch (error) {
 		logger.error({ err: error }, 'health check failed');
 		return Response.json(
