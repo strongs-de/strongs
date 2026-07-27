@@ -1,7 +1,27 @@
-import { redirect, type Handle } from '@sveltejs/kit';
+import { redirect, type Handle, type ServerInit } from '@sveltejs/kit';
 import { getDb } from '$lib/server/db';
 import { resolveSession } from '$lib/server/auth/session';
+import { failInterruptedJobs } from '$lib/server/import/jobs';
+import { pruneExpiredSessions } from '$lib/server/auth/session';
 import { logger } from '$lib/server/logger';
+
+/**
+ * Runs once when the server starts.
+ *
+ * An import that was running when the process stopped can neither continue nor be trusted, so it is
+ * marked as failed; leaving it at "running" would be indistinguishable from one that is working.
+ */
+export const init: ServerInit = async () => {
+	const db = getDb();
+	try {
+		await failInterruptedJobs(db);
+		await pruneExpiredSessions(db);
+	} catch (error) {
+		// A database that is not up yet must not stop the server from booting: the healthcheck will
+		// report unhealthy until it is, which is the signal the deployment watches.
+		logger.warn({ err: error }, 'startup housekeeping skipped');
+	}
+};
 
 /**
  * Request pipeline: resolve the session, guard the admin area, log slow requests.
