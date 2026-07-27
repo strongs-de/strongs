@@ -18,8 +18,16 @@ export type WordSegment = {
 	readonly kind: 'w';
 	/** The word as this translation renders it. */
 	readonly text: string;
-	/** Canonical Strong's id, e.g. `G26`. */
+	/** Canonical Strong's id of the primary sense, e.g. `G26`. Shown and linked by default. */
 	readonly strong: string;
+	/**
+	 * All ids this word carries, including `strong`, and only present when there is more than one.
+	 *
+	 * German renders a Hebrew phrase as a single word often enough to matter: "sechshundert" is
+	 * H8337 (six) plus H3967 (hundred), and Elberfelder writes that as `str="8337-H3967"`. There are
+	 * 2,726 such words in the bundled Elberfelder text.
+	 */
+	readonly strongs?: readonly string[];
 	/** Robinson morphology code, when the source provides one. */
 	readonly morph?: string;
 };
@@ -71,29 +79,86 @@ export function segmentsToText(segments: readonly VerseSegment[]): string {
 	return normalizeWhitespace(out);
 }
 
+export type TaggedWord = {
+	/** 0-based index within the verse, in reading order. */
+	position: number;
+	text: string;
+	strong: string;
+	morph?: string;
+};
+
+/**
+ * Extracts the Strong-tagged words of a verse in reading order.
+ *
+ * Used at import time to fill `verse_words`, which is what makes "every place this word occurs" and
+ * the rendering statistics ordinary SQL queries.
+ *
+ * A word carrying several Strong's numbers yields one entry per number, all sharing the same
+ * position, so a search for any of them finds the verse.
+ */
+export function wordsFromSegments(segments: readonly VerseSegment[]): TaggedWord[] {
+	const words: TaggedWord[] = [];
+	let position = 0;
+
+	const walk = (list: readonly VerseSegment[]): void => {
+		for (const segment of list) {
+			if (typeof segment === 'string') continue;
+
+			if (segment.kind === 'w') {
+				for (const strong of segment.strongs ?? [segment.strong]) {
+					words.push({
+						position,
+						text: segment.text,
+						strong,
+						...(segment.morph ? { morph: segment.morph } : {})
+					});
+				}
+				position += 1;
+			} else if (segment.kind === 'wj') {
+				walk(segment.children);
+			}
+		}
+	};
+
+	walk(segments);
+	return words;
+}
+
 /** Collapses runs of whitespace and trims, without touching the characters themselves. */
 export function normalizeWhitespace(value: string): string {
 	return value.replace(/\s+/g, ' ').trim();
 }
 
+const CLOSING_PUNCTUATION = ',.;:!?)]»”’';
+const OPENING_PUNCTUATION = '([«“‘';
+
 /**
- * Tidies spacing around punctuation that source markup leaves behind.
+ * Repairs the spacing that tagged-word markup leaves behind, operating only on the plain runs
+ * between words so the words themselves are never altered.
  *
- * Zefania files put a trailing space inside every tagged word — `<gr str="976">Buch </gr> des` — so a
- * naive join produces `Buch , des`. The old code chased this with two dozen string replacements; the
- * rules are collected here and applied once at import.
+ * Zefania puts the space that separates two words *inside* the preceding element —
+ * `<gr str="976">Buch </gr> des <gr str="1078">Geschlechts </gr>,` — which on its own produces
+ * "Buch des Geschlechts ,". Three rules are enough:
+ *
+ *  1. collapse runs of whitespace,
+ *  2. drop a leading space that sits in front of closing punctuation,
+ *  3. drop a trailing space that sits behind opening punctuation.
  */
-export function tidyPunctuation(value: string): string {
-	return (
-		value
-			// No space before closing punctuation.
-			.replace(/\s+([,.;:!?»”’)\]])/g, '$1')
-			// No space after opening punctuation.
-			.replace(/([«“‘(\[])\s+/g, '$1')
-			// Collapse whatever is left.
-			.replace(/\s{2,}/g, ' ')
-			.trim()
-	);
+export function tidySegmentSpacing(segments: VerseSegment[]): VerseSegment[] {
+	return segments.map((segment) => {
+		if (typeof segment !== 'string') return segment;
+
+		let text = segment.replace(/\s+/g, ' ');
+
+		if (text.length > 1 && text.startsWith(' ') && CLOSING_PUNCTUATION.includes(text[1]!)) {
+			text = text.slice(1);
+		}
+		if (text.length > 1 && text.endsWith(' ') && OPENING_PUNCTUATION.includes(text.at(-2)!)) {
+			text = text.slice(0, -1);
+		}
+
+		return text;
+	});
 }
 
 /**
