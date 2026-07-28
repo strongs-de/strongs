@@ -1,62 +1,96 @@
-Strongs.de
-==========
+# strongs.de
 
-About
-=====
-We host the source code of the bible study page www.strongs.de. We want to give it away, cause we want you to contribute and we want to support your ideas and projects that will give people the opportunity to study the word of god.
+Bible study site with parallel translations, Strong's numbers, Greek and Hebrew lexicons,
+morphology, cross references and verse lists.
 
-Until now this site is only available in german. We do have the aim (and we have many other great ideas) to support other languages as well, but this is a question how it is requested by our users.
+This is version 2: a rewrite in SvelteKit and PostgreSQL, self-hosted with Docker. The original
+Python 2 / Django application is still on the `main` branch.
 
+## Stack
 
-Prerequisits
-============
+| Layer    | Choice                                                      |
+| -------- | ----------------------------------------------------------- |
+| App      | SvelteKit 2 / Svelte 5, TypeScript, `adapter-node`, Node 24 |
+| Styling  | Tailwind CSS 4                                              |
+| Database | PostgreSQL 17 with Drizzle ORM, `unaccent` and `pg_trgm`    |
+| Search   | PostgreSQL full-text search, German snowball stemming       |
+| Email    | Brevo transactional API                                     |
+| Hosting  | Docker Compose on Coolify                                   |
+| Tests    | Vitest (unit and component), Playwright (end to end)        |
 
-- Docker
+Code, identifiers, comments and documentation are English. German appears only in the UI message
+catalogue and in content data (book names, licence notices, lexicon entries).
 
-Quick-Start
-===========
+## Local development
 
-- Clone this repo: `git clone https://github.com/strongs-de/strongs`
-- Create a file `.env` in the source directory to set the docker-compose varaibles:
+Requires Node 24+, pnpm and Docker.
+
+```sh
+pnpm install
+cp .env.example .env      # defaults already match the dev database
+pnpm db:start             # PostgreSQL 17 in Docker on port 5432
+pnpm db:migrate           # apply migrations
+pnpm dev
 ```
-CONTAINER_NAME_DB=strongs_de_db
-CONTAINER_NAME_WEB=strongs_de_web
-URL=your.url
+
+The site now runs but has no scripture in it. Import the bundled sources — about two minutes in total
+for 109,428 verses and 750,000 tagged words:
+
+```sh
+pnpm data:import data/bibles/GER_ELB1905_STRONG.xml
+pnpm data:import data/bibles/GER_SCH1951_STRONG.xml
+pnpm data:import data/bibles/GER_LUTH1912.xml
+pnpm data:import data/bibles/GER_ILGRDE.xml
+pnpm data:import data/bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml
+pnpm data:import data/strongsgreek.xml
+pnpm data:import --target GNTTR data/books    # Robinson morphology, as an overlay
 ```
-- Create the docker image: `docker-compose build`
-- Run initialization steps (only once):
-  - `docker-compose up -d`
-  - `docker-compose run --rm web python manage.py syncdb`
-  <!-- - `docker-compose run --rm web python manage.py initdatabase` -->
-  - Initialize bible books: `docker-compose run --rm web python manage.py init_bible_books`
-  - Add some bible translations:
-    - `docker-compose run --rm web python manage.py add_bible bibles/GER_ELB1905_STRONG.xml`
-    - `docker-compose run --rm web python manage.py add_bible bibles/GER_ILGRDE.xml`
-    - `docker-compose run --rm web python manage.py add_bible bibles/GER_LUTH1912.xml`
-    - `docker-compose run --rm web python manage.py add_bible bibles/GRC_GNTTR_TEXTUS_RECEPTUS_NT.xml`
-    - ...
-  - Create strong reference: `docker-compose run web python manage.py init_strong_grammar`
-- Restart the project: `docker-compose restart`
-- Now you can visit the page at [http://localhost:8000/](http://localhost:8000/)
 
-How to contribute
-=================
-If you want to contribute, you're welcome! To start developing, create a fork of this repository. Then you can make your extension or bug fix and create a pull request. After I've reviewed your changes, I will integrate them into the main repository and make it public!
-If you want to know more about the fork and pull-request development you can read this [article from github](https://guides.github.com/introduction/flow/index.html) itself.
+Everything the CLI does is also available in the admin UI at `/admin`; the CLI just avoids clicking
+through the wizard seven times. To reach `/admin`, set `BOOTSTRAP_ADMIN_EMAIL` in `.env` and register
+with that address. See [docs/importing.md](docs/importing.md) for the supported formats and the
+warnings the bundled files produce.
 
-There are some features we wish to add in the future. If you want to pick one - do it!
+### Useful scripts
 
-- Extend the layout into a stunning responsive one (especially for mobile)
-- Add multi-language support
-- Add possibility to comment your verse-lists
-- Add possibility to comment single verses (internally create a 1-verse verselist and allow to comment it). This should not be shown in the verslist combo.
+| Command            | Purpose                                                            |
+| ------------------ | ------------------------------------------------------------------ |
+| `pnpm dev`         | dev server with HMR                                                |
+| `pnpm check`       | `svelte-check` and TypeScript diagnostics                          |
+| `pnpm lint`        | Prettier and ESLint                                                |
+| `pnpm test:unit`   | Vitest in watch mode; needs no database                            |
+| `pnpm test:e2e`    | Playwright against a production build and its own fixture database |
+| `pnpm test`        | both, once                                                         |
+| `pnpm db:generate` | generate a migration after editing the schema                      |
+| `pnpm db:seed`     | small fixture used by the end-to-end tests                         |
+| `pnpm db:studio`   | Drizzle Studio                                                     |
 
-Bible-Licenses
-===================
-Due to licensing restrictions we are not allowed to include the bible translations for **Schlachter 2000** and **Neue Genfer Übersetzung**. The functionality to import these files is available and we have included it in our live site at www.strongs.de but it is not available nor part of this repo.
+## Deployment
 
+`compose.yaml` is the production stack: the app, PostgreSQL and a nightly `pg_dump` sidecar.
 
-License
-=======
+In Coolify, add a **Docker Compose** resource pointing at this repository, assign a domain to the
+`app` service, and set these environment variables:
 
-The code is licensed under CC BY (https://creativecommons.org/licenses/by/4.0/legalcode)
+| Variable                    | Notes                                                     |
+| --------------------------- | --------------------------------------------------------- |
+| `SERVICE_PASSWORD_POSTGRES` | generated by Coolify; used by app, database and backups   |
+| `SERVICE_BASE64_64_SESSION` | generated by Coolify; signs session cookies               |
+| `BREVO_API_KEY`             | transactional email; mails are logged when unset          |
+| `MAIL_FROM`                 | sender address, must be verified in Brevo                 |
+| `BOOTSTRAP_ADMIN_EMAIL`     | the first account registered with this address gets admin |
+
+Migrations run automatically on container start. Pushes to `main` trigger a deploy through the
+Coolify webhook once `COOLIFY_WEBHOOK` and `COOLIFY_TOKEN` are set as repository secrets.
+
+Backup, restore and upgrade procedures are in [docs/operations.md](docs/operations.md); the design and
+the reasoning behind it are in [docs/architecture.md](docs/architecture.md).
+
+## Licences
+
+Application code: CC BY 4.0, as in version 1.
+
+Bible translations and reference works each carry their own licence, recorded per resource and
+displayed in the reader. This repository contains only material believed to be in the public domain;
+Schlachter 2000 and the Neue Genfer Übersetzung are supported by the importer but not distributed
+here.

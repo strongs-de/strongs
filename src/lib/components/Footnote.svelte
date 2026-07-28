@@ -1,0 +1,117 @@
+<script lang="ts">
+	import { t } from '$lib/i18n';
+
+	let {
+		marker,
+		text
+	}: {
+		marker: string;
+		text: string;
+	} = $props();
+
+	let popup = $state<HTMLSpanElement | undefined>();
+	let trigger = $state<HTMLButtonElement | undefined>();
+
+	function toggle(): void {
+		if (!popup) return;
+		if (popup.matches(':popover-open')) {
+			popup.hidePopover();
+			return;
+		}
+		popup.showPopover();
+		place();
+	}
+
+	function place(): void {
+		if (!popup || !trigger) return;
+		const anchor = trigger.getBoundingClientRect();
+		const box = popup.getBoundingClientRect();
+		const margin = 8;
+		const gap = 5;
+
+		let left = anchor.left + anchor.width / 2 - box.width / 2;
+		left = Math.max(margin, Math.min(left, window.innerWidth - box.width - margin));
+
+		let top = anchor.bottom + gap;
+		if (top + box.height > window.innerHeight - margin) {
+			top = Math.max(margin, anchor.top - box.height - gap);
+		}
+
+		popup.style.left = `${left}px`;
+		popup.style.top = `${top}px`;
+	}
+</script>
+
+<svelte:window onresize={() => popup?.matches(':popover-open') && place()} />
+
+<button
+	bind:this={trigger}
+	type="button"
+	class="footnote-marker"
+	aria-label={t('verse.footnote', { marker: marker || '•' })}
+	aria-haspopup="dialog"
+	onclick={toggle}
+>
+	{marker || '•'}
+</button>
+<span bind:this={popup} popover="auto" role="note" class="footnote-popup">{text}</span>
+
+<style>
+	.footnote-marker {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 1.15rem;
+		height: 1.15rem;
+		margin: 0 0.08rem;
+		padding: 0 0.25rem;
+		vertical-align: 0.5em;
+		border: 1px solid color-mix(in oklab, var(--color-accent-500) 45%, transparent);
+		border-radius: 999px;
+		background: color-mix(in oklab, var(--color-accent-500) 10%, transparent);
+		font-family: var(--font-sans);
+		font-size: 0.62rem;
+		font-weight: 700;
+		line-height: 1;
+		color: var(--color-accent-700);
+		cursor: pointer;
+	}
+
+	.footnote-marker:hover,
+	.footnote-marker:focus-visible {
+		border-color: var(--color-accent-500);
+		background: color-mix(in oklab, var(--color-accent-500) 18%, transparent);
+	}
+
+	:global(.dark) .footnote-marker {
+		color: var(--color-accent-300);
+	}
+
+	.footnote-popup {
+		position: fixed;
+		inset: auto;
+		width: max-content;
+		max-width: min(24rem, calc(100vw - 1rem));
+		margin: 0;
+		padding: 0.55rem 0.7rem;
+		border: 1px solid var(--color-stone-200);
+		border-radius: 0.45rem;
+		background: white;
+		box-shadow: 0 10px 24px rgb(28 25 23 / 0.16);
+		font-family: var(--font-sans);
+		font-size: 0.78rem;
+		font-weight: 400;
+		line-height: 1.45;
+		color: var(--color-stone-700);
+	}
+
+	.footnote-popup:not(:popover-open) {
+		display: none;
+	}
+
+	:global(.dark) .footnote-popup {
+		border-color: var(--color-stone-700);
+		background: var(--color-stone-900);
+		color: var(--color-stone-200);
+	}
+</style>

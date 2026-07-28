@@ -1,0 +1,211 @@
+/**
+ * Account queries.
+ */
+
+import { createHash, randomBytes } from 'node:crypto';
+import { and, eq, gt, isNull, sql } from 'drizzle-orm';
+import { config } from '../config.ts';
+import type { Database } from '../db/client.ts';
+import { passwordResets, users, type User } from '../db/schema.ts';
+import { hashPassword } from '../auth/password.ts';
+import { normalizeFontScale } from '../reader-preferences.ts';
+
+export function normalizeEmail(email: string): string {
+	return email.trim().toLowerCase();
+}
+
+export async function findUserByEmail(db: Database, email: string): Promise<User | undefined> {
+	const [row] = await db
+		.select()
+		.from(users)
+		.where(eq(users.email, normalizeEmail(email)))
+		.limit(1);
+	return row;
+}
+
+export type CreateUserResult = { ok: true; user: User } | { ok: false; reason: 'emailTaken' };
+
+/**
+ * Creates an account.
+ *
+ * The first account registered with `BOOTSTRAP_ADMIN_EMAIL` becomes an admin, which is how a fresh
+ * deployment gets its first administrator without anyone editing the database by hand.
+ */
+export async function createUser(
+	db: Database,
+	input: { email: string; password: string; displayName?: string }
+): Promise<CreateUserResult> {
+	const email = normalizeEmail(input.email);
+	const bootstrapAdmin = config().BOOTSTRAP_ADMIN_EMAIL?.toLowerCase();
+
+	const existing = await findUserByEmail(db, email);
+	if (existing) return { ok: false, reason: 'emailTaken' };
+
+	const [user] = await db
+		.insert(users)
+		.values({
+			email,
+			passwordHash: await hashPassword(input.password),
+			displayName: input.displayName?.trim() || null,
+			role: bootstrapAdmin && bootstrapAdmin === email ? 'admin' : 'user'
+		})
+		.returning();
+
+	// A concurrent registration with the same address loses the unique index race.
+	if (!user) return { ok: false, reason: 'emailTaken' };
+
+	return { ok: true, user };
+}
+
+export async function recordLogin(db: Database, userId: string): Promise<void> {
+	await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, userId));
+}
+
+export async function updatePassword(
+	db: Database,
+	userId: string,
+	password: string
+): Promise<void> {
+	await db
+		.update(users)
+		.set({ passwordHash: await hashPassword(password), updatedAt: new Date() })
+		.where(eq(users.id, userId));
+}
+
+export async function updateProfile(
+	db: Database,
+	userId: string,
+	displayName: string | null
+): Promise<void> {
+	await db
+		.update(users)
+		.set({ displayName: displayName?.trim() || null, updatedAt: new Date() })
+		.where(eq(users.id, userId));
+}
+
+export async function updateReaderColumns(
+	db: Database,
+	userId: string,
+	columns: string[]
+): Promise<void> {
+	await db
+		.update(users)
+		.set({ readerColumns: columns.slice(0, 5), updatedAt: new Date() })
+		.where(eq(users.id, userId));
+}
+
+export async function updateReaderFontScale(
+	db: Database,
+	userId: string,
+	scale: number
+): Promise<number> {
+	const normalized = normalizeFontScale(scale);
+	await db
+		.update(users)
+		.set({ readerFontScale: normalized, updatedAt: new Date() })
+		.where(eq(users.id, userId));
+	return normalized;
+}
+
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
+
+/**
+ * Issues a password-reset token.
+ *
+ * Only the hash is stored, exactly as for sessions, so the token in the email is the only copy.
+ */
+export async function createPasswordReset(db: Database, userId: string): Promise<string> {
+	const token = randomBytes(32).toString('base64url');
+
+	await db.insert(passwordResets).values({
+		id: createHash('sha256').update(token).digest('hex'),
+		userId,
+		expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS)
+	});
+
+	return token;
+}
+
+/** Consumes a reset token, returning the user it belongs to. Single use. */
+export async function consumePasswordReset(
+	db: Database,
+	token: string
+): Promise<{ userId: string } | null> {
+	const id = createHash('sha256').update(token).digest('hex');
+
+	const [row] = await db
+		.update(passwordResets)
+		.set({ usedAt: new Date() })
+		.where(
+			and(
+				eq(passwordResets.id, id),
+				isNull(passwordResets.usedAt),
+				gt(passwordResets.expiresAt, new Date())
+			)
+		)
+		.returning({ userId: passwordResets.userId });
+
+	return row ?? null;
+}
+
+/** Admin listing, with a count of each account's verse lists. */
+export async function listUsers(db: Database): Promise<
+	{
+		id: string;
+		email: string;
+		displayName: string | null;
+		role: string;
+		createdAt: Date;
+		lastLoginAt: Date | null;
+		disabledAt: Date | null;
+		listCount: number;
+	}[]
+> {
+	const rows = await db.execute<{
+		id: string;
+		email: string;
+		display_name: string | null;
+		role: string;
+		created_at: string;
+		last_login_at: string | null;
+		disabled_at: string | null;
+		list_count: number;
+	}>(sql`
+		select u.id, u.email, u.display_name, u.role, u.created_at, u.last_login_at, u.disabled_at,
+		       count(l.id)::int as list_count
+		from users u
+		left join verse_lists l on l.user_id = u.id
+		group by u.id
+		order by u.created_at desc
+	`);
+
+	return rows.map((row) => ({
+		id: row.id,
+		email: row.email,
+		displayName: row.display_name,
+		role: row.role,
+		createdAt: new Date(row.created_at),
+		lastLoginAt: row.last_login_at ? new Date(row.last_login_at) : null,
+		disabledAt: row.disabled_at ? new Date(row.disabled_at) : null,
+		listCount: Number(row.list_count)
+	}));
+}
+
+export async function setUserRole(
+	db: Database,
+	userId: string,
+	role: 'user' | 'admin'
+): Promise<void> {
+	await db.update(users).set({ role, updatedAt: new Date() }).where(eq(users.id, userId));
+}
+
+export async function setUserDisabled(
+	db: Database,
+	userId: string,
+	disabled: boolean
+): Promise<void> {
+	await db
+		.update(users)
+		.set({ disabledAt: disabled ? new Date() : null, updatedAt: new Date() })
+		.where(eq(users.id, userId));
+}

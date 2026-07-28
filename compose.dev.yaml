@@ -1,0 +1,23 @@
+# Development database only — the app runs on the host via `pnpm dev`.
+# Started and stopped with `pnpm db:start` / `pnpm db:stop`.
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    environment:
+      POSTGRES_USER: strongs
+      POSTGRES_PASSWORD: strongs
+      POSTGRES_DB: strongs
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --locale=C.UTF-8'
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U strongs -d strongs']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata_dev:

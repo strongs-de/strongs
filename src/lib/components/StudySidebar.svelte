@@ -1,0 +1,350 @@
+<script lang="ts">
+	import { formatReference } from '$lib/bible/reference';
+	import { bookShortName } from '$lib/bible/book-names';
+	import { formatNumber, t } from '$lib/i18n';
+	import MorphologyList from './MorphologyList.svelte';
+	import BookDistribution from './BookDistribution.svelte';
+
+	/**
+	 * The study panel: dictionary entry, morphology, how the word is rendered, and every place it
+	 * occurs.
+	 *
+	 * Loaded on demand from `/api/strong/…` rather than being rendered with the chapter, because a
+	 * reader opens it for a handful of words out of a few hundred on the page.
+	 */
+	let {
+		strong,
+		word,
+		reference,
+		resourceIds,
+		onClose
+	}: {
+		strong: string;
+		word: string;
+		/** Verse the word was clicked in, used to look up its original form. */
+		reference: string;
+		resourceIds: string[];
+		onClose: () => void;
+	} = $props();
+
+	type Payload = {
+		strong: string;
+		found: boolean;
+		entry: {
+			lemma: string;
+			transliteration: string | null;
+			pronunciation: string | null;
+			definitionHtml: string | null;
+			derivationHtml: string | null;
+			kjvDefinitionHtml: string | null;
+			seeAlso: string[];
+			language: 'grc' | 'hbo';
+		} | null;
+		alternative: string | null;
+		statistics: { occurrences: number; verseCount: number };
+		bookCounts: { book: number; count: number }[];
+		glosses: { display: string; occurrences: number }[];
+		occurrences: {
+			occurrences: { book: number; chapter: number; verse: number; morph: string | null }[];
+			total: number;
+			page: number;
+			pageCount: number;
+		};
+		original: { word: string; morph: string | null; lemma: string | null } | null;
+		morphology: {
+			code: string;
+			partOfSpeech: string;
+			features: { feature: string; value: string }[];
+			unknown: string[];
+		} | null;
+	};
+
+	let payload = $state<Payload | null>(null);
+	let loading = $state(true);
+	let failed = $state(false);
+	let page = $state(1);
+
+	$effect(() => {
+		// Re-fetch whenever the word, the verse or the page changes.
+		const url = `/api/strong/${encodeURIComponent(strong)}?ref=${encodeURIComponent(reference)}&resources=${encodeURIComponent(resourceIds.join(','))}&page=${page}`;
+		const controller = new AbortController();
+		loading = true;
+		failed = false;
+
+		fetch(url, { signal: controller.signal })
+			.then((response) => (response.ok ? response.json() : Promise.reject(new Error('failed'))))
+			.then((data: Payload) => {
+				payload = data;
+				loading = false;
+			})
+			.catch((cause: unknown) => {
+				if (cause instanceof DOMException && cause.name === 'AbortError') return;
+				failed = true;
+				loading = false;
+			});
+
+		return () => controller.abort();
+	});
+
+	// Reset to the first page when a different word is opened.
+	let shownStrong = $state('');
+	$effect(() => {
+		if (shownStrong !== strong) {
+			shownStrong = strong;
+			page = 1;
+		}
+	});
+
+	const maxGloss = $derived(
+		payload?.glosses.reduce((max, gloss) => Math.max(max, gloss.occurrences), 0) ?? 0
+	);
+</script>
+
+<!--
+  Two shapes for one panel. On a phone it is a bottom sheet, so the verse that was tapped stays
+  readable above it; from `sm` up it is a column that sticks under the site header, which needs
+  `self-start` — a flex item stretched to its container's height has nowhere to stick to.
+-->
+<aside
+	class="panel fixed inset-x-0 bottom-0 z-40 flex max-h-[70dvh] flex-col rounded-t-xl border
+	       border-stone-200 bg-white shadow-2xl sm:sticky sm:inset-x-auto sm:top-[var(--header-height)]
+	       sm:bottom-auto sm:z-10 sm:h-[calc(100dvh-var(--header-height))]
+	       sm:max-h-none sm:w-[28rem] sm:shrink-0 sm:self-start sm:rounded-none sm:border-0 sm:border-l
+	       sm:shadow-[-8px_0_24px_rgb(28_25_23/0.04)] lg:w-[32rem] dark:border-stone-800 dark:bg-stone-900"
+	aria-label={t('sidebar.tab.strong')}
+>
+	<header
+		class="flex items-center justify-between gap-2 border-b border-stone-200 bg-accent-50/70 px-4 py-3
+		       dark:border-stone-800 dark:bg-accent-900/20"
+	>
+		<h2 class="text-sm font-semibold">
+			{t('strong.title', { id: strong })}
+		</h2>
+		<button
+			type="button"
+			onclick={onClose}
+			aria-label={t('action.close')}
+			class="rounded p-1 text-stone-400 hover:bg-stone-200 hover:text-stone-700
+			       dark:hover:bg-stone-800 dark:hover:text-stone-200"
+		>
+			<svg viewBox="0 0 20 20" class="size-4" fill="currentColor" aria-hidden="true">
+				<path
+					d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"
+				/>
+			</svg>
+		</button>
+	</header>
+
+	<div class="min-h-0 flex-1 overflow-y-auto px-4 py-3 text-sm">
+		{#if loading && !payload}
+			<p class="text-stone-500 dark:text-stone-400">…</p>
+		{:else if failed}
+			<p class="text-stone-600 dark:text-stone-300">{t('error.server.body')}</p>
+		{:else if payload}
+			{#if !payload.found}
+				<p class="mb-2 text-stone-600 dark:text-stone-300">{t('strong.notFound')}</p>
+				{#if payload.alternative}
+					<p>
+						<a
+							class="text-accent-600 hover:underline dark:text-accent-400"
+							href="/{payload.alternative}"
+						>
+							{t('strong.tryOther', { id: payload.alternative })}
+						</a>
+					</p>
+				{/if}
+			{:else if payload.entry}
+				<!-- Headword: the original word, its transliteration and pronunciation. -->
+				<p
+					class="mb-1 text-2xl leading-snug"
+					lang={payload.entry.language}
+					dir={payload.entry.language === 'hbo' ? 'rtl' : 'ltr'}
+					style="font-family: var({payload.entry.language === 'hbo'
+						? '--font-hebrew'
+						: '--font-greek'})"
+				>
+					{payload.original?.word ?? payload.entry.lemma}
+				</p>
+				<p class="mb-3 text-xs text-stone-500 dark:text-stone-400">
+					{#if payload.entry.transliteration}<span>{payload.entry.transliteration}</span>{/if}
+					{#if payload.entry.pronunciation}
+						<span class="mx-1">·</span><span>[{payload.entry.pronunciation}]</span>
+					{/if}
+					{#if payload.original?.lemma && payload.original.lemma !== payload.original.word}
+						<span class="mx-1">·</span><span>{payload.original.lemma}</span>
+					{/if}
+				</p>
+
+				{#if word}
+					<p class="mb-3 text-stone-600 dark:text-stone-300">
+						<span class="font-medium">{word}</span>
+						<span class="text-stone-400"> — {reference}</span>
+					</p>
+				{/if}
+
+				{#if payload.morphology}
+					<section class="mb-4">
+						<h3 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">
+							{t('strong.grammar')}
+						</h3>
+						<MorphologyList morphology={payload.morphology} />
+					</section>
+				{/if}
+
+				{#if payload.entry.definitionHtml}
+					<section class="mb-4">
+						<h3 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">
+							{t('strong.definition')}
+						</h3>
+						<!-- Lexicon HTML is built by our own parser (src/lib/bible/parse/strongs-xml.ts): every
+						     scrap of source text is escaped and only spans and internal Strong links are emitted. -->
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<div class="lexicon">{@html payload.entry.definitionHtml}</div>
+					</section>
+				{/if}
+
+				{#if payload.entry.derivationHtml}
+					<section class="mb-4">
+						<h3 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">
+							{t('strong.derivation')}
+						</h3>
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<div class="lexicon">{@html payload.entry.derivationHtml}</div>
+					</section>
+				{/if}
+
+				{#if payload.glosses.length > 0}
+					<section class="mb-4">
+						<h3 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">
+							{t('strong.translations')}
+						</h3>
+						<ul class="space-y-1">
+							{#each payload.glosses as gloss (gloss.display)}
+								<li class="flex items-center gap-2">
+									<span class="w-32 shrink-0 truncate" title={gloss.display}>{gloss.display}</span>
+									<span
+										class="h-1.5 rounded-full bg-accent-500/70"
+										style="width: {Math.max(4, (gloss.occurrences / Math.max(1, maxGloss)) * 100)}%"
+									></span>
+									<span class="shrink-0 text-xs text-stone-500 dark:text-stone-400">
+										{formatNumber(gloss.occurrences)}
+									</span>
+								</li>
+							{/each}
+						</ul>
+					</section>
+				{/if}
+
+				{#if payload.statistics.occurrences > 0}
+					<section>
+						<h3 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">
+							{t('strong.occurrences')}
+						</h3>
+						<p class="mb-2 text-xs text-stone-500 dark:text-stone-400">
+							{t('strong.occurrencesCount', {
+								count: formatNumber(payload.statistics.occurrences),
+								verses: formatNumber(payload.statistics.verseCount)
+							})}
+						</p>
+						<div class="mb-3">
+							<BookDistribution
+								counts={payload.bookCounts}
+								hrefForBook={(book) => `/${strong}?book=${book}`}
+								compact
+							/>
+						</div>
+						<ul class="flex flex-wrap gap-1">
+							{#each payload.occurrences.occurrences as occurrence (`${occurrence.book}-${occurrence.chapter}-${occurrence.verse}`)}
+								<li>
+									<a
+										class="inline-block rounded border border-stone-200 px-1.5 py-0.5 text-xs
+										       hover:border-accent-500 hover:text-accent-700 dark:border-stone-700
+										       dark:hover:text-accent-300"
+										href="/{bookShortName(
+											occurrence.book
+										)}{occurrence.chapter},{occurrence.verse}#{encodeURIComponent(strong)}"
+									>
+										{formatReference({
+											book: occurrence.book,
+											chapter: occurrence.chapter,
+											verse: occurrence.verse
+										})}
+									</a>
+								</li>
+							{/each}
+						</ul>
+
+						{#if payload.occurrences.pageCount > 1}
+							<div class="mt-2 flex items-center gap-2 text-xs">
+								<button
+									type="button"
+									class="rounded px-2 py-1 enabled:hover:bg-stone-200 disabled:opacity-40 dark:enabled:hover:bg-stone-800"
+									disabled={page <= 1}
+									onclick={() => (page -= 1)}
+								>
+									←
+								</button>
+								<span class="text-stone-500 dark:text-stone-400">
+									{t('search.page', {
+										page: payload.occurrences.page,
+										pages: payload.occurrences.pageCount
+									})}
+								</span>
+								<button
+									type="button"
+									class="rounded px-2 py-1 enabled:hover:bg-stone-200 disabled:opacity-40 dark:enabled:hover:bg-stone-800"
+									disabled={page >= payload.occurrences.pageCount}
+									onclick={() => (page += 1)}
+								>
+									→
+								</button>
+							</div>
+						{/if}
+
+						<a
+							class="mt-3 inline-block text-xs text-accent-600 hover:underline dark:text-accent-400"
+							href="/{strong}"
+						>
+							{t('strong.showAll')}
+						</a>
+					</section>
+				{/if}
+			{/if}
+		{/if}
+	</div>
+</aside>
+
+<style>
+	/* The sheet slides in; the reduced-motion block in layout.css shortens this to nothing. */
+	@media (max-width: 639px) {
+		.panel {
+			animation: slide-up 180ms ease-out;
+		}
+	}
+
+	@keyframes slide-up {
+		from {
+			transform: translateY(100%);
+		}
+		to {
+			transform: translateY(0);
+		}
+	}
+
+	.lexicon :global(a) {
+		color: var(--color-accent-600);
+		text-decoration: none;
+	}
+
+	.lexicon :global(a:hover) {
+		text-decoration: underline;
+	}
+
+	:global(.dark) .lexicon :global(a) {
+		color: var(--color-accent-400);
+	}
+
+	.lexicon :global(.original) {
+		font-family: var(--font-greek);
+	}
+</style>
