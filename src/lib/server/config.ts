@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+const emptyStringAsUndefined = (value: unknown) => (value === '' ? undefined : value);
+
 /**
  * Runtime configuration, validated once at startup.
  *
@@ -30,7 +32,7 @@ const schema = z.object({
 	 * Email address that is granted the admin role on first registration. Lets you bootstrap the
 	 * very first admin account without touching the database by hand.
 	 */
-	BOOTSTRAP_ADMIN_EMAIL: z.string().email().optional()
+	BOOTSTRAP_ADMIN_EMAIL: z.preprocess(emptyStringAsUndefined, z.string().email().optional())
 });
 
 export type Config = z.infer<typeof schema>;
