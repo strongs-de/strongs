@@ -13,7 +13,7 @@ services:
         condition: service_healthy
     environment:
       # Coolify substitutes the domain assigned to this service.
-      ORIGIN: ${SERVICE_FQDN_APP:-http://localhost:3000}
+      ORIGIN: ${SERVICE_URL_APP:-http://localhost:3000}
       DATABASE_URL: postgres://strongs:${SERVICE_PASSWORD_POSTGRES:?}@db:5432/strongs
       SESSION_SECRET: ${SERVICE_BASE64_64_SESSION:?}
       # Trust the reverse proxy in front of us when reconstructing scheme, host and client address.
