@@ -3,6 +3,7 @@
 	import { formatNumber, t } from '$lib/i18n';
 	import VerseText from '$lib/components/VerseText.svelte';
 	import GlossChart from '$lib/components/GlossChart.svelte';
+	import BookDistribution from '$lib/components/BookDistribution.svelte';
 
 	let { data } = $props();
 
@@ -19,7 +20,7 @@
 	/>
 </svelte:head>
 
-<main class="mx-auto w-full max-w-5xl px-3 py-5 sm:px-4">
+<main class="mx-auto w-full max-w-[90rem] px-3 py-5 sm:px-5">
 	<header class="mb-6">
 		<p class="text-xs font-semibold tracking-wide text-stone-500 uppercase">
 			{t('strong.title', { id: data.strong })}
@@ -43,7 +44,7 @@
 		{/if}
 	</header>
 
-	<div class="grid gap-8 lg:grid-cols-[2fr_1fr]">
+	<div class="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(22rem,1fr)]">
 		<section>
 			<h2 class="mb-2 text-sm font-semibold tracking-wide text-stone-500 uppercase">
 				{t('strong.occurrences')}
@@ -55,6 +56,22 @@
 				})}
 				{#if data.resource}<span class="text-stone-400"> · {data.resource.abbrev}</span>{/if}
 			</p>
+
+			<div class="mb-6">
+				<BookDistribution
+					counts={data.bookCounts}
+					hrefForBook={(book) => `/${data.strong}?book=${book}`}
+					activeBook={data.book}
+				/>
+				{#if data.book}
+					<a
+						class="mt-1 inline-block text-xs text-accent-600 hover:underline dark:text-accent-400"
+						href="/{data.strong}"
+					>
+						{t('statistics.clearFilter')}
+					</a>
+				{/if}
+			</div>
 
 			<ol class="space-y-3">
 				{#each data.occurrences.occurrences as occurrence (`${occurrence.book}-${occurrence.chapter}-${occurrence.verse}`)}
@@ -72,7 +89,7 @@
 								{ style: 'full' }
 							)}
 						</a>
-						<p class="mt-0.5 font-serif leading-relaxed">
+						<p class="scripture-sized mt-0.5 font-serif leading-relaxed">
 							<VerseText segments={occurrence.segments} activeStrong={data.strong} />
 						</p>
 					</li>
@@ -84,9 +101,11 @@
 					{#if data.occurrences.page > 1}
 						<a
 							class="rounded border border-stone-300 px-3 py-1 hover:border-accent-500 dark:border-stone-700"
-							href={data.occurrences.page === 2
+							href="{data.occurrences.page === 2
 								? pageBase
-								: `${pageBase}/${data.occurrences.page - 1}`}
+								: `${pageBase}/${data.occurrences.page - 1}`}{data.book
+								? `?book=${data.book}`
+								: ''}"
 							rel="prev">←</a
 						>
 					{/if}
@@ -99,7 +118,7 @@
 					{#if data.occurrences.page < data.occurrences.pageCount}
 						<a
 							class="rounded border border-stone-300 px-3 py-1 hover:border-accent-500 dark:border-stone-700"
-							href="{pageBase}/{data.occurrences.page + 1}"
+							href="{pageBase}/{data.occurrences.page + 1}{data.book ? `?book=${data.book}` : ''}"
 							rel="next">→</a
 						>
 					{/if}

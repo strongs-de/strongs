@@ -11,10 +11,16 @@
 	 */
 	let {
 		itemId,
-		html = null
+		html = null,
+		action = '?/saveNote',
+		reference,
+		placeholder = t('lists.notePlaceholder')
 	}: {
-		itemId: string;
+		itemId?: string;
 		html?: string | null;
+		action?: string;
+		reference?: string;
+		placeholder?: string;
 	} = $props();
 
 	let editor: HTMLDivElement | undefined = $state();
@@ -32,7 +38,7 @@
 
 <form
 	method="POST"
-	action="?/saveNote"
+	{action}
 	use:enhance={({ formData }) => {
 		// Read the editor at submit time. A contenteditable's `innerHTML` is not reactive, so binding it
 		// to the hidden field would send whatever the last render happened to see.
@@ -46,7 +52,8 @@
 		};
 	}}
 >
-	<input type="hidden" name="itemId" value={itemId} />
+	{#if itemId}<input type="hidden" name="itemId" value={itemId} />{/if}
+	{#if reference}<input type="hidden" name="reference" value={reference} />{/if}
 	<!-- Filled in by the submit handler above; the fallback covers a submit without JavaScript. -->
 	<input type="hidden" name="note" value={html ?? ''} />
 
@@ -92,7 +99,7 @@
 		tabindex="0"
 		aria-multiline="true"
 		aria-label={t('lists.note')}
-		data-placeholder={t('lists.notePlaceholder')}
+		data-placeholder={placeholder}
 		oninput={() => (dirty = true)}
 		class="note-editor min-h-16 rounded-md border border-stone-200 bg-white px-3 py-2 text-sm
 		       focus:border-accent-500 focus:outline-none dark:border-stone-800 dark:bg-stone-950"

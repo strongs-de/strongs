@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
 	import Button from '$lib/components/Button.svelte';
+	import { formatReference, referencePath } from '$lib/bible/reference';
 
 	let { data } = $props();
 
@@ -72,4 +73,67 @@
 			{/each}
 		</ul>
 	{/if}
+
+	<section class="mt-10 border-t border-stone-200 pt-7 dark:border-stone-800">
+		<h2 class="text-xl font-semibold tracking-tight">{t('lists.notesTitle')}</h2>
+
+		{#if data.notes.length === 0}
+			<p class="mt-3 text-sm text-stone-500 dark:text-stone-400">{t('lists.notesEmpty')}</p>
+		{:else}
+			<ul class="mt-4 grid gap-3 sm:grid-cols-2">
+				{#each data.notes as note (note.kind + note.id)}
+					<li
+						class="rounded-xl border border-stone-200 bg-white/50 p-4 dark:border-stone-800
+						       dark:bg-stone-900/40"
+					>
+						<div class="flex items-start justify-between gap-3">
+							<div>
+								<a
+									class="font-semibold text-accent-600 hover:underline dark:text-accent-400"
+									href={note.kind === 'chapter' && note.verse === null
+										? referencePath({ book: note.book, chapter: note.chapter })
+										: `/lists/${note.listId}#note-${note.id}`}
+								>
+									{formatReference({
+										book: note.book,
+										chapter: note.chapter,
+										...(note.verse !== null ? { verse: note.verse } : {})
+									})}
+								</a>
+								<p class="mt-0.5 text-xs text-stone-500 dark:text-stone-400">
+									{note.kind === 'chapter'
+										? t('lists.chapterNote')
+										: t('lists.verseNote', { list: note.listTitle ?? '' })}
+								</p>
+							</div>
+							<time
+								class="shrink-0 text-xs text-stone-400"
+								datetime={new Date(note.updatedAt).toISOString()}
+							>
+								{dateFormat.format(new Date(note.updatedAt))}
+							</time>
+						</div>
+						<!-- Both note types are sanitised when saved. -->
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<div class="note-preview mt-3 text-sm leading-relaxed">{@html note.html}</div>
+					</li>
+				{/each}
+			</ul>
+		{/if}
+	</section>
 </main>
+
+<style>
+	.note-preview {
+		display: -webkit-box;
+		overflow: hidden;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 5;
+		line-clamp: 5;
+	}
+
+	.note-preview :global(ul) {
+		list-style: disc;
+		padding-left: 1.25rem;
+	}
+</style>

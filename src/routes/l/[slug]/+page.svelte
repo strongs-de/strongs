@@ -33,7 +33,7 @@
 				</a>
 
 				{#if item.segments}
-					<p class="font-serif leading-relaxed">
+					<p class="scripture-sized font-serif leading-relaxed">
 						<VerseText segments={item.segments} />
 					</p>
 				{/if}

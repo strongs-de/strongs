@@ -138,6 +138,26 @@ describe('OSIS', () => {
 
 		expect(text(verses[0])).toBe('Im Anfang schuf Gott.');
 	});
+
+	it('recovers footnotes flattened at the end of older OSIS verses', async () => {
+		const { verses } = await drain(
+			parseOsis(`<osis><osisText osisIDWork="X" xml:lang="de"><div type="book" osisID="Rom">
+				<chapter osisID="Rom.6">
+					<verse osisID="Rom.6.11">Leben in Christus.   (1) V. 4 8</verse>
+					<verse osisID="Rom.6.12">Die Sünde herrsche nicht.   (a) 1Mo 4:7</verse>
+					<verse osisID="Rom.6.13">Gebt euch Gott hin.   (1) V. 19 (a) Rö 12:1; Eph 2:5</verse>
+				</chapter></div></osisText></osis>`)
+		);
+
+		expect(text(verses[0])).toBe('Leben in Christus.');
+		expect(verses[0]?.segments).toContainEqual({ kind: 'note', marker: '1', text: 'V. 4 8' });
+		expect(verses[1]?.segments).toContainEqual({ kind: 'note', marker: 'a', text: '1Mo 4:7' });
+		expect(verses[2]?.segments).toEqual([
+			'Gebt euch Gott hin.',
+			{ kind: 'note', marker: '1', text: 'V. 19' },
+			{ kind: 'note', marker: 'a', text: 'Rö 12:1; Eph 2:5' }
+		]);
+	});
 });
 
 describe('parseOsisId', () => {

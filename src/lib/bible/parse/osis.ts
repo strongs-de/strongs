@@ -65,7 +65,7 @@ export async function* parseOsis(input: SourceInput): ParseStream {
 		current = undefined;
 
 		milestoneVerse = false;
-		const finalized = finalizeSegments(tidySegmentSpacing(segments));
+		const finalized = finalizeSegments(tidySegmentSpacing(extractTrailingApparatus(segments)));
 		segments = [];
 		versesSeen += 1;
 
@@ -286,6 +286,49 @@ export async function* parseOsis(input: SourceInput): ParseStream {
 	if (trailing) yield trailing;
 	if (!metadataEmitted) yield emitMetadata();
 	yield { type: 'progress', done: versesSeen, total: versesSeen };
+}
+
+/**
+ * Recovers footnotes from older OSIS exports that flattened their apparatus into the verse text.
+ *
+ * Those files end a verse with two or more spaces followed by `(1) explanation` or `(a) reference`;
+ * real OSIS `<note>` elements are already handled at their exact position above. The flattening has
+ * lost the original word anchor, so these recovered notes are attached at the end of the verse—the
+ * only position the source still identifies—rather than displayed as if they were scripture.
+ */
+function extractTrailingApparatus(source: VerseSegment[]): VerseSegment[] {
+	const segments = [...source];
+	let lastTextIndex = -1;
+	for (let index = segments.length - 1; index >= 0; index -= 1) {
+		if (typeof segments[index] === 'string') {
+			lastTextIndex = index;
+			break;
+		}
+	}
+	if (lastTextIndex === -1) return segments;
+
+	const value = segments[lastTextIndex];
+	if (typeof value !== 'string') return segments;
+
+	const boundary = /^(.*?)\s{2,}(\([A-Za-z0-9]+\)\s*[\s\S]+)$/.exec(value);
+	if (!boundary) return segments;
+
+	const scripture = boundary[1]?.replace(/\s+$/, '') ?? '';
+	const apparatus = boundary[2] ?? '';
+	const notes: VerseSegment[] = [];
+	const notePattern = /\(([A-Za-z0-9]+)\)\s*([\s\S]*?)(?=\s+\([A-Za-z0-9]+\)\s*|$)/g;
+
+	for (const match of apparatus.matchAll(notePattern)) {
+		const marker = match[1] ?? '';
+		const text = (match[2] ?? '').replace(/\s+/g, ' ').trim();
+		if (text) notes.push({ kind: 'note', marker, text });
+	}
+	if (notes.length === 0) return segments;
+
+	if (scripture) segments[lastTextIndex] = scripture;
+	else segments.splice(lastTextIndex, 1);
+	segments.push(...notes);
+	return segments;
 }
 
 /**

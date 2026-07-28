@@ -45,6 +45,12 @@ export const de = {
 	'reader.copyright': 'Rechte',
 	'reader.verseMissing': 'Dieser Vers fehlt in dieser Übersetzung.',
 	'reader.chapterEmpty': 'Für dieses Kapitel liegt in dieser Übersetzung kein Text vor.',
+	'reader.notesColumn': 'Kapitelnotizen',
+	'reader.showNotes': 'Notizspalte einblenden',
+	'reader.hideNotes': 'Notizspalte ausblenden',
+	'reader.dragColumn': 'Spalte verschieben',
+	'reader.fontSmaller': 'Bibeltext verkleinern',
+	'reader.fontLarger': 'Bibeltext vergrößern',
 
 	// --- verse menu ---------------------------------------------------------
 	'verse.menu': 'Vers {reference}',
@@ -52,6 +58,7 @@ export const de = {
 	'verse.copyText': 'Vers kopieren',
 	'verse.copyLink': 'Link kopieren',
 	'verse.signInToSave': 'Zum Speichern anmelden',
+	'verse.footnote': 'Hinweis {marker} öffnen',
 
 	// --- study sidebar ------------------------------------------------------
 	'strong.title': 'Strong-Nummer {id}',
@@ -83,6 +90,9 @@ export const de = {
 	'search.didYouMean': 'Meintest du „{suggestion}“?',
 	'search.page': 'Seite {page} von {pages}',
 	'search.inTranslation': '{count} in {translation}',
+	'statistics.byBook': 'Verteilung nach Büchern',
+	'statistics.filterBook': 'Nur Ergebnisse aus {book} anzeigen',
+	'statistics.clearFilter': 'Buchfilter aufheben',
 	'search.hint.phrase':
 		'Setze mehrere Wörter in Anführungszeichen, um genau diese Folge zu suchen.',
 	'search.hint.strong':
@@ -103,6 +113,11 @@ export const de = {
 	'account.appearance': 'Darstellung',
 	'account.appearanceHint': 'Wird auf diesem Gerät gespeichert.',
 	'account.theme': 'Zwischen hellem und dunklem Design wechseln',
+	'account.readerFontSize': 'Textgröße im Bibeltext',
+	'account.readerFontPreview': 'Im Anfang schuf Gott Himmel und Erde.',
+	'account.readerTranslations': 'Gespeicherte Übersetzungen',
+	'account.readerTranslationsHint':
+		'Auswahl und Reihenfolge werden beim Ändern im Bibelleser automatisch in deinem Konto gespeichert.',
 	'account.saved': 'Gespeichert.',
 	'account.emailHint': 'Die E-Mail-Adresse kann nicht geändert werden.',
 	'auth.login.title': 'Anmelden',
@@ -122,7 +137,7 @@ export const de = {
 	'auth.logout.submit': 'Abmelden',
 
 	// --- verse lists --------------------------------------------------------
-	'lists.title': 'Verslisten',
+	'lists.title': 'Verslisten & Notizen',
 	'lists.new': 'Neue Versliste',
 	'lists.defaultTitle': 'Neue Versliste',
 	'lists.rename': 'Umbenennen',
@@ -131,10 +146,15 @@ export const de = {
 	'lists.empty': 'Diese Versliste ist noch leer.',
 	'lists.note': 'Notiz',
 	'lists.notePlaceholder': 'Deine Gedanken zu diesem Vers …',
+	'lists.chapterNotePlaceholder': 'Deine Gedanken zu diesem Kapitel …',
 	'lists.share': 'Teilen',
 	'lists.shareOn': 'Diese Liste ist über einen Link öffentlich abrufbar.',
 	'lists.shareOff': 'Diese Liste ist privat.',
-	'lists.subtitle': 'Verse sammeln, ordnen und mit Notizen versehen.',
+	'lists.subtitle': 'Verse sammeln und alle Kapitel- und Versnotizen an einem Ort wiederfinden.',
+	'lists.notesTitle': 'Alle Notizen',
+	'lists.notesEmpty': 'Du hast noch keine Notizen geschrieben.',
+	'lists.chapterNote': 'Kapitelnotiz',
+	'lists.verseNote': 'Versnotiz in „{list}“',
 	'lists.count': '{count} Verse',
 	'lists.countOne': 'Ein Vers',
 	'lists.countNone': 'Noch keine Verse',

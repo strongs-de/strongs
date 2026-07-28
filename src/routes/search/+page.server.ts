@@ -1,8 +1,9 @@
 import { redirect } from '@sveltejs/kit';
 import { parseReference, referencePath } from '$lib/bible/reference';
 import { normalizeStrongId } from '$lib/bible/strong';
+import { isValidBookId } from '$lib/bible/books';
 import { getDb } from '$lib/server/db';
-import { readColumns } from '$lib/server/columns';
+import { resolveColumns } from '$lib/server/columns';
 import { listBibles } from '$lib/server/repositories/resources';
 import { search } from '$lib/server/repositories/search';
 
@@ -13,9 +14,11 @@ import { search } from '$lib/server/repositories/search';
  * so pasting "Joh 3,16" into the search box lands on the chapter — the behaviour of the old catch-all
  * view, now in one place.
  */
-export async function load({ url, cookies, setHeaders }) {
+export async function load({ url, cookies, setHeaders, locals }) {
 	const query = (url.searchParams.get('q') ?? '').trim();
 	const page = Number.parseInt(url.searchParams.get('page') ?? '1', 10) || 1;
+	const requestedBook = Number.parseInt(url.searchParams.get('book') ?? '', 10);
+	const book = isValidBookId(requestedBook) ? requestedBook : undefined;
 
 	if (!query) {
 		return { query: '', results: null, columns: [] };
@@ -29,15 +32,16 @@ export async function load({ url, cookies, setHeaders }) {
 
 	const db = getDb();
 	const bibles = await listBibles(db);
-	const columnIds = readColumns(cookies, bibles);
+	const columnIds = resolveColumns(cookies, bibles, locals.user?.readerColumns);
 	const byId = new Map(bibles.map((bible) => [bible.id, bible]));
 
-	const results = await search(db, query, { resourceIds: columnIds, page });
+	const results = await search(db, query, { resourceIds: columnIds, page, book });
 
 	setHeaders({ 'cache-control': 'public, max-age=0, s-maxage=600' });
 
 	return {
 		query,
+		book: book ?? null,
 		results,
 		title: query,
 		columns: columnIds.flatMap((id) => {

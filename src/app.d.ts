@@ -15,7 +15,10 @@ declare global {
 
 		interface Locals {
 			/** Set by the auth hook when the request carries a valid session cookie. */
-			user: Pick<User, 'id' | 'email' | 'displayName' | 'role'> | null;
+			user: Pick<
+				User,
+				'id' | 'email' | 'displayName' | 'role' | 'readerColumns' | 'readerFontScale'
+			> | null;
 			/** Session id, needed to renew or revoke the session. */
 			sessionId: string | null;
 		}

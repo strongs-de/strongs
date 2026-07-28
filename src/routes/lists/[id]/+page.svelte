@@ -80,7 +80,10 @@
 	{:else}
 		<ol class="space-y-4">
 			{#each data.items as item (item.id)}
-				<li class="rounded-xl border border-stone-200 p-4 dark:border-stone-800">
+				<li
+					id="note-{item.id}"
+					class="rounded-xl border border-stone-200 p-4 dark:border-stone-800"
+				>
 					<div class="mb-2 flex items-baseline justify-between gap-3">
 						<a
 							class="text-sm font-semibold text-accent-600 hover:underline dark:text-accent-400"
@@ -107,7 +110,7 @@
 					</div>
 
 					{#if item.segments}
-						<p class="mb-3 font-serif leading-relaxed">
+						<p class="scripture-sized mb-3 font-serif leading-relaxed">
 							<VerseText segments={item.segments} />
 						</p>
 					{/if}

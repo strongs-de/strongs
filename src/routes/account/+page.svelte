@@ -106,6 +106,63 @@
 			<ThemeToggle />
 			<span class="text-sm text-stone-600 dark:text-stone-300">{t('account.theme')}</span>
 		</div>
+
+		<div class="mt-5 border-t border-stone-200 pt-5 dark:border-stone-800">
+			<div class="flex items-baseline justify-between gap-3">
+				<p class="text-sm font-medium">{t('account.readerFontSize')}</p>
+				<span class="text-sm text-stone-500 tabular-nums dark:text-stone-400">
+					{data.readerFontScale} %
+				</span>
+			</div>
+			<div class="mt-2 flex items-center gap-2">
+				<form method="POST" action="?/reader">
+					<input type="hidden" name="fontScale" value={data.readerFontScale - 5} />
+					<Button
+						type="submit"
+						disabled={data.readerFontScale <= 85}
+						ariaLabel={t('reader.fontSmaller')}>A−</Button
+					>
+				</form>
+				<form method="POST" action="?/reader">
+					<input type="hidden" name="fontScale" value={data.readerFontScale + 5} />
+					<Button
+						type="submit"
+						disabled={data.readerFontScale >= 140}
+						ariaLabel={t('reader.fontLarger')}>A+</Button
+					>
+				</form>
+				{#if form?.readerSaved}
+					<span class="text-sm text-stone-500 dark:text-stone-400">{t('account.saved')}</span>
+				{/if}
+			</div>
+			<p
+				class="mt-3 rounded-md border border-stone-200 bg-stone-50 px-3 py-2 font-serif
+				       leading-relaxed dark:border-stone-800 dark:bg-stone-950"
+				style="font-size: calc(1rem * {data.readerFontScale / 100})"
+			>
+				{t('account.readerFontPreview')}
+			</p>
+		</div>
+
+		<div class="mt-5 border-t border-stone-200 pt-5 dark:border-stone-800">
+			<p class="text-sm font-medium">{t('account.readerTranslations')}</p>
+			<p class="mt-1 text-xs text-stone-500 dark:text-stone-400">
+				{t('account.readerTranslationsHint')}
+			</p>
+			<ul class="mt-2 flex flex-wrap gap-1.5">
+				{#each data.columns as columnId (columnId)}
+					{@const resource = data.bibles.find((bible) => bible.id === columnId)}
+					{#if resource}
+						<li
+							class="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1 text-xs
+							       dark:border-stone-700 dark:bg-stone-800"
+						>
+							{resource.abbrev}
+						</li>
+					{/if}
+				{/each}
+			</ul>
+		</div>
 	</Card>
 
 	<form method="POST" action="/logout" class="flex justify-end">

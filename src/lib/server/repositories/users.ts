@@ -8,6 +8,7 @@ import { config } from '../config.ts';
 import type { Database } from '../db/client.ts';
 import { passwordResets, users, type User } from '../db/schema.ts';
 import { hashPassword } from '../auth/password.ts';
+import { normalizeFontScale } from '../reader-preferences.ts';
 
 export function normalizeEmail(email: string): string {
 	return email.trim().toLowerCase();
@@ -80,6 +81,30 @@ export async function updateProfile(
 		.update(users)
 		.set({ displayName: displayName?.trim() || null, updatedAt: new Date() })
 		.where(eq(users.id, userId));
+}
+
+export async function updateReaderColumns(
+	db: Database,
+	userId: string,
+	columns: string[]
+): Promise<void> {
+	await db
+		.update(users)
+		.set({ readerColumns: columns.slice(0, 5), updatedAt: new Date() })
+		.where(eq(users.id, userId));
+}
+
+export async function updateReaderFontScale(
+	db: Database,
+	userId: string,
+	scale: number
+): Promise<number> {
+	const normalized = normalizeFontScale(scale);
+	await db
+		.update(users)
+		.set({ readerFontScale: normalized, updatedAt: new Date() })
+		.where(eq(users.id, userId));
+	return normalized;
 }
 
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;

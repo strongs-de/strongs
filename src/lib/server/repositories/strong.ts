@@ -45,6 +45,11 @@ export type StrongStatistics = {
 	verseCount: number;
 };
 
+export type StrongBookCount = {
+	book: number;
+	count: number;
+};
+
 /** The dictionary entry, from whichever lexicon covers the number. */
 export async function loadStrongEntry(
 	db: Database,
@@ -90,6 +95,23 @@ export async function loadStrongStatistics(
 	};
 }
 
+/** How often a Strong-tagged word occurs in each biblical book. */
+export async function loadStrongBookCounts(
+	db: Database,
+	strong: StrongId,
+	resourceId: string
+): Promise<StrongBookCount[]> {
+	const rows = await db.execute<{ book_id: number; count: number }>(sql`
+		select book_id, count(*)::int as count
+		from ${verseWords}
+		where resource_id = ${resourceId} and strong = ${strong}
+		group by book_id
+		order by book_id
+	`);
+
+	return rows.map((row) => ({ book: row.book_id, count: Number(row.count) }));
+}
+
 /**
  * How a translation renders the word, most frequent first — the "Übersetzt als" table.
  */
@@ -128,16 +150,18 @@ export async function loadStrongOccurrences(
 	db: Database,
 	strong: StrongId,
 	resourceId: string,
-	options: { page?: number; pageSize?: number } = {}
+	options: { page?: number; pageSize?: number; book?: number } = {}
 ): Promise<OccurrencePage> {
 	const pageSize = options.pageSize ?? 25;
 	const page = Math.max(1, options.page ?? 1);
 	const offset = (page - 1) * pageSize;
+	const bookCondition = options.book ? sql`and book_id = ${options.book}` : sql``;
 
 	const [{ count } = { count: 0 }] = await db.execute<{ count: number }>(sql`
 		select count(distinct ${verseWords.verseId})::int as count
 		from ${verseWords}
 		where ${verseWords.resourceId} = ${resourceId} and ${verseWords.strong} = ${strong}
+		${bookCondition}
 	`);
 
 	const rows = await db.execute<{
@@ -153,6 +177,7 @@ export async function loadStrongOccurrences(
 			select distinct on (verse_id) verse_id, morph, lemma
 			from ${verseWords}
 			where resource_id = ${resourceId} and strong = ${strong}
+			${bookCondition}
 			order by verse_id, position
 		) w
 		join ${verses} v on v.id = w.verse_id

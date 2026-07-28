@@ -280,13 +280,23 @@ export const users = pgTable(
 		passwordHash: text('password_hash').notNull(),
 		role: text('role', { enum: USER_ROLES }).notNull().default('user'),
 		displayName: text('display_name'),
+		/** Reader translation ids in the user's preferred order; empty adopts the current device. */
+		readerColumns: text('reader_columns')
+			.array()
+			.notNull()
+			.default(sql`'{}'::text[]`),
+		/** Scripture font size as an integer percentage. */
+		readerFontScale: integer('reader_font_scale').notNull().default(100),
 		emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
 		lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
 		/** Set instead of deleting, so verse lists and notes survive a lockout. */
 		disabledAt: timestamp('disabled_at', { withTimezone: true }),
 		...timestamps
 	},
-	(table) => [uniqueIndex('users_email_idx').on(table.email)]
+	(table) => [
+		uniqueIndex('users_email_idx').on(table.email),
+		check('users_reader_font_scale_check', sql`${table.readerFontScale} between 85 and 140`)
+	]
 );
 
 export const sessions = pgTable(
@@ -381,6 +391,27 @@ export const verseListItems = pgTable(
 	]
 );
 
+/** A private rich-text note attached to a whole chapter, shown as an optional reader column. */
+export const chapterNotes = pgTable(
+	'chapter_notes',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		userId: uuid('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		bookId: integer('book_id').notNull(),
+		chapter: integer('chapter').notNull(),
+		noteHtml: text('note_html'),
+		...timestamps
+	},
+	(table) => [
+		uniqueIndex('chapter_notes_reference_idx').on(table.userId, table.bookId, table.chapter),
+		index('chapter_notes_user_idx').on(table.userId, table.updatedAt),
+		check('chapter_notes_book_id_check', sql`${table.bookId} between 1 and 66`),
+		check('chapter_notes_chapter_check', sql`${table.chapter} between 1 and 200`)
+	]
+);
+
 // --- operations -------------------------------------------------------------
 
 export const IMPORT_STATES = ['queued', 'running', 'done', 'failed', 'cancelled'] as const;
@@ -432,4 +463,5 @@ export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type VerseList = typeof verseLists.$inferSelect;
 export type VerseListItem = typeof verseListItems.$inferSelect;
+export type ChapterNote = typeof chapterNotes.$inferSelect;
 export type ImportJob = typeof importJobs.$inferSelect;

@@ -9,6 +9,9 @@ import {
 	recordFailedLogin
 } from '$lib/server/auth/rate-limit';
 import { findUserByEmail, recordLogin } from '$lib/server/repositories/users';
+import { updateReaderColumns } from '$lib/server/repositories/users';
+import { listBibles } from '$lib/server/repositories/resources';
+import { readColumns } from '$lib/server/columns';
 
 export async function load({ locals, url }) {
 	if (locals.user) redirect(303, url.searchParams.get('redirectTo') ?? '/account');
@@ -46,6 +49,9 @@ export const actions = {
 
 		await clearFailedLogins(db, email, address);
 		await pruneLoginAttempts(db);
+		if (user.readerColumns.length === 0) {
+			await updateReaderColumns(db, user.id, readColumns(cookies, await listBibles(db)));
+		}
 		await createSession(db, cookies, user.id, request.headers.get('user-agent') ?? undefined);
 		await recordLogin(db, user.id);
 

@@ -6,8 +6,14 @@ import {
 	verifyPassword
 } from '$lib/server/auth/password';
 import { destroyAllSessions, createSession } from '$lib/server/auth/session';
-import { findUserByEmail, updatePassword, updateProfile } from '$lib/server/repositories/users';
+import {
+	findUserByEmail,
+	updatePassword,
+	updateProfile,
+	updateReaderFontScale
+} from '$lib/server/repositories/users';
 import { listVerseLists } from '$lib/server/repositories/verse-lists';
+import { writeFontScale } from '$lib/server/reader-preferences';
 
 export async function load({ locals }) {
 	if (!locals.user) redirect(303, '/login?redirectTo=%2Faccount');
@@ -17,6 +23,7 @@ export async function load({ locals }) {
 
 	return {
 		listCount: lists.length,
+		readerFontScale: locals.user.readerFontScale,
 		minPasswordLength: MIN_PASSWORD_LENGTH
 	};
 }
@@ -27,6 +34,16 @@ export const actions = {
 		const form = await request.formData();
 		await updateProfile(getDb(), locals.user.id, String(form.get('displayName') ?? ''));
 		return { saved: true };
+	},
+
+	reader: async ({ request, locals, cookies }) => {
+		if (!locals.user) redirect(303, '/login');
+		const form = await request.formData();
+		const scale = Number(form.get('fontScale'));
+		if (!Number.isFinite(scale)) return fail(400, { readerError: true });
+		const savedScale = await updateReaderFontScale(getDb(), locals.user.id, scale);
+		writeFontScale(cookies, savedScale);
+		return { readerSaved: true };
 	},
 
 	password: async ({ request, locals, cookies }) => {

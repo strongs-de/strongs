@@ -3,6 +3,7 @@
 	// Imported for the recursive case (words of Jesus can contain tagged words). Svelte 5 prefers a
 	// self-import over <svelte:self>.
 	import VerseText from './VerseText.svelte';
+	import Footnote from './Footnote.svelte';
 
 	/**
 	 * Renders a verse from its stored segments.
@@ -33,11 +34,11 @@
 			data-strong={segment.strong}
 			title={segment.morph ?? undefined}
 			onclick={() => onStrongClick?.(segment.strong, segment.text)}>{segment.text}</button
-		>{:else if segment.kind === 'em'}<em>{segment.text}</em>{:else if segment.kind === 'note'}<span
-			class="note"
-			title={segment.text}
-			aria-label={segment.text}>{segment.marker || '*'}</span
-		>{:else if segment.kind === 'br'}<br />{:else if segment.kind === 'wj'}<span
+		>{:else if segment.kind === 'em'}<em>{segment.text}</em
+		>{:else if segment.kind === 'note'}<Footnote
+			marker={segment.marker}
+			text={segment.text}
+		/>{:else if segment.kind === 'br'}<br />{:else if segment.kind === 'wj'}<span
 			class="words-of-jesus"
 			><VerseText
 				segments={segment.children as VerseSegment[]}
@@ -72,13 +73,6 @@
 	.strong.active {
 		background-color: color-mix(in oklab, var(--color-accent-500) 22%, transparent);
 		border-radius: 0.2rem;
-	}
-
-	.note {
-		vertical-align: super;
-		font-size: 0.7em;
-		cursor: help;
-		color: var(--color-accent-600);
 	}
 
 	.words-of-jesus {

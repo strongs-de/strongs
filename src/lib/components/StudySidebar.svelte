@@ -3,6 +3,7 @@
 	import { bookShortName } from '$lib/bible/book-names';
 	import { formatNumber, t } from '$lib/i18n';
 	import MorphologyList from './MorphologyList.svelte';
+	import BookDistribution from './BookDistribution.svelte';
 
 	/**
 	 * The study panel: dictionary entry, morphology, how the word is rendered, and every place it
@@ -41,6 +42,7 @@
 		} | null;
 		alternative: string | null;
 		statistics: { occurrences: number; verseCount: number };
+		bookCounts: { book: number; count: number }[];
 		glosses: { display: string; occurrences: number }[];
 		occurrences: {
 			occurrences: { book: number; chapter: number; verse: number; morph: string | null }[];
@@ -107,8 +109,8 @@
 	class="panel fixed inset-x-0 bottom-0 z-40 flex max-h-[70dvh] flex-col rounded-t-xl border
 	       border-stone-200 bg-white shadow-2xl sm:sticky sm:inset-x-auto sm:top-[var(--header-height)]
 	       sm:bottom-auto sm:z-10 sm:h-[calc(100dvh-var(--header-height))]
-	       sm:max-h-none sm:w-80 sm:shrink-0 sm:self-start sm:rounded-none sm:border-0 sm:border-l
-	       sm:shadow-[-8px_0_24px_rgb(28_25_23/0.04)] lg:w-96 dark:border-stone-800 dark:bg-stone-900"
+	       sm:max-h-none sm:w-[28rem] sm:shrink-0 sm:self-start sm:rounded-none sm:border-0 sm:border-l
+	       sm:shadow-[-8px_0_24px_rgb(28_25_23/0.04)] lg:w-[32rem] dark:border-stone-800 dark:bg-stone-900"
 	aria-label={t('sidebar.tab.strong')}
 >
 	<header
@@ -244,6 +246,13 @@
 								verses: formatNumber(payload.statistics.verseCount)
 							})}
 						</p>
+						<div class="mb-3">
+							<BookDistribution
+								counts={payload.bookCounts}
+								hrefForBook={(book) => `/${strong}?book=${book}`}
+								compact
+							/>
+						</div>
 						<ul class="flex flex-wrap gap-1">
 							{#each payload.occurrences.occurrences as occurrence (`${occurrence.book}-${occurrence.chapter}-${occurrence.verse}`)}
 								<li>

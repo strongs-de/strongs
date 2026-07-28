@@ -2,12 +2,17 @@
 	import { formatReference, referencePath } from '$lib/bible/reference';
 	import { formatNumber, t } from '$lib/i18n';
 	import HighlightedVerse from '$lib/components/HighlightedVerse.svelte';
+	import BookDistribution from '$lib/components/BookDistribution.svelte';
 
 	let { data } = $props();
 
 	const countByResource = $derived(
 		new Map((data.results?.counts ?? []).map((count) => [count.resourceId, count.count]))
 	);
+
+	function bookFilterHref(book: number): string {
+		return `/search?q=${encodeURIComponent(data.query)}&book=${book}`;
+	}
 </script>
 
 <svelte:head>
@@ -54,6 +59,20 @@
 			</p>
 		</header>
 
+		<BookDistribution
+			counts={data.results.bookCounts}
+			hrefForBook={bookFilterHref}
+			activeBook={data.book}
+		/>
+		{#if data.book}
+			<a
+				class="-mt-2 mb-4 inline-block text-xs text-accent-600 hover:underline dark:text-accent-400"
+				href="/search?q={encodeURIComponent(data.query)}"
+			>
+				{t('statistics.clearFilter')}
+			</a>
+		{/if}
+
 		<ol class="space-y-4">
 			{#each data.results.hits as hit (`${hit.book}-${hit.chapter}-${hit.verse}`)}
 				<li class="rounded-lg border border-stone-200 p-3 dark:border-stone-800">
@@ -85,7 +104,7 @@
 										{data.columns[index]?.abbrev}
 									</p>
 									<p
-										class="font-serif leading-relaxed"
+										class="scripture-sized font-serif leading-relaxed"
 										lang={data.columns[index]?.language}
 										dir={data.columns[index]?.direction}
 									>
@@ -107,7 +126,9 @@
 				{#if data.results.page > 1}
 					<a
 						class="rounded border border-stone-300 px-3 py-1 hover:border-accent-500 dark:border-stone-700"
-						href="/search?q={encodeURIComponent(data.query)}&page={data.results.page - 1}"
+						href="/search?q={encodeURIComponent(data.query)}&page={data.results.page - 1}{data.book
+							? `&book=${data.book}`
+							: ''}"
 						rel="prev">←</a
 					>
 				{/if}
@@ -117,7 +138,9 @@
 				{#if data.results.page < data.results.pageCount}
 					<a
 						class="rounded border border-stone-300 px-3 py-1 hover:border-accent-500 dark:border-stone-700"
-						href="/search?q={encodeURIComponent(data.query)}&page={data.results.page + 1}"
+						href="/search?q={encodeURIComponent(data.query)}&page={data.results.page + 1}{data.book
+							? `&book=${data.book}`
+							: ''}"
 						rel="next">→</a
 					>
 				{/if}

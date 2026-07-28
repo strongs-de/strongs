@@ -5,6 +5,7 @@ import { parseReference } from '$lib/bible/reference';
 import { getDb } from '$lib/server/db';
 import {
 	loadOriginalWord,
+	loadStrongBookCounts,
 	loadStrongEntry,
 	loadStrongGlosses,
 	loadStrongOccurrences,
@@ -34,11 +35,12 @@ export async function GET({ params, url, setHeaders }) {
 	const reference = parseReference(url.searchParams.get('ref') ?? '');
 	const page = Number(url.searchParams.get('page') ?? '1') || 1;
 
-	const [entry, statistics, glosses, occurrences, original] = await Promise.all([
+	const [entry, statistics, bookCounts, glosses, occurrences, original] = await Promise.all([
 		loadStrongEntry(db, strong),
 		statisticsResource
 			? loadStrongStatistics(db, strong, statisticsResource)
 			: Promise.resolve({ occurrences: 0, verseCount: 0 }),
+		statisticsResource ? loadStrongBookCounts(db, strong, statisticsResource) : Promise.resolve([]),
 		statisticsResource ? loadStrongGlosses(db, strong, statisticsResource) : Promise.resolve([]),
 		statisticsResource
 			? loadStrongOccurrences(db, strong, statisticsResource, { page })
@@ -63,6 +65,7 @@ export async function GET({ params, url, setHeaders }) {
 		/** Offered when the number does not exist, as the old error page did. */
 		alternative: entry ? null : otherLanguageId(strong),
 		statistics,
+		bookCounts,
 		glosses,
 		occurrences,
 		original: original ?? null,

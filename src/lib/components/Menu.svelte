@@ -29,6 +29,12 @@
 
 	export function openAt(target: HTMLElement): void {
 		if (!element) return;
+		// The anchor is a toggle: clicking the same button a second time closes its menu. Native
+		// popovers only provide outside-click dismissal, so this small bit is ours.
+		if (open && anchor === target) {
+			close();
+			return;
+		}
 		anchor = target;
 		// Placed off-screen first, so measuring it does not make the page jump.
 		element.style.left = '-9999px';

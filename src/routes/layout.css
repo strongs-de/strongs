@@ -42,17 +42,24 @@
 
 	body {
 		@apply text-stone-900 antialiased dark:text-stone-100;
-		background:
-			radial-gradient(circle at 15% 0%, rgb(93 176 91 / 7%), transparent 28rem), var(--paper);
+		background-color: var(--paper);
+		background-image: radial-gradient(circle at 15% 0%, rgb(93 176 91 / 7%), transparent 28rem);
+		background-repeat: no-repeat;
+		background-attachment: fixed;
 		font-feature-settings: 'kern', 'liga';
 	}
 
 	:where(.dark) body {
-		background: radial-gradient(circle at 15% 0%, rgb(93 176 91 / 9%), transparent 32rem), #171916;
+		background-color: #171916;
+		background-image: radial-gradient(circle at 15% 0%, rgb(93 176 91 / 9%), transparent 32rem);
 	}
 
 	::selection {
 		background-color: color-mix(in oklab, var(--color-accent-400) 28%, transparent);
+	}
+
+	.scripture-sized {
+		font-size: calc(1rem * var(--reader-font-scale, 1));
 	}
 
 	:focus-visible {

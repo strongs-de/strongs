@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { addColumn, defaultColumns, MAX_COLUMNS, removeColumn, setColumn } from './columns.ts';
+import {
+	addColumn,
+	defaultColumns,
+	MAX_COLUMNS,
+	moveColumn,
+	removeColumn,
+	resolveColumns,
+	setColumn
+} from './columns.ts';
 import type { ReadableResource } from './repositories/resources.ts';
 
 /** Just enough of a resource for the column arithmetic, which only ever reads the id. */
@@ -24,6 +32,16 @@ const available = ['A', 'B', 'C', 'D', 'E', 'F'].map(resource);
 describe('reader columns', () => {
 	it('offers the first four translations to a first-time visitor', () => {
 		expect(defaultColumns(available)).toEqual(['A', 'B', 'C', 'D']);
+	});
+
+	it('prefers a valid account selection over the device cookie', () => {
+		const cookies = { get: () => 'A,B,C' } as unknown as Parameters<typeof resolveColumns>[0];
+		expect(resolveColumns(cookies, available, ['E', 'C'])).toEqual(['E', 'C']);
+	});
+
+	it('drops unavailable and duplicate account resources', () => {
+		const cookies = { get: () => 'A,B' } as unknown as Parameters<typeof resolveColumns>[0];
+		expect(resolveColumns(cookies, available, ['missing', 'D', 'D'])).toEqual(['D']);
 	});
 
 	describe('addColumn', () => {
@@ -67,6 +85,18 @@ describe('reader columns', () => {
 
 		it('refuses to leave the reader with nothing to read', () => {
 			expect(removeColumn(['A'], 0)).toEqual(['A']);
+		});
+	});
+
+	describe('moveColumn', () => {
+		it('moves a column in either direction', () => {
+			expect(moveColumn(['A', 'B', 'C', 'D'], 0, 2)).toEqual(['B', 'C', 'A', 'D']);
+			expect(moveColumn(['A', 'B', 'C', 'D'], 3, 1)).toEqual(['A', 'D', 'B', 'C']);
+		});
+
+		it('ignores invalid positions', () => {
+			expect(moveColumn(['A', 'B'], -1, 1)).toEqual(['A', 'B']);
+			expect(moveColumn(['A', 'B'], 0, 3)).toEqual(['A', 'B']);
 		});
 	});
 });

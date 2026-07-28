@@ -12,6 +12,7 @@
 	import StudySidebar from '$lib/components/StudySidebar.svelte';
 	import VerseMenu from '$lib/components/VerseMenu.svelte';
 	import VerseText from '$lib/components/VerseText.svelte';
+	import NoteEditor from '$lib/components/NoteEditor.svelte';
 
 	let { data } = $props();
 
@@ -49,6 +50,38 @@
 		data.bibles.filter((bible) => !data.columns.some((column) => column.resource.id === bible.id))
 	);
 	const canAddColumn = $derived(data.columns.length < data.maxColumns && unusedBibles.length > 0);
+	const visibleColumnCount = $derived(data.columns.length + (data.notesVisible ? 1 : 0));
+	const notesColumnIndex = $derived(data.columns.length);
+
+	let draggedColumn = $state<number | null>(null);
+	let dropColumn = $state<number | null>(null);
+	let reorderForm = $state<HTMLFormElement | undefined>();
+	let reorderFromInput = $state<HTMLInputElement | undefined>();
+	let reorderToInput = $state<HTMLInputElement | undefined>();
+
+	function startColumnDrag(event: DragEvent, index: number) {
+		draggedColumn = index;
+		event.dataTransfer?.setData('text/plain', String(index));
+		if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
+	}
+
+	function dropOnColumn(event: DragEvent, index: number) {
+		event.preventDefault();
+		const from = draggedColumn ?? Number(event.dataTransfer?.getData('text/plain'));
+		draggedColumn = null;
+		dropColumn = null;
+		if (
+			!Number.isInteger(from) ||
+			from === index ||
+			!reorderForm ||
+			!reorderFromInput ||
+			!reorderToInput
+		)
+			return;
+		reorderFromInput.value = String(from);
+		reorderToInput.value = String(index);
+		reorderForm.requestSubmit();
+	}
 
 	/**
 	 * Opens the verse menu, unless the reader meant to use the link.
@@ -174,6 +207,66 @@
 				<p class="hidden text-xs text-stone-500 sm:block dark:text-stone-400">
 					{t('search.hint.strong')}
 				</p>
+				<div
+					class="flex shrink-0 items-center rounded-md border border-stone-200 bg-white/70
+					       dark:border-stone-700 dark:bg-stone-900"
+					aria-label={t('account.readerFontSize')}
+				>
+					<form method="POST" action="?/adjustFontSize" use:enhance>
+						<input type="hidden" name="delta" value="-5" />
+						<button
+							type="submit"
+							disabled={data.readerFontScale <= 85}
+							class="inline-flex h-8 min-w-9 items-center justify-center rounded-l-md px-2
+							       font-serif text-sm font-semibold text-stone-700 hover:bg-stone-100
+							       disabled:cursor-not-allowed disabled:opacity-35 dark:text-stone-100
+							       dark:hover:bg-stone-800"
+							aria-label={t('reader.fontSmaller')}
+							title={t('reader.fontSmaller')}
+						>
+							A−
+						</button>
+					</form>
+					<span
+						class="min-w-11 border-x border-stone-200 px-1 text-center text-[0.65rem]
+						       text-stone-500 tabular-nums dark:border-stone-700 dark:text-stone-400"
+					>
+						{data.readerFontScale}%
+					</span>
+					<form method="POST" action="?/adjustFontSize" use:enhance>
+						<input type="hidden" name="delta" value="5" />
+						<button
+							type="submit"
+							disabled={data.readerFontScale >= 140}
+							class="inline-flex h-8 min-w-9 items-center justify-center rounded-r-md px-2
+							       font-serif text-base font-semibold text-stone-700 hover:bg-stone-100
+							       disabled:cursor-not-allowed disabled:opacity-35 dark:text-stone-100
+							       dark:hover:bg-stone-800"
+							aria-label={t('reader.fontLarger')}
+							title={t('reader.fontLarger')}
+						>
+							A+
+						</button>
+					</form>
+				</div>
+				{#if data.user}
+					<form method="POST" action="?/toggleNotes" use:enhance>
+						<button
+							type="submit"
+							class="inline-flex items-center gap-1.5 rounded-md border border-stone-200 px-2.5 py-1.5
+							       text-xs font-medium text-stone-600 hover:border-accent-400 hover:text-accent-700
+							       dark:border-stone-700 dark:text-stone-300 dark:hover:text-accent-300"
+							aria-pressed={data.notesVisible}
+						>
+							<svg viewBox="0 0 20 20" class="size-4" fill="currentColor" aria-hidden="true">
+								<path
+									d="M4.75 3A1.75 1.75 0 0 0 3 4.75v10.5C3 16.22 3.78 17 4.75 17h10.5c.97 0 1.75-.78 1.75-1.75V4.75C17 3.78 16.22 3 15.25 3H4.75Zm2 3.25a.75.75 0 0 1 .75-.75h5a.75.75 0 0 1 0 1.5h-5a.75.75 0 0 1-.75-.75Zm0 3.75a.75.75 0 0 1 .75-.75h5a.75.75 0 0 1 0 1.5h-5a.75.75 0 0 1-.75-.75Zm.75 3a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
+								/>
+							</svg>
+							{data.notesVisible ? t('reader.hideNotes') : t('reader.showNotes')}
+						</button>
+					</form>
+				{/if}
 			</div>
 
 			<!-- Column headers double as the translation picker. The bar sticks as one piece; a single
@@ -182,19 +275,66 @@
 				class="sticky top-[var(--header-height)] z-10 mb-2 hidden gap-0 overflow-hidden rounded-md border
 				       border-stone-200 bg-stone-50/95 py-1.5 shadow-sm backdrop-blur sm:grid
 				       dark:border-stone-800 dark:bg-stone-950/95"
-				style="grid-template-columns: repeat({data.columns.length}, minmax(0, 1fr))"
+				style="grid-template-columns: repeat({visibleColumnCount}, minmax(0, 1fr))"
 			>
 				{#each data.columns as column (column.resource.id)}
-					<ColumnPicker
-						index={column.index}
-						selected={column.resource}
-						available={data.bibles}
-						chosen={data.columns.map((other) => other.resource.id)}
-						canRemove={data.columns.length > 1}
-						canAdd={canAddColumn && column.index === data.columns.length - 1}
-					/>
+					<div
+						draggable="true"
+						role="group"
+						aria-label="{column.resource.abbrev}: {t('reader.dragColumn')}"
+						class="min-w-0 border-r border-stone-200 last:border-r-0 dark:border-stone-800"
+						class:opacity-40={draggedColumn === column.index}
+						class:ring-2={dropColumn === column.index}
+						class:ring-accent-400={dropColumn === column.index}
+						ondragstart={(event) => startColumnDrag(event, column.index)}
+						ondragover={(event) => {
+							event.preventDefault();
+							dropColumn = column.index;
+						}}
+						ondragleave={() => (dropColumn = null)}
+						ondrop={(event) => dropOnColumn(event, column.index)}
+						ondragend={() => {
+							draggedColumn = null;
+							dropColumn = null;
+						}}
+					>
+						<ColumnPicker
+							index={column.index}
+							selected={column.resource}
+							available={data.bibles}
+							chosen={data.columns.map((other) => other.resource.id)}
+							canRemove={data.columns.length > 1}
+							canAdd={canAddColumn && column.index === data.columns.length - 1}
+						/>
+					</div>
 				{/each}
+				{#if data.notesVisible}
+					<div class="flex min-h-8 items-center justify-between gap-2 px-2">
+						<span class="truncate text-sm font-semibold text-stone-700 dark:text-stone-200">
+							{t('reader.notesColumn')}
+						</span>
+						<form method="POST" action="?/toggleNotes" use:enhance class="flex items-center">
+							<button
+								type="submit"
+								class="inline-flex size-7 items-center justify-center rounded text-stone-400
+								       hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800
+								       dark:hover:text-stone-200"
+								aria-label={t('reader.hideNotes')}
+							>
+								<svg viewBox="0 0 20 20" class="size-4" fill="currentColor" aria-hidden="true">
+									<path
+										d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"
+									/>
+								</svg>
+							</button>
+						</form>
+					</div>
+				{/if}
 			</div>
+			<form bind:this={reorderForm} method="POST" action="?/moveColumn" use:enhance class="hidden">
+				<input bind:this={reorderFromInput} type="hidden" name="from" />
+				<input bind:this={reorderToInput} type="hidden" name="to" />
+			</form>
 
 			<!-- On a phone one column fits; tabs switch between translations. -->
 			<div
@@ -215,6 +355,19 @@
 						{column.resource.abbrev}
 					</button>
 				{/each}
+				{#if data.notesVisible}
+					<button
+						type="button"
+						class="shrink-0 rounded-full px-3 py-1 text-sm"
+						class:bg-accent-600={mobileColumn === notesColumnIndex}
+						class:text-white={mobileColumn === notesColumnIndex}
+						class:bg-stone-100={mobileColumn !== notesColumnIndex}
+						class:dark:bg-stone-800={mobileColumn !== notesColumnIndex}
+						onclick={() => (mobileColumn = notesColumnIndex)}
+					>
+						{t('lists.note')}
+					</button>
+				{/if}
 
 				{#if canAddColumn}
 					<form method="POST" action="?/addColumn" use:enhance>
@@ -260,12 +413,37 @@
 			{:else}
 				<div
 					class="verse-grid"
-					style="--columns: {data.columns.length}"
+					style="--columns: {visibleColumnCount}"
 					data-mobile-column={mobileColumn}
 				>
+					{#if data.notesVisible}
+						<aside
+							class="chapter-note"
+							class:hidden-on-mobile={mobileColumn !== notesColumnIndex}
+							style="grid-column: {notesColumnIndex + 1}; grid-row: 1 / span {Math.max(
+								1,
+								data.chapter.rows.length * 2 + 1
+							)}"
+						>
+							<h2 class="mb-2 text-xs font-semibold tracking-wide text-stone-500 uppercase">
+								{t('reader.notesColumn')}
+							</h2>
+							<NoteEditor
+								action="?/saveChapterNote"
+								reference="{data.shortBookName}{data.reference.chapter}"
+								html={data.chapterNote}
+								placeholder={t('lists.chapterNotePlaceholder')}
+							/>
+						</aside>
+					{/if}
+
 					{#each data.chapter.rows as row, rowIndex (row.verse)}
 						{#if headings.has(row.verse)}
-							<h2 class="heading" style="grid-row: {rowIndex * 2 + 1}">
+							<h2
+								class="heading"
+								class:hidden-on-mobile={mobileColumn === notesColumnIndex}
+								style="grid-column: 1 / span {data.columns.length}; grid-row: {rowIndex * 2 + 1}"
+							>
 								{headings.get(row.verse)}
 							</h2>
 						{/if}
@@ -324,12 +502,17 @@
 					{/each}
 				</div>
 
-				<!-- Licence notices, one per column that has one. -->
-				<footer class="mt-6 grid gap-4 text-xs text-stone-500 sm:grid-cols-2 dark:text-stone-400">
+				<!-- Licence notices stay in the same columns as their respective translations. -->
+				<footer
+					class="license-grid mt-6 grid text-xs text-stone-500 dark:text-stone-400"
+					style="--columns: {visibleColumnCount}"
+				>
 					{#each data.columns as column (column.resource.id)}
-						{#if column.resource.licenseHtml}
-							<p><strong>{column.resource.abbrev}:</strong> {column.resource.licenseHtml}</p>
-						{/if}
+						<div class:hidden-on-mobile={column.index !== mobileColumn}>
+							{#if column.resource.licenseHtml}
+								<p><strong>{column.resource.abbrev}:</strong> {column.resource.licenseHtml}</p>
+							{/if}
+						</div>
 					{/each}
 				</footer>
 			{/if}
@@ -365,9 +548,17 @@
 		background: rgb(28 25 23 / 0.28);
 	}
 
+	.license-grid {
+		grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+	}
+
 	/* One column on a phone: the inactive ones are hidden and every cell moves to column 1. */
 	@media (max-width: 639px) {
 		.verse-grid {
+			grid-template-columns: minmax(0, 1fr);
+		}
+
+		.license-grid {
 			grid-template-columns: minmax(0, 1fr);
 		}
 
@@ -381,7 +572,6 @@
 	}
 
 	.heading {
-		grid-column: 1 / -1;
 		margin: 1.5rem 0 0.25rem;
 		padding: 0 0.75rem;
 		font-size: 0.95rem;
@@ -389,15 +579,40 @@
 		color: var(--color-stone-500);
 	}
 
+	.chapter-note {
+		position: sticky;
+		top: calc(var(--header-height) + 3.75rem);
+		align-self: start;
+		min-width: 0;
+		margin: 0;
+		padding: 0.8rem;
+		border-left: 1px solid color-mix(in oklab, var(--color-stone-300) 55%, transparent);
+		font-family: var(--font-sans);
+	}
+
+	:global(.dark) .chapter-note {
+		border-left-color: color-mix(in oklab, var(--color-stone-700) 65%, transparent);
+	}
+
+	@media (max-width: 639px) {
+		.chapter-note {
+			position: static;
+			grid-column: 1 !important;
+			grid-row: 1 !important;
+			border-left: 0;
+		}
+	}
+
 	:global(.dark) .heading {
 		color: var(--color-stone-400);
 	}
 
 	.verse {
+		align-self: stretch;
 		margin: 0;
 		padding: 0.48rem 0.8rem;
 		font-family: var(--font-serif);
-		font-size: 1.035rem;
+		font-size: calc(1.035rem * var(--reader-font-scale, 1));
 		line-height: 1.72;
 		border-left: 1px solid color-mix(in oklab, var(--color-stone-300) 55%, transparent);
 		hyphens: auto;

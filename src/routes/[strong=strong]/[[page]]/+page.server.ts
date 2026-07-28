@@ -1,9 +1,11 @@
 import { error, redirect } from '@sveltejs/kit';
+import { isValidBookId } from '$lib/bible/books';
 import { normalizeStrongId, otherLanguageId } from '$lib/bible/strong';
 import { getDb } from '$lib/server/db';
 import { listBibles } from '$lib/server/repositories/resources';
 import {
 	loadStrongEntry,
+	loadStrongBookCounts,
 	loadStrongGlosses,
 	loadStrongOccurrences,
 	loadStrongStatistics,
@@ -17,7 +19,7 @@ import {
  * keep working. Unlike the sidebar this is server-rendered, because it is a page people link to and
  * search engines index.
  */
-export async function load({ params, setHeaders }) {
+export async function load({ params, setHeaders, url }) {
 	const strong = normalizeStrongId(params.strong);
 	if (!strong) error(404, 'Unbekannte Strong-Nummer');
 
@@ -28,6 +30,8 @@ export async function load({ params, setHeaders }) {
 
 	const page = params.page ? Number.parseInt(params.page, 10) : 1;
 	if (!Number.isInteger(page) || page < 1) error(404, 'Ungültige Seite');
+	const requestedBook = Number.parseInt(url.searchParams.get('book') ?? '', 10);
+	const book = isValidBookId(requestedBook) ? requestedBook : undefined;
 
 	const db = getDb();
 	const bibles = await listBibles(db);
@@ -38,11 +42,12 @@ export async function load({ params, setHeaders }) {
 		error(503, 'Es ist noch keine Übersetzung mit Strong-Nummern importiert.');
 	}
 
-	const [entry, statistics, glosses, occurrences] = await Promise.all([
+	const [entry, statistics, bookCounts, glosses, occurrences] = await Promise.all([
 		loadStrongEntry(db, strong),
 		loadStrongStatistics(db, strong, statisticsResource),
+		loadStrongBookCounts(db, strong, statisticsResource),
 		loadStrongGlosses(db, strong, statisticsResource, 20),
-		loadStrongOccurrences(db, strong, statisticsResource, { page, pageSize: 30 })
+		loadStrongOccurrences(db, strong, statisticsResource, { page, pageSize: 30, book })
 	]);
 
 	if (occurrences.total === 0 && !entry) {
@@ -61,8 +66,10 @@ export async function load({ params, setHeaders }) {
 
 	return {
 		strong,
+		book: book ?? null,
 		entry: entry ?? null,
 		statistics,
+		bookCounts,
 		glosses,
 		occurrences,
 		title: strong,

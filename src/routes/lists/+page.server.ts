@@ -1,6 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import { getDb } from '$lib/server/db';
 import { createVerseList, listVerseLists } from '$lib/server/repositories/verse-lists';
+import { listUserNotes } from '$lib/server/repositories/chapter-notes';
 
 /**
  * The reader's own verse lists.
@@ -12,7 +13,12 @@ import { createVerseList, listVerseLists } from '$lib/server/repositories/verse-
 export async function load({ locals }) {
 	if (!locals.user) redirect(303, '/login?redirectTo=%2Flists');
 
-	return { lists: await listVerseLists(getDb(), locals.user.id) };
+	const db = getDb();
+	const [lists, notes] = await Promise.all([
+		listVerseLists(db, locals.user.id),
+		listUserNotes(db, locals.user.id)
+	]);
+	return { lists, notes };
 }
 
 export const actions = {

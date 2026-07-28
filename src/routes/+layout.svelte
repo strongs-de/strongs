@@ -22,7 +22,7 @@
 
 <svelte:head><link rel="icon" href="/icon.png" /></svelte:head>
 
-<div class="flex min-h-full flex-col">
+<div class="flex min-h-full flex-col" style="--reader-font-scale: {data.readerFontScale / 100}">
 	<SiteHeader
 		query={(page.data.title as string | undefined) ?? ''}
 		previous={reader?.previous ? referencePath(reader.previous) : null}

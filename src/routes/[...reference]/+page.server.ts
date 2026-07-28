@@ -10,9 +10,25 @@ import {
 } from '$lib/bible/reference';
 import { normalizeStrongId } from '$lib/bible/strong';
 import { getDb } from '$lib/server/db';
-import { addColumn, readColumns, removeColumn, setColumn, writeColumns } from '$lib/server/columns';
+import {
+	addColumn,
+	moveColumn,
+	resolveColumns,
+	removeColumn,
+	setColumn,
+	writeColumns
+} from '$lib/server/columns';
 import { loadChapter } from '$lib/server/repositories/chapter';
+import { loadChapterNote, saveChapterNote } from '$lib/server/repositories/chapter-notes';
 import { bookCoverage, chapterCount, listBibles } from '$lib/server/repositories/resources';
+import { updateReaderColumns } from '$lib/server/repositories/users';
+import { updateReaderFontScale } from '$lib/server/repositories/users';
+import {
+	MAX_FONT_SCALE,
+	MIN_FONT_SCALE,
+	readFontScale,
+	writeFontScale
+} from '$lib/server/reader-preferences';
 import {
 	addVerseToList,
 	createVerseList,
@@ -73,7 +89,7 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 		error(503, 'Es ist noch keine Bibelübersetzung importiert.');
 	}
 
-	const columns = readColumns(cookies, bibles);
+	const columns = resolveColumns(cookies, bibles, locals.user?.readerColumns);
 
 	/**
 	 * Highest chapter the selected translations have for this book; 0 when none of them contains it.
@@ -103,6 +119,11 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 	const marked = locals.user
 		? await markedVersesByList(db, locals.user.id, reference.book, reference.chapter)
 		: [];
+	const notesVisible = cookies.get('chapter-notes-visible') === '1';
+	const chapterNote =
+		locals.user && notesVisible
+			? await loadChapterNote(db, locals.user.id, reference.book, reference.chapter)
+			: null;
 
 	// Public scripture text is the same for everyone; a signed-in reader's page is not.
 	setHeaders({
@@ -137,7 +158,9 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 		},
 		lists: lists.map((list) => ({ id: list.id, title: list.title })),
 		/** Which of this chapter's verses sit in which list, for the verse menu's check marks. */
-		markedVerses: marked
+		markedVerses: marked,
+		notesVisible: locals.user !== null && notesVisible,
+		chapterNote
 	};
 }
 
@@ -146,7 +169,7 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
  * selection is stored where server rendering can see it.
  */
 export const actions = {
-	setColumn: async ({ request, cookies }) => {
+	setColumn: async ({ request, cookies, locals }) => {
 		const form = await request.formData();
 		const index = Number(form.get('index'));
 		const resource = String(form.get('resource') ?? '');
@@ -156,19 +179,24 @@ export const actions = {
 			return { success: false };
 		}
 
-		writeColumns(cookies, setColumn(readColumns(cookies, bibles), index, resource));
+		await commitColumns(
+			cookies,
+			locals.user,
+			setColumn(resolveColumns(cookies, bibles, locals.user?.readerColumns), index, resource)
+		);
 		return { success: true };
 	},
 
-	addColumn: async ({ request, cookies }) => {
+	addColumn: async ({ request, cookies, locals }) => {
 		const form = await request.formData();
 		const resource = form.get('resource');
 
 		const bibles = await listBibles(getDb());
-		writeColumns(
+		await commitColumns(
 			cookies,
+			locals.user,
 			addColumn(
-				readColumns(cookies, bibles),
+				resolveColumns(cookies, bibles, locals.user?.readerColumns),
 				bibles,
 				// Absent when the button was submitted without a choice, which appends the next unused one.
 				resource === null ? undefined : String(resource)
@@ -177,13 +205,69 @@ export const actions = {
 		return { success: true };
 	},
 
-	removeColumn: async ({ request, cookies }) => {
+	removeColumn: async ({ request, cookies, locals }) => {
 		const form = await request.formData();
 		const index = Number(form.get('index'));
 		if (!Number.isInteger(index)) return { success: false };
 
 		const bibles = await listBibles(getDb());
-		writeColumns(cookies, removeColumn(readColumns(cookies, bibles), index));
+		await commitColumns(
+			cookies,
+			locals.user,
+			removeColumn(resolveColumns(cookies, bibles, locals.user?.readerColumns), index)
+		);
+		return { success: true };
+	},
+
+	moveColumn: async ({ request, cookies, locals }) => {
+		const form = await request.formData();
+		const from = Number(form.get('from'));
+		const to = Number(form.get('to'));
+		const bibles = await listBibles(getDb());
+		await commitColumns(
+			cookies,
+			locals.user,
+			moveColumn(resolveColumns(cookies, bibles, locals.user?.readerColumns), from, to)
+		);
+		return { success: true };
+	},
+
+	toggleNotes: async ({ cookies, locals }) => {
+		if (!locals.user) redirect(303, '/login');
+		const visible = cookies.get('chapter-notes-visible') === '1';
+		cookies.set('chapter-notes-visible', visible ? '0' : '1', {
+			path: '/',
+			maxAge: 60 * 60 * 24 * 365,
+			httpOnly: false,
+			sameSite: 'lax'
+		});
+		return { success: true };
+	},
+
+	saveChapterNote: async ({ request, locals }) => {
+		if (!locals.user) redirect(303, '/login');
+		const form = await request.formData();
+		const reference = parseReference(String(form.get('reference') ?? ''));
+		if (!reference) return fail(400, { error: 'reference' });
+		await saveChapterNote(
+			getDb(),
+			locals.user.id,
+			reference.book,
+			reference.chapter,
+			String(form.get('note') ?? '')
+		);
+		return { saved: true };
+	},
+
+	adjustFontSize: async ({ request, cookies, locals }) => {
+		const form = await request.formData();
+		const delta = Number(form.get('delta'));
+		if (delta !== -5 && delta !== 5) return fail(400, { error: 'fontScale' });
+
+		const current = readFontScale(cookies, locals.user?.readerFontScale);
+		const next = Math.min(MAX_FONT_SCALE, Math.max(MIN_FONT_SCALE, current + delta));
+		writeFontScale(cookies, next);
+		if (locals.user) await updateReaderFontScale(getDb(), locals.user.id, next);
 		return { success: true };
 	},
 
@@ -243,14 +327,23 @@ export const actions = {
 const LOCATION_COOKIE = 'location';
 
 /** Where `/` sends a returning visitor: the last chapter they read, or John 1. */
-function defaultLocation(cookies: Parameters<typeof readColumns>[0]): string {
+async function commitColumns(
+	cookies: Parameters<typeof writeColumns>[0],
+	user: App.Locals['user'],
+	columns: string[]
+): Promise<void> {
+	writeColumns(cookies, columns);
+	if (user) await updateReaderColumns(getDb(), user.id, columns);
+}
+
+function defaultLocation(cookies: Parameters<typeof writeColumns>[0]): string {
 	const stored = cookies.get(LOCATION_COOKIE);
 	const reference = stored ? parseReference(stored) : null;
 	return referencePath(reference ?? { book: 43, chapter: 1 });
 }
 
 function rememberLocation(
-	cookies: Parameters<typeof readColumns>[0],
+	cookies: Parameters<typeof writeColumns>[0],
 	reference: { book: number; chapter: number }
 ): void {
 	cookies.set(LOCATION_COOKIE, `${bookShortName(reference.book)}${reference.chapter}`, {

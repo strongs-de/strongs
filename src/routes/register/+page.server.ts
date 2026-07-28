@@ -3,6 +3,9 @@ import { getDb } from '$lib/server/db';
 import { checkPasswordStrength, MIN_PASSWORD_LENGTH } from '$lib/server/auth/password';
 import { createSession } from '$lib/server/auth/session';
 import { createUser } from '$lib/server/repositories/users';
+import { updateReaderColumns } from '$lib/server/repositories/users';
+import { listBibles } from '$lib/server/repositories/resources';
+import { readColumns } from '$lib/server/columns';
 
 export async function load({ locals }) {
 	if (locals.user) redirect(303, '/account');
@@ -28,6 +31,7 @@ export const actions = {
 
 		if (!result.ok) return fail(400, { ...values, error: 'taken' as const });
 
+		await updateReaderColumns(db, result.user.id, readColumns(cookies, await listBibles(db)));
 		await createSession(
 			db,
 			cookies,

@@ -1,7 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { parseReference } from '$lib/bible/reference';
 import { getDb } from '$lib/server/db';
-import { readColumns } from '$lib/server/columns';
+import { resolveColumns } from '$lib/server/columns';
 import { listBibles } from '$lib/server/repositories/resources';
 import {
 	addVerseToList,
@@ -28,7 +28,8 @@ export async function load({ params, locals, cookies }) {
 	if (!list) error(404, 'Versliste nicht gefunden');
 
 	const bibles = await listBibles(db);
-	const primary = readColumns(cookies, bibles)[0] ?? bibles[0]?.id ?? null;
+	const primary =
+		resolveColumns(cookies, bibles, locals.user.readerColumns)[0] ?? bibles[0]?.id ?? null;
 
 	return {
 		list: {

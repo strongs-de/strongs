@@ -48,7 +48,8 @@
 			'hover:shadow-md enabled:active:translate-y-0 enabled:active:bg-accent-800',
 		secondary:
 			'border border-stone-300 bg-white text-stone-800 hover:border-accent-400 hover:bg-accent-50/60 ' +
-			'dark:border-stone-700 dark:text-stone-100 dark:hover:border-stone-600 dark:hover:bg-stone-900',
+			'dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-stone-600 ' +
+			'dark:hover:bg-stone-800',
 		ghost:
 			'text-stone-600 hover:bg-stone-100 hover:text-stone-900 ' +
 			'dark:text-stone-300 dark:hover:bg-stone-800 dark:hover:text-stone-100',

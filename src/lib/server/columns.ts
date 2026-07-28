@@ -20,7 +20,21 @@ const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
  * so the reader always has something to show.
  */
 export function readColumns(cookies: Cookies, available: ReadableResource[]): string[] {
+	return resolveColumns(cookies, available);
+}
+
+/** Uses account preferences when present, otherwise this device's cookie and finally defaults. */
+export function resolveColumns(
+	cookies: Cookies,
+	available: ReadableResource[],
+	accountColumns: readonly string[] = []
+): string[] {
 	const known = new Set(available.map((resource) => resource.id));
+	const preferred = [...new Set(accountColumns)]
+		.filter((id) => known.has(id))
+		.slice(0, MAX_COLUMNS);
+	if (preferred.length > 0) return preferred;
+
 	const stored = (cookies.get(COLUMNS_COOKIE) ?? '')
 		.split(',')
 		.map((id) => id.trim())
@@ -89,6 +103,27 @@ export function addColumn(
 export function removeColumn(columns: string[], index: number): string[] {
 	if (columns.length <= 1) return columns;
 	return columns.filter((_id, position) => position !== index);
+}
+
+/** Moves one visible column to another position without changing the selected resources. */
+export function moveColumn(columns: string[], from: number, to: number): string[] {
+	if (
+		!Number.isInteger(from) ||
+		!Number.isInteger(to) ||
+		from < 0 ||
+		to < 0 ||
+		from >= columns.length ||
+		to >= columns.length ||
+		from === to
+	) {
+		return columns;
+	}
+
+	const next = [...columns];
+	const [moved] = next.splice(from, 1);
+	if (moved === undefined) return columns;
+	next.splice(to, 0, moved);
+	return next;
 }
 
 export { MAX_COLUMNS };

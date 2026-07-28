@@ -33,12 +33,15 @@ export type SearchResult = {
 	pageCount: number;
 	/** Matches per translation, for the summary line. */
 	counts: { resourceId: string; count: number }[];
+	/** Distinct matching verses per biblical book. */
+	bookCounts: { book: number; count: number }[];
 	/** Suggested spelling when the search found nothing. */
 	suggestion: string | null;
 };
 
 export type SearchOptions = {
 	resourceIds: string[];
+	book?: number;
 	page?: number;
 	pageSize?: number;
 };
@@ -106,6 +109,7 @@ export async function search(
 		page: 1,
 		pageCount: 1,
 		counts: [],
+		bookCounts: [],
 		suggestion: null
 	};
 
@@ -121,7 +125,8 @@ export async function search(
 
 	const conditions = [sql`search_vector @@ (${include})`, ...phrases];
 	if (exclude) conditions.push(sql`not (search_vector @@ (${exclude}))`);
-	const matches = sql.join(conditions, sql` and `);
+	const baseMatches = sql.join(conditions, sql` and `);
+	const matches = options.book ? sql`${baseMatches} and book_id = ${options.book}` : baseMatches;
 
 	// Distinct verse references, in canonical order — the order a reader expects when studying a word
 	// through scripture, rather than by relevance.
@@ -143,6 +148,16 @@ export async function search(
 		from verses
 		where resource_id in (${resources}) and ${matches}
 		group by resource_id
+	`);
+
+	const bookCounts = await db.execute<{ book_id: number; count: number }>(sql`
+		select book_id, count(*)::int as count from (
+			select distinct book_id, chapter, verse
+			from verses
+			where resource_id in (${resources}) and ${baseMatches}
+		) matched
+		group by book_id
+		order by book_id
 	`);
 
 	const references = await db.execute<{
@@ -168,6 +183,7 @@ export async function search(
 		page,
 		pageCount: Math.max(1, Math.ceil(total / pageSize)),
 		counts: counts.map((row) => ({ resourceId: row.resource_id, count: Number(row.count) })),
+		bookCounts: bookCounts.map((row) => ({ book: row.book_id, count: Number(row.count) })),
 		suggestion: null
 	};
 }
