@@ -53,6 +53,7 @@
 	</span>
 
 	<button
+		id="column-{index}"
 		type="button"
 		class="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md px-2 py-1 text-left
 		       text-sm font-semibold text-stone-700 transition hover:bg-white hover:shadow-sm
