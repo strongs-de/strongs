@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { t } from '$lib/i18n';
+	import Menu from './Menu.svelte';
 	import type { ReadableResource } from '$lib/server/repositories/resources';
 
 	/**
@@ -9,13 +10,17 @@
 	 * A plain form, so changing a column works without JavaScript and the choice is stored server-side
 	 * in a cookie that server rendering can already see. `use:enhance` upgrades it to a fetch when
 	 * scripting is available.
+	 *
+	 * The sticky bar lives on the row wrapper in the reader, not here: a sticky element needs a
+	 * containing block taller than itself, and one header cell never is.
 	 */
 	let {
 		index,
 		selected,
 		available,
 		chosen,
-		canRemove
+		canRemove,
+		canAdd = false
 	}: {
 		index: number;
 		selected: ReadableResource;
@@ -23,13 +28,16 @@
 		/** Ids currently in use, so the menu can mark them. */
 		chosen: string[];
 		canRemove: boolean;
+		/** Shows the "add a column" button; set on the last column only, so the grid keeps its shape. */
+		canAdd?: boolean;
 	} = $props();
+
+	let menu: Menu | undefined = $state();
+
+	const unused = $derived(available.filter((resource) => !chosen.includes(resource.id)));
 </script>
 
-<div
-	class="sticky top-[3.25rem] z-10 flex items-center gap-1 border-b border-stone-200 bg-white/95
-	       py-1.5 backdrop-blur dark:border-stone-800 dark:bg-stone-950/95"
->
+<div class="flex min-w-0 items-center gap-0.5">
 	<form method="POST" action="?/setColumn" use:enhance class="min-w-0 flex-1">
 		<input type="hidden" name="index" value={index} />
 		<label class="sr-only" for="column-{index}">{t('reader.chooseTranslation')}</label>
@@ -67,5 +75,48 @@
 				</svg>
 			</button>
 		</form>
+	{/if}
+
+	{#if canAdd && unused.length > 0}
+		<!-- Without scripting this submits without a `resource` and the server appends the next unused
+		     translation; with scripting the menu asks which one. -->
+		<form method="POST" action="?/addColumn" use:enhance>
+			<button
+				type="submit"
+				title={t('reader.addColumn')}
+				aria-label={t('reader.addColumn')}
+				class="rounded px-1 py-0.5 text-stone-400 hover:bg-stone-100 hover:text-accent-600
+				       dark:hover:bg-stone-800 dark:hover:text-accent-400"
+				onclick={(event) => {
+					event.preventDefault();
+					menu?.openAt(event.currentTarget);
+				}}
+			>
+				<svg viewBox="0 0 20 20" class="size-4" fill="currentColor" aria-hidden="true">
+					<path
+						d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z"
+					/>
+				</svg>
+			</button>
+		</form>
+
+		<Menu bind:this={menu} label={t('reader.addColumn')}>
+			<p class="menu-label">{t('reader.addColumn')}</p>
+			{#each unused as resource (resource.id)}
+				<form
+					method="POST"
+					action="?/addColumn"
+					role="none"
+					use:enhance={() =>
+						async ({ update }) => {
+							menu?.close();
+							await update({ reset: false });
+						}}
+				>
+					<input type="hidden" name="resource" value={resource.id} />
+					<button type="submit" role="menuitem">{resource.name}</button>
+				</form>
+			{/each}
+		</Menu>
 	{/if}
 </div>

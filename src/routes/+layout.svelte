@@ -1,6 +1,5 @@
 <script lang="ts">
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/state';
 	import { referencePath } from '$lib/bible/reference';
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
@@ -21,7 +20,7 @@
 	);
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
+<svelte:head><link rel="icon" href="/icon.png" /></svelte:head>
 
 <div class="flex min-h-full flex-col">
 	<SiteHeader

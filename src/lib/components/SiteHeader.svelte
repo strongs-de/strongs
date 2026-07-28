@@ -68,34 +68,54 @@
 <svelte:window onkeydown={onKeydown} />
 
 <header
-	class="sticky top-0 z-30 border-b border-stone-200 bg-white/95 backdrop-blur dark:border-stone-800 dark:bg-stone-950/95"
+	class="sticky top-0 z-30 border-b border-stone-200/90 bg-white/95 shadow-[0_1px_8px_rgb(28_25_23/0.06)]
+	       backdrop-blur-xl before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:bg-accent-500
+	       dark:border-stone-800 dark:bg-stone-950/95 dark:shadow-black/20"
 >
-	<div class="mx-auto flex max-w-[120rem] items-center gap-2 px-3 py-2 sm:gap-4 sm:px-4">
+	<div
+		class="mx-auto flex h-[var(--header-height)] max-w-[120rem] items-center gap-2 px-3 pt-0.5 sm:gap-5 sm:px-5"
+	>
 		<a
 			href="/"
-			class="shrink-0 text-lg font-semibold tracking-tight text-stone-900 dark:text-stone-100"
+			class="group shrink-0 focus-visible:rounded-sm"
+			aria-label="Strongs.de – Startseite"
 		>
-			strongs<span class="text-accent-600 dark:text-accent-400">.de</span>
+			<img src="/logo.png" alt="Strongs.de" class="hidden h-10 w-auto sm:block" />
+			<img src="/icon.png" alt="" class="size-9 rounded-sm sm:hidden" />
 		</a>
 
 		<form class="min-w-0 flex-1" onsubmit={submit} role="search">
 			<label class="sr-only" for="site-search">{t('nav.search.placeholder')}</label>
-			<input
-				bind:this={input}
-				bind:value
-				id="site-search"
-				type="search"
-				autocomplete="off"
-				spellcheck="false"
-				enterkeyhint="search"
-				placeholder={t('nav.search.placeholder')}
-				class="w-full rounded-lg border border-stone-300 bg-stone-50 px-3 py-1.5 text-sm
-				       placeholder:text-stone-400 focus:border-accent-500 focus:bg-white focus:outline-none
-				       dark:border-stone-700 dark:bg-stone-900 dark:placeholder:text-stone-500 dark:focus:bg-stone-900"
-			/>
+			<div class="relative">
+				<svg
+					viewBox="0 0 20 20"
+					class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-400"
+					fill="currentColor"
+					aria-hidden="true"
+				>
+					<path
+						fill-rule="evenodd"
+						d="M9 3.5a5.5 5.5 0 1 0 3.66 9.605l3.617 3.618a.75.75 0 1 0 1.06-1.06l-3.617-3.618A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"
+					/>
+				</svg>
+				<input
+					bind:this={input}
+					bind:value
+					id="site-search"
+					type="search"
+					autocomplete="off"
+					spellcheck="false"
+					enterkeyhint="search"
+					placeholder={t('nav.search.placeholder')}
+					class="w-full rounded-md border border-stone-300/90 bg-stone-100/70 py-2 pr-3 pl-9 text-sm
+					       shadow-inner shadow-stone-900/3 placeholder:text-stone-400 focus:border-accent-500
+					       focus:bg-white focus:ring-3 focus:ring-accent-500/10 focus:outline-none dark:border-stone-700
+					       dark:bg-stone-900 dark:shadow-black/20 dark:placeholder:text-stone-500 dark:focus:bg-stone-900"
+				/>
+			</div>
 		</form>
 
-		<nav class="flex shrink-0 items-center gap-1">
+		<nav class="flex shrink-0 items-center gap-0.5 sm:gap-1">
 			{#if previous}
 				<a
 					href={previous}
@@ -135,17 +155,28 @@
 
 			{#if user}
 				<a
+					href="/lists"
+					class="hidden rounded-md px-2.5 py-2 text-sm font-medium text-stone-600 hover:bg-accent-50
+					       hover:text-accent-800 data-[active=true]:text-accent-700 sm:block dark:text-stone-300
+					       dark:hover:bg-accent-900/30 dark:hover:text-accent-300"
+					data-active={page.url.pathname.startsWith('/lists') ? 'true' : undefined}
+				>
+					{t('nav.lists')}
+				</a>
+				<a
 					href="/account"
-					class="hidden rounded-md px-2 py-1.5 text-sm text-stone-600 hover:bg-stone-100
-					       sm:block dark:text-stone-300 dark:hover:bg-stone-800"
+					class="hidden rounded-md px-2.5 py-2 text-sm font-medium text-stone-600 hover:bg-accent-50
+					       hover:text-accent-800 sm:block dark:text-stone-300 dark:hover:bg-accent-900/30
+					       dark:hover:text-accent-300"
 				>
 					{user.displayName ?? user.email}
 				</a>
 				{#if user.role === 'admin'}
 					<a
 						href="/admin"
-						class="hidden rounded-md px-2 py-1.5 text-sm text-stone-600 hover:bg-stone-100
-						       sm:block dark:text-stone-300 dark:hover:bg-stone-800"
+						class="hidden rounded-md px-2.5 py-2 text-sm font-medium text-stone-600 hover:bg-accent-50
+						       hover:text-accent-800 sm:block dark:text-stone-300 dark:hover:bg-accent-900/30
+						       dark:hover:text-accent-300"
 					>
 						{t('nav.admin')}
 					</a>

@@ -1,6 +1,6 @@
 import { getDb } from '$lib/server/db';
 import { listBibles } from '$lib/server/repositories/resources';
-import { readColumns } from '$lib/server/columns';
+import { MAX_COLUMNS, readColumns } from '$lib/server/columns';
 
 /**
  * Data every page needs: the available translations and the reader's column selection.
@@ -14,6 +14,9 @@ export async function load({ cookies, locals }) {
 	return {
 		bibles,
 		columns: readColumns(cookies, bibles),
+		// The limit lives in $lib/server, so the reader cannot import it to decide whether to offer a
+		// further column.
+		maxColumns: MAX_COLUMNS,
 		user: locals.user
 	};
 }

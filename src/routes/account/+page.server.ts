@@ -7,13 +7,16 @@ import {
 } from '$lib/server/auth/password';
 import { destroyAllSessions, createSession } from '$lib/server/auth/session';
 import { findUserByEmail, updatePassword, updateProfile } from '$lib/server/repositories/users';
-import { createVerseList, listVerseLists } from '$lib/server/repositories/verse-lists';
+import { listVerseLists } from '$lib/server/repositories/verse-lists';
 
 export async function load({ locals }) {
 	if (!locals.user) redirect(303, '/login?redirectTo=%2Faccount');
 
+	// Only the count: verse lists live at /lists now, and this page just points there.
+	const lists = await listVerseLists(getDb(), locals.user.id);
+
 	return {
-		lists: await listVerseLists(getDb(), locals.user.id),
+		listCount: lists.length,
 		minPasswordLength: MIN_PASSWORD_LENGTH
 	};
 }
@@ -48,16 +51,5 @@ export const actions = {
 		await createSession(db, cookies, user.id, request.headers.get('user-agent') ?? undefined);
 
 		return { passwordSaved: true };
-	},
-
-	createList: async ({ request, locals }) => {
-		if (!locals.user) redirect(303, '/login');
-		const form = await request.formData();
-		const list = await createVerseList(
-			getDb(),
-			locals.user.id,
-			String(form.get('title') ?? 'Neue Versliste')
-		);
-		redirect(303, `/lists/${list.id}`);
 	}
 };

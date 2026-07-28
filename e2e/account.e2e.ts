@@ -26,7 +26,7 @@ async function register(page: import('@playwright/test').Page, email: string): P
 test('registration, sign out and sign in again', async ({ page }) => {
 	const email = uniqueEmail();
 	await register(page, email);
-	await expect(page.getByRole('heading', { name: 'Mein Konto' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Einstellungen' })).toBeVisible();
 
 	await page.getByRole('button', { name: 'Abmelden' }).click();
 	// Signing out lands on the reader, so the check is that the session is gone, not the address.
@@ -57,7 +57,8 @@ test('a wrong password is refused', async ({ page }) => {
 test('a verse list keeps its verses and notes', async ({ page }) => {
 	await register(page, uniqueEmail());
 
-	// Create a list.
+	// Create a list. Lists live in the main navigation now, not on the settings page.
+	await page.goto('/lists');
 	await page.getByPlaceholder('Neue Versliste').fill('Meine Studienliste');
 	await page.getByRole('button', { name: 'Neue Versliste' }).click();
 	await expect(page).toHaveURL(/\/lists\//);
@@ -84,6 +85,7 @@ test('a verse list keeps its verses and notes', async ({ page }) => {
 test('a shared list is readable without an account', async ({ page, browser }) => {
 	await register(page, uniqueEmail());
 
+	await page.goto('/lists');
 	await page.getByPlaceholder('Neue Versliste').fill('Geteilte Liste');
 	await page.getByRole('button', { name: 'Neue Versliste' }).click();
 	await page.getByPlaceholder('Joh 3,16').fill('1Mo 1,1');
@@ -100,6 +102,50 @@ test('a shared list is readable without an account', async ({ page, browser }) =
 	await expect(anonymousPage.getByRole('heading', { name: 'Geteilte Liste' })).toBeVisible();
 	await expect(anonymousPage.getByRole('link', { name: '1.Mose 1,1' })).toBeVisible();
 	await anonymous.close();
+});
+
+test('the verse menu creates a list and adds the verse in one step', async ({ page }) => {
+	await register(page, uniqueEmail());
+
+	// The point of the menu: no list has to exist first.
+	await page.goto('/Joh3');
+	await page.locator('#Joh3_16').getByRole('link', { name: 'Vers Johannes 3,16' }).click();
+	await page.getByRole('menuitem', { name: 'Neue Liste mit diesem Vers' }).click();
+
+	await page.goto('/lists');
+	await expect(page.getByRole('link', { name: /Johannes 3,16/ })).toBeVisible();
+	await page.getByRole('link', { name: /Johannes 3,16/ }).click();
+	await expect(page.getByRole('link', { name: 'Johannes 3,16' })).toBeVisible();
+});
+
+test('the verse menu ticks and unticks an existing list', async ({ page }) => {
+	await register(page, uniqueEmail());
+
+	await page.goto('/lists');
+	await page.getByPlaceholder('Neue Versliste').fill('Merkverse');
+	await page.getByRole('button', { name: 'Neue Versliste' }).click();
+
+	await page.goto('/Joh3');
+	const verse = page.locator('#Joh3_16').getByRole('link', { name: 'Vers Johannes 3,16' });
+
+	await verse.click();
+	await page.getByRole('menuitem', { name: 'Merkverse' }).click();
+	await expect(page.locator('#Joh3_16 .verse-number.in-list')).toHaveCount(1);
+
+	// Reopening shows it ticked, and clicking again takes the verse back out.
+	await page.reload();
+	await verse.click();
+	await page.getByRole('menuitem', { name: 'Merkverse' }).click();
+	await page.reload();
+	await expect(page.locator('#Joh3_16 .verse-number.in-list')).toHaveCount(0);
+});
+
+test('the verse menu offers signing in rather than a list', async ({ page }) => {
+	await page.goto('/Joh3');
+	await page.locator('#Joh3_16').getByRole('link', { name: 'Vers Johannes 3,16' }).click();
+
+	await expect(page.getByRole('menuitem', { name: 'Vers kopieren' })).toBeVisible();
+	await expect(page.getByRole('menuitem', { name: 'Zum Speichern anmelden' })).toBeVisible();
 });
 
 test('the admin area is hidden from a normal account', async ({ page }) => {

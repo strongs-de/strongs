@@ -6,24 +6,32 @@
 
 @theme {
 	/* Reading typography: a serif for scripture, a sans for the interface. */
-	--font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-	--font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', serif;
+	--font-sans: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+	--font-serif: Charter, 'Iowan Old Style', 'Palatino Linotype', Georgia, Cambria, serif;
 
 	/* Greek and Hebrew need fonts with polytonic and pointed coverage. */
 	--font-greek: 'Gentium Plus', 'SBL Greek', 'Palatino Linotype', ui-serif, serif;
 	--font-hebrew: 'Ezra SIL', 'SBL Hebrew', 'Taamey Frank CLM', 'Times New Roman', serif;
 
-	/* Accent used for Strong-tagged words and interactive affordances. */
-	--color-accent-50: oklch(0.97 0.02 250);
-	--color-accent-100: oklch(0.93 0.04 250);
-	--color-accent-200: oklch(0.87 0.07 250);
-	--color-accent-300: oklch(0.79 0.1 250);
-	--color-accent-400: oklch(0.7 0.13 250);
-	--color-accent-500: oklch(0.62 0.16 250);
-	--color-accent-600: oklch(0.54 0.16 250);
-	--color-accent-700: oklch(0.46 0.14 250);
-	--color-accent-800: oklch(0.38 0.11 250);
-	--color-accent-900: oklch(0.3 0.08 250);
+	/* Brand green sampled from the supplied logo. */
+	--color-accent-50: oklch(0.97 0.025 143);
+	--color-accent-100: oklch(0.93 0.055 143);
+	--color-accent-200: oklch(0.86 0.09 143);
+	--color-accent-300: oklch(0.78 0.125 143);
+	--color-accent-400: oklch(0.71 0.15 143);
+	--color-accent-500: oklch(0.65 0.16 143);
+	--color-accent-600: oklch(0.56 0.145 143);
+	--color-accent-700: oklch(0.47 0.12 143);
+	--color-accent-800: oklch(0.39 0.09 143);
+	--color-accent-900: oklch(0.31 0.065 143);
+}
+
+:root {
+	/* Height of the sticky site header. The reader's column headers and its study panel stick below
+	   it, so all three have to agree on one number. */
+	--header-height: 4rem;
+	--paper: #f8f7f2;
+	--paper-deep: #f0eee6;
 }
 
 @layer base {
@@ -33,7 +41,18 @@
 	}
 
 	body {
-		@apply bg-white text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100;
+		@apply text-stone-900 antialiased dark:text-stone-100;
+		background:
+			radial-gradient(circle at 15% 0%, rgb(93 176 91 / 7%), transparent 28rem), var(--paper);
+		font-feature-settings: 'kern', 'liga';
+	}
+
+	:where(.dark) body {
+		background: radial-gradient(circle at 15% 0%, rgb(93 176 91 / 9%), transparent 32rem), #171916;
+	}
+
+	::selection {
+		background-color: color-mix(in oklab, var(--color-accent-400) 28%, transparent);
 	}
 
 	:focus-visible {

@@ -210,25 +210,29 @@ export async function setVerseListSharing(
 	return slug;
 }
 
-/** Which verses of a chapter are already in a list, so the reader can mark them. */
-export async function markedVerses(
+/**
+ * Which verses of a chapter are in which of a reader's lists.
+ *
+ * The reader's verse menu offers every list at once and has to show which ones already hold the
+ * verse, so one query over all of them beats one query per list.
+ */
+export async function markedVersesByList(
 	db: Database,
-	listId: string,
+	userId: string,
 	book: number,
 	chapter: number
-): Promise<Set<number>> {
-	const rows = await db
-		.select({ verse: verseListItems.verse })
+): Promise<{ listId: string; verse: number }[]> {
+	return db
+		.select({ listId: verseListItems.listId, verse: verseListItems.verse })
 		.from(verseListItems)
+		.innerJoin(verseLists, eq(verseLists.id, verseListItems.listId))
 		.where(
 			and(
-				eq(verseListItems.listId, listId),
+				eq(verseLists.userId, userId),
 				eq(verseListItems.bookId, book),
 				eq(verseListItems.chapter, chapter)
 			)
 		);
-
-	return new Set(rows.map((row) => row.verse));
 }
 
 async function touch(db: Database, listId: string): Promise<void> {

@@ -15,9 +15,11 @@ import { loadChapter } from '$lib/server/repositories/chapter';
 import { bookCoverage, chapterCount, listBibles } from '$lib/server/repositories/resources';
 import {
 	addVerseToList,
+	createVerseList,
 	findVerseList,
 	listVerseLists,
-	markedVerses
+	markedVersesByList,
+	removeVerseFromList
 } from '$lib/server/repositories/verse-lists';
 
 /**
@@ -98,10 +100,9 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 	// Verse lists, so a signed-in reader can add a verse without leaving the chapter. The most recently
 	// used list is offered first, which is the one they are working in.
 	const lists = locals.user ? await listVerseLists(db, locals.user.id) : [];
-	const marked =
-		lists[0] !== undefined
-			? await markedVerses(db, lists[0].id, reference.book, reference.chapter)
-			: new Set<number>();
+	const marked = locals.user
+		? await markedVersesByList(db, locals.user.id, reference.book, reference.chapter)
+		: [];
 
 	// Public scripture text is the same for everyone; a signed-in reader's page is not.
 	setHeaders({
@@ -135,7 +136,8 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 			maxChapter
 		},
 		lists: lists.map((list) => ({ id: list.id, title: list.title })),
-		markedVerses: [...marked]
+		/** Which of this chapter's verses sit in which list, for the verse menu's check marks. */
+		markedVerses: marked
 	};
 }
 
@@ -158,9 +160,20 @@ export const actions = {
 		return { success: true };
 	},
 
-	addColumn: async ({ cookies }) => {
+	addColumn: async ({ request, cookies }) => {
+		const form = await request.formData();
+		const resource = form.get('resource');
+
 		const bibles = await listBibles(getDb());
-		writeColumns(cookies, addColumn(readColumns(cookies, bibles), bibles));
+		writeColumns(
+			cookies,
+			addColumn(
+				readColumns(cookies, bibles),
+				bibles,
+				// Absent when the button was submitted without a choice, which appends the next unused one.
+				resource === null ? undefined : String(resource)
+			)
+		);
 		return { success: true };
 	},
 
@@ -174,8 +187,38 @@ export const actions = {
 		return { success: true };
 	},
 
-	/** Adds the verse to a list straight from the reader, which is how notes get started. */
+	/**
+	 * Adds the verse to a list straight from the reader, which is how notes get started.
+	 *
+	 * An empty `listId` means "a new list for this verse": the first verse a reader wants to keep is
+	 * the moment they need a list, and making them go to the settings page first to create one was the
+	 * reason the feature went unused.
+	 */
 	addToList: async ({ request, locals }) => {
+		if (!locals.user) redirect(303, '/login');
+
+		const form = await request.formData();
+		const listId = String(form.get('listId') ?? '');
+		const reference = parseReference(String(form.get('reference') ?? ''));
+		if (!reference?.verse) return fail(400, { error: 'reference' });
+
+		const db = getDb();
+		const list = listId
+			? await findVerseList(db, { id: listId, userId: locals.user.id })
+			: await createVerseList(db, locals.user.id, String(form.get('title') ?? ''));
+		if (!list) return fail(404, { error: 'list' });
+
+		await addVerseToList(db, list.id, {
+			book: reference.book,
+			chapter: reference.chapter,
+			verse: reference.verse
+		});
+
+		return { added: true, listId: list.id };
+	},
+
+	/** The other half of the verse menu: a list the verse is already in can be unticked. */
+	removeFromList: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
 
 		const form = await request.formData();
@@ -187,13 +230,13 @@ export const actions = {
 		const list = await findVerseList(db, { id: listId, userId: locals.user.id });
 		if (!list) return fail(404, { error: 'list' });
 
-		await addVerseToList(db, list.id, {
+		await removeVerseFromList(db, list.id, {
 			book: reference.book,
 			chapter: reference.chapter,
 			verse: reference.verse
 		});
 
-		return { added: true };
+		return { removed: true, listId: list.id };
 	}
 };
 

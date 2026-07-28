@@ -55,19 +55,19 @@
 			type="button"
 			onclick={() => format('bold')}
 			class="rounded px-2 py-0.5 text-sm font-bold hover:bg-stone-100 dark:hover:bg-stone-800"
-			aria-label="Fett">B</button
+			aria-label={t('lists.noteBold')}>B</button
 		>
 		<button
 			type="button"
 			onclick={() => format('italic')}
 			class="rounded px-2 py-0.5 text-sm italic hover:bg-stone-100 dark:hover:bg-stone-800"
-			aria-label="Kursiv">I</button
+			aria-label={t('lists.noteItalic')}>I</button
 		>
 		<button
 			type="button"
 			onclick={() => format('insertUnorderedList')}
 			class="rounded px-2 py-0.5 text-sm hover:bg-stone-100 dark:hover:bg-stone-800"
-			aria-label="Liste">•</button
+			aria-label={t('lists.noteList')}>•</button
 		>
 
 		<span class="flex-1"></span>

@@ -98,13 +98,22 @@
 	);
 </script>
 
+<!--
+  Two shapes for one panel. On a phone it is a bottom sheet, so the verse that was tapped stays
+  readable above it; from `sm` up it is a column that sticks under the site header, which needs
+  `self-start` — a flex item stretched to its container's height has nowhere to stick to.
+-->
 <aside
-	class="flex w-full shrink-0 flex-col border-l border-stone-200 bg-stone-50 sm:w-80 lg:w-96
-	       dark:border-stone-800 dark:bg-stone-900"
+	class="panel fixed inset-x-0 bottom-0 z-40 flex max-h-[70dvh] flex-col rounded-t-xl border
+	       border-stone-200 bg-white shadow-2xl sm:sticky sm:inset-x-auto sm:top-[var(--header-height)]
+	       sm:bottom-auto sm:z-10 sm:h-[calc(100dvh-var(--header-height))]
+	       sm:max-h-none sm:w-80 sm:shrink-0 sm:self-start sm:rounded-none sm:border-0 sm:border-l
+	       sm:shadow-[-8px_0_24px_rgb(28_25_23/0.04)] lg:w-96 dark:border-stone-800 dark:bg-stone-900"
 	aria-label={t('sidebar.tab.strong')}
 >
 	<header
-		class="flex items-center justify-between gap-2 border-b border-stone-200 px-4 py-2.5 dark:border-stone-800"
+		class="flex items-center justify-between gap-2 border-b border-stone-200 bg-accent-50/70 px-4 py-3
+		       dark:border-stone-800 dark:bg-accent-900/20"
 	>
 		<h2 class="text-sm font-semibold">
 			{t('strong.title', { id: strong })}
@@ -297,6 +306,22 @@
 </aside>
 
 <style>
+	/* The sheet slides in; the reduced-motion block in layout.css shortens this to nothing. */
+	@media (max-width: 639px) {
+		.panel {
+			animation: slide-up 180ms ease-out;
+		}
+	}
+
+	@keyframes slide-up {
+		from {
+			transform: translateY(100%);
+		}
+		to {
+			transform: translateY(0);
+		}
+	}
+
 	.lexicon :global(a) {
 		color: var(--color-accent-600);
 		text-decoration: none;

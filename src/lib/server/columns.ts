@@ -65,10 +65,25 @@ export function setColumn(columns: string[], index: number, resourceId: string):
 	return next.filter((id, position) => id !== undefined && next.indexOf(id) === position);
 }
 
-export function addColumn(columns: string[], available: ReadableResource[]): string[] {
+/**
+ * Appends a column.
+ *
+ * A specific translation when the reader picked one from the menu, otherwise the first one not on
+ * screen yet — which is what a plain submit without scripting sends.
+ */
+export function addColumn(
+	columns: string[],
+	available: ReadableResource[],
+	resourceId?: string
+): string[] {
 	if (columns.length >= MAX_COLUMNS) return columns;
-	const next = available.find((resource) => !columns.includes(resource.id));
-	return next ? [...columns, next.id] : columns;
+
+	const wanted =
+		resourceId !== undefined
+			? available.find((resource) => resource.id === resourceId && !columns.includes(resource.id))
+			: available.find((resource) => !columns.includes(resource.id));
+
+	return wanted ? [...columns, wanted.id] : columns;
 }
 
 export function removeColumn(columns: string[], index: number): string[] {
