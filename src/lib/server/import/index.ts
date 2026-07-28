@@ -13,11 +13,15 @@ import { ingestBible, type IngestOptions } from './ingest-bible.ts';
 import { ingestLexicon } from './ingest-lexicon.ts';
 import { ingestMorphology } from './ingest-morphology.ts';
 import { ingestCommentary, ingestCrossReferences } from './ingest-simple.ts';
+import { readSwordModule } from './sword.ts';
 
 export type ResourceKind = 'bible' | 'lexicon' | 'commentary' | 'xrefs' | 'morphology';
 
 const KIND_BY_FORMAT: Record<SourceFormat, ResourceKind> = {
 	zefania: 'bible',
+	'zefania-commentary': 'commentary',
+	'sword-bible': 'bible',
+	'sword-commentary': 'commentary',
 	osis: 'bible',
 	usfm: 'bible',
 	usx: 'bible',
@@ -56,7 +60,14 @@ export type RunImportResult = {
 
 export async function runImport(db: Database, options: RunImportOptions): Promise<RunImportResult> {
 	const kind = resourceKindForFormat(options.format);
-	const stream = parserFor(options.format)(options.input);
+	const stream =
+		options.format === 'sword-bible' || options.format === 'sword-commentary'
+			? options.sourceFile
+				? readSwordModule(options.sourceFile, options.format)
+				: (() => {
+						throw new Error('SWORD imports require the original archive file');
+					})()
+			: parserFor(options.format)(options.input);
 
 	switch (kind) {
 		case 'bible': {

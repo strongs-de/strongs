@@ -11,6 +11,9 @@ import type { VerseSegment } from '../segments.ts';
 
 export const SOURCE_FORMATS = [
 	'zefania',
+	'zefania-commentary',
+	'sword-bible',
+	'sword-commentary',
 	'osis',
 	'usfm',
 	'usx',

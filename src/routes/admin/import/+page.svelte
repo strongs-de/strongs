@@ -31,6 +31,9 @@
 
 	const formatLabels: Record<string, string> = {
 		zefania: 'Zefania XML (Bibel)',
+		'zefania-commentary': 'Zefania XML (Kommentar)',
+		'sword-bible': 'SWORD-Modul (Bibel)',
+		'sword-commentary': 'SWORD-Modul (Kommentar)',
 		osis: 'OSIS XML (Bibel)',
 		usfm: 'USFM (Bibel)',
 		usx: 'USX (Bibel)',
@@ -87,7 +90,7 @@
 			name="file"
 			type="file"
 			required
-			accept=".xml,.usfm,.sfm,.usx,.txt,.csv,.tsv,.tsp,.thml,.osis"
+			accept=".xml,.usfm,.sfm,.usx,.txt,.csv,.tsv,.tsp,.thml,.osis,.zip"
 			class="w-full rounded-md border border-stone-300 px-3 py-2 text-sm file:mr-3 file:rounded
 			       file:border-0 file:bg-stone-100 file:px-2 file:py-1 file:text-xs
 			       dark:border-stone-700 dark:file:bg-stone-800"

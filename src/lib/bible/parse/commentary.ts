@@ -171,6 +171,149 @@ export async function* parseCommentaryThml(input: SourceInput): ParseStream {
 	yield { type: 'progress', done: entries, total: entries };
 }
 
+/**
+ * Zefania's dictionary markup is also used for verse commentaries. A typical item looks like:
+ *
+ *   <item id="Psalms 1:1" target="19;1;1">
+ *     <reflink mscope="19;1;1-6"/>
+ *     <description>...</description>
+ *   </item>
+ *
+ * `target` and `mscope` use Zefania's numeric book ids, so they line up with our canonical ids.
+ */
+export async function* parseZefaniaCommentary(input: SourceInput): ParseStream {
+	const information: Record<string, string> = {};
+	let informationField: string | undefined;
+	let inInformation = false;
+	let metadataEmitted = false;
+	let item:
+		| {
+				id?: string;
+				target?: string;
+				scope?: string;
+				descriptions: string[];
+		  }
+		| undefined;
+	let description = '';
+	let inDescription = false;
+	let entries = 0;
+
+	for await (const event of readXml(input)) {
+		if (event.type === 'open') {
+			if (event.name === 'information') {
+				inInformation = true;
+			} else if (inInformation) {
+				informationField = event.name;
+			} else if (event.name === 'item') {
+				item = {
+					id: attribute(event.attributes, 'id'),
+					target: attribute(event.attributes, 'target'),
+					descriptions: []
+				};
+			} else if (item && event.name === 'reflink') {
+				item.scope = attribute(event.attributes, 'mscope', 'target');
+			} else if (item && event.name === 'description') {
+				description = '';
+				inDescription = true;
+			}
+			continue;
+		}
+
+		if (event.type === 'text') {
+			if (inDescription) description += event.text;
+			else if (inInformation && informationField) {
+				information[informationField] = (information[informationField] ?? '') + event.text;
+			}
+			continue;
+		}
+
+		if (event.name === 'description' && inDescription) {
+			const text = description.replace(/\s+/g, ' ').trim();
+			if (text) item?.descriptions.push(text);
+			description = '';
+			inDescription = false;
+		} else if (event.name === 'information') {
+			inInformation = false;
+			informationField = undefined;
+			if (!metadataEmitted) {
+				yield { type: 'metadata', metadata: zefaniaCommentaryMetadata(information) };
+				metadataEmitted = true;
+			}
+		} else if (event.name === 'item' && item) {
+			const reference =
+				parseZefaniaScope(item.scope ?? item.target) ?? parseReference(item.id ?? '');
+			if (!reference || item.descriptions.length === 0) {
+				yield {
+					type: 'warning',
+					message: `skipped a Zefania commentary item without a usable reference or description (${item.id ?? item.target ?? '?'})`
+				};
+			} else {
+				entries += 1;
+				yield {
+					type: 'commentaryEntry',
+					entry: {
+						book: reference.book,
+						chapter: reference.chapter,
+						...(reference.verse !== undefined ? { verseStart: reference.verse } : {}),
+						...(reference.verseEnd !== undefined ? { verseEnd: reference.verseEnd } : {}),
+						bodyHtml: item.descriptions.map((part) => `<p>${sanitizeHtml(part)}</p>`).join('')
+					}
+				};
+			}
+			item = undefined;
+			if (entries > 0 && entries % 500 === 0) yield { type: 'progress', done: entries };
+		} else if (inInformation) {
+			informationField = undefined;
+		}
+	}
+
+	if (!metadataEmitted) {
+		yield { type: 'metadata', metadata: zefaniaCommentaryMetadata(information) };
+	}
+	yield { type: 'progress', done: entries, total: entries };
+}
+
+function parseZefaniaScope(value: string | undefined): ReturnType<typeof parseReference> {
+	if (!value) return null;
+	const match = /^\s*(\d+)\s*;\s*(\d+)(?:\s*;\s*(\d+)(?:\s*[-–]\s*(\d+))?)?/.exec(value);
+	if (!match) return null;
+
+	const book = Number(match[1]);
+	const chapter = Number(match[2]);
+	const verse = match[3] ? Number(match[3]) : undefined;
+	const verseEnd = match[4] ? Number(match[4]) : undefined;
+	if (book < 1 || book > 66 || chapter < 1 || !Number.isSafeInteger(chapter)) return null;
+	return {
+		book,
+		chapter,
+		...(verse !== undefined && verse > 0 ? { verse } : {}),
+		...(verseEnd !== undefined && verse !== undefined && verseEnd >= verse ? { verseEnd } : {})
+	};
+}
+
+function zefaniaCommentaryMetadata(information: Record<string, string>): ResourceMetadata {
+	const clean = (value: string | undefined) => value?.replace(/\s+/g, ' ').trim() || undefined;
+	const name = clean(information['title']) ?? clean(information['subject']) ?? 'Kommentar';
+	const id = clean(information['identifier']) ?? name;
+	const language = clean(information['language'])?.toLowerCase();
+	const rights = clean(information['rights']);
+
+	return {
+		id:
+			id
+				.replace(/[^\w]+/g, '')
+				.toUpperCase()
+				.slice(0, 32) || 'COMMENTARY',
+		name,
+		abbrev: name,
+		language: language === 'ger' || language === 'deu' ? 'de' : (language ?? 'de'),
+		...(rights && rights.toLowerCase() !== 'unknown' ? { licenseHtml: rights } : {}),
+		...(clean(information['description'])
+			? { description: clean(information['description'])! }
+			: {})
+	};
+}
+
 function commentaryMetadata(options: CommentaryOptions): ResourceMetadata {
 	const name = options.metadata?.name ?? 'Kommentar';
 	return {

@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { t } from '$lib/i18n';
 	import Menu from './Menu.svelte';
+	import ResourceMenuItems from './ResourceMenuItems.svelte';
 	import type { ReadableResource } from '$lib/server/repositories/resources';
 
 	/**
@@ -75,32 +76,14 @@
 
 	<Menu bind:this={selectMenu} label={t('reader.chooseTranslation')}>
 		<p class="menu-label">{t('reader.chooseTranslation')}</p>
-		{#each available as resource (resource.id)}
-			<form
-				method="POST"
-				action="?/setColumn"
-				role="none"
-				use:enhance={() =>
-					async ({ update }) => {
-						selectMenu?.close();
-						await update({ reset: false });
-					}}
-			>
-				<input type="hidden" name="index" value={index} />
-				<input type="hidden" name="resource" value={resource.id} />
-				<button type="submit" role="menuitem">
-					<span class="min-w-0 flex-1">
-						<span class="block truncate font-medium">{resource.name}</span>
-						<span class="block text-[0.7rem] text-stone-400">{resource.abbrev}</span>
-					</span>
-					{#if resource.id === selected.id}
-						<span class="menu-check" aria-hidden="true">✓</span>
-					{:else if chosen.includes(resource.id)}
-						<span class="text-xs text-stone-400" title="Bereits sichtbar">•</span>
-					{/if}
-				</button>
-			</form>
-		{/each}
+		<ResourceMenuItems
+			resources={available}
+			action="?/setColumn"
+			{index}
+			selectedId={selected.id}
+			{chosen}
+			onChoose={() => selectMenu?.close()}
+		/>
 	</Menu>
 
 	{#if canRemove}
@@ -147,21 +130,11 @@
 
 		<Menu bind:this={addMenu} label={t('reader.addColumn')}>
 			<p class="menu-label">{t('reader.addColumn')}</p>
-			{#each unused as resource (resource.id)}
-				<form
-					method="POST"
-					action="?/addColumn"
-					role="none"
-					use:enhance={() =>
-						async ({ update }) => {
-							addMenu?.close();
-							await update({ reset: false });
-						}}
-				>
-					<input type="hidden" name="resource" value={resource.id} />
-					<button type="submit" role="menuitem">{resource.name}</button>
-				</form>
-			{/each}
+			<ResourceMenuItems
+				resources={unused}
+				action="?/addColumn"
+				onChoose={() => addMenu?.close()}
+			/>
 		</Menu>
 	{/if}
 </div>

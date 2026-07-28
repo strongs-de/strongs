@@ -51,6 +51,9 @@ export const de = {
 	'reader.dragColumn': 'Spalte verschieben',
 	'reader.fontSmaller': 'Bibeltext verkleinern',
 	'reader.fontLarger': 'Bibeltext vergrößern',
+	'resource.group.bibles': 'Bibeln',
+	'resource.group.commentaries': 'Kommentare',
+	'resource.group.xrefs': 'Parallelstellen',
 
 	// --- verse menu ---------------------------------------------------------
 	'verse.menu': 'Vers {reference}',
@@ -115,9 +118,9 @@ export const de = {
 	'account.theme': 'Zwischen hellem und dunklem Design wechseln',
 	'account.readerFontSize': 'Textgröße im Bibeltext',
 	'account.readerFontPreview': 'Im Anfang schuf Gott Himmel und Erde.',
-	'account.readerTranslations': 'Gespeicherte Übersetzungen',
+	'account.readerTranslations': 'Gespeicherte Lesespalten',
 	'account.readerTranslationsHint':
-		'Auswahl und Reihenfolge werden beim Ändern im Bibelleser automatisch in deinem Konto gespeichert.',
+		'Auswahl und Reihenfolge von Bibeln und Nachschlagewerken werden im Bibelleser automatisch gespeichert.',
 	'account.saved': 'Gespeichert.',
 	'account.emailHint': 'Die E-Mail-Adresse kann nicht geändert werden.',
 	'auth.login.title': 'Anmelden',

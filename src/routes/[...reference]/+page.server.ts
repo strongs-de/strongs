@@ -19,8 +19,14 @@ import {
 	writeColumns
 } from '$lib/server/columns';
 import { loadChapter } from '$lib/server/repositories/chapter';
+import { loadReferenceResources } from '$lib/server/repositories/reference-resources';
 import { loadChapterNote, saveChapterNote } from '$lib/server/repositories/chapter-notes';
-import { bookCoverage, chapterCount, listBibles } from '$lib/server/repositories/resources';
+import {
+	bookCoverage,
+	chapterCount,
+	listBibles,
+	listReaderResources
+} from '$lib/server/repositories/resources';
 import { updateReaderColumns } from '$lib/server/repositories/users';
 import { updateReaderFontScale } from '$lib/server/repositories/users';
 import {
@@ -89,7 +95,9 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 		error(503, 'Es ist noch keine Bibelübersetzung importiert.');
 	}
 
-	const columns = resolveColumns(cookies, bibles, locals.user?.readerColumns);
+	const readerResources = await listReaderResources(db);
+	const columns = resolveColumns(cookies, readerResources, locals.user?.readerColumns);
+	const selectedBibles = columns.filter((id) => bibles.some((bible) => bible.id === id));
 
 	/**
 	 * Highest chapter the selected translations have for this book; 0 when none of them contains it.
@@ -99,19 +107,38 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 	 * loop. When the book is absent entirely there is nothing to clamp to, so the empty state is
 	 * rendered instead.
 	 */
-	const maxChapter = await chapterCount(db, columns, reference.book);
+	const maxChapter = await chapterCount(
+		db,
+		selectedBibles.length > 0 ? selectedBibles : bibles.map((bible) => bible.id),
+		reference.book
+	);
 	if (maxChapter > 0 && reference.chapter > maxChapter) {
 		redirect(302, referencePath({ book: reference.book, chapter: maxChapter }));
 	}
 
-	const chapter = await loadChapter(db, {
-		resourceIds: columns,
-		book: reference.book,
-		chapter: reference.chapter
-	});
+	const [chapter, referenceResources] = await Promise.all([
+		loadChapter(db, {
+			resourceIds: selectedBibles,
+			book: reference.book,
+			chapter: reference.chapter
+		}),
+		loadReferenceResources(db, {
+			resourceIds: columns,
+			book: reference.book,
+			chapter: reference.chapter
+		})
+	]);
+	for (const verse of referenceResources.verseNumbers) {
+		if (!chapter.rows.some((row) => row.verse === verse)) {
+			chapter.rows.push({ verse, cells: selectedBibles.map(() => null) });
+		}
+	}
+	chapter.rows.sort((left, right) => left.verse - right.verse);
+	chapter.empty = chapter.rows.length === 0;
 
-	const coverage = await bookCoverage(db, columns);
-	const byId = new Map(bibles.map((resource) => [resource.id, resource]));
+	const coverage = await bookCoverage(db, selectedBibles);
+	const byId = new Map(readerResources.map((resource) => [resource.id, resource]));
+	const bibleCellIndex = new Map(selectedBibles.map((id, index) => [id, index]));
 
 	// Verse lists, so a signed-in reader can add a verse without leaving the chapter. The most recently
 	// used list is offered first, which is the one they are working in.
@@ -142,11 +169,13 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 			// Maps do not survive serialisation to the browser.
 			headings: [...chapter.headings.entries()]
 		},
+		referenceResources,
 		columns: columns.map((id, index) => {
 			const resource = byId.get(id)!;
 			return {
 				index,
 				resource,
+				bibleCellIndex: bibleCellIndex.get(id) ?? null,
 				/** False when this translation does not contain the current book at all. */
 				covers: coverage.get(id)?.has(reference.book) ?? false
 			};
@@ -174,15 +203,15 @@ export const actions = {
 		const index = Number(form.get('index'));
 		const resource = String(form.get('resource') ?? '');
 
-		const bibles = await listBibles(getDb());
-		if (!Number.isInteger(index) || !bibles.some((bible) => bible.id === resource)) {
+		const available = await listReaderResources(getDb());
+		if (!Number.isInteger(index) || !available.some((item) => item.id === resource)) {
 			return { success: false };
 		}
 
 		await commitColumns(
 			cookies,
 			locals.user,
-			setColumn(resolveColumns(cookies, bibles, locals.user?.readerColumns), index, resource)
+			setColumn(resolveColumns(cookies, available, locals.user?.readerColumns), index, resource)
 		);
 		return { success: true };
 	},
@@ -191,7 +220,7 @@ export const actions = {
 		const form = await request.formData();
 		const resource = form.get('resource');
 
-		const bibles = await listBibles(getDb());
+		const bibles = await listReaderResources(getDb());
 		await commitColumns(
 			cookies,
 			locals.user,
@@ -210,7 +239,7 @@ export const actions = {
 		const index = Number(form.get('index'));
 		if (!Number.isInteger(index)) return { success: false };
 
-		const bibles = await listBibles(getDb());
+		const bibles = await listReaderResources(getDb());
 		await commitColumns(
 			cookies,
 			locals.user,
@@ -223,7 +252,7 @@ export const actions = {
 		const form = await request.formData();
 		const from = Number(form.get('from'));
 		const to = Number(form.get('to'));
-		const bibles = await listBibles(getDb());
+		const bibles = await listReaderResources(getDb());
 		await commitColumns(
 			cookies,
 			locals.user,

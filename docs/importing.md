@@ -16,14 +16,15 @@ re-import, so edits made in the admin UI survive.
 
 ## Bible translations
 
-| Format         | Recognised by                | Notes                                                                                        |
-| -------------- | ---------------------------- | -------------------------------------------------------------------------------------------- |
-| Zefania XML    | `<XMLBIBLE>`                 | What the bundled translations use. Strong's numbers as `<gr str="…">`, morphology as `rmac`. |
-| OSIS           | `<osis>`                     | Both container (`<verse>text</verse>`) and milestone (`<verse sID=…/>`) styles.              |
-| USFM           | `\id`, `\c`, `\v` markers    | Word-level Strong's attributes are read; footnotes and cross references are dropped.         |
-| USX            | `<usx>`                      | What eBible.org publishes.                                                                   |
-| USFX           | `<usfx>`                     | Same content, different shape.                                                               |
-| Verse per line | a reference and text per row | Tab, pipe, semicolon or comma separated; also `book`/`chapter`/`verse`/`text` columns.       |
+| Format                  | Recognised by                   | Notes                                                                                                          |
+| ----------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Zefania XML             | `<XMLBIBLE>`                    | What the bundled translations use. Strong's numbers as `<gr str="…">`, morphology as `rmac`.                   |
+| CrossWire SWORD raw ZIP | `mods.d/*.conf` plus `modules/` | Bible drivers `RawText`/`zText` (including their v4 variants). The runtime uses CrossWire's `diatheke` reader. |
+| OSIS                    | `<osis>`                        | Both container (`<verse>text</verse>`) and milestone (`<verse sID=…/>`) styles.                                |
+| USFM                    | `\id`, `\c`, `\v` markers       | Word-level Strong's attributes are read; footnotes and cross references are dropped.                           |
+| USX                     | `<usx>`                         | What eBible.org publishes.                                                                                     |
+| USFX                    | `<usfx>`                        | Same content, different shape.                                                                                 |
+| Verse per line          | a reference and text per row    | Tab, pipe, semicolon or comma separated; also `book`/`chapter`/`verse`/`text` columns.                         |
 
 USFM carries Strong's numbers as word attributes, which the importer reads:
 
@@ -42,6 +43,8 @@ one verse with `verse_end = 17`, and the reader spans it across both rows so the
 | Morphology          | Robinson TSP         | `data/books/*.TSP`. An **overlay**: it adds lemmas to a Greek text that is already imported, so pass `--target GNTTR` or pick the target in the wizard. |
 | Cross references    | CSV/TSV              | Two reference columns and an optional score: `Gen 1:1<TAB>Joh 1:1<TAB>23`.                                                                              |
 | Commentary          | CSV/Markdown or ThML | Reference and body per row, or CCEL-style ThML. Bodies are reduced to eleven formatting tags with no attributes.                                        |
+| Commentary          | Zefania XML          | `<dictionary type="x-commentary">` items with numeric `target`/`reflink mscope` references and one or more descriptions.                                |
+| Commentary          | CrossWire SWORD ZIP  | `RawCom`/`zCom`, `HREFCom` and `RawFiles` drivers (including v4 variants), read through CrossWire's `diatheke`.                                         |
 
 A directory is read as one resource, files in name order — which is how the 27 TSP files become a single
 morphology overlay:

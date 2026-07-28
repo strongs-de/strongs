@@ -143,6 +143,7 @@ async function ingest(
 				.onConflictDoUpdate({
 					target: resources.id,
 					set: {
+						kind: handler.kind,
 						sourceFormat: options.sourceFormat,
 						sourceFile: options.sourceFile ?? null,
 						status: 'importing',

@@ -86,7 +86,9 @@
 	}
 
 	function items(): HTMLElement[] {
-		return [...(element?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])];
+		return [...(element?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])].filter(
+			(item) => item.offsetParent !== null
+		);
 	}
 
 	function onToggle(event: ToggleEvent): void {

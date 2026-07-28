@@ -48,7 +48,8 @@ export function resolveColumns(
 
 /** The first few translations in display order, which is what a first-time visitor sees. */
 export function defaultColumns(available: ReadableResource[]): string[] {
-	return available.slice(0, 4).map((resource) => resource.id);
+	const bibles = available.filter((resource) => resource.kind === 'bible');
+	return (bibles.length > 0 ? bibles : available).slice(0, 4).map((resource) => resource.id);
 }
 
 export function writeColumns(cookies: Cookies, columns: string[]): void {

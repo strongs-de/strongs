@@ -7,7 +7,7 @@ import { parseUsfx, parseUsx } from './usx.ts';
 import { parseVpl } from './vpl.ts';
 import { parseTsk } from './tsk.ts';
 import { parseTsp } from './tsp.ts';
-import { parseCommentaryCsv, sanitizeHtml } from './commentary.ts';
+import { parseCommentaryCsv, parseZefaniaCommentary, sanitizeHtml } from './commentary.ts';
 import type {
 	ParsedCommentaryEntry,
 	ParsedCrossReference,
@@ -432,11 +432,50 @@ describe('sanitizeHtml', () => {
 	it('escapes text that looks like markup', () => {
 		expect(sanitizeHtml('5 &lt; 7 &amp; 8 &gt; 6')).toBe('5 &lt; 7 &amp; 8 &gt; 6');
 	});
+
+	it('reads Zefania dictionary commentaries with numeric scopes', async () => {
+		const { commentary, metadata, warnings } = await drain(
+			parseZefaniaCommentary(`<?xml version="1.0"?>
+				<dictionary type="x-commentary">
+					<INFORMATION>
+						<title>Carl Heinrich Riegers Kommentar</title>
+						<identifier>RIEG</identifier>
+						<language>GER</language>
+					</INFORMATION>
+					<item id="Psalms 1:1" target="19;1;1">
+						<reflink mscope="19;1;1-6"/>
+						<description>Der erste Psalm.</description>
+						<description>Ausführliche &amp; sichere Erklärung.</description>
+					</item>
+				</dictionary>`)
+		);
+
+		expect(warnings).toEqual([]);
+		expect(metadata).toMatchObject({
+			id: 'RIEG',
+			name: 'Carl Heinrich Riegers Kommentar',
+			language: 'de'
+		});
+		expect(commentary).toEqual([
+			{
+				book: 19,
+				chapter: 1,
+				verseStart: 1,
+				verseEnd: 6,
+				bodyHtml: '<p>Der erste Psalm.</p><p>Ausführliche &amp; sichere Erklärung.</p>'
+			}
+		]);
+	});
 });
 
 describe('detectFormat', () => {
 	const cases: [label: string, sample: string, format: string][] = [
 		['Zefania', '<?xml version="1.0"?><XMLBIBLE biblename="X">', 'zefania'],
+		[
+			'Zefania commentary',
+			'<!-- Zefania XML --><dictionary type="x-commentary"><item target="19;1;1"><description>Text</description></item></dictionary>',
+			'zefania-commentary'
+		],
 		[
 			'OSIS',
 			'<?xml version="1.0"?><osis xmlns="http://www.bibletechnologies.net/2003/OSIS/namespace">',

@@ -11,13 +11,14 @@
  */
 
 import { createReadStream } from 'node:fs';
-import { open, readdir, stat } from 'node:fs/promises';
+import { open, readFile, readdir, stat } from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
 import { detectFormat } from '../src/lib/bible/parse/detect.ts';
 import { DETECTION_PREFIX_BYTES } from '../src/lib/bible/parse/detect.ts';
 import type { SourceFormat } from '../src/lib/bible/parse/types.ts';
 import { createDb } from '../src/lib/server/db/client.ts';
 import { runImport } from '../src/lib/server/import/index.ts';
+import { detectSwordFormat } from '../src/lib/server/import/sword.ts';
 
 type Options = {
 	file: string;
@@ -115,7 +116,9 @@ async function resolveInputs(path: string): Promise<string[]> {
 
 	const entries = await readdir(path, { withFileTypes: true });
 	const files = entries
-		.filter((entry) => entry.isFile() && /\.(tsp|usfm|sfm|usx|txt|xml|csv|tsv)$/i.test(entry.name))
+		.filter(
+			(entry) => entry.isFile() && /\.(tsp|usfm|sfm|usx|txt|xml|csv|tsv|zip)$/i.test(entry.name)
+		)
 		.map((entry) => join(path, entry.name))
 		.sort();
 
@@ -134,18 +137,27 @@ const path = resolve(options.file);
 const inputs = await resolveInputs(path);
 if (inputs.length > 1) console.log(`reading ${inputs.length} files from ${options.file}`);
 
-const detection = options.format
+let resolvedDetection: { format: SourceFormat; reason: string } | null = options.format
 	? { format: options.format, reason: 'given on the command line' }
-	: detectFormat(await readPrefix(inputs[0]!), basename(inputs[0]!));
+	: null;
+if (!options.format) {
+	const first = inputs[0]!;
+	const sword = first.toLowerCase().endsWith('.zip')
+		? detectSwordFormat(new Uint8Array(await readFile(first)))
+		: null;
+	resolvedDetection = sword
+		? { format: sword, reason: 'CrossWire SWORD module configuration' }
+		: detectFormat(await readPrefix(first), basename(first));
+}
 
-if (!detection) {
+if (!resolvedDetection) {
 	console.error(
 		`could not recognise the format of ${options.file}. Pass --format explicitly; see docs/importing.md`
 	);
 	process.exit(1);
 }
 
-console.log(`format: ${detection.format} (${detection.reason})`);
+console.log(`format: ${resolvedDetection.format} (${resolvedDetection.reason})`);
 
 const { client, db } = createDb(databaseUrl, { max: 4 });
 const started = Date.now();
@@ -155,7 +167,7 @@ try {
 	let lastMessage = '';
 
 	const result = await runImport(db, {
-		format: detection.format,
+		format: resolvedDetection.format,
 		input: readChunks(...inputs),
 		sourceFile: path,
 		...(options.target ? { targetResourceId: options.target } : {}),

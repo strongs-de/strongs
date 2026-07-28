@@ -10,13 +10,20 @@ import { parseTsp } from './tsp.ts';
 import { parseUsfm } from './usfm.ts';
 import { parseUsfx, parseUsx } from './usx.ts';
 import { parseVpl } from './vpl.ts';
-import { parseCommentaryCsv, parseCommentaryThml } from './commentary.ts';
+import { parseCommentaryCsv, parseCommentaryThml, parseZefaniaCommentary } from './commentary.ts';
 import { parseZefania } from './zefania.ts';
 
 export type Parser = (input: SourceInput) => ParseStream;
 
 const parsers: Record<SourceFormat, Parser> = {
 	zefania: parseZefania,
+	'zefania-commentary': parseZefaniaCommentary,
+	'sword-bible': () => {
+		throw new Error('SWORD modules must be read from their archived source file');
+	},
+	'sword-commentary': () => {
+		throw new Error('SWORD modules must be read from their archived source file');
+	},
 	osis: parseOsis,
 	usfm: (input) => parseUsfm(input),
 	usx: (input) => parseUsx(input),

@@ -1,5 +1,5 @@
 import { getDb } from '$lib/server/db';
-import { listBibles } from '$lib/server/repositories/resources';
+import { listBibles, listReaderResources } from '$lib/server/repositories/resources';
 import { MAX_COLUMNS, resolveColumns, writeColumns } from '$lib/server/columns';
 import { updateReaderColumns } from '$lib/server/repositories/users';
 import { readFontScale, writeFontScale } from '$lib/server/reader-preferences';
@@ -12,7 +12,8 @@ import { readFontScale, writeFontScale } from '$lib/server/reader-preferences';
 export async function load({ cookies, locals }) {
 	const db = getDb();
 	const bibles = await listBibles(db);
-	const columns = resolveColumns(cookies, bibles, locals.user?.readerColumns);
+	const readerResources = await listReaderResources(db);
+	const columns = resolveColumns(cookies, readerResources, locals.user?.readerColumns);
 	if (locals.user && locals.user.readerColumns.length === 0) {
 		await updateReaderColumns(db, locals.user.id, columns);
 	}
@@ -23,6 +24,7 @@ export async function load({ cookies, locals }) {
 
 	return {
 		bibles,
+		readerResources,
 		columns,
 		readerFontScale,
 		// The limit lives in $lib/server, so the reader cannot import it to decide whether to offer a

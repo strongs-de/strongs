@@ -25,6 +25,12 @@ RUN pnpm prune --prod
 FROM node:24-bookworm-slim AS runtime
 WORKDIR /app
 
+# CrossWire's own reader handles the compressed zText/zCom module formats; unzip expands uploaded
+# raw ZIP packages into an isolated temporary SWORD library.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends diatheke unzip \
+    && rm -rf /var/lib/apt/lists/*
+
 ENV NODE_ENV=production \
     PORT=3000 \
     BODY_SIZE_LIMIT=Infinity \

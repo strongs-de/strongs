@@ -13,6 +13,7 @@
 	import VerseMenu from '$lib/components/VerseMenu.svelte';
 	import VerseText from '$lib/components/VerseText.svelte';
 	import NoteEditor from '$lib/components/NoteEditor.svelte';
+	import ResourceMenuItems from '$lib/components/ResourceMenuItems.svelte';
 
 	let { data } = $props();
 
@@ -46,12 +47,28 @@
 	let verseMenu = $state<VerseMenu | undefined>();
 	let addColumnMenu = $state<Menu | undefined>();
 
-	const unusedBibles = $derived(
-		data.bibles.filter((bible) => !data.columns.some((column) => column.resource.id === bible.id))
+	const unusedResources = $derived(
+		data.readerResources.filter(
+			(resource) => !data.columns.some((column) => column.resource.id === resource.id)
+		)
 	);
-	const canAddColumn = $derived(data.columns.length < data.maxColumns && unusedBibles.length > 0);
+	const canAddColumn = $derived(
+		data.columns.length < data.maxColumns && unusedResources.length > 0
+	);
 	const visibleColumnCount = $derived(data.columns.length + (data.notesVisible ? 1 : 0));
 	const notesColumnIndex = $derived(data.columns.length);
+
+	function commentaryAt(resourceId: string, verse: number) {
+		return data.referenceResources.commentaries.filter(
+			(entry) => entry.resourceId === resourceId && (entry.verseStart ?? 1) === verse
+		);
+	}
+
+	function crossReferencesAt(resourceId: string, verse: number) {
+		return data.referenceResources.crossReferences.filter(
+			(entry) => entry.resourceId === resourceId && entry.fromVerse === verse
+		);
+	}
 
 	let draggedColumn = $state<number | null>(null);
 	let dropColumn = $state<number | null>(null);
@@ -301,7 +318,7 @@
 						<ColumnPicker
 							index={column.index}
 							selected={column.resource}
-							available={data.bibles}
+							available={data.readerResources}
 							chosen={data.columns.map((other) => other.resource.id)}
 							canRemove={data.columns.length > 1}
 							canAdd={canAddColumn && column.index === data.columns.length - 1}
@@ -388,20 +405,11 @@
 
 					<Menu bind:this={addColumnMenu} label={t('reader.addColumn')}>
 						<p class="menu-label">{t('reader.addColumn')}</p>
-						{#each unusedBibles as bible (bible.id)}
-							<form
-								method="POST"
-								action="?/addColumn"
-								role="none"
-								use:enhance={() => {
-									addColumnMenu?.close();
-									return async ({ update }) => update({ reset: false });
-								}}
-							>
-								<input type="hidden" name="resource" value={bible.id} />
-								<button type="submit" role="menuitem">{bible.name}</button>
-							</form>
-						{/each}
+						<ResourceMenuItems
+							resources={unusedResources}
+							action="?/addColumn"
+							onChoose={() => addColumnMenu?.close()}
+						/>
 					</Menu>
 				{/if}
 			</div>
@@ -448,8 +456,10 @@
 							</h2>
 						{/if}
 
-						{#each row.cells as cell, columnIndex (columnIndex)}
-							{#if cell}
+						{#each data.columns as column, columnIndex (column.resource.id)}
+							{@const cell =
+								column.bibleCellIndex === null ? null : row.cells[column.bibleCellIndex]}
+							{#if column.resource.kind === 'bible' && cell}
 								<p
 									class="verse"
 									class:hidden-on-mobile={columnIndex !== mobileColumn}
@@ -497,6 +507,64 @@
 										/>
 									</span>
 								</p>
+							{:else if column.resource.kind === 'commentary'}
+								{@const entries = commentaryAt(column.resource.id, row.verse)}
+								{#if entries.length > 0}
+									<article
+										class="reference-cell"
+										class:hidden-on-mobile={columnIndex !== mobileColumn}
+										style="grid-column: {columnIndex + 1}; grid-row: {rowIndex * 2 + 2}"
+									>
+										<span class="verse-number">{row.verse}</span>
+										{#each entries as entry (entry.id)}
+											{#if entry.title}
+												<h3 class="mb-1 font-semibold">{entry.title}</h3>
+											{/if}
+											<!-- Imported commentary is reduced to an allow-list by its parser. -->
+											<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+											<div class="commentary-body">{@html entry.bodyHtml}</div>
+										{/each}
+									</article>
+								{/if}
+							{:else if column.resource.kind === 'xrefs'}
+								{@const references = crossReferencesAt(column.resource.id, row.verse)}
+								{#if references.length > 0}
+									<div
+										class="reference-cell"
+										class:hidden-on-mobile={columnIndex !== mobileColumn}
+										style="grid-column: {columnIndex + 1}; grid-row: {rowIndex * 2 + 2}"
+									>
+										<span class="verse-number">{row.verse}</span>
+										<ul class="flex flex-wrap gap-1">
+											{#each references as target (target.id)}
+												<li>
+													<a
+														class="inline-block rounded border border-stone-200 px-1.5 py-0.5 text-xs
+														       hover:border-accent-500 hover:text-accent-700 dark:border-stone-700
+														       dark:hover:text-accent-300"
+														href={referencePath({
+															book: target.toBook,
+															chapter: target.toChapter,
+															verse: target.toVerse,
+															...(target.toVerseEnd > target.toVerse
+																? { verseEnd: target.toVerseEnd }
+																: {})
+														})}
+													>
+														{formatReference({
+															book: target.toBook,
+															chapter: target.toChapter,
+															verse: target.toVerse,
+															...(target.toVerseEnd > target.toVerse
+																? { verseEnd: target.toVerseEnd }
+																: {})
+														})}
+													</a>
+												</li>
+											{/each}
+										</ul>
+									</div>
+								{/if}
 							{/if}
 						{/each}
 					{/each}
@@ -550,6 +618,22 @@
 
 	.license-grid {
 		grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+	}
+
+	.reference-cell {
+		min-width: 0;
+		padding: 0.45rem 0.75rem 0.8rem;
+		border-right: 1px solid var(--color-stone-100);
+		font-size: 0.875rem;
+		line-height: 1.55;
+	}
+
+	:global(.dark) .reference-cell {
+		border-color: var(--color-stone-800);
+	}
+
+	.commentary-body :global(p + p) {
+		margin-top: 0.5rem;
 	}
 
 	/* One column on a phone: the inactive ones are hidden and every cell moves to column 1. */

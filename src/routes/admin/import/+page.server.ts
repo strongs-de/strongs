@@ -5,6 +5,7 @@ import { getDb } from '$lib/server/db';
 import { queueImport, listJobs, hasRunningJob } from '$lib/server/import/jobs';
 import { resourceKindForFormat } from '$lib/server/import';
 import { morphologyTargets } from '$lib/server/import/ingest-morphology';
+import { detectSwordFormat } from '$lib/server/import/sword';
 
 /**
  * Upload and import.
@@ -42,7 +43,7 @@ export const actions = {
 		const chosen = String(form.get('format') ?? '');
 		const format: SourceFormat | undefined = SOURCE_FORMATS.includes(chosen as SourceFormat)
 			? (chosen as SourceFormat)
-			: detectFormat(prefix, file.name)?.format;
+			: (detectSwordFormat(new Uint8Array(contents)) ?? detectFormat(prefix, file.name)?.format);
 
 		if (!format) {
 			return fail(400, {

@@ -151,7 +151,7 @@
 			</p>
 			<ul class="mt-2 flex flex-wrap gap-1.5">
 				{#each data.columns as columnId (columnId)}
-					{@const resource = data.bibles.find((bible) => bible.id === columnId)}
+					{@const resource = data.readerResources.find((item) => item.id === columnId)}
 					{#if resource}
 						<li
 							class="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1 text-xs

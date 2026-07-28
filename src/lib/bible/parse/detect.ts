@@ -23,6 +23,17 @@ export function detectFormat(prefix: string, fileName?: string): Detection | nul
 	const name = fileName?.toLowerCase() ?? '';
 
 	// --- XML formats, identified by their root element -----------------------
+	if (
+		/<(?:\w+:)?dictionary\b[^>]*\btype\s*=\s*["']x-commentary["']/i.test(head) ||
+		/<(?:\w+:)?item\b[^>]*\btarget\s*=\s*["'][^"']+["'][^>]*>[\s\S]*?<(?:\w+:)?description\b/i.test(
+			head
+		)
+	) {
+		return {
+			format: 'zefania-commentary',
+			reason: 'Zefania XML commentary root element <dictionary type="x-commentary">'
+		};
+	}
 	if (lower.includes('<xmlbible') || lower.includes('zefania')) {
 		return { format: 'zefania', reason: 'Zefania XML root element <XMLBIBLE>' };
 	}
