@@ -240,6 +240,7 @@
 	let jumpedSignature = '';
 	let suppressFlowScroll = false;
 	let suppressFlowTimer: ReturnType<typeof setTimeout> | undefined;
+	let suppressReaderScroll = false;
 	const visibleStreamChapter = $derived(
 		streamChapters.find(
 			(stream) => `${stream.reference.book}:${stream.reference.chapter}` === visibleChapterKey
@@ -263,7 +264,17 @@
 			activeFlowSource = 0;
 			jumpedSignature = '';
 			if (data.reference.verse === undefined) {
+				// Landing on a new chapter always starts at its top, so the reset itself must not be
+				// mistaken by `onReaderWindowScroll` for the reader having scrolled near the top of an
+				// accumulated stream — that would immediately prepend the previous chapter and scroll
+				// back down again, undoing the reset.
+				suppressProgrammaticReaderScroll();
 				tick().then(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+			}
+			if (data.readerLayout === 'aligned') {
+				// Mirrors the flow layout's own eager preload below: a chapter short enough to leave the
+				// page unscrolled would otherwise never reach the scroll threshold that loads the next one.
+				tick().then(() => void loadAlignedNext());
 			}
 		}
 	});
@@ -274,6 +285,21 @@
 		suppressFlowTimer = setTimeout(() => {
 			suppressFlowScroll = false;
 		}, 80);
+	}
+
+	/**
+	 * Suppresses `onReaderWindowScroll` for the one scroll event our own `window.scrollTo` reset
+	 * causes, the same way `suppressProgrammaticFlowScroll` shields the flow columns from their own
+	 * sync. Two animation frames comfortably span the async scroll event a browser dispatches after
+	 * `scrollTo`.
+	 */
+	function suppressProgrammaticReaderScroll() {
+		suppressReaderScroll = true;
+		requestAnimationFrame(() => {
+			requestAnimationFrame(() => {
+				suppressReaderScroll = false;
+			});
+		});
 	}
 
 	async function fetchStreamChapter(reference: { book: number; chapter: number }) {
@@ -350,6 +376,7 @@
 	 */
 	function onReaderWindowScroll() {
 		if (data.readerLayout !== 'aligned') return;
+		if (suppressReaderScroll) return;
 		if (window.scrollY < 500) void loadAlignedPrevious();
 		if (document.documentElement.scrollHeight - window.scrollY - window.innerHeight < 900) {
 			void loadAlignedNext();
