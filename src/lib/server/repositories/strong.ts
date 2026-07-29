@@ -8,6 +8,7 @@
  */
 
 import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
+import { bookIdsForTestament } from '../../bible/books.ts';
 import { strongLanguage, type StrongId } from '../../bible/strong.ts';
 import type { VerseSegment } from '../../bible/segments.ts';
 import type { Database } from '../db/client.ts';
@@ -95,7 +96,13 @@ export async function loadStrongStatistics(
 	};
 }
 
-/** How often a Strong-tagged word occurs in each biblical book. */
+/**
+ * How often a Strong-tagged word occurs in each biblical book.
+ *
+ * Includes every book of the word's own testament, zero-filled where it does not occur — a Strong's
+ * number is Hebrew or Greek by construction, so the chart's book axis is fixed regardless of which
+ * books happen to have a hit, rather than growing and shrinking with the result set.
+ */
 export async function loadStrongBookCounts(
 	db: Database,
 	strong: StrongId,
@@ -109,7 +116,9 @@ export async function loadStrongBookCounts(
 		order by book_id
 	`);
 
-	return rows.map((row) => ({ book: row.book_id, count: Number(row.count) }));
+	const counts = new Map(rows.map((row) => [row.book_id, Number(row.count)]));
+	const testament = strongLanguage(strong) === 'hebrew' ? 'ot' : 'nt';
+	return bookIdsForTestament(testament).map((book) => ({ book, count: counts.get(book) ?? 0 }));
 }
 
 /**

@@ -14,13 +14,15 @@
 		html = null,
 		action = '?/saveNote',
 		reference,
-		placeholder = t('lists.notePlaceholder')
+		placeholder = t('lists.notePlaceholder'),
+		onSaved
 	}: {
 		itemId?: string;
 		html?: string | null;
 		action?: string;
 		reference?: string;
 		placeholder?: string;
+		onSaved?: (html: string) => void;
 	} = $props();
 
 	let editor: HTMLDivElement | undefined = $state();
@@ -46,6 +48,7 @@
 
 		return async ({ update }) => {
 			await update({ reset: false });
+			onSaved?.(editor?.innerHTML ?? html ?? '');
 			dirty = false;
 			saved = true;
 			setTimeout(() => (saved = false), 2000);

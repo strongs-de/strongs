@@ -63,6 +63,51 @@ export function isTextSegment(segment: VerseSegment): segment is TextSegment {
 }
 
 /**
+ * Splits off the first visible word so a reader can keep a verse/chapter number attached to it.
+ *
+ * The whitespace stays at the beginning of the remainder. Rendering both arrays consecutively
+ * therefore reproduces the original text exactly.
+ */
+export function splitVerseLead(
+	segments: readonly VerseSegment[]
+): [VerseSegment[], VerseSegment[]] {
+	const lead: VerseSegment[] = [];
+	const rest = [...segments];
+
+	while (rest.length > 0) {
+		const segment = rest.shift()!;
+		if (typeof segment === 'string') {
+			const boundary = segment.search(/\s/);
+			if (boundary < 0) {
+				lead.push(segment);
+				continue;
+			}
+			if (boundary > 0) lead.push(segment.slice(0, boundary));
+			rest.unshift(segment.slice(boundary));
+			break;
+		}
+
+		lead.push(segment);
+		if (segment.kind === 'w' || segment.kind === 'em' || segment.kind === 'wj') break;
+		if (segment.kind === 'br') break;
+	}
+
+	// Closing punctuation can be stored as the next plain segment. Keep it with the first word too.
+	const next = rest[0];
+	if (typeof next === 'string') {
+		const punctuation = /^[,.;:!?…)\]}»”’]+/.exec(next);
+		if (punctuation) {
+			lead.push(punctuation[0]);
+			const remainder = next.slice(punctuation[0].length);
+			if (remainder) rest[0] = remainder;
+			else rest.shift();
+		}
+	}
+
+	return [lead, rest];
+}
+
+/**
  * Flattens segments to the plain text used for full-text search, snippets and copying.
  *
  * Notes are excluded: they are editorial apparatus, and including them would make searches match

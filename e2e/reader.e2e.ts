@@ -47,6 +47,98 @@ test('verses stay aligned across columns', async ({ page }) => {
 	expect(new Set(verse16.map((cell) => cell.column)).size).toBe(verse16.length);
 });
 
+test('the view menu switches to synchronized flowing text', async ({ page }) => {
+	await page.goto('/Joh3');
+	expect(await page.evaluate(() => window.scrollY)).toBe(0);
+
+	await page.getByRole('button', { name: 'Ansicht' }).click();
+	await expect(page.getByRole('menuitemradio', { name: 'Helles Design' })).toBeVisible();
+	await expect(page.getByRole('menuitemradio', { name: 'Dunkles Design' })).toBeVisible();
+	await page.getByRole('menuitem', { name: /Fließtext/ }).click();
+
+	const reader = page.getByTestId('flow-reader');
+	await expect(reader).toBeVisible();
+	await expect(page.locator('.flow-verse').first()).toHaveCSS('display', 'inline');
+	await expect(page.locator('.flow-chapter-title')).toHaveCount(0);
+	await expect(page.locator('.flow-chapter-number').first()).toHaveText('3');
+	await expect(page.locator('.verse-lead').first()).toHaveCSS('white-space', 'nowrap');
+	await expect(page.locator('.keep-punctuation').first()).toHaveCSS('white-space', 'nowrap');
+
+	const columns = page.locator('.flow-column');
+	await expect(columns).toHaveCount(2);
+	await expect(columns.first()).toHaveCSS('scrollbar-width', 'none');
+	await page.waitForTimeout(120);
+	await columns.first().evaluate((element) => {
+		const verse = element.querySelector<HTMLElement>('[data-verse-key="43:3:17"]');
+		element.dispatchEvent(new WheelEvent('wheel', { deltaY: 100 }));
+		element.scrollTop = verse?.offsetTop ?? element.scrollHeight;
+		element.dispatchEvent(new Event('scroll'));
+	});
+
+	await expect
+		.poll(() => columns.nth(1).evaluate((element) => element.scrollTop))
+		.toBeGreaterThan(0);
+
+	// Whichever text column the reader manipulates becomes the source for all the others.
+	const firstPosition = await columns.first().evaluate((element) => element.scrollTop);
+	await page.waitForTimeout(120);
+	await columns.nth(1).evaluate((element) => {
+		element.dispatchEvent(new WheelEvent('wheel', { deltaY: -100 }));
+		element.scrollTop = 0;
+		element.dispatchEvent(new Event('scroll'));
+	});
+	await expect
+		.poll(() => columns.first().evaluate((element) => element.scrollTop))
+		.not.toBe(firstPosition);
+
+	// The preference survives a regular navigation.
+	await page.goto('/Joh3');
+	await expect(reader).toBeVisible();
+});
+
+test('flowing text preloads the next chapter for endless scrolling', async ({ page }) => {
+	await page.goto('/Joh3');
+	await page.getByRole('button', { name: 'Ansicht' }).click();
+	await page.getByRole('menuitem', { name: /Fließtext/ }).click();
+
+	await expect(page.locator('[data-chapter-key="43:4"]').first()).toBeAttached();
+});
+
+test('a verse reference scrolls directly to the requested verse', async ({ page }) => {
+	await page.setViewportSize({ width: 900, height: 260 });
+	await page.goto('/1Mo1,3');
+
+	await expect(page.locator('.verse.highlighted').first()).toBeInViewport();
+	expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+});
+
+test('changing the reference resets aligned scrolling and the visible chapter', async ({
+	page
+}) => {
+	await page.setViewportSize({ width: 900, height: 260 });
+	await page.goto('/1Mo1,3');
+	expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+
+	await page.getByRole('searchbox').fill('Joh 3');
+	await page.getByRole('searchbox').press('Enter');
+
+	await expect(page).toHaveURL(/\/Joh3$/);
+	await expect(page.getByTestId('reader-location')).toContainText('Johannes 3');
+	await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+});
+
+test('the aligned chapter label follows endless scrolling', async ({ page }) => {
+	await page.setViewportSize({ width: 900, height: 300 });
+	await page.goto('/1Mo1');
+
+	const nextChapter = page.locator('.aligned-chapter[data-chapter-key="1:2"]');
+	await expect(nextChapter).toBeAttached();
+	await nextChapter.scrollIntoViewIfNeeded();
+	await page.evaluate(() => window.scrollBy(0, 100));
+
+	await expect(page.getByTestId('reader-location')).toContainText('1.Mose 2');
+});
+
 test('chapter navigation moves forwards and backwards', async ({ page }) => {
 	await page.goto('/1Mo1');
 

@@ -9,6 +9,7 @@
  */
 
 import { sql, type SQL } from 'drizzle-orm';
+import { BOOKS } from '../../bible/books.ts';
 import { parseSearchQuery, type ParsedQuery } from '../../bible/search-query.ts';
 import type { VerseSegment } from '../../bible/segments.ts';
 import type { Database } from '../db/client.ts';
@@ -176,6 +177,10 @@ export async function search(
 
 	const hits = await attachParallelText(db, references, options.resourceIds);
 
+	// Zero-filled for every book, not just ones with a hit, so the chart's book axis stays the whole
+	// canon instead of growing and shrinking with the result set.
+	const bookCountsByBook = new Map(bookCounts.map((row) => [row.book_id, Number(row.count)]));
+
 	return {
 		query,
 		hits,
@@ -183,7 +188,7 @@ export async function search(
 		page,
 		pageCount: Math.max(1, Math.ceil(total / pageSize)),
 		counts: counts.map((row) => ({ resourceId: row.resource_id, count: Number(row.count) })),
-		bookCounts: bookCounts.map((row) => ({ book: row.book_id, count: Number(row.count) })),
+		bookCounts: BOOKS.map((book) => ({ book: book.id, count: bookCountsByBook.get(book.id) ?? 0 })),
 		suggestion: null
 	};
 }

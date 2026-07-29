@@ -82,6 +82,45 @@ test('a verse list keeps its verses and notes', async ({ page }) => {
 	await expect(page.getByRole('textbox', { name: 'Notiz' })).toContainText('Der bekannteste Vers');
 });
 
+test('chapter notes follow the visible chapter while scrolling', async ({ page }) => {
+	await register(page, uniqueEmail());
+	await page.goto('/1Mo1');
+
+	await page.getByRole('button', { name: 'Notizspalte einblenden' }).click();
+	const noteForm = page
+		.locator('form[action="?/saveChapterNote"]')
+		.filter({ has: page.locator('input[name="reference"][value="1Mo2"]') });
+	await noteForm.getByRole('textbox', { name: 'Notiz' }).fill('Notiz für Kapitel zwei');
+	await noteForm.getByRole('button', { name: 'Speichern' }).click();
+
+	await page.getByRole('button', { name: 'Ansicht' }).click();
+	await page.getByRole('menuitem', { name: /Fließtext/ }).click();
+
+	const firstTextColumn = page.locator('.flow-column').first();
+	const visibleNote = page.locator('.flow-note > div:not(.hidden-note)');
+	await expect(visibleNote.locator('.note-chapter-title')).toHaveText('1.Mose 1');
+	await expect(page.locator('[data-chapter-key="1:2"]').first()).toBeAttached();
+	await page.waitForTimeout(120);
+
+	const chapterTop = await firstTextColumn.evaluate((element) => {
+		const chapter = element.querySelector<HTMLElement>('[data-chapter-key="1:2"]');
+		if (!chapter) return Number.POSITIVE_INFINITY;
+		for (let attempt = 0; attempt < 3; attempt += 1) {
+			const distance =
+				chapter.getBoundingClientRect().top - element.getBoundingClientRect().top - 12;
+			element.scrollTop += distance;
+		}
+		element.dispatchEvent(new Event('scroll'));
+		return chapter.getBoundingClientRect().top - element.getBoundingClientRect().top;
+	});
+	expect(chapterTop).toBeLessThanOrEqual(13);
+
+	await expect(visibleNote.locator('.note-chapter-title')).toHaveText('1.Mose 2');
+	await expect(visibleNote.locator('[contenteditable="true"]')).toContainText(
+		'Notiz für Kapitel zwei'
+	);
+});
+
 test('a shared list is readable without an account', async ({ page, browser }) => {
 	await register(page, uniqueEmail());
 

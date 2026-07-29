@@ -86,9 +86,9 @@
 	}
 
 	function items(): HTMLElement[] {
-		return [...(element?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])].filter(
-			(item) => item.offsetParent !== null
-		);
+		return [
+			...(element?.querySelectorAll<HTMLElement>('[role="menuitem"], [role="menuitemradio"]') ?? [])
+		].filter((item) => item.offsetParent !== null);
 	}
 
 	function onToggle(event: ToggleEvent): void {
@@ -170,7 +170,8 @@
 
 	/* Items are styled here rather than by every caller, so a menu looks the same wherever it opens.
 	   Wrapping <form>s carry role="none" so the menu/menuitem relationship survives them. */
-	.menu :global([role='menuitem']) {
+	.menu :global([role='menuitem']),
+	.menu :global([role='menuitemradio']) {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -187,12 +188,16 @@
 	}
 
 	.menu :global([role='menuitem']:hover),
-	.menu :global([role='menuitem']:focus-visible) {
+	.menu :global([role='menuitem']:focus-visible),
+	.menu :global([role='menuitemradio']:hover),
+	.menu :global([role='menuitemradio']:focus-visible) {
 		background: var(--color-stone-100);
 	}
 
 	:global(.dark) .menu :global([role='menuitem']:hover),
-	:global(.dark) .menu :global([role='menuitem']:focus-visible) {
+	:global(.dark) .menu :global([role='menuitem']:focus-visible),
+	:global(.dark) .menu :global([role='menuitemradio']:hover),
+	:global(.dark) .menu :global([role='menuitemradio']:focus-visible) {
 		background: var(--color-stone-800);
 	}
 

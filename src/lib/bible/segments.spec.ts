@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
 	finalizeSegments,
+	splitVerseLead,
 	segmentsToText,
 	tidySegmentSpacing,
 	wordsFromSegments,
@@ -37,6 +38,20 @@ describe('segmentsToText', () => {
 		expect(segmentsToText(['Zeile eins', { kind: 'br' }, 'Zeile zwei'])).toBe(
 			'Zeile eins Zeile zwei'
 		);
+	});
+});
+
+describe('splitVerseLead', () => {
+	it('keeps the first word and its punctuation together', () => {
+		expect(splitVerseLead(['Jesus, antwortete ihnen.'])).toEqual([
+			['Jesus,'],
+			[' antwortete ihnen.']
+		]);
+	});
+
+	it('attaches punctuation from the next segment to a tagged word', () => {
+		const word = { kind: 'w', text: 'Jesus', strong: 'G2424' } as const;
+		expect(splitVerseLead([word, '? Danach'])).toEqual([[word, '?'], [' Danach']]);
 	});
 });
 

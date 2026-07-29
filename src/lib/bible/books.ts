@@ -114,6 +114,11 @@ export function isValidBookId(id: number): boolean {
 	return byId.has(id);
 }
 
+/** Every book id in a testament, in canonical order — Strong's numbers never cross testaments. */
+export function bookIdsForTestament(testament: Testament): number[] {
+	return BOOKS.filter((book) => book.testament === testament).map((book) => book.id);
+}
+
 /**
  * Which Strong's language a book uses. Determines whether a bare number like `430` means H430 or
  * G430, exactly as the old site decided it from `bookNr < 40`.

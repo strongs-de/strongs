@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { t } from '$lib/i18n';
+	import ReaderViewMenu from './ReaderViewMenu.svelte';
 	import ThemeToggle from './ThemeToggle.svelte';
 
 	/**
@@ -13,12 +14,14 @@
 		query = '',
 		previous = null,
 		next = null,
-		user = null
+		user = null,
+		readerPreferences = null
 	}: {
 		query?: string;
 		previous?: string | null;
 		next?: string | null;
 		user?: { displayName: string | null; email: string; role: string } | null;
+		readerPreferences?: { layout: 'aligned' | 'flow'; fontScale: number } | null;
 	} = $props();
 
 	// A writable derived: it follows the current reference as you navigate, but typing overrides it.
@@ -29,7 +32,7 @@
 		event.preventDefault();
 		const trimmed = value.trim();
 		if (!trimmed) return;
-		await goto(`/${encodeURIComponent(trimmed)}`);
+		await goto(`/${encodeURIComponent(trimmed)}`, { noScroll: true });
 		input?.blur();
 	}
 
@@ -151,7 +154,11 @@
 				</a>
 			{/if}
 
-			<ThemeToggle />
+			{#if readerPreferences}
+				<ReaderViewMenu layout={readerPreferences.layout} fontScale={readerPreferences.fontScale} />
+			{:else}
+				<ThemeToggle />
+			{/if}
 
 			{#if user}
 				<a

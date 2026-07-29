@@ -23,31 +23,70 @@
 		/** Highlights every occurrence of the Strong's number currently shown in the sidebar. */
 		activeStrong?: string | null;
 	} = $props();
+
+	type RenderPart = { segment: VerseSegment; suffix: string };
+
+	function keepClosingPunctuation(list: VerseSegment[]): RenderPart[] {
+		const parts: RenderPart[] = [];
+		for (const original of list) {
+			let segment = original;
+			const previous = parts.at(-1);
+			if (
+				typeof segment === 'string' &&
+				previous &&
+				typeof previous.segment !== 'string' &&
+				previous.segment.kind !== 'br'
+			) {
+				const punctuation = /^[,.;:!?…)\]}»”’]+/.exec(segment);
+				if (punctuation) {
+					previous.suffix += punctuation[0];
+					segment = segment.slice(punctuation[0].length);
+				}
+			}
+			if (segment !== '') parts.push({ segment, suffix: '' });
+		}
+		return parts;
+	}
+
+	const renderParts = $derived(keepClosingPunctuation(segments));
 </script>
 
-{#each segments as segment, index (index)}
-	{#if typeof segment === 'string'}{segment}{:else if segment.kind === 'w'}<button
-			type="button"
-			class="strong"
-			class:active={activeStrong !== null &&
-				(segment.strong === activeStrong || segment.strongs?.includes(activeStrong))}
-			data-strong={segment.strong}
-			title={segment.morph ?? undefined}
-			onclick={() => onStrongClick?.(segment.strong, segment.text)}>{segment.text}</button
-		>{:else if segment.kind === 'em'}<em>{segment.text}</em
-		>{:else if segment.kind === 'note'}<Footnote
-			marker={segment.marker}
-			text={segment.text}
-		/>{:else if segment.kind === 'br'}<br />{:else if segment.kind === 'wj'}<span
-			class="words-of-jesus"
-			><VerseText
-				segments={segment.children as VerseSegment[]}
-				{onStrongClick}
-				{activeStrong}
-			/></span
-		>{/if}{/each}
+{#each renderParts as part, index (index)}
+	{@const segment = part.segment}
+	{#if typeof segment === 'string'}
+		{segment}
+	{:else if segment.kind === 'br'}
+		<br />
+	{:else}
+		<span class:keep-punctuation={segment.kind === 'w' || segment.kind === 'em'}
+			>{#if segment.kind === 'w'}<button
+					type="button"
+					class="strong"
+					class:active={activeStrong !== null &&
+						(segment.strong === activeStrong || segment.strongs?.includes(activeStrong))}
+					data-strong={segment.strong}
+					title={segment.morph ?? undefined}
+					onclick={() => onStrongClick?.(segment.strong, segment.text)}>{segment.text}</button
+				>{:else if segment.kind === 'em'}<em>{segment.text}</em
+				>{:else if segment.kind === 'note'}<Footnote
+					marker={segment.marker}
+					text={segment.text}
+				/>{:else if segment.kind === 'wj'}<span class="words-of-jesus"
+					><VerseText
+						segments={segment.children as VerseSegment[]}
+						{onStrongClick}
+						{activeStrong}
+					/></span
+				>{/if}{part.suffix}</span
+		>
+	{/if}
+{/each}
 
 <style>
+	.keep-punctuation {
+		white-space: nowrap;
+	}
+
 	/* Tagged words are darker and get an underline on hover, the affordance the old site used too. */
 	.strong {
 		display: inline;

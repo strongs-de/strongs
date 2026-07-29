@@ -16,9 +16,11 @@
 		compact?: boolean;
 	} = $props();
 
-	const nonEmpty = $derived(counts.filter((entry) => entry.count > 0));
-	const oldTestament = $derived(nonEmpty.filter((entry) => entry.book <= 39));
-	const newTestament = $derived(nonEmpty.filter((entry) => entry.book >= 40));
+	// Zero-count books stay in the chart — the server already scopes `counts` to whichever books are
+	// relevant (a Strong's number's own testament, or the whole canon for a text search), so an empty
+	// bar here means "no hits in this book", not "not applicable".
+	const oldTestament = $derived(counts.filter((entry) => entry.book <= 39));
+	const newTestament = $derived(counts.filter((entry) => entry.book >= 40));
 
 	function maxCount(entries: { count: number }[]): number {
 		return entries.reduce((maximum, entry) => Math.max(maximum, entry.count), 1);
@@ -31,7 +33,7 @@
 	}
 </script>
 
-{#if nonEmpty.length > 0}
+{#if counts.length > 0}
 	<figure class="book-distribution" aria-label={label}>
 		<figcaption class="mb-3 text-xs font-semibold tracking-wide text-stone-500 uppercase">
 			{label}

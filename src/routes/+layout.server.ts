@@ -2,7 +2,12 @@ import { getDb } from '$lib/server/db';
 import { listBibles, listReaderResources } from '$lib/server/repositories/resources';
 import { MAX_COLUMNS, resolveColumns, writeColumns } from '$lib/server/columns';
 import { updateReaderColumns } from '$lib/server/repositories/users';
-import { readFontScale, writeFontScale } from '$lib/server/reader-preferences';
+import {
+	readFontScale,
+	readReaderLayout,
+	writeFontScale,
+	writeReaderLayout
+} from '$lib/server/reader-preferences';
 
 /**
  * Data every page needs: the available translations and the reader's column selection.
@@ -21,12 +26,15 @@ export async function load({ cookies, locals }) {
 	writeColumns(cookies, columns);
 	const readerFontScale = readFontScale(cookies, locals.user?.readerFontScale);
 	writeFontScale(cookies, readerFontScale);
+	const readerLayout = readReaderLayout(cookies);
+	writeReaderLayout(cookies, readerLayout);
 
 	return {
 		bibles,
 		readerResources,
 		columns,
 		readerFontScale,
+		readerLayout,
 		// The limit lives in $lib/server, so the reader cannot import it to decide whether to offer a
 		// further column.
 		maxColumns: MAX_COLUMNS,

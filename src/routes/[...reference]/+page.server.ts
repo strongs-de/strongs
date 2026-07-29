@@ -33,6 +33,8 @@ import {
 	MAX_FONT_SCALE,
 	MIN_FONT_SCALE,
 	readFontScale,
+	readReaderLayout,
+	writeReaderLayout,
 	writeFontScale
 } from '$lib/server/reader-preferences';
 import {
@@ -298,6 +300,16 @@ export const actions = {
 		writeFontScale(cookies, next);
 		if (locals.user) await updateReaderFontScale(getDb(), locals.user.id, next);
 		return { success: true };
+	},
+
+	setReaderLayout: async ({ request, cookies }) => {
+		const form = await request.formData();
+		const layout = String(form.get('layout') ?? '');
+		if (layout !== 'aligned' && layout !== 'flow') {
+			return fail(400, { error: 'readerLayout' });
+		}
+		writeReaderLayout(cookies, layout);
+		return { success: true, layout: readReaderLayout(cookies) };
 	},
 
 	/**
