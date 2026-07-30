@@ -48,39 +48,32 @@
 	bind:this={trigger}
 	type="button"
 	class="footnote-marker"
-	aria-label={t('verse.footnote', { marker: marker || '•' })}
+	aria-label={t('verse.footnote', { marker: marker || '*' })}
 	aria-haspopup="dialog"
 	onclick={toggle}
 >
-	{marker || '•'}
+	{marker || '*'}
 </button>
 <span bind:this={popup} popover="auto" role="note" class="footnote-popup">{text}</span>
 
 <style>
 	.footnote-marker {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		min-width: 1.15rem;
-		height: 1.15rem;
-		margin: 0 0.08rem;
-		padding: 0 0.25rem;
-		vertical-align: 0.5em;
-		border: 1px solid color-mix(in oklab, var(--color-accent-500) 45%, transparent);
-		border-radius: 999px;
-		background: color-mix(in oklab, var(--color-accent-500) 10%, transparent);
+		display: inline;
+		padding: 0;
+		border: none;
+		background: none;
+		vertical-align: super;
 		font-family: var(--font-sans);
-		font-size: 0.62rem;
+		font-size: 0.7em;
 		font-weight: 700;
-		line-height: 1;
+		line-height: 0;
 		color: var(--color-accent-700);
 		cursor: pointer;
 	}
 
 	.footnote-marker:hover,
 	.footnote-marker:focus-visible {
-		border-color: var(--color-accent-500);
-		background: color-mix(in oklab, var(--color-accent-500) 18%, transparent);
+		text-decoration: underline;
 	}
 
 	:global(.dark) .footnote-marker {

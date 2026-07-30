@@ -17,6 +17,9 @@
  *   "Buch , des". Spacing is repaired once here rather than per request.
  * - Luther 1912 wraps study notes in `<DIV><NOTE type="x-studynote">…</NOTE></DIV>`, which must not
  *   become part of the verse text.
+ * - bibelkommentare.de's MyBible-derived export (elb_bk) tags a Strong's number the site hasn't
+ *   mapped to a word yet as `<gr str="…">[?]</gr>`. That `[?]` is a placeholder from their own site,
+ *   never real verse text, so it is dropped like a `<gr>` with no text at all.
  * - The interlinear file contains a duplicated `<CHAPTER cnumber="2">` in Galatians. Verses are
  *   emitted in source order and the ingester decides which duplicate to keep; see
  *   `src/lib/server/import/ingest-bible.ts` for the rule and why.
@@ -26,6 +29,9 @@ import { strongIdsFromSource } from '../strong.ts';
 import { finalizeSegments, pushText, tidySegmentSpacing, type VerseSegment } from '../segments.ts';
 import { attribute, intAttribute, readXml } from './xml.ts';
 import type { ParseEvent, ParseStream, ResourceMetadata, SourceInput } from './types.ts';
+
+/** bibelkommentare.de's own marker for "this Strong's number has no word assigned yet". */
+const UNASSIGNED_STRONG_PLACEHOLDER = '[?]';
 
 export async function* parseZefania(input: SourceInput): ParseStream {
 	const information: Record<string, string> = {};
@@ -134,7 +140,7 @@ export async function* parseZefania(input: SourceInput): ParseStream {
 				const strongs =
 					word.strong && book !== undefined ? strongIdsFromSource(word.strong, book) : [];
 
-				if (!text) {
+				if (!text || text === UNASSIGNED_STRONG_PLACEHOLDER) {
 					pushText(segments, trailing);
 					break;
 				}

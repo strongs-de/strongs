@@ -217,6 +217,20 @@ describe('parseZefania', () => {
 		expect(warnings.join(' ')).toContain('7225');
 	});
 
+	it('drops a Strong number bibelkommentare.de has not mapped to a word yet', async () => {
+		// bibelkommentare.de's MyBible export renders such words as <gr str="…">[?]</gr>.
+		const { verses, warnings } = await collect(
+			wrap(
+				`<identifier>X</identifier><language>GER</language>`,
+				`<BIBLEBOOK bnumber="1"><CHAPTER cnumber="1"><VERS vnumber="1">Und <gr str="853">[?]</gr> die Erde</VERS></CHAPTER></BIBLEBOOK>`
+			)
+		);
+
+		expect(segmentsToText(verses[0]!.segments)).toBe('Und die Erde');
+		expect(verses[0]?.segments.every((segment) => typeof segment === 'string')).toBe(true);
+		expect(warnings).toEqual([]);
+	});
+
 	it('emits duplicated verses in source order so the later one can win', async () => {
 		// data/bibles/GER_ILGRDE.xml has two <CHAPTER cnumber="2"> blocks in Galatians; the second is
 		// the complete chapter, so the ingester must be able to overwrite the first.
