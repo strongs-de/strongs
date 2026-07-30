@@ -52,7 +52,7 @@ export function detectFormat(prefix: string, fileName?: string): Detection | nul
 	if (lower.includes('<lexicon') && lower.includes('morphhb/namespace')) {
 		return {
 			format: 'hebrew-lexicon-xml',
-			reason: "Open Scriptures Hebrew Lexicon root element <lexicon>"
+			reason: 'Open Scriptures Hebrew Lexicon root element <lexicon>'
 		};
 	}
 	if (lower.includes('<thml')) {

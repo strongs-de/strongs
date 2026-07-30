@@ -37,7 +37,8 @@ describe('parseHebrewLexiconXml', () => {
 			lemma: 'אַגְמוֹן',
 			transliteration: 'ʼagmôwn',
 			pronunciation: "ag-mone'",
-			definitionHtml: 'a <strong>rush</strong> (as growing there); collectively a <strong>rope</strong> of rushes',
+			definitionHtml:
+				'a <strong>rush</strong> (as growing there); collectively a <strong>rope</strong> of rushes',
 			derivationHtml:
 				'from the same as <a class="strong-link" href="/H98">H98</a>; a marshy <strong>pool</strong> (others from a different root, a <strong>kettle</strong>); by implication',
 			kjvDefinitionHtml: 'bulrush, caldron, hook, rush.'
@@ -93,7 +94,9 @@ describe('parseHebrewLexiconXml', () => {
 	});
 
 	it('warns about an entry without a headword instead of silently dropping it', async () => {
-		const { entries, warnings } = await collect(wrap(`<entry id="H1"><meaning>orphaned</meaning></entry>`));
+		const { entries, warnings } = await collect(
+			wrap(`<entry id="H1"><meaning>orphaned</meaning></entry>`)
+		);
 
 		expect(entries).toEqual([]);
 		expect(warnings).toHaveLength(1);
