@@ -36,7 +36,7 @@ export async function load({ params, setHeaders, url }) {
 	const db = getDb();
 	const bibles = await listBibles(db);
 	const columns = bibles.map((bible) => bible.id);
-	const statisticsResource = await pickStatisticsResource(db, columns);
+	const statisticsResource = await pickStatisticsResource(db, columns, strong);
 
 	if (!statisticsResource) {
 		error(503, 'Es ist noch keine Übersetzung mit Strong-Nummern importiert.');

@@ -28,6 +28,7 @@ const KIND_BY_FORMAT: Record<SourceFormat, ResourceKind> = {
 	usfx: 'bible',
 	vpl: 'bible',
 	'strongs-xml': 'lexicon',
+	'hebrew-lexicon-xml': 'lexicon',
 	tsp: 'morphology',
 	tsk: 'xrefs',
 	'commentary-csv': 'commentary',

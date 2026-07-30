@@ -31,7 +31,7 @@ export async function GET({ params, url, setHeaders }) {
 		.map((id) => id.trim())
 		.filter(Boolean);
 
-	const statisticsResource = await pickStatisticsResource(db, resourceIds);
+	const statisticsResource = await pickStatisticsResource(db, resourceIds, strong);
 	const reference = parseReference(url.searchParams.get('ref') ?? '');
 	const page = Number(url.searchParams.get('page') ?? '1') || 1;
 

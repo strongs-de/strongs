@@ -3,6 +3,7 @@
  */
 
 import type { ParseStream, SourceFormat, SourceInput } from './types.ts';
+import { parseHebrewLexiconXml } from './hebrew-lexicon-xml.ts';
 import { parseOsis } from './osis.ts';
 import { parseStrongsXml } from './strongs-xml.ts';
 import { parseTsk } from './tsk.ts';
@@ -30,6 +31,7 @@ const parsers: Record<SourceFormat, Parser> = {
 	usfx: (input) => parseUsfx(input),
 	vpl: (input) => parseVpl(input),
 	'strongs-xml': parseStrongsXml,
+	'hebrew-lexicon-xml': parseHebrewLexiconXml,
 	tsp: parseTsp,
 	tsk: parseTsk,
 	'commentary-csv': (input) => parseCommentaryCsv(input),

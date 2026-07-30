@@ -49,6 +49,12 @@ export function detectFormat(prefix: string, fileName?: string): Detection | nul
 	if (lower.includes('<strongsdictionary')) {
 		return { format: 'strongs-xml', reason: "Strong's dictionary root element" };
 	}
+	if (lower.includes('<lexicon') && lower.includes('morphhb/namespace')) {
+		return {
+			format: 'hebrew-lexicon-xml',
+			reason: "Open Scriptures Hebrew Lexicon root element <lexicon>"
+		};
+	}
 	if (lower.includes('<thml')) {
 		return { format: 'commentary-thml', reason: 'ThML root element <ThML>' };
 	}

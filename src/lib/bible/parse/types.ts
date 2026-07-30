@@ -20,6 +20,7 @@ export const SOURCE_FORMATS = [
 	'usfx',
 	'vpl',
 	'strongs-xml',
+	'hebrew-lexicon-xml',
 	'tsp',
 	'tsk',
 	'commentary-csv',

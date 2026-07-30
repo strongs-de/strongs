@@ -251,29 +251,41 @@ export async function loadOriginalWord(
 
 /**
  * Which of the reader's translations to base the statistics on: the first selected one that actually
- * carries Strong's numbers, since a translation without them has nothing to count.
+ * carries Strong's numbers for the number's own testament, since a translation without them — or one
+ * that only covers the other testament, like a Greek NT interlinear — has nothing to count.
  */
 export async function pickStatisticsResource(
 	db: Database,
-	resourceIds: string[]
+	resourceIds: string[],
+	strong: StrongId
 ): Promise<string | undefined> {
 	if (resourceIds.length === 0) return undefined;
 
+	const canon = strongLanguage(strong) === 'hebrew' ? 'ot' : 'nt';
+
 	const rows = await db
-		.select({ id: resources.id })
+		.select({ id: resources.id, canon: resources.canon })
 		.from(resources)
 		.where(and(inArray(resources.id, resourceIds), eq(resources.hasStrongs, true)))
 		.orderBy(asc(resources.sortOrder));
 
-	const preferred = resourceIds.find((id) => rows.some((row) => row.id === id));
+	const preferred = resourceIds.find((id) =>
+		rows.some((row) => row.id === id && (row.canon === canon || row.canon === 'both'))
+	);
 	if (preferred) return preferred;
 
-	// None of the reader's columns has Strong's numbers; fall back to any translation that does.
+	// None of the reader's columns has Strong's numbers covering this testament; fall back to any
+	// translation that does.
 	const [fallback] = await db
 		.select({ id: resources.id })
 		.from(resources)
 		.where(
-			and(eq(resources.hasStrongs, true), eq(resources.kind, 'bible'), eq(resources.isPublic, true))
+			and(
+				eq(resources.hasStrongs, true),
+				eq(resources.kind, 'bible'),
+				eq(resources.isPublic, true),
+				inArray(resources.canon, [canon, 'both'])
+			)
 		)
 		.orderBy(desc(resources.wordCount))
 		.limit(1);
