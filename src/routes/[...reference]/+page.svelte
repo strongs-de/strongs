@@ -241,6 +241,7 @@
 	let suppressFlowScroll = false;
 	let suppressFlowTimer: ReturnType<typeof setTimeout> | undefined;
 	let suppressReaderScroll = false;
+	let flowSyncTimer: ReturnType<typeof setTimeout> | undefined;
 	const visibleStreamChapter = $derived(
 		streamChapters.find(
 			(stream) => `${stream.reference.book}:${stream.reference.chapter}` === visibleChapterKey
@@ -432,6 +433,21 @@
 		activeFlowSource = columnIndex;
 		if (suppressFlowTimer) clearTimeout(suppressFlowTimer);
 		suppressFlowScroll = false;
+		if (flowSyncTimer) clearTimeout(flowSyncTimer);
+	}
+
+	/**
+	 * Debounces the cross-column sync so it runs once the scroll has settled rather than on every
+	 * scroll event. On touch devices a drag fires continuous scroll events with no gaps, so this
+	 * keeps the other columns still until the finger lifts and any momentum scrolling stops — synced
+	 * columns jumping around mid-drag reads as jittery, not helpful.
+	 */
+	function scheduleFlowSync(columnIndex: number) {
+		if (flowSyncTimer) clearTimeout(flowSyncTimer);
+		flowSyncTimer = setTimeout(() => {
+			flowSyncTimer = undefined;
+			syncFlowColumns(columnIndex);
+		}, 150);
 	}
 
 	/**
@@ -446,7 +462,7 @@
 		const source = flowColumns[columnIndex];
 		if (!source) return;
 		updateVisibleChapter(source, 12);
-		syncFlowColumns(columnIndex);
+		scheduleFlowSync(columnIndex);
 		if (source.scrollTop < 500) void loadStreamPrevious();
 		if (source.scrollHeight - source.scrollTop - source.clientHeight < 900) void loadStreamNext();
 	}
