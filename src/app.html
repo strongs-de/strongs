@@ -8,14 +8,26 @@
 		<meta name="theme-color" content="#3f873f" />
 		<script>
 			// Apply the stored colour scheme before first paint, to avoid a flash of the wrong theme.
+			// The cookie is this device's choice (set by the server, seeded from the account on a device
+			// that has never chosen one); a leftover localStorage value from before the cookie existed is
+			// migrated once so it is not silently forgotten.
 			try {
-				const stored = localStorage.getItem('theme');
+				const match = document.cookie.match(/(?:^|; )theme=(light|dark)/);
+				let stored = match ? match[1] : null;
+				if (!stored) {
+					const legacy = localStorage.getItem('theme');
+					if (legacy === 'light' || legacy === 'dark') {
+						stored = legacy;
+						document.cookie = 'theme=' + legacy + '; path=/; max-age=31536000; samesite=lax';
+					}
+				}
 				const dark =
 					stored === 'dark' ||
 					(stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 				if (dark) document.documentElement.classList.add('dark');
 			} catch {
-				// localStorage can throw in private browsing modes; the media query default suffices.
+				// Cookies and localStorage can throw in private browsing modes; the media query default
+				// suffices.
 			}
 		</script>
 		%sveltekit.head%

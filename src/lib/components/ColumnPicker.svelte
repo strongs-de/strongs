@@ -56,10 +56,11 @@
 	<button
 		id="column-{index}"
 		type="button"
-		class="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md px-2 py-1 text-left
-		       text-sm font-semibold text-stone-700 transition hover:bg-white hover:shadow-sm
-		       focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500
-		       dark:text-stone-200 dark:hover:bg-stone-800"
+		class="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md border-2
+		       border-stone-300 px-2 py-1 text-left text-sm font-semibold text-stone-700 transition
+		       hover:bg-white hover:shadow-sm focus:outline-none focus-visible:ring-2
+		       focus-visible:ring-accent-500 dark:border-stone-600 dark:text-stone-200
+		       dark:hover:bg-stone-800"
 		aria-label={t('reader.chooseTranslation')}
 		aria-haspopup="menu"
 		onclick={(event) => selectMenu?.openAt(event.currentTarget)}

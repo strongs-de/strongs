@@ -58,17 +58,22 @@
 
 <style>
 	.footnote-marker {
-		display: inline;
-		padding: 0;
+		display: inline-block;
+		/* A little extra room around the glyph, so the tap target is bigger than the rendered
+		   character itself — `line-height: 0` used to collapse the button to a sliver a touch could
+		   miss even though a mouse pointer, being pixel-precise, still landed on it. */
+		padding: 0.35em 0.2em;
+		margin: -0.35em -0.2em;
 		border: none;
 		background: none;
 		vertical-align: super;
 		font-family: var(--font-sans);
 		font-size: 0.7em;
 		font-weight: 700;
-		line-height: 0;
+		line-height: 1;
 		color: var(--color-accent-700);
 		cursor: pointer;
+		touch-action: manipulation;
 	}
 
 	.footnote-marker:hover,

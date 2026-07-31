@@ -4,8 +4,9 @@
 	import { page } from '$app/state';
 	import { tick } from 'svelte';
 	import { SvelteSet } from 'svelte/reactivity';
-	import { formatReference, referencePath } from '$lib/bible/reference';
+	import { formatReference, referencePath, type VerseRef } from '$lib/bible/reference';
 	import { segmentsToText, splitVerseLead } from '$lib/bible/segments';
+	import { readerLocation, setJumpToVerse } from '$lib/reader-location.svelte';
 	import { t } from '$lib/i18n';
 	import ColumnPicker from '$lib/components/ColumnPicker.svelte';
 	import Menu from '$lib/components/Menu.svelte';
@@ -256,12 +257,25 @@
 			streamSignature = signature;
 			streamColumnsKey = columnsKey;
 			streamChapters = [initialStreamChapter()];
-			// The flow columns themselves are keyed on the resource id, so they only get torn down
-			// (and their `bind:this` re-run) when the set of columns changes — not on every chapter
-			// navigation. Clearing this on every navigation would leave it permanently empty, since
-			// nothing would ever repopulate it for the still-mounted column elements.
-			if (columnsChanged) flowColumns = [];
+			if (columnsChanged) {
+				// A column that merely swaps translation keeps its position but changes its
+				// `column.resource.id` key, so the keyed `#each` below tears down and remounts only *that*
+				// column — every other column's element is reused as-is and never re-runs `bind:this`. If
+				// `flowColumns` were simply reset to `[]` here, those untouched columns would stay
+				// permanently missing from it (that used to be the bug: cross-column scroll sync broke
+				// after switching a translation, until a reload remounted everything). Requerying by the
+				// stable position attribute instead of trusting which elements happened to remount fixes
+				// every column at once, whatever combination of add/remove/reorder/swap caused the change.
+				tick().then(() => {
+					flowColumns = data.columns
+						.map((_, index) =>
+							document.querySelector<HTMLElement>(`.flow-column[data-flow-column-index="${index}"]`)
+						)
+						.filter((element): element is HTMLElement => element !== null);
+				});
+			}
 			visibleChapterKey = `${data.reference.book}:${data.reference.chapter}`;
+			readerLocation.reference = data.reference;
 			activeFlowSource = 0;
 			jumpedSignature = '';
 			if (data.reference.verse === undefined) {
@@ -392,6 +406,10 @@
 			chapters.findLast((section) => section.getBoundingClientRect().top <= pickerBottom + 8) ??
 			chapters[0];
 		if (chapter?.dataset.chapterKey) visibleChapterKey = chapter.dataset.chapterKey;
+
+		const verses = [...document.querySelectorAll<HTMLElement>('[data-verse-key]')];
+		const anchor = verses.find((verse) => verse.getBoundingClientRect().bottom > pickerBottom + 8);
+		scheduleAddressBarUpdate(anchor?.dataset.verseKey);
 	}
 
 	function updateVisibleChapter(source: HTMLElement, inset: number) {
@@ -402,7 +420,103 @@
 		if (chapter?.dataset.chapterKey) visibleChapterKey = chapter.dataset.chapterKey;
 	}
 
-	function syncFlowColumns(sourceIndex = 0) {
+	let addressBarTimer: ReturnType<typeof setTimeout> | undefined;
+
+	/**
+	 * Keeps the URL, and `readerLocation` (which the header's search field reads), in step with
+	 * whatever chapter and verse are actually on screen while scrolling. A reload then lands back where
+	 * the reader left off, not at the chapter the click landed on.
+	 *
+	 * Debounced like `scheduleFlowSync`: rewriting the address bar on every scroll frame would be
+	 * needless churn (and fight with `history`'s own rate limits), so it only fires once scrolling has
+	 * settled for a moment.
+	 */
+	function scheduleAddressBarUpdate(verseKey: string | undefined) {
+		if (!verseKey) return;
+		const [book, chapter, verse] = verseKey.split(':').map(Number);
+		if (!book || !chapter || !verse) return;
+
+		// The search field follows this immediately — it already only re-syncs while unfocused (see
+		// `SiteHeader.svelte`), so there is no risk of clobbering something the reader is typing. Only
+		// the actual address bar write stays debounced, since rewriting `history` on every settle would
+		// be needless churn.
+		readerLocation.reference = { book, chapter, verse };
+
+		if (addressBarTimer) clearTimeout(addressBarTimer);
+		addressBarTimer = setTimeout(() => {
+			addressBarTimer = undefined;
+			const path = referencePath({ book, chapter, verse });
+			if (path === page.url.pathname) return;
+			replaceState(`${path}${page.url.search}${page.url.hash}`, page.state);
+		}, 200);
+	}
+
+	/**
+	 * Scrolls straight to a reference already in the loaded stream, without a navigation — used both to
+	 * land on a deep-linked verse after a real navigation and, via `jumpToVerse`, to let the header's
+	 * search field re-centre on a reference that a plain `goto` would treat as a no-op because the URL
+	 * would not change (the reader may have scrolled away from it since).
+	 *
+	 * Returns whether the reference was actually found, so a caller like the header can fall back to a
+	 * real navigation for anything not already loaded.
+	 */
+	function scrollToVerse(
+		book: number,
+		chapter: number,
+		verse: number,
+		allowHighlightedFallback = false
+	): boolean {
+		const key = `${book}:${chapter}:${verse}`;
+		if (data.readerLayout === 'flow') {
+			let found = false;
+			for (const column of flowColumns) {
+				const target =
+					column?.querySelector<HTMLElement>(`[data-verse-key="${key}"]`) ??
+					(allowHighlightedFallback
+						? column?.querySelector<HTMLElement>('.flow-verse.highlighted')
+						: null);
+				if (column && target) {
+					found = true;
+					const next =
+						column.scrollTop +
+						target.getBoundingClientRect().top -
+						column.getBoundingClientRect().top -
+						12;
+					suppressProgrammaticFlowScroll();
+					column.scrollTop = next;
+				}
+			}
+			if (found) {
+				visibleChapterKey = `${book}:${chapter}`;
+				scheduleAddressBarUpdate(key);
+			}
+			return found;
+		}
+
+		const target =
+			document.querySelector<HTMLElement>(`[data-verse-key="${key}"]`) ??
+			(allowHighlightedFallback ? document.querySelector<HTMLElement>('.verse.highlighted') : null);
+		if (!target) return false;
+		target.scrollIntoView({ block: 'start' });
+		scheduleAddressBarUpdate(key);
+		return true;
+	}
+
+	$effect(() => {
+		setJumpToVerse((reference: VerseRef) =>
+			scrollToVerse(reference.book, reference.chapter, reference.verse ?? 1)
+		);
+		return () => setJumpToVerse(null);
+	});
+
+	/**
+	 * `trackAddress` is only set from a real scroll event (via `scheduleFlowSync`) — the other callers
+	 * use this purely to align the non-source columns with wherever the source column already is, on
+	 * mount or after a chapter loads, and are not the reader actually moving. Driving the address bar
+	 * from those too could genuinely move it a verse or two off (a short verse 1 can already have
+	 * scrolled past the anchor line by the time this first runs), even though nothing was scrolled.
+	 */
+	function syncFlowColumns(sourceIndex = 0, trackAddress = false) {
 		const source = flowColumns[sourceIndex];
 		if (!source || data.readerLayout !== 'flow') return;
 		const anchorInset = 12;
@@ -411,6 +525,7 @@
 		const verses = [...source.querySelectorAll<HTMLElement>('[data-verse-key]')];
 		const anchor = verses.find((verse) => verse.getBoundingClientRect().bottom > sourceTop);
 		if (!anchor?.dataset.verseKey) return;
+		if (trackAddress) scheduleAddressBarUpdate(anchor.dataset.verseKey);
 		const sourceAnchorOffset = anchor.getBoundingClientRect().top - sourceTop;
 
 		for (let index = 0; index < flowColumns.length; index += 1) {
@@ -446,7 +561,7 @@
 		if (flowSyncTimer) clearTimeout(flowSyncTimer);
 		flowSyncTimer = setTimeout(() => {
 			flowSyncTimer = undefined;
-			syncFlowColumns(columnIndex);
+			syncFlowColumns(columnIndex, true);
 		}, 150);
 	}
 
@@ -483,29 +598,11 @@
 		if (signature === jumpedSignature) return;
 		jumpedSignature = signature;
 
+		// The highlighted-verse fallback covers a merged range (e.g. "16-17"): only the range's first
+		// verse carries that exact `data-verse-key`, so a deep link straight to "17" would otherwise
+		// find nothing.
 		tick().then(() => {
-			if (data.readerLayout === 'flow') {
-				for (const column of flowColumns) {
-					const target =
-						column?.querySelector<HTMLElement>(
-							`[data-verse-key="${data.reference.book}:${data.reference.chapter}:${verse}"]`
-						) ?? column?.querySelector<HTMLElement>('.flow-verse.highlighted');
-					if (column && target) {
-						const next =
-							column.scrollTop +
-							target.getBoundingClientRect().top -
-							column.getBoundingClientRect().top -
-							12;
-						suppressProgrammaticFlowScroll();
-						column.scrollTop = next;
-					}
-				}
-				visibleChapterKey = `${data.reference.book}:${data.reference.chapter}`;
-			} else {
-				document.querySelector<HTMLElement>('.verse.highlighted')?.scrollIntoView({
-					block: 'start'
-				});
-			}
+			scrollToVerse(data.reference.book, data.reference.chapter, verse, true);
 		});
 	});
 
@@ -718,6 +815,7 @@
 					{#each data.columns as column, columnIndex (column.resource.id)}
 						<div
 							bind:this={flowColumns[columnIndex]}
+							data-flow-column-index={columnIndex}
 							class="flow-column"
 							class:hidden-on-mobile={columnIndex !== mobileColumn}
 							role="region"
@@ -993,6 +1091,7 @@
 											id={columnIndex === 0
 												? `${stream.shortBookName}${stream.reference.chapter}_${cell.verse}`
 												: undefined}
+											data-verse-key={`${stream.reference.book}:${stream.reference.chapter}:${cell.verse}`}
 											style="grid-column: {columnIndex + 1}; grid-row: {rowIndex * 2 +
 												2} / span {cell.span * 2 - 1}"
 											class:highlighted={stream.reference.book === data.reference.book &&
@@ -1248,6 +1347,8 @@
 
 	.flow-chapter {
 		padding: 0.8rem 0.9rem 1.4rem;
+		text-align: justify;
+		text-justify: inter-word;
 	}
 
 	.flow-chapter + .flow-chapter {
@@ -1279,7 +1380,7 @@
 		display: inline;
 		margin: 0;
 		font-family: var(--font-serif);
-		font-size: calc(1.035rem * var(--reader-font-scale, 1));
+		font-size: calc(1.19rem * var(--reader-font-scale, 1));
 		line-height: 1.72;
 		hyphens: auto;
 	}
@@ -1477,10 +1578,12 @@
 		margin: 0;
 		padding: 0.48rem 0.8rem;
 		font-family: var(--font-serif);
-		font-size: calc(1.035rem * var(--reader-font-scale, 1));
+		font-size: calc(1.19rem * var(--reader-font-scale, 1));
 		line-height: 1.72;
 		border-left: 1px solid color-mix(in oklab, var(--color-stone-300) 55%, transparent);
 		hyphens: auto;
+		text-align: justify;
+		text-justify: inter-word;
 		scroll-margin-top: calc(var(--header-height) + 6.5rem);
 	}
 

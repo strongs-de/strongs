@@ -5,8 +5,10 @@ import { updateReaderColumns } from '$lib/server/repositories/users';
 import {
 	readFontScale,
 	readReaderLayout,
+	readTheme,
 	writeFontScale,
-	writeReaderLayout
+	writeReaderLayout,
+	writeTheme
 } from '$lib/server/reader-preferences';
 
 /**
@@ -22,12 +24,15 @@ export async function load({ cookies, locals }) {
 	if (locals.user && locals.user.readerColumns.length === 0) {
 		await updateReaderColumns(db, locals.user.id, columns);
 	}
-	// Keep the device fallback aligned with the account so signing out does not reshuffle the reader.
+	// Keep the device fallback aligned with whatever was just resolved, so a device's own cookie is
+	// always what the next request sees — signing out does not reshuffle the reader either.
 	writeColumns(cookies, columns);
 	const readerFontScale = readFontScale(cookies, locals.user?.readerFontScale);
 	writeFontScale(cookies, readerFontScale);
-	const readerLayout = readReaderLayout(cookies);
+	const readerLayout = readReaderLayout(cookies, locals.user?.readerLayout);
 	writeReaderLayout(cookies, readerLayout);
+	const theme = readTheme(cookies, locals.user?.theme);
+	if (theme) writeTheme(cookies, theme);
 
 	return {
 		bibles,
@@ -35,6 +40,7 @@ export async function load({ cookies, locals }) {
 		columns,
 		readerFontScale,
 		readerLayout,
+		theme,
 		// The limit lives in $lib/server, so the reader cannot import it to decide whether to offer a
 		// further column.
 		maxColumns: MAX_COLUMNS,

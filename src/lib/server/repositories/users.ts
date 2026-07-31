@@ -107,6 +107,25 @@ export async function updateReaderFontScale(
 	return normalized;
 }
 
+export async function updateReaderLayout(
+	db: Database,
+	userId: string,
+	layout: 'aligned' | 'flow'
+): Promise<void> {
+	await db
+		.update(users)
+		.set({ readerLayout: layout, updatedAt: new Date() })
+		.where(eq(users.id, userId));
+}
+
+export async function updateTheme(
+	db: Database,
+	userId: string,
+	theme: 'light' | 'dark'
+): Promise<void> {
+	await db.update(users).set({ theme, updatedAt: new Date() }).where(eq(users.id, userId));
+}
+
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
 
 /**

@@ -27,8 +27,11 @@ import {
 	listBibles,
 	listReaderResources
 } from '$lib/server/repositories/resources';
-import { updateReaderColumns } from '$lib/server/repositories/users';
-import { updateReaderFontScale } from '$lib/server/repositories/users';
+import {
+	updateReaderColumns,
+	updateReaderFontScale,
+	updateReaderLayout
+} from '$lib/server/repositories/users';
 import {
 	MAX_FONT_SCALE,
 	MIN_FONT_SCALE,
@@ -302,14 +305,15 @@ export const actions = {
 		return { success: true };
 	},
 
-	setReaderLayout: async ({ request, cookies }) => {
+	setReaderLayout: async ({ request, cookies, locals }) => {
 		const form = await request.formData();
 		const layout = String(form.get('layout') ?? '');
 		if (layout !== 'aligned' && layout !== 'flow') {
 			return fail(400, { error: 'readerLayout' });
 		}
 		writeReaderLayout(cookies, layout);
-		return { success: true, layout: readReaderLayout(cookies) };
+		if (locals.user) await updateReaderLayout(getDb(), locals.user.id, layout);
+		return { success: true, layout: readReaderLayout(cookies, locals.user?.readerLayout) };
 	},
 
 	/**

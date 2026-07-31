@@ -59,7 +59,7 @@
 	}
 
 	.scripture-sized {
-		font-size: calc(1rem * var(--reader-font-scale, 1));
+		font-size: calc(1.15rem * var(--reader-font-scale, 1));
 	}
 
 	:focus-visible {

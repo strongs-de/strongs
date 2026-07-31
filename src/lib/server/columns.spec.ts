@@ -34,14 +34,19 @@ describe('reader columns', () => {
 		expect(defaultColumns(available)).toEqual(['A', 'B', 'C', 'D']);
 	});
 
-	it('prefers a valid account selection over the device cookie', () => {
+	it('prefers the device cookie over the account selection', () => {
 		const cookies = { get: () => 'A,B,C' } as unknown as Parameters<typeof resolveColumns>[0];
-		expect(resolveColumns(cookies, available, ['E', 'C'])).toEqual(['E', 'C']);
+		expect(resolveColumns(cookies, available, ['E', 'C'])).toEqual(['A', 'B', 'C']);
 	});
 
-	it('drops unavailable and duplicate account resources', () => {
-		const cookies = { get: () => 'A,B' } as unknown as Parameters<typeof resolveColumns>[0];
+	it('falls back to a valid account selection when this device has no cookie yet', () => {
+		const cookies = { get: () => undefined } as unknown as Parameters<typeof resolveColumns>[0];
 		expect(resolveColumns(cookies, available, ['missing', 'D', 'D'])).toEqual(['D']);
+	});
+
+	it('drops unavailable and duplicate resources from the device cookie too', () => {
+		const cookies = { get: () => 'missing,D,D' } as unknown as Parameters<typeof resolveColumns>[0];
+		expect(resolveColumns(cookies, available, ['E', 'C'])).toEqual(['D']);
 	});
 
 	describe('addColumn', () => {

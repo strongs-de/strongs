@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { parseReference } from '$lib/bible/reference';
+	import { jumpToVerse } from '$lib/reader-location.svelte';
 	import { t } from '$lib/i18n';
 	import ReaderViewMenu from './ReaderViewMenu.svelte';
 	import ThemeToggle from './ThemeToggle.svelte';
@@ -24,14 +26,35 @@
 		readerPreferences?: { layout: 'aligned' | 'flow'; fontScale: number } | null;
 	} = $props();
 
-	// A writable derived: it follows the current reference as you navigate, but typing overrides it.
-	let value = $derived(query);
+	/**
+	 * Follows `query` as the reader navigates or scrolls — but only while the field is not focused.
+	 * `query` now also moves in the background as the reader scrolls the reader (see
+	 * `reader-location.svelte.ts`), and a plain `$derived` would silently overwrite whatever the reader
+	 * had just typed the moment that next scroll update landed, before they got to press Enter.
+	 */
+	let value = $state(query);
+	let focused = $state(false);
+	$effect(() => {
+		if (!focused) value = query;
+	});
 	let input: HTMLInputElement | undefined = $state();
 
 	async function submit(event: SubmitEvent) {
 		event.preventDefault();
 		const trimmed = value.trim();
 		if (!trimmed) return;
+
+		// A reference already on screen — or already loaded via infinite scroll further up or down the
+		// stream — would otherwise be a no-op: the URL `goto` below would navigate to is the one already
+		// showing, and the reader may since have scrolled away from it. Scrolling there directly covers
+		// that; anything not already loaded (a different chapter, a word, a Strong's number) falls
+		// through to a real navigation exactly as before.
+		const reference = parseReference(trimmed);
+		if (reference && jumpToVerse?.(reference)) {
+			input?.blur();
+			return;
+		}
+
 		await goto(`/${encodeURIComponent(trimmed)}`, { noScroll: true });
 		input?.blur();
 	}
@@ -104,15 +127,17 @@
 				<input
 					bind:this={input}
 					bind:value
+					onfocus={() => (focused = true)}
+					onblur={() => (focused = false)}
 					id="site-search"
 					type="search"
 					autocomplete="off"
 					spellcheck="false"
 					enterkeyhint="search"
 					placeholder={t('nav.search.placeholder')}
-					class="w-full rounded-md border border-stone-300/90 bg-stone-100/70 py-2 pr-3 pl-9 text-sm
+					class="w-full rounded-md border-2 border-stone-400 bg-stone-100/70 py-2 pr-3 pl-9 text-sm
 					       shadow-inner shadow-stone-900/3 placeholder:text-stone-400 focus:border-accent-500
-					       focus:bg-white focus:ring-3 focus:ring-accent-500/10 focus:outline-none dark:border-stone-700
+					       focus:bg-white focus:ring-3 focus:ring-accent-500/10 focus:outline-none dark:border-stone-600
 					       dark:bg-stone-900 dark:shadow-black/20 dark:placeholder:text-stone-500 dark:focus:bg-stone-900"
 				/>
 			</div>

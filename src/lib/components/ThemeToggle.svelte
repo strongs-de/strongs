@@ -16,11 +16,17 @@
 	function toggle() {
 		dark = !dark;
 		document.documentElement.classList.toggle('dark', dark);
+		const theme = dark ? 'dark' : 'light';
 		try {
-			localStorage.setItem('theme', dark ? 'dark' : 'light');
+			document.cookie = `theme=${theme}; path=/; max-age=31536000; samesite=lax`;
 		} catch {
 			// Private browsing can refuse storage; the toggle still works for this session.
 		}
+		void fetch('/api/theme', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ theme })
+		});
 	}
 </script>
 

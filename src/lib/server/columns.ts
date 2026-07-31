@@ -23,25 +23,31 @@ export function readColumns(cookies: Cookies, available: ReadableResource[]): st
 	return resolveColumns(cookies, available);
 }
 
-/** Uses account preferences when present, otherwise this device's cookie and finally defaults. */
+/**
+ * Uses this device's cookie when present, otherwise the account's preference — which only seeds a
+ * device that has not chosen its own columns yet — and finally the default order.
+ */
 export function resolveColumns(
 	cookies: Cookies,
 	available: ReadableResource[],
 	accountColumns: readonly string[] = []
 ): string[] {
 	const known = new Set(available.map((resource) => resource.id));
+
+	const storedRaw = cookies.get(COLUMNS_COOKIE);
+	if (storedRaw !== undefined) {
+		const stored = storedRaw
+			.split(',')
+			.map((id) => id.trim())
+			.filter((id) => known.has(id));
+		const columns = [...new Set(stored)].slice(0, MAX_COLUMNS);
+		if (columns.length > 0) return columns;
+	}
+
 	const preferred = [...new Set(accountColumns)]
 		.filter((id) => known.has(id))
 		.slice(0, MAX_COLUMNS);
 	if (preferred.length > 0) return preferred;
-
-	const stored = (cookies.get(COLUMNS_COOKIE) ?? '')
-		.split(',')
-		.map((id) => id.trim())
-		.filter((id) => known.has(id));
-
-	const columns = [...new Set(stored)].slice(0, MAX_COLUMNS);
-	if (columns.length > 0) return columns;
 
 	return defaultColumns(available);
 }

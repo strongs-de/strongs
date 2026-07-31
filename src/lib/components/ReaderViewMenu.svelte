@@ -19,11 +19,17 @@
 	function setTheme(next: boolean) {
 		dark = next;
 		document.documentElement.classList.toggle('dark', dark);
+		const theme = dark ? 'dark' : 'light';
 		try {
-			localStorage.setItem('theme', dark ? 'dark' : 'light');
+			document.cookie = `theme=${theme}; path=/; max-age=31536000; samesite=lax`;
 		} catch {
 			// The choice still applies to this page when storage is unavailable.
 		}
+		void fetch('/api/theme', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ theme })
+		});
 	}
 </script>
 
