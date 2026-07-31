@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 /**
  * Reader, search and study sidebar.
@@ -7,12 +7,24 @@ import { expect, test } from '@playwright/test';
  * three dictionary entries.
  */
 
+/**
+ * Flowing text is the default for a fresh visitor; the tests below exercise the column grid
+ * specifically, so they ask for it explicitly rather than depending on which layout happens to be
+ * the default.
+ */
+async function useAlignedLayout(page: Page): Promise<void> {
+	await page
+		.context()
+		.addCookies([{ name: 'reader-layout', value: 'aligned', url: 'http://localhost:4173' }]);
+}
+
 test('the root redirects into the reader', async ({ page }) => {
 	await page.goto('/');
 	await expect(page).toHaveURL(/\/Joh1$/);
 });
 
 test('a reference shows the chapter in parallel columns', async ({ page }) => {
+	await useAlignedLayout(page);
 	await page.goto('/Joh3,16');
 
 	await expect(page.getByRole('heading', { level: 1 })).toContainText('Johannes');
@@ -30,6 +42,7 @@ test('a reference shows the chapter in parallel columns', async ({ page }) => {
 });
 
 test('verses stay aligned across columns', async ({ page }) => {
+	await useAlignedLayout(page);
 	await page.goto('/Joh3');
 
 	// The two cells for verse 16 must start on the same grid row, which is what alignment means here.
@@ -105,6 +118,7 @@ test('flowing text preloads the next chapter for endless scrolling', async ({ pa
 });
 
 test('a verse reference scrolls directly to the requested verse', async ({ page }) => {
+	await useAlignedLayout(page);
 	await page.setViewportSize({ width: 900, height: 260 });
 	await page.goto('/1Mo1,3');
 
@@ -115,6 +129,7 @@ test('a verse reference scrolls directly to the requested verse', async ({ page 
 test('changing the reference resets aligned scrolling and the visible chapter', async ({
 	page
 }) => {
+	await useAlignedLayout(page);
 	await page.setViewportSize({ width: 900, height: 260 });
 	await page.goto('/1Mo1,3');
 	expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
@@ -128,6 +143,7 @@ test('changing the reference resets aligned scrolling and the visible chapter', 
 });
 
 test('the aligned chapter label follows endless scrolling', async ({ page }) => {
+	await useAlignedLayout(page);
 	await page.setViewportSize({ width: 900, height: 300 });
 	await page.goto('/1Mo1');
 

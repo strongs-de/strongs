@@ -84,6 +84,13 @@ test('a verse list keeps its verses and notes', async ({ page }) => {
 
 test('chapter notes follow the visible chapter while scrolling', async ({ page }) => {
 	await register(page, uniqueEmail());
+	// The note for chapter 2 is filled in before switching to flowing text below; in the aligned grid
+	// every loaded chapter's note editor is on the page at once (just scrolled off), so it can be
+	// filled without first scrolling anything into view — flowing text, now the default for a fresh
+	// visitor, keeps every chapter but the current one's note editor hidden until it becomes visible.
+	await page
+		.context()
+		.addCookies([{ name: 'reader-layout', value: 'aligned', url: 'http://localhost:4173' }]);
 	await page.goto('/1Mo1');
 
 	await page.getByRole('button', { name: 'Notizspalte einblenden' }).click();
@@ -102,18 +109,28 @@ test('chapter notes follow the visible chapter while scrolling', async ({ page }
 	await expect(page.locator('[data-chapter-key="1:2"]').first()).toBeAttached();
 	await page.waitForTimeout(120);
 
-	const chapterTop = await firstTextColumn.evaluate((element) => {
-		const chapter = element.querySelector<HTMLElement>('[data-chapter-key="1:2"]');
-		if (!chapter) return Number.POSITIVE_INFINITY;
-		for (let attempt = 0; attempt < 3; attempt += 1) {
-			const distance =
-				chapter.getBoundingClientRect().top - element.getBoundingClientRect().top - 12;
-			element.scrollTop += distance;
-		}
-		element.dispatchEvent(new Event('scroll'));
-		return chapter.getBoundingClientRect().top - element.getBoundingClientRect().top;
-	});
-	expect(chapterTop).toBeLessThanOrEqual(13);
+	// A single scroll dispatch can land inside the app's own ~80ms window for suppressing scroll
+	// events it caused itself (see `suppressProgrammaticFlowScroll` in the reader), which the chapter
+	// preload triggered by switching to flowing text can still be running through this soon after.
+	// Polling — scroll, dispatch, check — rather than doing it once retries past that window instead
+	// of racing it.
+	//
+	// The target offset (4px, well inside the reader's own 12px "close enough to the top" threshold)
+	// is deliberately not 12 itself: `scrollTop` rounds to the nearest layout pixel, so aiming exactly
+	// at the boundary can converge one pixel short of it forever instead of crossing it.
+	await expect
+		.poll(() =>
+			firstTextColumn.evaluate((element) => {
+				const chapter = element.querySelector<HTMLElement>('[data-chapter-key="1:2"]');
+				if (!chapter) return Number.POSITIVE_INFINITY;
+				const distance =
+					chapter.getBoundingClientRect().top - element.getBoundingClientRect().top - 4;
+				element.scrollTop += distance;
+				element.dispatchEvent(new Event('scroll'));
+				return chapter.getBoundingClientRect().top - element.getBoundingClientRect().top;
+			})
+		)
+		.toBeLessThanOrEqual(12);
 
 	await expect(visibleNote.locator('.note-chapter-title')).toHaveText('1.Mose 2');
 	await expect(visibleNote.locator('[contenteditable="true"]')).toContainText(
