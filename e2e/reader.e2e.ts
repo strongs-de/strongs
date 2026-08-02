@@ -3,8 +3,8 @@ import { expect, test, type Page } from '@playwright/test';
 /**
  * Reader, search and study sidebar.
  *
- * Runs against the fixture from `pnpm db:seed`: SEEDDE (with Strong's numbers) and SEEDPLAIN, plus
- * three dictionary entries.
+ * Runs against the fixture from `pnpm db:seed`: SEEDDE (with Strong's numbers), SEEDPLAIN and
+ * SEEDCOMMENTARY, plus three dictionary entries.
  */
 
 /**
@@ -16,6 +16,17 @@ async function useAlignedLayout(page: Page): Promise<void> {
 	await page
 		.context()
 		.addCookies([{ name: 'reader-layout', value: 'aligned', url: 'http://localhost:4173' }]);
+}
+
+/** The commentary fixture is not a default column, so tests exercising it must select it explicitly. */
+async function useCommentaryColumn(page: Page): Promise<void> {
+	await page.context().addCookies([
+		{
+			name: 'columns',
+			value: 'SEEDDE,SEEDPLAIN,SEEDCOMMENTARY',
+			url: 'http://localhost:4173'
+		}
+	]);
 }
 
 test('the root redirects into the reader', async ({ page }) => {
@@ -39,6 +50,65 @@ test('a reference shows the chapter in parallel columns', async ({ page }) => {
 
 	// The requested verse is highlighted.
 	await expect(page.locator('.verse.highlighted').first()).toBeVisible();
+});
+
+test('commentary text is formatted the same as scripture text, in both layouts', async ({
+	page
+}) => {
+	await useCommentaryColumn(page);
+
+	await page.goto('/Joh3,16');
+	const flowCommentary = page.locator('.flow-reference .commentary-body').first();
+	await expect(flowCommentary).toContainText('bekannteste Vers');
+	expect(
+		await page
+			.locator('.flow-reference')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontSize)
+	).toBe(
+		await page
+			.locator('.flow-verse')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontSize)
+	);
+	expect(
+		await page
+			.locator('.flow-reference')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontFamily)
+	).toBe(
+		await page
+			.locator('.flow-verse')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontFamily)
+	);
+
+	await useAlignedLayout(page);
+	await page.goto('/Joh3,16');
+	const alignedCommentary = page.locator('.reference-cell .commentary-body').first();
+	await expect(alignedCommentary).toContainText('bekannteste Vers');
+	expect(
+		await page
+			.locator('.reference-cell')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontSize)
+	).toBe(
+		await page
+			.locator('.verse')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontSize)
+	);
+	expect(
+		await page
+			.locator('.reference-cell')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontFamily)
+	).toBe(
+		await page
+			.locator('.verse')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontFamily)
+	);
 });
 
 test('verses stay aligned across columns', async ({ page }) => {
@@ -288,8 +358,10 @@ test('a reference typed into the search box goes to the chapter', async ({ page 
 test('the column selection persists across navigations', async ({ page }) => {
 	await page.goto('/Joh3');
 
-	// Put the second translation in the first column.
+	// Put the second translation in the first column. The fixture now spans more than one resource
+	// kind (bibles and a commentary), so the menu groups them under an expandable "Bibeln" submenu.
 	await page.locator('#column-0').click();
+	await page.getByRole('menuitem', { name: 'Bibeln' }).click();
 	await page
 		.locator('form[action="?/setColumn"]')
 		.filter({ has: page.locator('input[name="resource"][value="SEEDPLAIN"]') })
@@ -313,7 +385,8 @@ test('a closed column can be opened again', async ({ page }) => {
 	await expect(page.locator('button[id^="column-"]')).toHaveCount(1);
 
 	await page.getByRole('button', { name: 'Spalte hinzufügen' }).first().click();
-	await page.getByRole('menuitem').first().click();
+	await page.getByRole('menuitem', { name: 'Bibeln' }).click();
+	await page.locator('form[action="?/addColumn"]').getByRole('menuitem').first().click();
 
 	await expect(page.locator('button[id^="column-"]')).toHaveCount(2);
 

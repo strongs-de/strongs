@@ -1419,8 +1419,9 @@
 		   when an entry is shorter than the number's own line height. */
 		display: flow-root;
 		margin-bottom: 1rem;
-		font-size: 0.875rem;
-		line-height: 1.6;
+		font-family: var(--font-serif);
+		font-size: calc(1.19rem * var(--reader-font-scale, 1));
+		line-height: 1.72;
 	}
 
 	.flow-note {
@@ -1454,8 +1455,9 @@
 		min-width: 0;
 		padding: 0.45rem 0.75rem 0.8rem;
 		border-right: 1px solid var(--color-stone-100);
-		font-size: 0.875rem;
-		line-height: 1.6;
+		font-family: var(--font-serif);
+		font-size: calc(1.19rem * var(--reader-font-scale, 1));
+		line-height: 1.72;
 	}
 
 	:global(.dark) .reference-cell {
