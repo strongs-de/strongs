@@ -136,6 +136,8 @@ export const de = {
 	'highlights.addColor': 'Farbe hinzufügen',
 	'highlights.errorColor': 'Bitte wähle eine Farbe.',
 	'highlights.errorLimit': 'Es sind bereits {max} Farben angelegt.',
+	'highlights.menuLabel': 'Markieren',
+	'highlights.unnamed': 'Unbenannte Farbe',
 	'auth.login.title': 'Anmelden',
 	'auth.login.submit': 'Anmelden',
 	'auth.login.failed': 'E-Mail-Adresse oder Passwort ist falsch.',
