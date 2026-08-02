@@ -30,6 +30,12 @@ export const init: ServerInit = async () => {
  * protection by forgetting a check.
  */
 export const handle: Handle = async ({ event, resolve }) => {
+	const recovered = recoverMalformedUri(event.url);
+	// A plain Response rather than `redirect()`: thrown this early, before any `await`, it turns into
+	// an unhandled rejection instead of a redirect — `redirect()` further down (past the session
+	// lookup's `await`) is unaffected.
+	if (recovered) return new Response(null, { status: 301, headers: { location: recovered } });
+
 	const session = await resolveSession(getDb(), event.cookies);
 	event.locals.user = session?.user ?? null;
 	event.locals.sessionId = session?.sessionId ?? null;
@@ -54,3 +60,21 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	return response;
 };
+
+/**
+ * Some old browsers and stale bookmarked links percent-encode non-ASCII characters as Latin-1 (e.g.
+ * "ö" as `%F6`) instead of UTF-8 (`%C3%B6`). SvelteKit's router rejects that outright with a 400
+ * before any route runs, so it has to be recovered here: reinterpret the escapes as Latin-1 — whose
+ * codepoints (0–255) already agree with Unicode — and redirect to the correctly UTF-8-encoded URL.
+ */
+function recoverMalformedUri(url: URL): string | null {
+	try {
+		decodeURI(url.pathname);
+		return null;
+	} catch {
+		const recovered = url.pathname.replace(/%[0-9A-Fa-f]{2}/g, (hex) =>
+			String.fromCharCode(parseInt(hex.slice(1), 16))
+		);
+		return `${encodeURI(recovered)}${url.search}`;
+	}
+}

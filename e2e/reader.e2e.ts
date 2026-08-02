@@ -411,3 +411,22 @@ test('legacy URLs from the previous site still resolve', async ({ page }) => {
 	await page.goto('/Joh3/trans/0_2');
 	await expect(page).toHaveURL(/\/Joh3$/);
 });
+
+test('a reference percent-encoded as Latin-1 does not crash the page', async ({ page }) => {
+	// "1K%F6n16" is "1Kön16" (1.Könige 16) with "ö" mis-encoded as Latin-1 (0xF6) instead of UTF-8
+	// (%C3%B6) — something old browsers and stale bookmarks still produce.
+	const response = await page.goto('/1K%F6n16');
+	expect(response?.status()).toBeLessThan(400);
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('Könige');
+});
+
+test('the homepage link clears the remembered chapter instead of bouncing back to it', async ({
+	page
+}) => {
+	await page.goto('/Joh3');
+	await expect(page).toHaveURL(/\/Joh3$/);
+
+	await page.getByRole('link', { name: 'Strongs.de – Startseite' }).click();
+
+	await expect(page).toHaveURL(/\/Joh1$/);
+});
