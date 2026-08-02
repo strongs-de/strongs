@@ -22,6 +22,19 @@
 		if (count === 1) return t('lists.listCountOne');
 		return t('lists.listCount', { count });
 	}
+
+	const dateFormat = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' });
+
+	let copiedKey = $state(false);
+
+	async function copyKey(key: string): Promise<void> {
+		try {
+			await navigator.clipboard.writeText(key);
+			copiedKey = true;
+		} catch {
+			// A denied clipboard permission just leaves the key to be selected and copied by hand.
+		}
+	}
 </script>
 
 <svelte:head><title>{t('account.title')} — strongs.de</title></svelte:head>
@@ -162,6 +175,118 @@
 					{/if}
 				{/each}
 			</ul>
+		</div>
+	</Card>
+
+	<Card title={t('account.apiKeys')} description={t('account.apiKeysHint')}>
+		{#if form?.createdApiKey}
+			<div
+				class="dark:bg-accent-950/30 mb-4 rounded-md border border-accent-300 bg-accent-50 px-3
+				       py-2.5 dark:border-accent-800"
+			>
+				<p class="text-sm font-medium text-accent-900 dark:text-accent-100">
+					{t('apiKeys.createdTitle')}
+				</p>
+				<p class="mt-1 text-xs text-accent-800 dark:text-accent-200">
+					{t('apiKeys.createdHint')}
+				</p>
+				<div class="mt-2 flex items-center gap-2">
+					<code
+						class="min-w-0 flex-1 truncate rounded border border-accent-300 bg-white px-2 py-1.5
+						       font-mono text-xs dark:border-accent-800 dark:bg-stone-950"
+					>
+						{form.createdApiKey.key}
+					</code>
+					<Button
+						size="sm"
+						variant="secondary"
+						onclick={() => copyKey(form?.createdApiKey?.key ?? '')}
+					>
+						{copiedKey ? t('action.copied') : t('action.copy')}
+					</Button>
+				</div>
+			</div>
+		{/if}
+
+		{#if form?.apiKeyError === 'name'}
+			<p class="mb-3 text-sm text-red-700 dark:text-red-300">{t('apiKeys.errorName')}</p>
+		{:else if form?.apiKeyError === 'limit'}
+			<p class="mb-3 text-sm text-red-700 dark:text-red-300">
+				{t('apiKeys.errorLimit', { max: data.maxApiKeys })}
+			</p>
+		{/if}
+
+		<form method="POST" action="?/createApiKey" class="max-w-sm space-y-3">
+			<TextField name="name" label={t('apiKeys.name')} required />
+
+			<fieldset>
+				<legend class="mb-1 text-sm font-medium">{t('apiKeys.scope')}</legend>
+				<div class="space-y-2 text-sm">
+					<label class="flex items-start gap-2">
+						<input type="radio" name="scope" value="public" checked class="mt-0.5" />
+						<span>
+							<span class="block font-medium">{t('apiKeys.scope.public')}</span>
+							<span class="block text-xs text-stone-500 dark:text-stone-400"
+								>{t('apiKeys.scope.publicHint')}</span
+							>
+						</span>
+					</label>
+					<label class="flex items-start gap-2">
+						<input type="radio" name="scope" value="personal" class="mt-0.5" />
+						<span>
+							<span class="block font-medium">{t('apiKeys.scope.personal')}</span>
+							<span class="block text-xs text-stone-500 dark:text-stone-400"
+								>{t('apiKeys.scope.personalHint')}</span
+							>
+						</span>
+					</label>
+				</div>
+			</fieldset>
+
+			<Button>{t('apiKeys.create')}</Button>
+		</form>
+
+		<div class="mt-5 border-t border-stone-200 pt-5 dark:border-stone-800">
+			{#if data.apiKeys.length === 0}
+				<p class="text-sm text-stone-500 dark:text-stone-400">{t('apiKeys.empty')}</p>
+			{:else}
+				<ul class="space-y-3">
+					{#each data.apiKeys as key (key.id)}
+						<li
+							class="flex items-start justify-between gap-3 rounded-md border border-stone-200 px-3
+							       py-2.5 dark:border-stone-800"
+						>
+							<div class="min-w-0">
+								<p class="truncate text-sm font-medium">{key.name}</p>
+								<p class="mt-0.5 font-mono text-xs text-stone-500 dark:text-stone-400">
+									{key.prefix}…
+								</p>
+								<p class="mt-1 text-xs text-stone-500 dark:text-stone-400">
+									{key.scope === 'personal'
+										? t('apiKeys.scope.personal')
+										: t('apiKeys.scope.public')}
+									· {t('apiKeys.createdAt', { date: dateFormat.format(key.createdAt) })}
+								</p>
+								<p class="text-xs text-stone-500 dark:text-stone-400">
+									{#if key.revokedAt}
+										{t('apiKeys.revoked', { date: dateFormat.format(key.revokedAt) })}
+									{:else if key.lastUsedAt}
+										{t('apiKeys.lastUsedAt', { date: dateFormat.format(key.lastUsedAt) })}
+									{:else}
+										{t('apiKeys.lastUsedNever')}
+									{/if}
+								</p>
+							</div>
+							{#if !key.revokedAt}
+								<form method="POST" action="?/revokeApiKey">
+									<input type="hidden" name="id" value={key.id} />
+									<Button variant="danger" size="sm">{t('apiKeys.revoke')}</Button>
+								</form>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			{/if}
 		</div>
 	</Card>
 

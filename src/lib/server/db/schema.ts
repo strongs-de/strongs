@@ -351,6 +351,32 @@ export const loginAttempts = pgTable(
 	(table) => [index('login_attempts_subject_idx').on(table.subject, table.attemptedAt)]
 );
 
+/**
+ * `public` reaches only public content (bibles, lexicon, commentaries, search); `personal` also
+ * reaches the key owner's own verse lists and notes.
+ */
+export const API_KEY_SCOPES = ['public', 'personal'] as const;
+
+export const apiKeys = pgTable(
+	'api_keys',
+	{
+		/** SHA-256 of the key; the key itself is shown once at creation and never stored. */
+		id: text('id').primaryKey(),
+		userId: uuid('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		/** The owner's own label, e.g. "Meine App" — keys are otherwise indistinguishable in a list. */
+		name: text('name').notNull(),
+		scope: text('scope', { enum: API_KEY_SCOPES }).notNull(),
+		/** First characters of the key, shown in the list so a key stays identifiable once created. */
+		prefix: text('prefix').notNull(),
+		lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+		revokedAt: timestamp('revoked_at', { withTimezone: true }),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(table) => [index('api_keys_user_idx').on(table.userId, table.revokedAt)]
+);
+
 // --- verse lists ------------------------------------------------------------
 
 export const verseLists = pgTable(
@@ -470,6 +496,7 @@ export type NewVerseWord = typeof verseWords.$inferInsert;
 export type LexiconEntry = typeof lexiconEntries.$inferSelect;
 export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
+export type ApiKey = typeof apiKeys.$inferSelect;
 export type VerseList = typeof verseLists.$inferSelect;
 export type VerseListItem = typeof verseListItems.$inferSelect;
 export type ChapterNote = typeof chapterNotes.$inferSelect;
