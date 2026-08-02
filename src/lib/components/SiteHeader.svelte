@@ -60,6 +60,17 @@
 	}
 
 	/**
+	 * `/` on its own resumes the last chapter read, via a cookie — useful when typed directly, but it
+	 * means this link would otherwise just bounce a click straight back to wherever the reader already
+	 * is. Clearing the cookie first makes "Startseite" actually mean home; `data-sveltekit-preload-data
+	 * ="off"` on the link matters too, or hovering it would preload `/`'s data — reading the cookie —
+	 * before this handler ever runs, and the click would reuse that stale, already-fetched redirect.
+	 */
+	function goHome(): void {
+		document.cookie = 'location=; path=/; max-age=0; samesite=lax';
+	}
+
+	/**
 	 * Typing anywhere focuses the search box, as on the old site, and the arrow keys page through
 	 * chapters. Both are skipped while a field or a modifier key is in play.
 	 */
@@ -103,6 +114,8 @@
 	>
 		<a
 			href="/"
+			onclick={goHome}
+			data-sveltekit-preload-data="off"
 			class="group shrink-0 focus-visible:rounded-sm"
 			aria-label="Strongs.de – Startseite"
 		>

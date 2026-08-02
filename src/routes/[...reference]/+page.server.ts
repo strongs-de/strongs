@@ -60,7 +60,7 @@ import {
  *   3. anything else      → the search page
  */
 export async function load({ params, cookies, url, setHeaders, locals }) {
-	const raw = decodeURIComponent(params.reference ?? '').replace(/\/+$/, '');
+	const raw = decodeReferenceParam(params.reference ?? '').replace(/\/+$/, '');
 
 	// Legacy paths from the previous site: /async/Joh3 and /Joh3/trans/0_2/ variants.
 	const cleaned = raw.replace(/^async\//, '').replace(/\/?trans\/\d+_\d+$/, '');
@@ -368,6 +368,23 @@ export const actions = {
 		return { removed: true, listId: list.id };
 	}
 };
+
+/**
+ * Some old browsers and bookmarked links percent-encode non-ASCII characters as Latin-1 (e.g. "ö" as
+ * `%F6`) instead of UTF-8 (`%C3%B6`), which `decodeURIComponent` rejects as malformed and throws on —
+ * crashing the whole page instead of just failing to resolve a reference. Recovering the Latin-1
+ * reading handles that case; the codepoints it produces (0–255) already agree with Unicode, so German
+ * umlauts and similar characters round-trip correctly.
+ */
+function decodeReferenceParam(raw: string): string {
+	try {
+		return decodeURIComponent(raw);
+	} catch {
+		return raw.replace(/%[0-9A-Fa-f]{2}/g, (hex) =>
+			String.fromCharCode(parseInt(hex.slice(1), 16))
+		);
+	}
+}
 
 const LOCATION_COOKIE = 'location';
 
