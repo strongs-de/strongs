@@ -186,6 +186,30 @@ test('clicking a tagged word opens the study sidebar', async ({ page }) => {
 	await expect(page).toHaveURL(/#G25\/geliebt\/16$/);
 });
 
+test('clicking a footnote marker opens its note without relying on the Popover API', async ({
+	page
+}) => {
+	await page.goto('/Joh3');
+
+	// Force the same code path devices without Popover API support hit, so a regression here is
+	// caught even when the browser under test does support it.
+	await page.addInitScript(() => {
+		// @ts-expect-error simulating an older WebView for the test
+		delete HTMLElement.prototype.showPopover;
+	});
+	await page.reload();
+
+	const marker = page.locator('button.footnote-marker').first();
+	await marker.click();
+
+	const note = page.getByRole('note');
+	await expect(note).toBeVisible();
+	await expect(note).toContainText('so sehr');
+
+	await marker.click();
+	await expect(note).not.toBeVisible();
+});
+
 test('the Strong page lists every occurrence', async ({ page }) => {
 	await page.goto('/G2316');
 
