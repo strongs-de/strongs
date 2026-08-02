@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
-/* Dark mode is driven by a class on <html>, set before first paint in app.html, so an explicit
-   user choice wins over the OS preference. */
+/* Dark mode is driven by a class on <html>, set before first paint in app.html. Light is the
+   default regardless of OS preference; only an explicit user choice enables dark. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {

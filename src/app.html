@@ -21,13 +21,10 @@
 						document.cookie = 'theme=' + legacy + '; path=/; max-age=31536000; samesite=lax';
 					}
 				}
-				const dark =
-					stored === 'dark' ||
-					(stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-				if (dark) document.documentElement.classList.add('dark');
+				// Light is the default regardless of OS preference; only an explicit choice enables dark.
+				if (stored === 'dark') document.documentElement.classList.add('dark');
 			} catch {
-				// Cookies and localStorage can throw in private browsing modes; the media query default
-				// suffices.
+				// Cookies and localStorage can throw in private browsing modes; light remains the default.
 			}
 		</script>
 		%sveltekit.head%
