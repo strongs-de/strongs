@@ -13,10 +13,12 @@ import { eq } from 'drizzle-orm';
 import { parseVpl } from '../src/lib/bible/parse/vpl.ts';
 import { parseZefania } from '../src/lib/bible/parse/zefania.ts';
 import { parseStrongsXml } from '../src/lib/bible/parse/strongs-xml.ts';
+import { parseCommentaryCsv } from '../src/lib/bible/parse/commentary.ts';
 import { createDb } from '../src/lib/server/db/client.ts';
 import { refreshStrongStatisticsBlocking } from '../src/lib/server/db/statistics.ts';
 import { ingestBible } from '../src/lib/server/import/ingest-bible.ts';
 import { ingestLexicon } from '../src/lib/server/import/ingest-lexicon.ts';
+import { ingestCommentary } from '../src/lib/server/import/ingest-simple.ts';
 import { hashPassword } from '../src/lib/server/auth/password.ts';
 import { resources, users } from '../src/lib/server/db/schema.ts';
 
@@ -77,6 +79,10 @@ const LEXICON = `<?xml version="1.0" encoding="utf-8"?>
 	</entry>
 </entries></strongsdictionary>`;
 
+/** A commentary entry on the same verse as the fixture translations, so the reader has something to
+ *  show alongside them. */
+const COMMENTARY = `Joh 3,16\tDer bekannteste Vers der Bibel. **Also** meint hier: auf diese Weise.`;
+
 const url = process.env.DATABASE_URL;
 if (!url) {
 	console.error('DATABASE_URL is not set');
@@ -95,9 +101,15 @@ try {
 
 	await ingestLexicon(db, parseStrongsXml(LEXICON), { sourceFormat: 'strongs-xml' });
 
+	await ingestCommentary(db, parseCommentaryCsv(COMMENTARY), {
+		sourceFormat: 'commentary-csv',
+		overrides: { id: 'SEEDCOMMENTARY', name: 'Testkommentar', abbrev: 'Kommentar' }
+	});
+
 	// Deterministic column order, so the end-to-end tests can rely on which column is which.
 	await db.update(resources).set({ sortOrder: 10 }).where(eq(resources.id, 'SEEDDE'));
 	await db.update(resources).set({ sortOrder: 20 }).where(eq(resources.id, 'SEEDPLAIN'));
+	await db.update(resources).set({ sortOrder: 30 }).where(eq(resources.id, 'SEEDCOMMENTARY'));
 
 	await refreshStrongStatisticsBlocking(db);
 
@@ -116,7 +128,7 @@ try {
 		});
 	}
 
-	console.log('seeded: SEEDDE, SEEDPLAIN, STRONGS_GREEK and the admin account');
+	console.log('seeded: SEEDDE, SEEDPLAIN, SEEDCOMMENTARY, STRONGS_GREEK and the admin account');
 } catch (error) {
 	console.error('seeding failed:', error);
 	process.exitCode = 1;
