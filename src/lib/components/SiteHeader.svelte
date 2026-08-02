@@ -223,6 +223,21 @@
 					{t('nav.login')}
 				</a>
 			{/if}
+
+			<a
+				href="/impressum"
+				class="rounded-md px-1.5 py-1.5 text-xs text-stone-400 hover:text-stone-600
+				       dark:text-stone-500 dark:hover:text-stone-300"
+			>
+				{t('nav.impressum')}
+			</a>
+			<a
+				href="/datenschutz"
+				class="rounded-md px-1.5 py-1.5 text-xs text-stone-400 hover:text-stone-600
+				       dark:text-stone-500 dark:hover:text-stone-300"
+			>
+				{t('nav.datenschutz')}
+			</a>
 		</nav>
 	</div>
 </header>

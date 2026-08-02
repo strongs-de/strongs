@@ -37,6 +37,8 @@ export const de = {
 	'nav.admin': 'Verwaltung',
 	'nav.theme.light': 'Helles Design',
 	'nav.theme.dark': 'Dunkles Design',
+	'nav.impressum': 'Impressum',
+	'nav.datenschutz': 'Datenschutz',
 
 	// --- reader -------------------------------------------------------------
 	'reader.chooseTranslation': 'Übersetzung wählen',
