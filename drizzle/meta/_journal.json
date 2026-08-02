@@ -50,6 +50,13 @@
       "when": 1785481987397,
       "tag": "0006_dusty_vulture",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1785703785235,
+      "tag": "0007_classy_mojo",
+      "breakpoints": true
     }
   ]
 }
