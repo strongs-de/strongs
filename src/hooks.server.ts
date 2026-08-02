@@ -6,6 +6,7 @@ import { pruneExpiredSessions } from '$lib/server/auth/session';
 import { logger } from '$lib/server/logger';
 import { authenticateApiRequest, type ApiAuth } from '$lib/server/api/gate';
 import { checkApiRateLimit, KEYED_LIMIT, TRUSTED_LIMIT } from '$lib/server/api/rate-limit';
+import { apiError } from '$lib/server/api/errors';
 
 /**
  * Runs once when the server starts.
@@ -80,22 +81,23 @@ async function guardApiRequest(
 ): Promise<ApiAuth | Response> {
 	const db = getDb();
 	const gate = await authenticateApiRequest(db, request, clientAddress);
-	if (!gate.ok) return jsonError(gate.status, gate.code);
+	if (!gate.ok) {
+		const message =
+			gate.code === 'missing_api_key'
+				? 'This request needs an API key. See https://strongs.de/api for how to get one.'
+				: 'This API key is invalid or has been revoked.';
+		return apiError(gate.status, gate.code, message);
+	}
 
 	const limit = gate.auth.kind === 'key' ? KEYED_LIMIT : TRUSTED_LIMIT;
 	const rate = await checkApiRateLimit(db, gate.rateLimitSubject, limit);
 	if (!rate.allowed) {
-		return jsonError(429, 'rate_limited', { 'Retry-After': String(rate.retryAfterSeconds) });
+		const response = apiError(429, 'rate_limited', 'Too many requests. Try again shortly.');
+		response.headers.set('Retry-After', String(rate.retryAfterSeconds));
+		return response;
 	}
 
 	return gate.auth;
-}
-
-function jsonError(status: number, code: string, headers: Record<string, string> = {}): Response {
-	return new Response(JSON.stringify({ error: { code } }), {
-		status,
-		headers: { 'content-type': 'application/json', ...headers }
-	});
 }
 
 /**

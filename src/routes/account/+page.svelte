@@ -179,6 +179,9 @@
 	</Card>
 
 	<Card title={t('account.apiKeys')} description={t('account.apiKeysHint')}>
+		{#snippet actions()}
+			<Button href="/api" variant="secondary">{t('apiKeys.docs')}</Button>
+		{/snippet}
 		{#if form?.createdApiKey}
 			<div
 				class="dark:bg-accent-950/30 mb-4 rounded-md border border-accent-300 bg-accent-50 px-3
