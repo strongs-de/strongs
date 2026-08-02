@@ -185,6 +185,23 @@
 				<ThemeToggle />
 			{/if}
 
+			<a
+				href="/help"
+				title={t('nav.help')}
+				aria-label={t('nav.help')}
+				class="rounded-md px-2 py-1.5 text-stone-500 hover:bg-stone-100 hover:text-stone-900
+				       dark:hover:bg-stone-800 dark:hover:text-stone-100"
+				data-active={page.url.pathname === '/help' ? 'true' : undefined}
+			>
+				<svg viewBox="0 0 20 20" class="size-5" fill="currentColor" aria-hidden="true">
+					<path
+						fill-rule="evenodd"
+						d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a1.5 1.5 0 1 1 2.28 1.93c-.153.148-.353.302-.507.418l-.006.005a3.478 3.478 0 0 0-.51.465c-.163.19-.207.35-.207.44v.5a.75.75 0 0 0 1.5 0v-.443a2 2 0 0 1 .513-1.325A2.55 2.55 0 0 1 12 8.518 3 3 0 1 0 6.5 6.767a.75.75 0 1 0 1.44.418c.1-.34.278-.622.5-.845ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+						clip-rule="evenodd"
+					/>
+				</svg>
+			</a>
+
 			{#if user}
 				<a
 					href="/lists"
