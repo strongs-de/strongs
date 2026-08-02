@@ -34,6 +34,15 @@ test('the root redirects into the reader', async ({ page }) => {
 	await expect(page).toHaveURL(/\/Joh1$/);
 });
 
+test('the help page is reachable from the site header', async ({ page }) => {
+	await page.goto('/Joh3');
+
+	await page.getByRole('link', { name: 'Hilfe' }).click();
+
+	await expect(page).toHaveURL(/\/help$/);
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('Hilfe');
+});
+
 test('a reference shows the chapter in parallel columns', async ({ page }) => {
 	await useAlignedLayout(page);
 	await page.goto('/Joh3,16');
