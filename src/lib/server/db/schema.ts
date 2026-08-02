@@ -377,6 +377,18 @@ export const apiKeys = pgTable(
 	(table) => [index('api_keys_user_idx').on(table.userId, table.revokedAt)]
 );
 
+/** Requests through the public API, kept just long enough to enforce its rate limit. */
+export const apiRequests = pgTable(
+	'api_requests',
+	{
+		id: bigserial('id', { mode: 'number' }).primaryKey(),
+		/** `key:<key id>` for an authenticated request, `ip:<address>` otherwise. */
+		subject: text('subject').notNull(),
+		requestedAt: timestamp('requested_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(table) => [index('api_requests_subject_idx').on(table.subject, table.requestedAt)]
+);
+
 // --- verse lists ------------------------------------------------------------
 
 export const verseLists = pgTable(
