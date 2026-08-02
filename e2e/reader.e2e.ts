@@ -307,10 +307,58 @@ test('the study panel and the column headers stay in view while scrolling', asyn
 	await expect(sidebar).toBeVisible();
 
 	await page.mouse.wheel(0, 4000);
-	// A sticky element keeps its viewport position; before the fix both scrolled away, because the
+	// Both are fixed/pinned to the viewport; before the fix both scrolled away, because the
 	// reader's <main> was a scroll container and nothing could stick to the viewport inside it.
 	await expect(sidebar).toBeInViewport();
 	await expect(header).toBeInViewport();
+});
+
+test('opening the study sidebar does not resize the reading columns', async ({ page }) => {
+	await page.goto('/Joh3');
+
+	const column = page.locator('.flow-column[data-flow-column-index="0"]');
+	const before = (await column.boundingBox())!;
+
+	await page.locator('button.strong[data-strong="G25"]').first().click();
+	await expect(page.getByRole('complementary')).toBeVisible();
+
+	const after = (await column.boundingBox())!;
+	expect(after.width).toBeCloseTo(before.width, 0);
+});
+
+test('escape closes the study sidebar', async ({ page }) => {
+	await page.goto('/Joh3');
+
+	await page.locator('button.strong[data-strong="G25"]').first().click();
+	const sidebar = page.getByRole('complementary');
+	await expect(sidebar).toBeVisible();
+
+	await page.keyboard.press('Escape');
+	await expect(sidebar).not.toBeVisible();
+});
+
+test('clicking outside the study sidebar closes it', async ({ page }) => {
+	await page.goto('/Joh3');
+
+	await page.locator('button.strong[data-strong="G25"]').first().click();
+	const sidebar = page.getByRole('complementary');
+	await expect(sidebar).toBeVisible();
+
+	await page.getByRole('heading', { level: 1 }).click();
+	await expect(sidebar).not.toBeVisible();
+});
+
+test('clicking another word switches the sidebar instead of closing it', async ({ page }) => {
+	await page.goto('/Joh3');
+
+	await page.locator('button.strong[data-strong="G25"]').first().click();
+	const sidebar = page.getByRole('complementary');
+	await expect(sidebar).toContainText('G25');
+
+	// "Gott" nearby carries G2316.
+	await page.locator('button.strong[data-strong="G2316"]').first().click();
+	await expect(sidebar).toBeVisible();
+	await expect(sidebar).toContainText('G2316');
 });
 
 test('on a phone the study panel is a sheet that leaves the verse visible', async ({ page }) => {

@@ -630,13 +630,13 @@
 	{#if nextPath}<link rel="next" href={nextPath} />{/if}
 </svelte:head>
 
-<div class="flex min-h-0 flex-1">
+<div class="min-h-0 flex-1">
 	<!-- No `overflow-x` here: it would make this a scroll container, and every `sticky` inside it
 	     would then stick to a box that never scrolls vertically. The grid's `minmax(0, 1fr)` tracks
 	     cannot overflow anyway. -->
-	<main class="min-w-0 flex-1 bg-white/65 dark:bg-stone-950/45">
+	<main class="bg-white/65 dark:bg-stone-950/45">
 		<div
-			class="mx-auto max-w-[120rem] px-3 py-4 sm:px-5 sm:py-5"
+			class="mx-auto max-w-[var(--content-max-width)] px-3 py-4 sm:px-5 sm:py-5"
 			class:pb-sheet={activeStrong !== null}
 		>
 			<div

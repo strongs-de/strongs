@@ -63,6 +63,21 @@
 	let loading = $state(true);
 	let failed = $state(false);
 	let page = $state(1);
+	let asideEl: HTMLElement | undefined = $state();
+
+	function onWindowKeydown(event: KeyboardEvent): void {
+		if (event.key === 'Escape') onClose();
+	}
+
+	// A click on another Strong's word must switch the lookup, not close the panel first — that
+	// word is outside `asideEl`, so without this exclusion it would immediately reopen empty.
+	function onWindowClick(event: MouseEvent): void {
+		const target = event.target as HTMLElement | null;
+		if (!asideEl || !target) return;
+		if (asideEl.contains(target)) return;
+		if (target.closest('.strong')) return;
+		onClose();
+	}
 
 	$effect(() => {
 		// Re-fetch whenever the word, the verse or the page changes.
@@ -100,17 +115,31 @@
 	);
 </script>
 
+<svelte:window onkeydown={onWindowKeydown} onclick={onWindowClick} />
+
 <!--
-  Two shapes for one panel. On a phone it is a bottom sheet, so the verse that was tapped stays
-  readable above it; from `sm` up it is a column that sticks under the site header, which needs
-  `self-start` — a flex item stretched to its container's height has nowhere to stick to.
+  Two shapes for one panel, both overlays: on a phone it's a bottom sheet, so the verse that was
+  tapped stays readable above it; from `sm` up it's a right-hand panel pinned under the site
+  header. Neither shares a flex row with `main`, so opening or closing it never resizes the
+  reading columns — that used to happen on every single word click.
 -->
+<div
+	class="pointer-events-none fixed inset-x-0 top-[var(--header-height)] bottom-0 z-30 hidden
+	       bg-stone-950/5 sm:block dark:bg-black/25"
+	aria-hidden="true"
+></div>
+
 <aside
+	bind:this={asideEl}
 	class="panel fixed inset-x-0 bottom-0 z-40 flex max-h-[70dvh] flex-col rounded-t-xl border
-	       border-stone-200 bg-white shadow-2xl sm:sticky sm:inset-x-auto sm:top-[var(--header-height)]
-	       sm:bottom-auto sm:z-10 sm:h-[calc(100dvh-var(--header-height))]
-	       sm:max-h-none sm:w-[28rem] sm:shrink-0 sm:self-start sm:rounded-none sm:border-0 sm:border-l
-	       sm:shadow-[-8px_0_24px_rgb(28_25_23/0.04)] lg:w-[32rem] dark:border-stone-800 dark:bg-stone-900"
+	       border-stone-200 bg-white shadow-2xl sm:inset-x-auto sm:top-[var(--header-height)]
+	       sm:right-[max(0px,calc((100vw-var(--content-max-width))/2-28rem))] sm:bottom-auto
+	       sm:h-[calc(100dvh-var(--header-height))] sm:max-h-none
+	       sm:w-[28rem]
+	       sm:rounded-none sm:border-0 sm:border-l
+	       sm:shadow-[-8px_0_24px_rgb(28_25_23/0.04)]
+	       lg:right-[max(0px,calc((100vw-var(--content-max-width))/2-32rem))] lg:w-[32rem]
+	       dark:border-stone-800 dark:bg-stone-900"
 	aria-label={t('sidebar.tab.strong')}
 >
 	<header
@@ -315,10 +344,17 @@
 </aside>
 
 <style>
-	/* The sheet slides in; the reduced-motion block in layout.css shortens this to nothing. */
+	/* The sheet slides up on a phone, in from the right on a wider screen; the reduced-motion block
+	   in layout.css shortens both to nothing. */
 	@media (max-width: 639px) {
 		.panel {
 			animation: slide-up 180ms ease-out;
+		}
+	}
+
+	@media (min-width: 640px) {
+		.panel {
+			animation: slide-in-right 180ms ease-out;
 		}
 	}
 
@@ -328,6 +364,15 @@
 		}
 		to {
 			transform: translateY(0);
+		}
+	}
+
+	@keyframes slide-in-right {
+		from {
+			transform: translateX(100%);
+		}
+		to {
+			transform: translateX(0);
 		}
 	}
 

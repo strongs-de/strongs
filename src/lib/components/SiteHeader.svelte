@@ -99,7 +99,7 @@
 	       dark:border-stone-800 dark:bg-stone-950/95 dark:shadow-black/20"
 >
 	<div
-		class="mx-auto flex h-[var(--header-height)] max-w-[120rem] items-center gap-2 px-3 pt-0.5 sm:gap-5 sm:px-5"
+		class="mx-auto flex h-[var(--header-height)] max-w-[var(--content-max-width)] items-center gap-2 px-3 pt-0.5 sm:gap-5 sm:px-5"
 	>
 		<a
 			href="/"
