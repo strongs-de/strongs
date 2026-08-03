@@ -1,9 +1,16 @@
 import { expect, test } from '@playwright/test';
 
 /**
- * The public API's domain gate and rate limiting (`hooks.server.ts` + `lib/server/api/`), exercised
- * against the `/api/v1/ping` diagnostic endpoint — the real endpoints land in a later PR.
+ * The public API: the domain gate and rate limiting (`hooks.server.ts` + `lib/server/api/`), and the
+ * `/api/v1` endpoints themselves.
  */
+
+/**
+ * `request.get` sends none of the headers a real same-origin browser fetch would, so content
+ * endpoint tests that do not care about auth pass this to satisfy the gate — it matches the `ORIGIN`
+ * playwright.config.ts sets for the e2e server.
+ */
+const trusted = { origin: 'http://localhost:4173' };
 
 function uniqueEmail(): string {
 	return `e2e-api-${Math.random().toString(36).slice(2, 10)}@example.com`;
@@ -76,4 +83,86 @@ test('exceeding the per-key rate limit returns 429 with Retry-After', async ({ p
 	expect(over.status()).toBe(429);
 	expect(over.headers()['retry-after']).toBeTruthy();
 	expect((await over.json()).error.code).toBe('rate_limited');
+});
+
+test('GET /api/v1/books lists the 66-book canon', async ({ request }) => {
+	const response = await request.get('/api/v1/books', { headers: trusted });
+	expect(response.status()).toBe(200);
+	const body = await response.json();
+	expect(body.books).toHaveLength(66);
+	expect(body.books.find((book: { id: number }) => book.id === 43)).toMatchObject({
+		shortName: 'Joh'
+	});
+});
+
+test('GET /api/v1/resources lists the seeded resources', async ({ request }) => {
+	const response = await request.get('/api/v1/resources', { headers: trusted });
+	expect(response.status()).toBe(200);
+	const body = await response.json();
+	const ids = body.resources.map((resource: { id: string }) => resource.id);
+	expect(ids).toEqual(expect.arrayContaining(['SEEDDE', 'SEEDPLAIN', 'SEEDCOMMENTARY']));
+});
+
+test('GET /api/v1/bibles/:bible/:book/:chapter returns the chapter text', async ({ request }) => {
+	const response = await request.get('/api/v1/bibles/SEEDDE/43/3', { headers: trusted });
+	expect(response.status()).toBe(200);
+	const body = await response.json();
+	const verse16 = body.verses.find((verse: { verse: number }) => verse.verse === 16);
+	expect(verse16.segments.some((segment: { strong?: string }) => segment.strong === 'G25')).toBe(
+		true
+	);
+});
+
+test('GET /api/v1/bibles/:bible/:book/:chapter 404s for an unknown bible', async ({ request }) => {
+	const response = await request.get('/api/v1/bibles/NOPE/43/3', { headers: trusted });
+	expect(response.status()).toBe(404);
+	expect((await response.json()).error.code).toBe('unknown_bible');
+});
+
+test('GET /api/v1/strong/:id returns the lexicon entry', async ({ request }) => {
+	const response = await request.get('/api/v1/strong/G25', { headers: trusted });
+	expect(response.status()).toBe(200);
+	const body = await response.json();
+	expect(body.found).toBe(true);
+	expect(body.entry.lemma).toBe('ἀγαπάω');
+});
+
+test('GET /api/v1/search finds a word', async ({ request }) => {
+	const response = await request.get('/api/v1/search?q=geliebt', { headers: trusted });
+	expect(response.status()).toBe(200);
+	const body = await response.json();
+	expect(body.hits.length).toBeGreaterThan(0);
+});
+
+test('GET /api/v1/lists and /api/v1/notes need a session or a personal-scope key', async ({
+	request
+}) => {
+	const lists = await request.get('/api/v1/lists', { headers: trusted });
+	expect(lists.status()).toBe(403);
+	expect((await lists.json()).error.code).toBe('personal_scope_required');
+
+	const notes = await request.get('/api/v1/notes', { headers: trusted });
+	expect(notes.status()).toBe(403);
+});
+
+test('a signed-in session reads its own lists and notes through the API', async ({ page }) => {
+	await page.goto('/register');
+	await page.getByLabel('E-Mail-Adresse').fill(uniqueEmail());
+	await page.getByLabel('Anzeigename').fill('E2E');
+	await page.getByLabel('Passwort', { exact: true }).fill('ein-sicheres-passwort');
+	await page.getByLabel('Passwort wiederholen').fill('ein-sicheres-passwort');
+	await page.getByRole('button', { name: 'Konto erstellen' }).click();
+	await expect(page).toHaveURL(/\/account$/);
+
+	// A real in-page fetch, not the request fixture: only a browser attaches the session cookie and
+	// the same-origin signal this endpoint's "trusted" path checks for.
+	const lists = await page.evaluate(() =>
+		fetch('/api/v1/lists').then((response) => response.json())
+	);
+	expect(lists).toEqual({ lists: [] });
+
+	const notes = await page.evaluate(() =>
+		fetch('/api/v1/notes').then((response) => response.json())
+	);
+	expect(notes).toEqual({ notes: [] });
 });

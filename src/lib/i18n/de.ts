@@ -142,6 +142,7 @@ export const de = {
 	'apiKeys.scope.personal': 'Auch persönliche Daten',
 	'apiKeys.scope.personalHint': 'Zusätzlich eigene Verslisten und Notizen.',
 	'apiKeys.create': 'Schlüssel erstellen',
+	'apiKeys.docs': 'API-Dokumentation',
 	'apiKeys.createdTitle': 'Schlüssel erstellt',
 	'apiKeys.createdHint':
 		'Dieser Schlüssel wird nur jetzt angezeigt. Kopiere ihn an einen sicheren Ort.',
