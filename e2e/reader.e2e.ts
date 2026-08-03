@@ -34,6 +34,19 @@ test('the root redirects into the reader', async ({ page }) => {
 	await expect(page).toHaveURL(/\/Joh1$/);
 });
 
+test('Impressum and Datenschutz are reachable from the site header', async ({ page }) => {
+	await page.goto('/Joh3');
+
+	await page.getByRole('link', { name: 'Impressum' }).click();
+	await expect(page).toHaveURL(/\/impressum$/);
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('Impressum');
+
+	await page.goto('/Joh3');
+	await page.getByRole('link', { name: 'Datenschutz' }).click();
+	await expect(page).toHaveURL(/\/datenschutz$/);
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('Datenschutzerklärung');
+});
+
 test('the help page is reachable from the site header', async ({ page }) => {
 	await page.goto('/Joh3');
 

@@ -48,6 +48,12 @@ import {
 	markedVersesByList,
 	removeVerseFromList
 } from '$lib/server/repositories/verse-lists';
+import { listHighlightStyles } from '$lib/server/repositories/highlight-styles';
+import {
+	loadChapterHighlights,
+	removeVerseHighlight,
+	setVerseHighlight
+} from '$lib/server/repositories/verse-highlights';
 
 /**
  * The reader, and the resolver for everything that is not a named route.
@@ -156,6 +162,10 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 		locals.user && notesVisible
 			? await loadChapterNote(db, locals.user.id, reference.book, reference.chapter)
 			: null;
+	const highlightStyles = locals.user ? await listHighlightStyles(db, locals.user.id) : [];
+	const highlights = locals.user
+		? await loadChapterHighlights(db, locals.user.id, reference.book, reference.chapter)
+		: [];
 
 	// Public scripture text is the same for everyone; a signed-in reader's page is not.
 	setHeaders({
@@ -193,6 +203,8 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 		lists: lists.map((list) => ({ id: list.id, title: list.title })),
 		/** Which of this chapter's verses sit in which list, for the verse menu's check marks. */
 		markedVerses: marked,
+		highlightStyles,
+		highlights,
 		notesVisible: locals.user !== null && notesVisible,
 		chapterNote
 	};
@@ -366,6 +378,37 @@ export const actions = {
 		});
 
 		return { removed: true, listId: list.id };
+	},
+
+	/** Picking a colour from the verse menu's swatches. Silently ignored for a style that is not the
+	 *  signed-in reader's own — there is nothing a reader could usefully be told there. */
+	setHighlight: async ({ request, locals }) => {
+		if (!locals.user) redirect(303, '/login');
+
+		const form = await request.formData();
+		const reference = parseReference(String(form.get('reference') ?? ''));
+		const styleId = String(form.get('styleId') ?? '');
+		if (!reference?.verse || !styleId) return fail(400, { error: 'reference' });
+
+		await setVerseHighlight(
+			getDb(),
+			locals.user.id,
+			{ ...reference, verse: reference.verse },
+			styleId
+		);
+		return { highlighted: true };
+	},
+
+	/** Clicking an already-active swatch again, to clear the verse's highlight. */
+	removeHighlight: async ({ request, locals }) => {
+		if (!locals.user) redirect(303, '/login');
+
+		const form = await request.formData();
+		const reference = parseReference(String(form.get('reference') ?? ''));
+		if (!reference?.verse) return fail(400, { error: 'reference' });
+
+		await removeVerseHighlight(getDb(), locals.user.id, { ...reference, verse: reference.verse });
+		return { highlighted: true };
 	}
 };
 

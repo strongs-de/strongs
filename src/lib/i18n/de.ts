@@ -37,6 +37,8 @@ export const de = {
 	'nav.admin': 'Verwaltung',
 	'nav.theme.light': 'Helles Design',
 	'nav.theme.dark': 'Dunkles Design',
+	'nav.impressum': 'Impressum',
+	'nav.datenschutz': 'Datenschutz',
 
 	// --- reader -------------------------------------------------------------
 	'reader.chooseTranslation': 'Übersetzung wählen',
@@ -152,6 +154,14 @@ export const de = {
 	'apiKeys.createdAt': 'Erstellt am {date}',
 	'apiKeys.lastUsedAt': 'Zuletzt verwendet am {date}',
 	'apiKeys.lastUsedNever': 'Noch nie verwendet',
+	'account.highlights': 'Versmarkierungen',
+	'account.highlightsHint': 'Farben zum Markieren von Versen, mit eigenen Namen.',
+	'highlights.namePlaceholder': 'Unbenannt',
+	'highlights.addColor': 'Farbe hinzufügen',
+	'highlights.errorColor': 'Bitte wähle eine Farbe.',
+	'highlights.errorLimit': 'Es sind bereits {max} Farben angelegt.',
+	'highlights.menuLabel': 'Markieren',
+	'highlights.unnamed': 'Unbenannte Farbe',
 	'auth.login.title': 'Anmelden',
 	'auth.login.submit': 'Anmelden',
 	'auth.login.failed': 'E-Mail-Adresse oder Passwort ist falsch.',
