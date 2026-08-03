@@ -4,6 +4,8 @@ import { resolveSession } from '$lib/server/auth/session';
 import { failInterruptedJobs } from '$lib/server/import/jobs';
 import { pruneExpiredSessions } from '$lib/server/auth/session';
 import { logger } from '$lib/server/logger';
+import { authenticateApiRequest, type ApiAuth } from '$lib/server/api/gate';
+import { checkApiRateLimit, KEYED_LIMIT, TRUSTED_LIMIT } from '$lib/server/api/rate-limit';
 
 /**
  * Runs once when the server starts.
@@ -50,6 +52,13 @@ export const handle: Handle = async ({ event, resolve }) => {
 		}
 	}
 
+	event.locals.apiAuth = null;
+	if (event.url.pathname.startsWith('/api/v1/')) {
+		const gated = await guardApiRequest(event.request, event.getClientAddress());
+		if (gated instanceof Response) return gated;
+		event.locals.apiAuth = gated;
+	}
+
 	const started = Date.now();
 	const response = await resolve(event);
 	const duration = Date.now() - started;
@@ -60,6 +69,34 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	return response;
 };
+
+/**
+ * Authenticates and rate-limits a request to the public API, returning either the resolved
+ * `ApiAuth` to stash on `event.locals` or a `Response` to short-circuit with (401 or 429).
+ */
+async function guardApiRequest(
+	request: Request,
+	clientAddress: string
+): Promise<ApiAuth | Response> {
+	const db = getDb();
+	const gate = await authenticateApiRequest(db, request, clientAddress);
+	if (!gate.ok) return jsonError(gate.status, gate.code);
+
+	const limit = gate.auth.kind === 'key' ? KEYED_LIMIT : TRUSTED_LIMIT;
+	const rate = await checkApiRateLimit(db, gate.rateLimitSubject, limit);
+	if (!rate.allowed) {
+		return jsonError(429, 'rate_limited', { 'Retry-After': String(rate.retryAfterSeconds) });
+	}
+
+	return gate.auth;
+}
+
+function jsonError(status: number, code: string, headers: Record<string, string> = {}): Response {
+	return new Response(JSON.stringify({ error: { code } }), {
+		status,
+		headers: { 'content-type': 'application/json', ...headers }
+	});
+}
 
 /**
  * Some old browsers and stale bookmarked links percent-encode non-ASCII characters as Latin-1 (e.g.

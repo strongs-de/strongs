@@ -1,6 +1,7 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 import type { User } from '$lib/server/db/schema';
+import type { ApiAuth } from '$lib/server/api/gate';
 
 declare global {
 	namespace App {
@@ -28,6 +29,8 @@ declare global {
 			> | null;
 			/** Session id, needed to renew or revoke the session. */
 			sessionId: string | null;
+			/** Set by the hook for any `/api/v1` request; null outside that namespace. */
+			apiAuth: ApiAuth | null;
 		}
 	}
 }

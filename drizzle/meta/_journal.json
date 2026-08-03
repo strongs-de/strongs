@@ -71,6 +71,13 @@
       "when": 1785768286580,
       "tag": "0009_true_glorian",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1785768863567,
+      "tag": "0010_petite_wild_pack",
+      "breakpoints": true
     }
   ]
 }
