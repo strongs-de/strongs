@@ -82,13 +82,23 @@ export async function* readSwordModule(
 
 		let count = 0;
 		for (const book of BOOKS) {
-			const result = await run(
-				'diatheke',
-				['-b', configuration.module, '-o', 'nfmhs', '-f', 'OSIS', '-e', 'UTF8', '-k', book.osisId],
-				environment
-			);
-
 			if (expectedFormat === 'sword-bible') {
+				const result = await run(
+					'diatheke',
+					[
+						'-b',
+						configuration.module,
+						'-o',
+						'nfmhs',
+						'-f',
+						'OSIS',
+						'-e',
+						'UTF8',
+						'-k',
+						book.osisId
+					],
+					environment
+				);
 				const document = swordBookAsOsis(result.stdout, book.id, book.osisId);
 				if (document) {
 					for await (const event of parseOsis(document)) {
@@ -99,7 +109,45 @@ export async function* readSwordModule(
 					}
 				}
 			} else {
-				for (const entry of swordCommentaryEntries(result.stdout)) {
+				// Read the book twice, with and without diatheke's section-heading filter ("h" in `-o`).
+				// A commentary section's heading has no other structural marker in diatheke's flattened
+				// OSIS output — it is plain text merged straight into the body — so the only way to tell
+				// the two apart is to diff a rendering that has it against one that does not.
+				const [withHeadings, withoutHeadings] = await Promise.all([
+					run(
+						'diatheke',
+						[
+							'-b',
+							configuration.module,
+							'-o',
+							'nfmhs',
+							'-f',
+							'OSIS',
+							'-e',
+							'UTF8',
+							'-k',
+							book.osisId
+						],
+						environment
+					),
+					run(
+						'diatheke',
+						[
+							'-b',
+							configuration.module,
+							'-o',
+							'nfms',
+							'-f',
+							'OSIS',
+							'-e',
+							'UTF8',
+							'-k',
+							book.osisId
+						],
+						environment
+					)
+				]);
+				for (const entry of swordCommentaryEntries(withHeadings.stdout, withoutHeadings.stdout)) {
 					count += 1;
 					yield { type: 'commentaryEntry', entry };
 				}
@@ -135,18 +183,112 @@ function swordBookAsOsis(output: string, expectedBook: number, osisId: string): 
 	return `<osis><osisText osisIDWork="SWORD"><div type="book" osisID="${osisId}">${verses.join('')}</div></osisText></osis>`;
 }
 
-function* swordCommentaryEntries(output: string) {
-	for (const parsed of parseDiathekeOutput(output)) {
-		const bodyHtml = sanitizeHtml(parsed.content);
-		if (!bodyHtml) continue;
-		yield {
-			book: parsed.book,
-			chapter: parsed.chapter,
-			verseStart: parsed.verse,
-			verseEnd: parsed.verse,
-			bodyHtml
+type CommentarySection = {
+	book: number;
+	chapter: number;
+	verseStart: number;
+	verseEnd: number;
+	title?: string;
+	bodyHtml: string;
+};
+
+/**
+ * Turns diatheke's per-verse commentary text into per-section entries.
+ *
+ * A SWORD zCom module stores one block of text per commented section (often several verses, e.g.
+ * `annotateRef="Gen.1.3-Gen.1.5"`) and maps every verse in that range to the same block. Asking
+ * diatheke for each verse individually therefore returns byte-identical text for every verse in a
+ * section — which is exactly how the section's range is recovered here: consecutive verses of the same
+ * chapter with identical rendered content are merged back into one entry spanning `verseStart..verseEnd`,
+ * rather than imported as repeated, single-verse duplicates.
+ *
+ * `withHeadings`/`withoutHeadings` are the same book read twice, with diatheke's section-heading filter
+ * ("h" in `-o`) toggled. See `extractTitle` for why both are needed to recover the heading text.
+ */
+export function* swordCommentaryEntries(
+	withHeadings: string,
+	withoutHeadings: string
+): Generator<CommentarySection> {
+	const headed = [...parseDiathekeOutput(withHeadings)];
+	const plain = [...parseDiathekeOutput(withoutHeadings)];
+	const alignedPlain =
+		headed.length === plain.length &&
+		headed.every(
+			(entry, index) =>
+				entry.book === plain[index]!.book &&
+				entry.chapter === plain[index]!.chapter &&
+				entry.verse === plain[index]!.verse
+		);
+
+	type PendingSection = {
+		book: number;
+		chapter: number;
+		verseStart: number;
+		verseEnd: number;
+		title: string | undefined;
+		plainContent: string;
+	};
+	let pending: PendingSection | null = null;
+
+	function* flush(): Generator<CommentarySection> {
+		if (!pending) return;
+		const bodyHtml = sanitizeHtml(pending.plainContent);
+		if (bodyHtml) {
+			yield {
+				book: pending.book,
+				chapter: pending.chapter,
+				verseStart: pending.verseStart,
+				verseEnd: pending.verseEnd,
+				...(pending.title ? { title: pending.title } : {}),
+				bodyHtml
+			};
+		}
+	}
+
+	for (const [index, verse] of headed.entries()) {
+		const plainContent = alignedPlain ? plain[index]!.content : verse.content;
+
+		if (
+			pending &&
+			pending.book === verse.book &&
+			pending.chapter === verse.chapter &&
+			pending.verseEnd + 1 === verse.verse &&
+			pending.plainContent === plainContent
+		) {
+			pending.verseEnd = verse.verse;
+			continue;
+		}
+
+		yield* flush();
+		pending = {
+			book: verse.book,
+			chapter: verse.chapter,
+			verseStart: verse.verse,
+			verseEnd: verse.verse,
+			title: alignedPlain ? extractTitle(verse.content, plainContent) : undefined,
+			plainContent
 		};
 	}
+	yield* flush();
+}
+
+/**
+ * Recovers a section's heading by diffing the same text rendered with and without diatheke's
+ * section-heading filter. The filter has no output of its own for the heading (no tag, no delimiter) —
+ * it either merges the heading straight into the body as plain text, or drops it entirely — so the
+ * heading can only be isolated as whatever leading text disappears when the filter is turned off.
+ *
+ * This only recovers a clean, single heading: a book/testament introduction can bundle several
+ * unrelated headings into one block (e.g. "Einleitung Downloads Über den Autor …"), which does not
+ * reduce to "one heading, then the body" — `withoutHeading` is then not a clean trailing match and no
+ * title is extracted, leaving that block's text exactly as before.
+ */
+export function extractTitle(withHeading: string, withoutHeading: string): string | undefined {
+	const headed = withHeading.trim();
+	const body = withoutHeading.trim();
+	if (body.length === 0 || headed.length <= body.length || !headed.endsWith(body)) return undefined;
+	const title = headed.slice(0, headed.length - body.length).trim();
+	return title || undefined;
 }
 
 function parseDiathekeLine(line: string) {
