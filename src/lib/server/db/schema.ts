@@ -421,6 +421,68 @@ export const chapterNotes = pgTable(
 	]
 );
 
+// --- verse highlights ---------------------------------------------------
+
+/**
+ * `color` is the only kind rendered today; `underline` and `symbol` are reserved so a style can
+ * later carry an underline or an icon instead of (or alongside) a fill colour — the way Logos'
+ * highlighting palettes do — without another migration once the reader grows that.
+ */
+export const HIGHLIGHT_STYLE_KINDS = ['color', 'underline', 'symbol'] as const;
+
+/**
+ * One colour (or, later, underline/symbol) in a reader's personal highlighting palette. Ten are
+ * seeded for a new account; a reader can rename any of them or add more of their own.
+ */
+export const highlightStyles = pgTable(
+	'highlight_styles',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		userId: uuid('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		kind: text('kind', { enum: HIGHLIGHT_STYLE_KINDS }).notNull().default('color'),
+		/** CSS colour, e.g. `#fde68a`. */
+		color: text('color').notNull(),
+		/** The owner's own label, e.g. "Verheißungen" — null until renamed from its seeded default. */
+		name: text('name'),
+		sortOrder: integer('sort_order').notNull().default(0),
+		...timestamps
+	},
+	(table) => [index('highlight_styles_user_idx').on(table.userId, table.sortOrder)]
+);
+
+export type HighlightStyle = typeof highlightStyles.$inferSelect;
+
+/** One verse marked with one style. A verse holds at most one at a time — picking another replaces it. */
+export const verseHighlights = pgTable(
+	'verse_highlights',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		userId: uuid('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		styleId: uuid('style_id')
+			.notNull()
+			.references(() => highlightStyles.id, { onDelete: 'cascade' }),
+		bookId: integer('book_id').notNull(),
+		chapter: integer('chapter').notNull(),
+		verse: integer('verse').notNull(),
+		...timestamps
+	},
+	(table) => [
+		uniqueIndex('verse_highlights_verse_idx').on(
+			table.userId,
+			table.bookId,
+			table.chapter,
+			table.verse
+		),
+		index('verse_highlights_style_idx').on(table.styleId)
+	]
+);
+
+export type VerseHighlight = typeof verseHighlights.$inferSelect;
+
 // --- operations -------------------------------------------------------------
 
 export const IMPORT_STATES = ['queued', 'running', 'done', 'failed', 'cancelled'] as const;

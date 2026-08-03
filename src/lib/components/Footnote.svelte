@@ -1,4 +1,11 @@
+<script module lang="ts">
+	// Only one footnote popup should be open at a time; each instance registers how to close
+	// itself here so opening a new one dismisses whichever was open before.
+	let closeOpen: (() => void) | null = null;
+</script>
+
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { t } from '$lib/i18n';
 
 	let {
@@ -9,16 +16,19 @@
 		text: string;
 	} = $props();
 
+	let open = $state(false);
 	let popup = $state<HTMLSpanElement | undefined>();
 	let trigger = $state<HTMLButtonElement | undefined>();
 
-	function toggle(): void {
-		if (!popup) return;
-		if (popup.matches(':popover-open')) {
-			popup.hidePopover();
+	async function toggle(): Promise<void> {
+		if (open) {
+			open = false;
 			return;
 		}
-		popup.showPopover();
+		closeOpen?.();
+		open = true;
+		closeOpen = () => (open = false);
+		await tick();
 		place();
 	}
 
@@ -40,9 +50,27 @@
 		popup.style.left = `${left}px`;
 		popup.style.top = `${top}px`;
 	}
+
+	function onWindowKeydown(event: KeyboardEvent): void {
+		if (event.key === 'Escape') open = false;
+	}
+
+	// The trigger's own click already toggles `open`; without this exclusion an outside click
+	// would close it here first and then the click handler would immediately reopen it.
+	function onWindowClick(event: MouseEvent): void {
+		if (!open) return;
+		const target = event.target as HTMLElement | null;
+		if (!target) return;
+		if (popup?.contains(target) || target.closest('.footnote-marker')) return;
+		open = false;
+	}
 </script>
 
-<svelte:window onresize={() => popup?.matches(':popover-open') && place()} />
+<svelte:window
+	onresize={() => open && place()}
+	onclick={onWindowClick}
+	onkeydown={onWindowKeydown}
+/>
 
 <button
 	bind:this={trigger}
@@ -50,11 +78,14 @@
 	class="footnote-marker"
 	aria-label={t('verse.footnote', { marker: marker || '*' })}
 	aria-haspopup="dialog"
+	aria-expanded={open}
 	onclick={toggle}
 >
 	{marker || '*'}
 </button>
-<span bind:this={popup} popover="auto" role="note" class="footnote-popup">{text}</span>
+{#if open}
+	<span bind:this={popup} role="note" class="footnote-popup">{text}</span>
+{/if}
 
 <style>
 	.footnote-marker {
@@ -87,6 +118,7 @@
 
 	.footnote-popup {
 		position: fixed;
+		z-index: 50;
 		inset: auto;
 		width: max-content;
 		max-width: min(24rem, calc(100vw - 1rem));
@@ -101,10 +133,6 @@
 		font-weight: 400;
 		line-height: 1.45;
 		color: var(--color-stone-700);
-	}
-
-	.footnote-popup:not(:popover-open) {
-		display: none;
 	}
 
 	:global(.dark) .footnote-popup {
