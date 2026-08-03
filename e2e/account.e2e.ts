@@ -41,6 +41,30 @@ test('registration, sign out and sign in again', async ({ page }) => {
 	await expect(page).toHaveURL(/\/account$/);
 });
 
+test('a reader gets a default highlight palette, can rename a colour and add one', async ({
+	page
+}) => {
+	await register(page, uniqueEmail());
+
+	const rows = page.locator('form[action="?/renameHighlightStyle"]');
+	await expect(rows).toHaveCount(10);
+
+	await rows.first().getByRole('textbox').fill('Verheißungen');
+	await rows.first().getByRole('button', { name: 'Speichern' }).click();
+
+	// The name survives a reload — the whole point of naming a colour is to keep the label.
+	await page.reload();
+	await expect(rows.first().getByRole('textbox')).toHaveValue('Verheißungen');
+
+	const addForm = page.locator('form[action="?/addHighlightStyle"]');
+	await addForm.locator('input[name="color"]').fill('#123456');
+	await addForm.locator('input[name="name"]').fill('Meine Farbe');
+	await addForm.getByRole('button', { name: 'Farbe hinzufügen' }).click();
+
+	await expect(rows).toHaveCount(11);
+	await expect(rows.last().getByRole('textbox')).toHaveValue('Meine Farbe');
+});
+
 test('a wrong password is refused', async ({ page }) => {
 	const email = uniqueEmail();
 	await register(page, email);
