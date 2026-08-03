@@ -91,18 +91,34 @@ export async function* parseCommentaryThml(input: SourceInput): ParseStream {
 	let entries = 0;
 	let title: string | undefined;
 
-	/** Reference of the section being read, and the HTML collected for it. */
+	/** Reference of the section being read, its heading (if any), and the HTML collected for it. */
 	let reference: ReturnType<typeof parseReference> | null = null;
+	let sectionTitle: string | undefined;
+	/**
+	 * A CCEL section heading lives on the `<div title="…">` that wraps the `scripRef`/`scripCom`
+	 * marker, e.g. `<div class="Section" title="Commentary on John 3:16">` — captured here as soon as
+	 * that div opens, then claimed by the section the very next reference marker starts.
+	 */
+	let pendingDivTitle: string | undefined;
 	let body = '';
 	let depth = 0;
 	let inTitle = false;
 
 	const flush = ():
-		| { book: number; chapter: number; verseStart?: number; verseEnd?: number; bodyHtml: string }
+		| {
+				book: number;
+				chapter: number;
+				verseStart?: number;
+				verseEnd?: number;
+				title?: string;
+				bodyHtml: string;
+		  }
 		| undefined => {
 		const text = sanitizeHtml(body);
 		const current = reference;
+		const currentTitle = sectionTitle;
 		reference = null;
+		sectionTitle = undefined;
 		body = '';
 		if (!current || !text) return undefined;
 
@@ -111,12 +127,16 @@ export async function* parseCommentaryThml(input: SourceInput): ParseStream {
 			chapter: current.chapter,
 			...(current.verse !== undefined ? { verseStart: current.verse } : {}),
 			...(current.verseEnd !== undefined ? { verseEnd: current.verseEnd } : {}),
+			...(currentTitle ? { title: currentTitle } : {}),
 			bodyHtml: text
 		};
 	};
 
 	for await (const event of readXml(input)) {
 		if (event.type === 'open') {
+			const divTitle = attribute(event.attributes, 'title');
+			if (divTitle) pendingDivTitle = divTitle;
+
 			if (event.name === 'scripref' || event.name === 'scripcom') {
 				// A reference marker starts a new section; the previous one is complete.
 				const passage = attribute(event.attributes, 'passage', 'parsed', 'value');
@@ -126,6 +146,8 @@ export async function* parseCommentaryThml(input: SourceInput): ParseStream {
 					yield { type: 'commentaryEntry', entry: pending };
 				}
 				reference = passage ? parseReference(normalizePassage(passage)) : null;
+				sectionTitle = pendingDivTitle;
+				pendingDivTitle = undefined;
 				if (passage && !reference) {
 					yield { type: 'warning', message: `unreadable passage reference "${passage}"` };
 				}

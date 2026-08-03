@@ -7,7 +7,12 @@ import { parseUsfx, parseUsx } from './usx.ts';
 import { parseVpl } from './vpl.ts';
 import { parseTsk } from './tsk.ts';
 import { parseTsp } from './tsp.ts';
-import { parseCommentaryCsv, parseZefaniaCommentary, sanitizeHtml } from './commentary.ts';
+import {
+	parseCommentaryCsv,
+	parseCommentaryThml,
+	parseZefaniaCommentary,
+	sanitizeHtml
+} from './commentary.ts';
 import type {
 	ParsedCommentaryEntry,
 	ParsedCrossReference,
@@ -412,6 +417,41 @@ Röm 8,28-30\tNicht alles ist gut, aber Gott wirkt in allem.
 			bodyHtml: 'Der bekannteste Vers. <strong>Also</strong> meint: auf diese Weise.'
 		});
 		expect(commentary[1]).toMatchObject({ book: 45, chapter: 8, verseStart: 28, verseEnd: 30 });
+	});
+
+	it('reads a per-section heading from a ThML section div', async () => {
+		const { commentary, metadata } = await drain(
+			parseCommentaryThml(`<ThML>
+				<ThML.head><title>Ausgewählte Kommentare</title></ThML.head>
+				<ThML.body>
+					<div class="Section" title="Kommentar zu Johannes 3:16">
+						<scripRef passage="John 3:16"/>Der bekannteste Vers der Bibel.
+					</div>
+					<div class="Section" title="Kommentar zu Römer 8:28-30">
+						<scripCom passage="Romans 8:28-30"/>Alles wirkt zum Guten.
+					</div>
+				</ThML.body>
+			</ThML>`)
+		);
+
+		expect(metadata).toMatchObject({ name: 'Ausgewählte Kommentare' });
+		expect(commentary).toMatchObject([
+			{
+				book: 43,
+				chapter: 3,
+				verseStart: 16,
+				title: 'Kommentar zu Johannes 3:16',
+				bodyHtml: 'Der bekannteste Vers der Bibel.'
+			},
+			{
+				book: 45,
+				chapter: 8,
+				verseStart: 28,
+				verseEnd: 30,
+				title: 'Kommentar zu Römer 8:28-30',
+				bodyHtml: 'Alles wirkt zum Guten.'
+			}
+		]);
 	});
 });
 

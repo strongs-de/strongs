@@ -287,6 +287,14 @@
 	let suppressFlowTimer: ReturnType<typeof setTimeout> | undefined;
 	let suppressReaderScroll = false;
 	let flowSyncTimer: ReturnType<typeof setTimeout> | undefined;
+	/**
+	 * The element each flow column was last aligned to, indexed by column. A ranged block (a comment
+	 * spanning several verses, or a merged Bible cell) should hold still while the reader is anywhere
+	 * inside its range — only actually re-aligning a column when its covering block *changes* achieves
+	 * that: scrolling within the same range keeps finding the same element here and is a no-op, and only
+	 * crossing into the next range's block triggers the single jump that brings it to the anchor line.
+	 */
+	let lastAlignedElement: (Element | null)[] = [];
 	const visibleStreamChapter = $derived(
 		streamChapters.find(
 			(stream) => `${stream.reference.book}:${stream.reference.chapter}` === visibleChapterKey
@@ -496,6 +504,31 @@
 	}
 
 	/**
+	 * Finds the element for a verse within a flow column, matching a ranged block (a commentary entry or
+	 * a merged Bible verse cell) whenever the verse falls inside its `data-verse-key`/`data-verse-end`
+	 * span, not just on an exact key match. Without this, a comment covering verses 3-5 (or a translation
+	 * that prints 16-17 as one unit) is only found while the anchor verse is exactly its first verse —
+	 * everywhere else in the range, sync silently does nothing and a deep link into the middle of the
+	 * range finds no target to scroll to at all.
+	 */
+	function findVerseElement(container: Element, key: string, verse: number): HTMLElement | null {
+		const exact = container.querySelector<HTMLElement>(`[data-verse-key="${key}"]`);
+		if (exact) return exact;
+
+		const prefix = key.slice(0, key.lastIndexOf(':') + 1);
+		for (const candidate of container.querySelectorAll<HTMLElement>('[data-verse-end]')) {
+			const candidateKey = candidate.dataset.verseKey;
+			if (!candidateKey || !candidateKey.startsWith(prefix)) continue;
+			const start = Number(candidateKey.slice(prefix.length));
+			const end = Number(candidate.dataset.verseEnd);
+			if (Number.isFinite(start) && Number.isFinite(end) && start <= verse && verse <= end) {
+				return candidate;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Scrolls straight to a reference already in the loaded stream, without a navigation — used both to
 	 * land on a deep-linked verse after a real navigation and, via `jumpToVerse`, to let the header's
 	 * search field re-centre on a reference that a plain `goto` would treat as a no-op because the URL
@@ -513,14 +546,15 @@
 		const key = `${book}:${chapter}:${verse}`;
 		if (data.readerLayout === 'flow') {
 			let found = false;
-			for (const column of flowColumns) {
+			for (const [index, column] of flowColumns.entries()) {
 				const target =
-					column?.querySelector<HTMLElement>(`[data-verse-key="${key}"]`) ??
+					(column && findVerseElement(column, key, verse)) ??
 					(allowHighlightedFallback
 						? column?.querySelector<HTMLElement>('.flow-verse.highlighted')
 						: null);
 				if (column && target) {
 					found = true;
+					lastAlignedElement[index] = target;
 					const next =
 						column.scrollTop +
 						target.getBoundingClientRect().top -
@@ -570,21 +604,26 @@
 		const anchor = verses.find((verse) => verse.getBoundingClientRect().bottom > sourceTop);
 		if (!anchor?.dataset.verseKey) return;
 		if (trackAddress) scheduleAddressBarUpdate(anchor.dataset.verseKey);
-		const sourceAnchorOffset = anchor.getBoundingClientRect().top - sourceTop;
+		const anchorVerse = Number(anchor.dataset.verseKey.split(':').at(-1));
 
 		for (let index = 0; index < flowColumns.length; index += 1) {
 			if (index === sourceIndex) continue;
 			const column = flowColumns[index];
-			const target = column?.querySelector<HTMLElement>(
-				`[data-verse-key="${anchor.dataset.verseKey}"]`
-			);
-			if (column && target) {
-				const columnTop = column.getBoundingClientRect().top + anchorInset;
-				const next =
-					column.scrollTop + target.getBoundingClientRect().top - columnTop - sourceAnchorOffset;
-				suppressProgrammaticFlowScroll();
-				column.scrollTop = next;
-			}
+			const target = column && findVerseElement(column, anchor.dataset.verseKey, anchorVerse);
+			if (!column || !target) continue;
+
+			// Only a genuine change of the block covering the anchor verse moves this column — as long as
+			// scrolling the source stays within the same ranged block (e.g. a comment on verses 3-5), the
+			// same element keeps being found here and nothing happens. That is what lets a long comment be
+			// read on its own without dragging the Bible text along, and vice versa: the target only jumps
+			// once the reader actually crosses into the next range.
+			if (lastAlignedElement[index] === target) continue;
+			lastAlignedElement[index] = target;
+
+			const columnTop = column.getBoundingClientRect().top + anchorInset;
+			const next = column.scrollTop + target.getBoundingClientRect().top - columnTop;
+			suppressProgrammaticFlowScroll();
+			column.scrollTop = next;
 		}
 	}
 
@@ -894,6 +933,7 @@
 											<p
 												class="flow-verse"
 												data-verse-key={`${stream.reference.book}:${stream.reference.chapter}:${cell.verse}`}
+												data-verse-end={cell.verseEnd ?? cell.verse}
 												id={columnIndex === 0
 													? `${stream.shortBookName}${stream.reference.chapter}_${cell.verse}`
 													: undefined}
@@ -987,11 +1027,17 @@
 												row.verse
 											)}
 											{#if entries.length}
+												{@const rangeEnd = Math.max(
+													...entries.map((entry) => entry.verseEnd ?? entry.verseStart ?? row.verse)
+												)}
 												<article
 													class="flow-reference"
 													data-verse-key={`${stream.reference.book}:${stream.reference.chapter}:${row.verse}`}
+													data-verse-end={rangeEnd}
 												>
-													<span class="verse-number">{row.verse}</span>
+													<span class="verse-number"
+														>{row.verse}{#if rangeEnd > row.verse}-{rangeEnd}{/if}</span
+													>
 													{#each entries as entry (entry.id)}
 														{#if entry.title}<h3 class="commentary-title">{entry.title}</h3>{/if}
 														<!-- Imported commentary is reduced to an allow-list by its parser. -->
@@ -1208,12 +1254,18 @@
 											row.verse
 										)}
 										{#if entries.length > 0}
+											{@const rangeEnd = Math.max(
+												...entries.map((entry) => entry.verseEnd ?? entry.verseStart ?? row.verse)
+											)}
 											<article
 												class="reference-cell"
 												class:hidden-on-mobile={columnIndex !== mobileColumn}
-												style="grid-column: {columnIndex + 1}; grid-row: {rowIndex * 2 + 2}"
+												style="grid-column: {columnIndex + 1}; grid-row: {rowIndex * 2 +
+													2} / span {(rangeEnd - row.verse + 1) * 2 - 1}"
 											>
-												<span class="verse-number">{row.verse}</span>
+												<span class="verse-number"
+													>{row.verse}{#if rangeEnd > row.verse}-{rangeEnd}{/if}</span
+												>
 												{#each entries as entry (entry.id)}
 													{#if entry.title}
 														<h3 class="commentary-title">{entry.title}</h3>
