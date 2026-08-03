@@ -8,6 +8,7 @@ import { loadChapter } from '$lib/server/repositories/chapter';
 import { loadChapterNote } from '$lib/server/repositories/chapter-notes';
 import { loadReferenceResources } from '$lib/server/repositories/reference-resources';
 import { listBibles, listReaderResources } from '$lib/server/repositories/resources';
+import { loadChapterHighlights } from '$lib/server/repositories/verse-highlights';
 
 export async function GET({ params, cookies, locals, setHeaders }) {
 	const book = Number(params.book);
@@ -27,7 +28,7 @@ export async function GET({ params, cookies, locals, setHeaders }) {
 	const columnIds = resolveColumns(cookies, readerResources, locals.user?.readerColumns);
 	const bibleIds = columnIds.filter((id) => bibles.some((bible) => bible.id === id));
 	const notesVisible = cookies.get('chapter-notes-visible') === '1';
-	const [chapter, referenceResources, chapterNote] = await Promise.all([
+	const [chapter, referenceResources, chapterNote, highlights] = await Promise.all([
 		loadChapter(db, { resourceIds: bibleIds, book, chapter: chapterNumber }),
 		loadReferenceResources(db, {
 			resourceIds: columnIds,
@@ -36,7 +37,10 @@ export async function GET({ params, cookies, locals, setHeaders }) {
 		}),
 		locals.user && notesVisible
 			? loadChapterNote(db, locals.user.id, book, chapterNumber)
-			: Promise.resolve(null)
+			: Promise.resolve(null),
+		locals.user
+			? loadChapterHighlights(db, locals.user.id, book, chapterNumber)
+			: Promise.resolve([])
 	]);
 
 	for (const verse of referenceResources.verseNumbers) {
@@ -56,6 +60,7 @@ export async function GET({ params, cookies, locals, setHeaders }) {
 		shortBookName: bookShortName(book),
 		chapter: { ...chapter, headings: [...chapter.headings.entries()] },
 		chapterNote,
+		highlights,
 		referenceResources,
 		columns: columnIds.map((id) => ({
 			resourceId: id,

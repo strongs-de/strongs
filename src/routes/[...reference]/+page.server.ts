@@ -48,6 +48,12 @@ import {
 	markedVersesByList,
 	removeVerseFromList
 } from '$lib/server/repositories/verse-lists';
+import { listHighlightStyles } from '$lib/server/repositories/highlight-styles';
+import {
+	loadChapterHighlights,
+	removeVerseHighlight,
+	setVerseHighlight
+} from '$lib/server/repositories/verse-highlights';
 
 /**
  * The reader, and the resolver for everything that is not a named route.
@@ -60,7 +66,7 @@ import {
  *   3. anything else      → the search page
  */
 export async function load({ params, cookies, url, setHeaders, locals }) {
-	const raw = decodeURIComponent(params.reference ?? '').replace(/\/+$/, '');
+	const raw = decodeReferenceParam(params.reference ?? '').replace(/\/+$/, '');
 
 	// Legacy paths from the previous site: /async/Joh3 and /Joh3/trans/0_2/ variants.
 	const cleaned = raw.replace(/^async\//, '').replace(/\/?trans\/\d+_\d+$/, '');
@@ -156,6 +162,10 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 		locals.user && notesVisible
 			? await loadChapterNote(db, locals.user.id, reference.book, reference.chapter)
 			: null;
+	const highlightStyles = locals.user ? await listHighlightStyles(db, locals.user.id) : [];
+	const highlights = locals.user
+		? await loadChapterHighlights(db, locals.user.id, reference.book, reference.chapter)
+		: [];
 
 	// Public scripture text is the same for everyone; a signed-in reader's page is not.
 	setHeaders({
@@ -193,6 +203,8 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 		lists: lists.map((list) => ({ id: list.id, title: list.title })),
 		/** Which of this chapter's verses sit in which list, for the verse menu's check marks. */
 		markedVerses: marked,
+		highlightStyles,
+		highlights,
 		notesVisible: locals.user !== null && notesVisible,
 		chapterNote
 	};
@@ -366,8 +378,56 @@ export const actions = {
 		});
 
 		return { removed: true, listId: list.id };
+	},
+
+	/** Picking a colour from the verse menu's swatches. Silently ignored for a style that is not the
+	 *  signed-in reader's own — there is nothing a reader could usefully be told there. */
+	setHighlight: async ({ request, locals }) => {
+		if (!locals.user) redirect(303, '/login');
+
+		const form = await request.formData();
+		const reference = parseReference(String(form.get('reference') ?? ''));
+		const styleId = String(form.get('styleId') ?? '');
+		if (!reference?.verse || !styleId) return fail(400, { error: 'reference' });
+
+		await setVerseHighlight(
+			getDb(),
+			locals.user.id,
+			{ ...reference, verse: reference.verse },
+			styleId
+		);
+		return { highlighted: true };
+	},
+
+	/** Clicking an already-active swatch again, to clear the verse's highlight. */
+	removeHighlight: async ({ request, locals }) => {
+		if (!locals.user) redirect(303, '/login');
+
+		const form = await request.formData();
+		const reference = parseReference(String(form.get('reference') ?? ''));
+		if (!reference?.verse) return fail(400, { error: 'reference' });
+
+		await removeVerseHighlight(getDb(), locals.user.id, { ...reference, verse: reference.verse });
+		return { highlighted: true };
 	}
 };
+
+/**
+ * Some old browsers and bookmarked links percent-encode non-ASCII characters as Latin-1 (e.g. "ö" as
+ * `%F6`) instead of UTF-8 (`%C3%B6`), which `decodeURIComponent` rejects as malformed and throws on —
+ * crashing the whole page instead of just failing to resolve a reference. Recovering the Latin-1
+ * reading handles that case; the codepoints it produces (0–255) already agree with Unicode, so German
+ * umlauts and similar characters round-trip correctly.
+ */
+function decodeReferenceParam(raw: string): string {
+	try {
+		return decodeURIComponent(raw);
+	} catch {
+		return raw.replace(/%[0-9A-Fa-f]{2}/g, (hex) =>
+			String.fromCharCode(parseInt(hex.slice(1), 16))
+		);
+	}
+}
 
 const LOCATION_COOKIE = 'location';
 

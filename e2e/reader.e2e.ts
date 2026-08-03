@@ -3,8 +3,8 @@ import { expect, test, type Page } from '@playwright/test';
 /**
  * Reader, search and study sidebar.
  *
- * Runs against the fixture from `pnpm db:seed`: SEEDDE (with Strong's numbers) and SEEDPLAIN, plus
- * three dictionary entries.
+ * Runs against the fixture from `pnpm db:seed`: SEEDDE (with Strong's numbers), SEEDPLAIN and
+ * SEEDCOMMENTARY, plus three dictionary entries.
  */
 
 /**
@@ -18,9 +18,42 @@ async function useAlignedLayout(page: Page): Promise<void> {
 		.addCookies([{ name: 'reader-layout', value: 'aligned', url: 'http://localhost:4173' }]);
 }
 
+/** The commentary fixture is not a default column, so tests exercising it must select it explicitly. */
+async function useCommentaryColumn(page: Page): Promise<void> {
+	await page.context().addCookies([
+		{
+			name: 'columns',
+			value: 'SEEDDE,SEEDPLAIN,SEEDCOMMENTARY',
+			url: 'http://localhost:4173'
+		}
+	]);
+}
+
 test('the root redirects into the reader', async ({ page }) => {
 	await page.goto('/');
 	await expect(page).toHaveURL(/\/Joh1$/);
+});
+
+test('Impressum and Datenschutz are reachable from the site header', async ({ page }) => {
+	await page.goto('/Joh3');
+
+	await page.getByRole('link', { name: 'Impressum' }).click();
+	await expect(page).toHaveURL(/\/impressum$/);
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('Impressum');
+
+	await page.goto('/Joh3');
+	await page.getByRole('link', { name: 'Datenschutz' }).click();
+	await expect(page).toHaveURL(/\/datenschutz$/);
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('Datenschutzerklärung');
+});
+
+test('the help page is reachable from the site header', async ({ page }) => {
+	await page.goto('/Joh3');
+
+	await page.getByRole('link', { name: 'Hilfe' }).click();
+
+	await expect(page).toHaveURL(/\/help$/);
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('Hilfe');
 });
 
 test('a reference shows the chapter in parallel columns', async ({ page }) => {
@@ -39,6 +72,65 @@ test('a reference shows the chapter in parallel columns', async ({ page }) => {
 
 	// The requested verse is highlighted.
 	await expect(page.locator('.verse.highlighted').first()).toBeVisible();
+});
+
+test('commentary text is formatted the same as scripture text, in both layouts', async ({
+	page
+}) => {
+	await useCommentaryColumn(page);
+
+	await page.goto('/Joh3,16');
+	const flowCommentary = page.locator('.flow-reference .commentary-body').first();
+	await expect(flowCommentary).toContainText('bekannteste Vers');
+	expect(
+		await page
+			.locator('.flow-reference')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontSize)
+	).toBe(
+		await page
+			.locator('.flow-verse')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontSize)
+	);
+	expect(
+		await page
+			.locator('.flow-reference')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontFamily)
+	).toBe(
+		await page
+			.locator('.flow-verse')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontFamily)
+	);
+
+	await useAlignedLayout(page);
+	await page.goto('/Joh3,16');
+	const alignedCommentary = page.locator('.reference-cell .commentary-body').first();
+	await expect(alignedCommentary).toContainText('bekannteste Vers');
+	expect(
+		await page
+			.locator('.reference-cell')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontSize)
+	).toBe(
+		await page
+			.locator('.verse')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontSize)
+	);
+	expect(
+		await page
+			.locator('.reference-cell')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontFamily)
+	).toBe(
+		await page
+			.locator('.verse')
+			.first()
+			.evaluate((el) => getComputedStyle(el).fontFamily)
+	);
 });
 
 test('verses stay aligned across columns', async ({ page }) => {
@@ -186,6 +278,30 @@ test('clicking a tagged word opens the study sidebar', async ({ page }) => {
 	await expect(page).toHaveURL(/#G25\/geliebt\/16$/);
 });
 
+test('clicking a footnote marker opens its note without relying on the Popover API', async ({
+	page
+}) => {
+	await page.goto('/Joh3');
+
+	// Force the same code path devices without Popover API support hit, so a regression here is
+	// caught even when the browser under test does support it.
+	await page.addInitScript(() => {
+		// @ts-expect-error simulating an older WebView for the test
+		delete HTMLElement.prototype.showPopover;
+	});
+	await page.reload();
+
+	const marker = page.locator('button.footnote-marker').first();
+	await marker.click();
+
+	const note = page.getByRole('note');
+	await expect(note).toBeVisible();
+	await expect(note).toContainText('so sehr');
+
+	await marker.click();
+	await expect(note).not.toBeVisible();
+});
+
 test('the Strong page lists every occurrence', async ({ page }) => {
 	await page.goto('/G2316');
 
@@ -264,8 +380,10 @@ test('a reference typed into the search box goes to the chapter', async ({ page 
 test('the column selection persists across navigations', async ({ page }) => {
 	await page.goto('/Joh3');
 
-	// Put the second translation in the first column.
+	// Put the second translation in the first column. The fixture now spans more than one resource
+	// kind (bibles and a commentary), so the menu groups them under an expandable "Bibeln" submenu.
 	await page.locator('#column-0').click();
+	await page.getByRole('menuitem', { name: 'Bibeln' }).click();
 	await page
 		.locator('form[action="?/setColumn"]')
 		.filter({ has: page.locator('input[name="resource"][value="SEEDPLAIN"]') })
@@ -289,7 +407,8 @@ test('a closed column can be opened again', async ({ page }) => {
 	await expect(page.locator('button[id^="column-"]')).toHaveCount(1);
 
 	await page.getByRole('button', { name: 'Spalte hinzufügen' }).first().click();
-	await page.getByRole('menuitem').first().click();
+	await page.getByRole('menuitem', { name: 'Bibeln' }).click();
+	await page.locator('form[action="?/addColumn"]').getByRole('menuitem').first().click();
 
 	await expect(page.locator('button[id^="column-"]')).toHaveCount(2);
 
@@ -386,4 +505,23 @@ test('legacy URLs from the previous site still resolve', async ({ page }) => {
 
 	await page.goto('/Joh3/trans/0_2');
 	await expect(page).toHaveURL(/\/Joh3$/);
+});
+
+test('a reference percent-encoded as Latin-1 does not crash the page', async ({ page }) => {
+	// "1K%F6n16" is "1Kön16" (1.Könige 16) with "ö" mis-encoded as Latin-1 (0xF6) instead of UTF-8
+	// (%C3%B6) — something old browsers and stale bookmarks still produce.
+	const response = await page.goto('/1K%F6n16');
+	expect(response?.status()).toBeLessThan(400);
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('Könige');
+});
+
+test('the homepage link clears the remembered chapter instead of bouncing back to it', async ({
+	page
+}) => {
+	await page.goto('/Joh3');
+	await expect(page).toHaveURL(/\/Joh3$/);
+
+	await page.getByRole('link', { name: 'Strongs.de – Startseite' }).click();
+
+	await expect(page).toHaveURL(/\/Joh1$/);
 });

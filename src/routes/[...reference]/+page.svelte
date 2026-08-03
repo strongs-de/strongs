@@ -133,12 +133,18 @@
 			...(verseEnd && verseEnd > verse ? { verseEnd } : {})
 		};
 
-		verseMenu?.openAt(event.currentTarget, verse, {
-			reference: formatReference(reference),
-			label: formatReference(reference, { style: 'full' }),
-			path: referencePath(reference),
-			text: segmentsToText(segments)
-		});
+		verseMenu?.openAt(
+			event.currentTarget,
+			verse,
+			{
+				reference: formatReference(reference),
+				label: formatReference(reference, { style: 'full' }),
+				path: referencePath(reference),
+				text: segmentsToText(segments)
+			},
+			highlightByKey.get(`${book}:${chapter}:${verse}`)?.styleId ?? null,
+			(styleId) => updateStreamHighlight(book, chapter, verse, styleId)
+		);
 	}
 
 	/** Which column a reader is looking at on a phone, where only one fits. */
@@ -212,6 +218,7 @@
 		chapter: typeof data.chapter;
 		chapterNote: string | null;
 		referenceResources: typeof data.referenceResources;
+		highlights: typeof data.highlights;
 		navigation: {
 			previous: { book: number; chapter: number } | null;
 			next: { book: number; chapter: number } | null;
@@ -226,11 +233,48 @@
 			chapter: data.chapter,
 			chapterNote: data.chapterNote,
 			referenceResources: data.referenceResources,
+			highlights: data.highlights,
 			navigation: data.navigation
 		};
 	}
 
 	let streamChapters = $state<StreamChapter[]>([initialStreamChapter()]);
+
+	/** Every highlighted verse across every loaded chapter, keyed like `data-verse-key`. */
+	const highlightByKey = $derived(
+		new Map(
+			streamChapters.flatMap((stream) =>
+				stream.highlights.map(
+					(highlight) =>
+						[
+							`${stream.reference.book}:${stream.reference.chapter}:${highlight.verse}`,
+							highlight
+						] as const
+				)
+			)
+		)
+	);
+
+	/** Applies a verse-menu highlight pick to whichever loaded chapter the verse belongs to, so the
+	 *  colour appears at once instead of after a reload. */
+	function updateStreamHighlight(
+		book: number,
+		chapter: number,
+		verse: number,
+		styleId: string | null
+	): void {
+		const stream = streamChapters.find(
+			(candidate) => candidate.reference.book === book && candidate.reference.chapter === chapter
+		);
+		if (!stream) return;
+
+		stream.highlights = stream.highlights.filter((highlight) => highlight.verse !== verse);
+		const style = styleId
+			? data.highlightStyles.find((candidate) => candidate.id === styleId)
+			: undefined;
+		if (style)
+			stream.highlights.push({ verse, styleId: style.id, color: style.color, name: style.name });
+	}
 	let flowColumns = $state<HTMLElement[]>([]);
 	let loadingPrevious = $state(false);
 	let loadingNext = $state(false);
@@ -844,6 +888,9 @@
 										{/if}
 										{#if column.resource.kind === 'bible' && cell}
 											{@const [leadSegments, remainingSegments] = splitVerseLead(cell.segments)}
+											{@const mark = highlightByKey.get(
+												`${stream.reference.book}:${stream.reference.chapter}:${cell.verse}`
+											)}
 											<p
 												class="flow-verse"
 												data-verse-key={`${stream.reference.book}:${stream.reference.chapter}:${cell.verse}`}
@@ -855,6 +902,7 @@
 													data.reference.verse !== undefined &&
 													cell.verse <= data.reference.verse &&
 													(cell.verseEnd ?? cell.verse) >= data.reference.verse}
+												style:background-color={mark?.color}
 											>
 												<span class="verse-lead">
 													{#if cell.verse === firstVerse}
@@ -1085,6 +1133,9 @@
 									{@const cell =
 										column.bibleCellIndex === null ? null : row.cells[column.bibleCellIndex]}
 									{#if column.resource.kind === 'bible' && cell}
+										{@const mark = highlightByKey.get(
+											`${stream.reference.book}:${stream.reference.chapter}:${cell.verse}`
+										)}
 										<p
 											class="verse"
 											class:hidden-on-mobile={columnIndex !== mobileColumn}
@@ -1099,6 +1150,7 @@
 												data.reference.verse !== undefined &&
 												cell.verse <= data.reference.verse &&
 												(cell.verseEnd ?? cell.verse) >= data.reference.verse}
+											style:background-color={mark?.color}
 										>
 											<a
 												class="verse-number"
@@ -1256,7 +1308,13 @@
 </div>
 
 <!-- One menu for the whole chapter, opened with whichever verse number was clicked. -->
-<VerseMenu bind:this={verseMenu} lists={data.lists} signedIn={data.user !== null} {marks} />
+<VerseMenu
+	bind:this={verseMenu}
+	lists={data.lists}
+	signedIn={data.user !== null}
+	{marks}
+	highlightStyles={data.highlightStyles}
+/>
 
 <style>
 	.verse-grid {
@@ -1419,8 +1477,9 @@
 		   when an entry is shorter than the number's own line height. */
 		display: flow-root;
 		margin-bottom: 1rem;
-		font-size: 0.875rem;
-		line-height: 1.6;
+		font-family: var(--font-serif);
+		font-size: calc(1.19rem * var(--reader-font-scale, 1));
+		line-height: 1.72;
 	}
 
 	.flow-note {
@@ -1454,8 +1513,9 @@
 		min-width: 0;
 		padding: 0.45rem 0.75rem 0.8rem;
 		border-right: 1px solid var(--color-stone-100);
-		font-size: 0.875rem;
-		line-height: 1.6;
+		font-family: var(--font-serif);
+		font-size: calc(1.19rem * var(--reader-font-scale, 1));
+		line-height: 1.72;
 	}
 
 	:global(.dark) .reference-cell {

@@ -35,6 +35,8 @@
 			// A denied clipboard permission just leaves the key to be selected and copied by hand.
 		}
 	}
+
+	let newColor = $state('#fde68a');
 </script>
 
 <svelte:head><title>{t('account.title')} — strongs.de</title></svelte:head>
@@ -288,6 +290,69 @@
 				</ul>
 			{/if}
 		</div>
+	</Card>
+
+	<Card title={t('account.highlights')} description={t('account.highlightsHint')}>
+		{#if form?.highlightStyleError === 'color'}
+			<p class="mb-3 text-sm text-red-700 dark:text-red-300">{t('highlights.errorColor')}</p>
+		{:else if form?.highlightStyleError === 'limit'}
+			<p class="mb-3 text-sm text-red-700 dark:text-red-300">
+				{t('highlights.errorLimit', { max: data.maxHighlightStyles })}
+			</p>
+		{/if}
+
+		<ul class="space-y-2">
+			{#each data.highlightStyles as style (style.id)}
+				<li class="flex items-center gap-2">
+					<span
+						class="size-6 shrink-0 rounded-full border border-stone-300 dark:border-stone-600"
+						style="background-color: {style.color}"
+						aria-hidden="true"
+					></span>
+					<form method="POST" action="?/renameHighlightStyle" class="flex min-w-0 flex-1 gap-2">
+						<input type="hidden" name="id" value={style.id} />
+						<input
+							type="text"
+							name="name"
+							value={style.name ?? ''}
+							placeholder={t('highlights.namePlaceholder')}
+							maxlength={60}
+							class="w-full min-w-0 rounded-md border border-stone-300 bg-white px-2.5 py-1.5 text-sm
+							       shadow-inner shadow-stone-900/3 focus:border-accent-500 focus:ring-3
+							       focus:ring-accent-500/10 focus:outline-none dark:border-stone-700
+							       dark:bg-stone-900"
+						/>
+						<Button type="submit" size="sm" variant="secondary">{t('action.save')}</Button>
+					</form>
+				</li>
+			{/each}
+		</ul>
+
+		{#if data.highlightStyles.length < data.maxHighlightStyles}
+			<form
+				method="POST"
+				action="?/addHighlightStyle"
+				class="mt-4 flex items-center gap-2 border-t border-stone-200 pt-4 dark:border-stone-800"
+			>
+				<input
+					type="color"
+					name="color"
+					bind:value={newColor}
+					aria-label={t('highlights.addColor')}
+					class="size-8 shrink-0 rounded border border-stone-300 dark:border-stone-600"
+				/>
+				<input
+					type="text"
+					name="name"
+					placeholder={t('highlights.namePlaceholder')}
+					maxlength={60}
+					class="w-full min-w-0 flex-1 rounded-md border border-stone-300 bg-white px-2.5 py-1.5
+					       text-sm shadow-inner shadow-stone-900/3 focus:border-accent-500 focus:ring-3
+					       focus:ring-accent-500/10 focus:outline-none dark:border-stone-700 dark:bg-stone-900"
+				/>
+				<Button type="submit" size="sm" variant="secondary">{t('highlights.addColor')}</Button>
+			</form>
+		{/if}
 	</Card>
 
 	<form method="POST" action="/logout" class="flex justify-end">
