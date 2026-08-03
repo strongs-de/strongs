@@ -454,6 +454,35 @@ export const highlightStyles = pgTable(
 
 export type HighlightStyle = typeof highlightStyles.$inferSelect;
 
+/** One verse marked with one style. A verse holds at most one at a time — picking another replaces it. */
+export const verseHighlights = pgTable(
+	'verse_highlights',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		userId: uuid('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		styleId: uuid('style_id')
+			.notNull()
+			.references(() => highlightStyles.id, { onDelete: 'cascade' }),
+		bookId: integer('book_id').notNull(),
+		chapter: integer('chapter').notNull(),
+		verse: integer('verse').notNull(),
+		...timestamps
+	},
+	(table) => [
+		uniqueIndex('verse_highlights_verse_idx').on(
+			table.userId,
+			table.bookId,
+			table.chapter,
+			table.verse
+		),
+		index('verse_highlights_style_idx').on(table.styleId)
+	]
+);
+
+export type VerseHighlight = typeof verseHighlights.$inferSelect;
+
 // --- operations -------------------------------------------------------------
 
 export const IMPORT_STATES = ['queued', 'running', 'done', 'failed', 'cancelled'] as const;
