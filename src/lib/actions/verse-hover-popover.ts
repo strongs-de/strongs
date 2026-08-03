@@ -17,7 +17,11 @@ type ChapterVerseRow = { verse: number; verseEnd?: number; segments: VerseSegmen
 /** One fetch per chapter, shared across every popup on the page for as long as it stays open. */
 const chapterCache = new Map<string, Promise<ChapterVerseRow[]>>();
 
-function loadChapterVerses(bibleId: string, book: number, chapter: number): Promise<ChapterVerseRow[]> {
+function loadChapterVerses(
+	bibleId: string,
+	book: number,
+	chapter: number
+): Promise<ChapterVerseRow[]> {
 	const key = `${bibleId}/${book}/${chapter}`;
 	const cached = chapterCache.get(key);
 	if (cached) return cached;
@@ -100,11 +104,18 @@ export function verseHoverPopover(node: HTMLElement, params: VerseHoverParams) {
 	}
 
 	/** Rebuilds the popup's content: the reference plus the translation name, then the verse text. */
-	function renderContent(box: HTMLDivElement, referenceLabel: string, translationLabel: string, text: string): void {
+	function renderContent(
+		box: HTMLDivElement,
+		referenceLabel: string,
+		translationLabel: string,
+		text: string
+	): void {
 		box.replaceChildren();
 		const heading = document.createElement('div');
 		heading.className = 'verse-hover-popup-ref';
-		heading.textContent = translationLabel ? `${referenceLabel} · ${translationLabel}` : referenceLabel;
+		heading.textContent = translationLabel
+			? `${referenceLabel} · ${translationLabel}`
+			: referenceLabel;
 		const body = document.createElement('div');
 		body.textContent = text;
 		box.append(heading, body);
@@ -135,7 +146,12 @@ export function verseHoverPopover(node: HTMLElement, params: VerseHoverParams) {
 			]);
 			if (token !== requestToken) return;
 			const translationLabel = labels.find((label) => label.id === bibleId)?.abbrev ?? '';
-			renderContent(box, referenceLabel, translationLabel, collectVerseText(rows, verse, verseEnd) || '…');
+			renderContent(
+				box,
+				referenceLabel,
+				translationLabel,
+				collectVerseText(rows, verse, verseEnd) || '…'
+			);
 			place(target, box);
 		} catch {
 			if (token === requestToken) hide();

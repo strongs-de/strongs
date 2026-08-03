@@ -135,8 +135,8 @@
 					</h2>
 					<!-- Built by our own parser with every source string escaped; see
 					     src/lib/bible/parse/strongs-xml.ts. -->
-					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					<div class="lexicon" use:verseHoverPopover={{ bibleId: data.primaryBibleId }}>
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 						{@html data.entry.definitionHtml}
 					</div>
 				</section>
@@ -147,8 +147,8 @@
 					<h2 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">
 						{t('strong.derivation')}
 					</h2>
-					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					<div class="lexicon" use:verseHoverPopover={{ bibleId: data.primaryBibleId }}>
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 						{@html data.entry.derivationHtml}
 					</div>
 				</section>

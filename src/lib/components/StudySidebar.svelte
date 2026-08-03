@@ -228,8 +228,8 @@
 						</h3>
 						<!-- Lexicon HTML is built by our own parser (src/lib/bible/parse/strongs-xml.ts): every
 						     scrap of source text is escaped and only spans and internal Strong links are emitted. -->
-						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 						<div class="lexicon" use:verseHoverPopover={{ bibleId: resourceIds[0] ?? null }}>
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 							{@html payload.entry.definitionHtml}
 						</div>
 					</section>
@@ -240,8 +240,8 @@
 						<h3 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">
 							{t('strong.derivation')}
 						</h3>
-						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 						<div class="lexicon" use:verseHoverPopover={{ bibleId: resourceIds[0] ?? null }}>
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 							{@html payload.entry.derivationHtml}
 						</div>
 					</section>
