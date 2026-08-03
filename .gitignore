@@ -26,3 +26,6 @@ test-results
 test-results
 playwright-report
 /var/
+
+# Third-party data pending licensing (not ours to redistribute)
+/data/private/

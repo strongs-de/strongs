@@ -112,6 +112,64 @@ describe('parseStrongsXml', () => {
 		expect(warnings).toHaveLength(1);
 	});
 
+	it('turns a <br/> into a literal line break, for sources with a structured definition', async () => {
+		const { entries } = await collect(
+			wrap(`<entry strongs="00001"><strongs>1</strongs>
+				<greek BETA="*A" unicode="Α" translit="A"/>
+				<strongs_def>I.) first sense<br/>II.) second sense</strongs_def></entry>`)
+		);
+
+		expect(entries[0]?.definitionHtml).toBe('I.) first sense<br/>II.) second sense');
+	});
+
+	it('turns an <abbr> into a native tooltip, for sources that gloss recurring abbreviations', async () => {
+		const { entries } = await collect(
+			wrap(`<entry strongs="00001"><strongs>1</strongs>
+				<greek BETA="*A" unicode="Α" translit="A"/>
+				<strongs_def><abbr title="Septuaginta">LXX</abbr>: also used in the papyri</strongs_def></entry>`)
+		);
+
+		expect(entries[0]?.definitionHtml).toBe(
+			'<abbr title="Septuaginta">LXX</abbr>: also used in the papyri'
+		);
+	});
+
+	it('turns a <verseref> into a link carrying the reference, for click-to-jump and hover-preview', async () => {
+		const { entries } = await collect(
+			wrap(`<entry strongs="00001"><strongs>1</strongs>
+				<greek BETA="*A" unicode="Α" translit="A"/>
+				<strongs_def>see <verseref href="/Joh3,16" book="43" chapter="3" verse="16">Joh 3:16</verseref></strongs_def></entry>`)
+		);
+
+		expect(entries[0]?.definitionHtml).toBe(
+			'see <a class="verse-ref" href="/Joh3,16" data-book="43" data-chapter="3" data-verse="16">Joh 3:16</a>'
+		);
+	});
+
+	it('carries a verse range end when a <verseref> has one', async () => {
+		const { entries } = await collect(
+			wrap(`<entry strongs="00001"><strongs>1</strongs>
+				<greek BETA="*A" unicode="Α" translit="A"/>
+				<strongs_def><verseref href="/Joh3,16-18" book="43" chapter="3" verse="16" end="18">3:16-18</verseref></strongs_def></entry>`)
+		);
+
+		expect(entries[0]?.definitionHtml).toBe(
+			'<a class="verse-ref" href="/Joh3,16-18" data-book="43" data-chapter="3" data-verse="16" data-verse-end="18">3:16-18</a>'
+		);
+	});
+
+	it('turns <indent> into a block-styled span, for grouping a "Wortfamilie"-style list', async () => {
+		const { entries } = await collect(
+			wrap(`<entry strongs="00001"><strongs>1</strongs>
+				<greek BETA="*A" unicode="Α" translit="A"/>
+				<strongs_def>Wortfamilie:<br/><indent>related word</indent></strongs_def></entry>`)
+		);
+
+		expect(entries[0]?.definitionHtml).toBe(
+			'Wortfamilie:<br/><span class="wf-entry">related word</span>'
+		);
+	});
+
 	it('recognises a Hebrew dictionary from its inline elements', async () => {
 		const { entries } = await collect(
 			wrap(`<entry strongs="00430"><strongs>430</strongs>

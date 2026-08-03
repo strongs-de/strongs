@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { formatReference, referencePath } from '$lib/bible/reference';
 	import { formatNumber, t } from '$lib/i18n';
+	import { verseHoverPopover } from '$lib/actions/verse-hover-popover';
 	import VerseText from '$lib/components/VerseText.svelte';
 	import GlossChart from '$lib/components/GlossChart.svelte';
 	import BookDistribution from '$lib/components/BookDistribution.svelte';
@@ -135,7 +136,9 @@
 					<!-- Built by our own parser with every source string escaped; see
 					     src/lib/bible/parse/strongs-xml.ts. -->
 					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-					<div class="lexicon">{@html data.entry.definitionHtml}</div>
+					<div class="lexicon" use:verseHoverPopover={{ bibleId: data.primaryBibleId }}>
+						{@html data.entry.definitionHtml}
+					</div>
 				</section>
 			{/if}
 
@@ -145,7 +148,9 @@
 						{t('strong.derivation')}
 					</h2>
 					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-					<div class="lexicon">{@html data.entry.derivationHtml}</div>
+					<div class="lexicon" use:verseHoverPopover={{ bibleId: data.primaryBibleId }}>
+						{@html data.entry.derivationHtml}
+					</div>
 				</section>
 			{/if}
 
@@ -198,5 +203,36 @@
 
 	.lexicon :global(.original) {
 		font-family: var(--font-greek);
+	}
+
+	.lexicon :global(abbr) {
+		cursor: help;
+		text-decoration: underline dotted;
+		text-decoration-color: color-mix(in oklab, currentColor 40%, transparent);
+	}
+
+	/* A real <a>, so it already gets the pointer cursor a link implies; only the underline needs to
+	   read as distinct from the plain cross-reference links above. */
+	.lexicon :global(.verse-ref) {
+		text-decoration: underline dotted;
+		text-decoration-color: color-mix(in oklab, var(--color-accent-500) 50%, transparent);
+	}
+
+	.lexicon :global(.verse-ref:hover) {
+		text-decoration-style: solid;
+	}
+
+	/* Groups the related words listed under a "Wortfamilie:" heading, so they read as belonging to it
+	   rather than continuing the entry's own numbered senses above. */
+	.lexicon :global(.wf-entry) {
+		display: block;
+		margin-top: 0.35rem;
+		margin-left: 0.9rem;
+		padding-left: 0.6rem;
+		border-left: 2px solid var(--color-stone-200);
+	}
+
+	:global(.dark) .lexicon :global(.wf-entry) {
+		border-left-color: var(--color-stone-700);
 	}
 </style>

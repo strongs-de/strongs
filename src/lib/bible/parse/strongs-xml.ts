@@ -65,6 +65,44 @@ export async function* parseStrongsXml(input: SourceInput): ParseStream {
 					numberText = '';
 					break;
 
+				case 'br':
+					// Not in the original Strong's format, but some sources structure a definition into
+					// numbered senses that need to stay on their own line rather than run together.
+					if (field) html[field] += '<br/>';
+					break;
+
+				case 'abbr': {
+					// Not in the original Strong's format either: some sources reuse a fixed set of
+					// abbreviations throughout and want to gloss them inline, native-tooltip style.
+					const title = attribute(event.attributes, 'title');
+					if (field) html[field] += `<abbr title="${escapeHtml(title ?? '')}">`;
+					break;
+				}
+
+				case 'verseref': {
+					// Marks a Bible reference quoted inside a definition. It becomes a real link — a
+					// click jumps straight to the verse — that also shows that verse's text on hover
+					// without the source needing to embed it itself.
+					const book = attribute(event.attributes, 'book');
+					const chapter = attribute(event.attributes, 'chapter');
+					const verse = attribute(event.attributes, 'verse');
+					const end = attribute(event.attributes, 'end');
+					const href = attribute(event.attributes, 'href');
+					// The open and close tags must both fire, or neither: the close handler below has
+					// no way to know which case it is closing, so it always emits `</a>`.
+					if (field) {
+						html[field] +=
+							`<a class="verse-ref" href="${escapeHtml(href ?? '#')}" data-book="${escapeHtml(book ?? '')}" data-chapter="${escapeHtml(chapter ?? '')}" data-verse="${escapeHtml(verse ?? '')}"${end ? ` data-verse-end="${escapeHtml(end)}"` : ''}>`;
+					}
+					break;
+				}
+
+				case 'indent':
+					// Groups the related words listed under a "Wortfamilie"-style heading, so the reader
+					// can set them apart (indented, in this app's stylesheet) from the entry's own text.
+					if (field) html[field] += '<span class="wf-entry">';
+					break;
+
 				case 'greek':
 				case 'hebrew': {
 					const word = attribute(event.attributes, 'unicode');
@@ -127,6 +165,18 @@ export async function* parseStrongsXml(input: SourceInput): ParseStream {
 			case 'strongs':
 				inNumber = false;
 				number ??= toNumber(numberText);
+				break;
+
+			case 'abbr':
+				if (field) html[field] += '</abbr>';
+				break;
+
+			case 'verseref':
+				if (field) html[field] += '</a>';
+				break;
+
+			case 'indent':
+				if (field) html[field] += '</span>';
 				break;
 
 			case 'strongs_def':

@@ -73,6 +73,11 @@ export async function load({ params, setHeaders, url }) {
 		glosses,
 		occurrences,
 		title: strong,
-		resource: resource ? { id: resource.id, abbrev: resource.abbrev } : null
+		resource: resource ? { id: resource.id, abbrev: resource.abbrev } : null,
+		// The translation the verse-hover popover fetches text from. This page has a shared, cookie-free
+		// cache (`s-maxage`), so it deliberately reuses the same resource already picked for the
+		// occurrence statistics above rather than the reader's own `columns` cookie, which would vary
+		// per visitor and make that shared cache serve one visitor's choice to everyone else.
+		primaryBibleId: statisticsResource
 	};
 }
