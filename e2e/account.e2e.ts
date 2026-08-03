@@ -66,6 +66,30 @@ test('an API key can be created, shown once and revoked', async ({ page }) => {
 	await expect(page.locator('li', { hasText: 'Meine App' })).toContainText('Widerrufen am');
 });
 
+test('a reader gets a default highlight palette, can rename a colour and add one', async ({
+	page
+}) => {
+	await register(page, uniqueEmail());
+
+	const rows = page.locator('form[action="?/renameHighlightStyle"]');
+	await expect(rows).toHaveCount(10);
+
+	await rows.first().getByRole('textbox').fill('Verheißungen');
+	await rows.first().getByRole('button', { name: 'Speichern' }).click();
+
+	// The name survives a reload — the whole point of naming a colour is to keep the label.
+	await page.reload();
+	await expect(rows.first().getByRole('textbox')).toHaveValue('Verheißungen');
+
+	const addForm = page.locator('form[action="?/addHighlightStyle"]');
+	await addForm.locator('input[name="color"]').fill('#123456');
+	await addForm.locator('input[name="name"]').fill('Meine Farbe');
+	await addForm.getByRole('button', { name: 'Farbe hinzufügen' }).click();
+
+	await expect(rows).toHaveCount(11);
+	await expect(rows.last().getByRole('textbox')).toHaveValue('Meine Farbe');
+});
+
 test('a wrong password is refused', async ({ page }) => {
 	const email = uniqueEmail();
 	await register(page, email);
@@ -197,6 +221,49 @@ test('the verse menu creates a list and adds the verse in one step', async ({ pa
 	await expect(page.getByRole('link', { name: /Johannes 3,16/ })).toBeVisible();
 	await page.getByRole('link', { name: /Johannes 3,16/ }).click();
 	await expect(page.getByRole('link', { name: 'Johannes 3,16' })).toBeVisible();
+});
+
+test('a signed-in reader can highlight a verse with a colour and clear it', async ({ page }) => {
+	await register(page, uniqueEmail());
+
+	await page.goto('/Joh3');
+	await page.locator('#Joh3_16').getByRole('link', { name: 'Vers Johannes 3,16' }).click();
+
+	const swatches = page.locator('.swatches .swatch');
+	await expect(swatches).toHaveCount(10);
+	await swatches.first().click();
+
+	const verse = page.locator('[data-verse-key="43:3:16"]').first();
+	await expect(verse).toHaveCSS('background-color', 'rgb(253, 230, 138)');
+
+	// The colour survives a reload, not just the optimistic UI update.
+	await page.reload();
+	await expect(verse).toHaveCSS('background-color', 'rgb(253, 230, 138)');
+
+	// Picking the same swatch again clears the highlight instead of re-applying it.
+	await page.locator('#Joh3_16').getByRole('link', { name: 'Vers Johannes 3,16' }).click();
+	await expect(swatches.first()).toHaveAttribute('aria-pressed', 'true');
+	await swatches.first().click();
+	await expect(verse).not.toHaveCSS('background-color', 'rgb(253, 230, 138)');
+
+	await page.reload();
+	await expect(verse).not.toHaveCSS('background-color', 'rgb(253, 230, 138)');
+});
+
+test('a highlight also renders in the aligned-columns layout', async ({ page }) => {
+	await register(page, uniqueEmail());
+	await page
+		.context()
+		.addCookies([{ name: 'reader-layout', value: 'aligned', url: 'http://localhost:4173' }]);
+
+	await page.goto('/Joh3');
+	await page.locator('#Joh3_16').getByRole('link', { name: 'Vers Johannes 3,16' }).click();
+	await page.locator('.swatches .swatch').first().click();
+
+	await expect(page.locator('[data-verse-key="43:3:16"]').first()).toHaveCSS(
+		'background-color',
+		'rgb(253, 230, 138)'
+	);
 });
 
 test('the verse menu ticks and unticks an existing list', async ({ page }) => {

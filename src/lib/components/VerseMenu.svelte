@@ -29,22 +29,41 @@
 		lists,
 		signedIn,
 		/** Keys are `${verse}:${listId}` for every verse of this chapter that sits in a list. */
-		marks
+		marks,
+		/** The reader's own highlight palette, in display order. */
+		highlightStyles
 	}: {
 		lists: { id: string; title: string }[];
 		signedIn: boolean;
 		marks: Set<string>;
+		highlightStyles: { id: string; color: string; name: string | null }[];
 	} = $props();
 
 	let menu: Menu | undefined = $state();
 	let context = $state<VerseContext | null>(null);
 	let verse = $state(0);
 	let copied = $state<'text' | 'link' | null>(null);
+	let activeStyleId = $state<string | null>(null);
+	let onHighlightChange: ((styleId: string | null) => void) | undefined;
 
-	export function openAt(anchor: HTMLElement, verseNumber: number, next: VerseContext): void {
+	/**
+	 * `highlight` is the style currently on this verse, if any (null for none); `onChange` fires
+	 * optimistically the moment a swatch is picked, before the form submit resolves — the reader who
+	 * owns `streamChapters` (the reader route) is what actually holds the coloured state, this menu
+	 * only reports the change up.
+	 */
+	export function openAt(
+		anchor: HTMLElement,
+		verseNumber: number,
+		next: VerseContext,
+		highlight: string | null,
+		onChange: (styleId: string | null) => void
+	): void {
 		context = next;
 		verse = verseNumber;
 		copied = null;
+		activeStyleId = highlight;
+		onHighlightChange = onChange;
 		menu?.openAt(anchor);
 	}
 
@@ -69,6 +88,14 @@
 	function mark(listId: string, present: boolean): void {
 		if (present) marks.add(`${verse}:${listId}`);
 		else marks.delete(`${verse}:${listId}`);
+	}
+
+	/** Clicking the active swatch again clears the highlight instead of re-picking the same colour. */
+	function pickHighlight(styleId: string): void {
+		const next = activeStyleId === styleId ? null : styleId;
+		activeStyleId = next;
+		onHighlightChange?.(next);
+		menu?.close();
 	}
 </script>
 
@@ -98,6 +125,37 @@
 		<button type="button" role="menuitem" onclick={() => copy('link', linkUrl)}>
 			{copied === 'link' ? t('action.copied') : t('verse.copyLink')}
 		</button>
+
+		{#if signedIn && highlightStyles.length > 0}
+			<hr />
+			<p class="menu-label">{t('highlights.menuLabel')}</p>
+			<div class="swatches" role="none">
+				{#each highlightStyles as style (style.id)}
+					{@const active = activeStyleId === style.id}
+					<form
+						method="POST"
+						action={active ? '?/removeHighlight' : '?/setHighlight'}
+						role="none"
+						use:enhance={() => {
+							pickHighlight(style.id);
+							return async ({ update }) => update({ reset: false, invalidateAll: false });
+						}}
+					>
+						<input type="hidden" name="reference" value={context.reference} />
+						{#if !active}<input type="hidden" name="styleId" value={style.id} />{/if}
+						<button
+							type="submit"
+							class="swatch"
+							class:active
+							style:background-color={style.color}
+							title={style.name ?? t('highlights.unnamed')}
+							aria-label={style.name ?? t('highlights.unnamed')}
+							aria-pressed={active}
+						></button>
+					</form>
+				{/each}
+			</div>
+		{/if}
 
 		<hr />
 
@@ -180,5 +238,31 @@
 
 	:global(.dark) .new-list {
 		color: var(--color-accent-400);
+	}
+
+	.swatches {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		padding: 0.2rem 0.75rem 0.5rem;
+	}
+
+	.swatch {
+		box-sizing: border-box;
+		width: 1.5rem;
+		height: 1.5rem;
+		border-radius: 999px;
+		border: 1px solid rgb(28 25 23 / 0.15);
+		cursor: pointer;
+	}
+
+	.swatch.active {
+		border: 2px solid var(--color-stone-700);
+		box-shadow: 0 0 0 2px var(--color-stone-50);
+	}
+
+	:global(.dark) .swatch.active {
+		border-color: var(--color-stone-200);
+		box-shadow: 0 0 0 2px var(--color-stone-900);
 	}
 </style>
