@@ -41,6 +41,31 @@ test('registration, sign out and sign in again', async ({ page }) => {
 	await expect(page).toHaveURL(/\/account$/);
 });
 
+test('an API key can be created, shown once and revoked', async ({ page }) => {
+	await register(page, uniqueEmail());
+
+	await page.getByLabel('Name', { exact: true }).fill('Meine App');
+	await page.getByRole('radio', { name: /Auch persönliche Daten/ }).check();
+	await page.getByRole('button', { name: 'Schlüssel erstellen' }).click();
+
+	await expect(page.getByText('Schlüssel erstellt')).toBeVisible();
+	const shownKey = (
+		await page.locator('code').filter({ hasText: 'sk_strongs_' }).textContent()
+	)?.trim();
+	expect(shownKey).toMatch(/^sk_strongs_/);
+
+	const keyItem = page.locator('li', { hasText: 'Meine App' });
+	await expect(keyItem).toContainText('Auch persönliche Daten');
+
+	// The raw key is never shown again after a reload — only its non-secret prefix.
+	await page.reload();
+	await expect(page.getByText('Schlüssel erstellt')).not.toBeVisible();
+	await expect(page.locator('li', { hasText: 'Meine App' })).toContainText(shownKey!.slice(0, 19));
+
+	await page.getByRole('button', { name: 'Widerrufen' }).click();
+	await expect(page.locator('li', { hasText: 'Meine App' })).toContainText('Widerrufen am');
+});
+
 test('a reader gets a default highlight palette, can rename a colour and add one', async ({
 	page
 }) => {
