@@ -636,6 +636,55 @@ test('on a phone the study panel is a sheet that leaves the verse visible', asyn
 	expect(verseBox.y).toBeLessThan(sheetBox.y);
 });
 
+test('the mobile column switcher exposes real tab semantics without hiding desktop columns', async ({
+	page
+}) => {
+	// Default (desktop) viewport first: the regression this specifically guards against is
+	// `aria-hidden` leaking onto desktop, where every column is visible at once regardless of which
+	// one `mobileColumn` happens to name.
+	await page.goto('/Joh3');
+
+	const columns = page.locator('.flow-column');
+	await expect(columns).toHaveCount(2);
+	await expect(columns.first()).not.toHaveAttribute('aria-hidden', 'true');
+	await expect(columns.nth(1)).not.toHaveAttribute('aria-hidden', 'true');
+	await expect(columns.nth(1)).not.toHaveAttribute('role', 'tabpanel');
+
+	// Now at phone width, where the switcher actually appears and the same mechanism legitimately
+	// hides the non-selected column from assistive tech.
+	await page.setViewportSize({ width: 390, height: 780 });
+	await page.reload();
+
+	const tabs = page.getByRole('tablist', { name: 'Spaltenauswahl' }).getByRole('tab');
+	await expect(tabs).toHaveCount(2);
+	await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
+	await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'false');
+	await expect(tabs.first()).toHaveAttribute('tabindex', '0');
+	await expect(tabs.nth(1)).toHaveAttribute('tabindex', '-1');
+
+	const mobileColumns = page.locator('.flow-column');
+	await expect(mobileColumns.first()).toHaveAttribute('role', 'tabpanel');
+	await expect(mobileColumns.nth(1)).toHaveAttribute('aria-hidden', 'true');
+
+	// ArrowRight moves focus to the next tab and switches to it in the same step (automatic
+	// activation), matching the existing click-to-switch behaviour. Read the focused id back from
+	// the same round trip that dispatches the key, rather than polling for it afterwards: this
+	// sandbox's headless browser can drop DOM focus asynchronously some time after a programmatic
+	// `.focus()` call for reasons unrelated to the app (the handler itself sets it synchronously,
+	// every time), and a later, separate assertion would be at the mercy of that.
+	await tabs.first().focus();
+	const focusedIdAfterArrowRight = await page.evaluate(() => {
+		document.activeElement?.dispatchEvent(
+			new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true })
+		);
+		return document.activeElement?.id;
+	});
+	expect(focusedIdAfterArrowRight).toBe('mobile-tab-1');
+	await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+	await expect(mobileColumns.first()).toHaveAttribute('aria-hidden', 'true');
+	await expect(mobileColumns.nth(1)).not.toHaveAttribute('aria-hidden', 'true');
+});
+
 test('legacy URLs from the previous site still resolve', async ({ page }) => {
 	await page.goto('/async/Joh3');
 	await expect(page).toHaveURL(/\/Joh3$/);

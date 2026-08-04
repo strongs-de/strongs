@@ -297,6 +297,55 @@
 	/** Which column a reader is looking at on a phone, where only one fits. */
 	let mobileColumn = $state(0);
 
+	/**
+	 * Whether the phone-width layout (one column visible, switched by tabs) is actually in effect —
+	 * not merely "the reader happens to be on a phone", since a desktop window can be narrowed too.
+	 *
+	 * `mobileColumn` only means something once this is true: on desktop every column is visible at
+	 * once, so gating `role="tabpanel"`/`aria-hidden` purely on `columnIndex !== mobileColumn` would
+	 * incorrectly hide every non-selected column from assistive tech there too, even though a sighted
+	 * desktop reader sees them all just fine.
+	 */
+	let isMobileViewport = $state(false);
+
+	$effect(() => {
+		const query = window.matchMedia('(max-width: 639px)');
+		isMobileViewport = query.matches;
+		const onChange = (event: MediaQueryListEvent) => {
+			isMobileViewport = event.matches;
+		};
+		query.addEventListener('change', onChange);
+		return () => query.removeEventListener('change', onChange);
+	});
+
+	let mobileTablist = $state<HTMLElement | undefined>();
+
+	/**
+	 * Roving focus for the mobile column tabs, matching `Menu.svelte`'s own arrow-key handling.
+	 * "Automatic activation": moving focus also switches `mobileColumn`, the same as a click — there
+	 * is no separate "activate" step, matching the existing click-to-switch behaviour exactly.
+	 */
+	function onMobileTabKeydown(event: KeyboardEvent) {
+		if (!mobileTablist) return;
+		const tabs = [...mobileTablist.querySelectorAll<HTMLElement>('[role="tab"]')];
+		if (tabs.length === 0) return;
+
+		const current = tabs.indexOf(document.activeElement as HTMLElement);
+		let next: number | null = null;
+
+		if (event.key === 'ArrowRight') next = (current + 1) % tabs.length;
+		else if (event.key === 'ArrowLeft') next = (current - 1 + tabs.length) % tabs.length;
+		else if (event.key === 'Home') next = 0;
+		else if (event.key === 'End') next = tabs.length - 1;
+
+		if (next === null) return;
+		event.preventDefault();
+		const target = tabs[next];
+		target?.focus();
+		const index = Number(target?.id.replace('mobile-tab-', ''));
+		if (Number.isFinite(index)) mobileColumn = index;
+	}
+
 	/** Strong's number shown in the study sidebar, kept in the URL hash so it can be shared. */
 	let activeStrong = $state<{ strong: string; word: string; reference: string } | null>(null);
 
@@ -1059,32 +1108,53 @@
 				       dark:border-stone-800 dark:bg-stone-950/95"
 				data-testid="column-picker-bar"
 			>
-				{#each data.columns as column (column.resource.id)}
-					<button
-						type="button"
-						class="shrink-0 rounded-full px-3 py-1 text-sm"
-						class:bg-accent-600={mobileColumn === column.index}
-						class:text-white={mobileColumn === column.index}
-						class:bg-stone-100={mobileColumn !== column.index}
-						class:dark:bg-stone-800={mobileColumn !== column.index}
-						onclick={() => (mobileColumn = column.index)}
-					>
-						{column.resource.abbrev}
-					</button>
-				{/each}
-				{#if data.notesVisible}
-					<button
-						type="button"
-						class="shrink-0 rounded-full px-3 py-1 text-sm"
-						class:bg-accent-600={mobileColumn === notesColumnIndex}
-						class:text-white={mobileColumn === notesColumnIndex}
-						class:bg-stone-100={mobileColumn !== notesColumnIndex}
-						class:dark:bg-stone-800={mobileColumn !== notesColumnIndex}
-						onclick={() => (mobileColumn = notesColumnIndex)}
-					>
-						{t('lists.note')}
-					</button>
-				{/if}
+				<!-- The tablist container itself is never a stop on the Tab key — only the tabs are, via
+				     their own roving tabindex below — so it does not need one of its own either. -->
+				<!-- svelte-ignore a11y_interactive_supports_focus -->
+				<div
+					bind:this={mobileTablist}
+					role="tablist"
+					aria-label={t('reader.mobileColumnsTablist')}
+					class="contents"
+					onkeydown={onMobileTabKeydown}
+				>
+					{#each data.columns as column (column.resource.id)}
+						<button
+							type="button"
+							role="tab"
+							id="mobile-tab-{column.index}"
+							aria-selected={mobileColumn === column.index}
+							aria-controls="mobile-tabpanel-{column.index}"
+							tabindex={mobileColumn === column.index ? 0 : -1}
+							class="mobile-tab shrink-0 rounded-full px-3 py-1 text-sm"
+							class:bg-accent-600={mobileColumn === column.index}
+							class:text-white={mobileColumn === column.index}
+							class:bg-stone-100={mobileColumn !== column.index}
+							class:dark:bg-stone-800={mobileColumn !== column.index}
+							onclick={() => (mobileColumn = column.index)}
+						>
+							{column.resource.abbrev}
+						</button>
+					{/each}
+					{#if data.notesVisible}
+						<button
+							type="button"
+							role="tab"
+							id="mobile-tab-{notesColumnIndex}"
+							aria-selected={mobileColumn === notesColumnIndex}
+							aria-controls="mobile-tabpanel-{notesColumnIndex}"
+							tabindex={mobileColumn === notesColumnIndex ? 0 : -1}
+							class="mobile-tab shrink-0 rounded-full px-3 py-1 text-sm"
+							class:bg-accent-600={mobileColumn === notesColumnIndex}
+							class:text-white={mobileColumn === notesColumnIndex}
+							class:bg-stone-100={mobileColumn !== notesColumnIndex}
+							class:dark:bg-stone-800={mobileColumn !== notesColumnIndex}
+							onclick={() => (mobileColumn = notesColumnIndex)}
+						>
+							{t('lists.note')}
+						</button>
+					{/if}
+				</div>
 
 				{#if canAddColumn}
 					<form method="POST" action="?/addColumn" use:enhance>
@@ -1131,8 +1201,11 @@
 							data-flow-column-index={columnIndex}
 							class="flow-column"
 							class:hidden-on-mobile={columnIndex !== mobileColumn}
-							role="region"
-							aria-label={column.resource.name}
+							role={isMobileViewport ? 'tabpanel' : 'region'}
+							id={isMobileViewport ? `mobile-tabpanel-${columnIndex}` : undefined}
+							aria-labelledby={isMobileViewport ? `mobile-tab-${columnIndex}` : undefined}
+							aria-label={isMobileViewport ? undefined : column.resource.name}
+							aria-hidden={isMobileViewport && columnIndex !== mobileColumn}
 							onwheel={() => makeFlowSource(columnIndex)}
 							ontouchstart={() => makeFlowSource(columnIndex)}
 							onpointerdown={() => makeFlowSource(columnIndex)}
@@ -1319,6 +1392,10 @@
 						<aside
 							class="flow-column flow-note"
 							class:hidden-on-mobile={mobileColumn !== notesColumnIndex}
+							role={isMobileViewport ? 'tabpanel' : undefined}
+							id={isMobileViewport ? `mobile-tabpanel-${notesColumnIndex}` : undefined}
+							aria-labelledby={isMobileViewport ? `mobile-tab-${notesColumnIndex}` : undefined}
+							aria-hidden={isMobileViewport && mobileColumn !== notesColumnIndex}
 						>
 							{#each streamChapters as stream (`note:${stream.reference.book}:${stream.reference.chapter}`)}
 								<div
@@ -1637,6 +1714,34 @@
 	.column-resize-handle:focus-visible {
 		outline: 2px solid var(--color-accent-500);
 		outline-offset: -2px;
+	}
+
+	/* The mobile column tabs. The pill's background already shows which one is selected; the
+	   underline is a second, less color-dependent cue, and the one that actually animates. */
+	.mobile-tab {
+		position: relative;
+	}
+
+	.mobile-tab::after {
+		position: absolute;
+		right: 20%;
+		bottom: -0.35rem;
+		left: 20%;
+		height: 2px;
+		border-radius: 1px;
+		background: var(--color-accent-500);
+		opacity: 0;
+		transition: opacity 150ms ease;
+		content: '';
+	}
+
+	.mobile-tab[aria-selected='true']::after {
+		opacity: 1;
+	}
+
+	.mobile-tab:focus-visible {
+		outline: 2px solid var(--color-accent-500);
+		outline-offset: 2px;
 	}
 
 	.license-grid {

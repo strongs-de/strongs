@@ -63,6 +63,7 @@ export const de = {
 	'reader.flowSyncEnable': 'Synchron scrollen aktivieren',
 	'reader.flowSyncDisable': 'Synchron scrollen deaktivieren',
 	'reader.resizeColumns': 'Spaltenbreite anpassen',
+	'reader.mobileColumnsTablist': 'Spaltenauswahl',
 	'resource.group.bibles': 'Bibeln',
 	'resource.group.commentaries': 'Kommentare',
 	'resource.group.xrefs': 'Parallelstellen',
