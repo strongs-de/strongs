@@ -2,7 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { getDb } from '$lib/server/db';
 import { config } from '$lib/server/config';
 import { checkPasswordStrength, MIN_PASSWORD_LENGTH } from '$lib/server/auth/password';
-import { countRecent, recordAttempt } from '$lib/server/auth/rate-limit';
+import { countRecent, LIMITS, recordAttempt } from '$lib/server/auth/rate-limit';
 import { mailer } from '$lib/server/mail';
 import { logger } from '$lib/server/logger';
 import { createEmailVerification, createUser } from '$lib/server/repositories/users';
@@ -42,7 +42,7 @@ export const actions = {
 		const address = getClientAddress();
 
 		// Per-address only, unlike login: there is no account yet to also key on.
-		if ((await countRecent(db, `register:${address}`)) >= 10) {
+		if ((await countRecent(db, `register:${address}`)) >= LIMITS.MAX_REGISTRATIONS_PER_ADDRESS) {
 			return fail(429, { ...values, error: 'throttled' as const });
 		}
 		await recordAttempt(db, `register:${address}`);
