@@ -20,7 +20,9 @@ import {
 	listLocalBackups,
 	runRestore,
 	runScheduledBackup,
-	stagedDumpPath
+	stagedDumpPath,
+	stageFromLocal,
+	stageFromS3
 } from '$lib/server/backup/jobs';
 import { hasPgTools, isCustomFormatDump } from '$lib/server/backup/pg';
 import {
@@ -32,6 +34,11 @@ import { selectExpired } from '$lib/server/backup/retention';
 
 /** Typed confirmation the restore form requires before a restore is allowed to proceed. */
 const RESTORE_CONFIRMATION = 'WIEDERHERSTELLEN';
+
+/** Same server-side check for every restore action, whichever source the file comes from. */
+function isConfirmed(form: FormData): boolean {
+	return String(form.get('confirm') ?? '').trim() === RESTORE_CONFIRMATION;
+}
 
 function clampInt(
 	value: FormDataEntryValue | null,
@@ -213,25 +220,30 @@ export const actions = {
 		}
 	},
 
+	// The three restore actions below all report failure through the dedicated `restoreError` key
+	// (rather than the generic `error` key `saveSettings`/`deleteLocal` use) so the "Wiederherstellen"
+	// section is the only place that ever renders one of their messages — otherwise a restore failure
+	// would render twice, once there and once in the unrelated S3-settings error banner above.
+
 	restore: async ({ request, locals }) => {
 		const form = await request.formData();
 
 		// The server-side check that matters; the client-side disabled button is convenience only.
-		if (String(form.get('confirm') ?? '').trim() !== RESTORE_CONFIRMATION) {
-			return fail(400, { error: 'confirm' });
+		if (!isConfirmed(form)) {
+			return fail(400, { restoreError: 'confirm' });
 		}
 
 		let path: string;
 		try {
 			path = stagedDumpPath(String(form.get('stagedId') ?? ''));
 		} catch {
-			return fail(400, { error: 'Ungültige hochgeladene Datei. Bitte erneut hochladen.' });
+			return fail(400, { restoreError: 'Ungültige hochgeladene Datei. Bitte erneut hochladen.' });
 		}
 
 		const stats = await stat(path).catch(() => null);
 		if (!stats || stats.size === 0) {
 			return fail(400, {
-				error: 'Die hochgeladene Datei wurde nicht gefunden. Bitte erneut hochladen.'
+				restoreError: 'Die hochgeladene Datei wurde nicht gefunden. Bitte erneut hochladen.'
 			});
 		}
 
@@ -240,12 +252,79 @@ export const actions = {
 		await handle.read(head, 0, 5, 0);
 		await handle.close();
 		if (!isCustomFormatDump(head)) {
-			return fail(400, { error: 'Das ist keine gültige Backup-Datei.' });
+			return fail(400, { restoreError: 'Das ist keine gültige Backup-Datei.' });
 		}
 
 		const db = getDb();
 		if (await hasRunningBackupJob(db)) {
-			return fail(409, { error: 'Es läuft bereits ein Backup- oder Wiederherstellungsvorgang.' });
+			return fail(409, {
+				restoreError: 'Es läuft bereits ein Backup- oder Wiederherstellungsvorgang.'
+			});
+		}
+
+		await runRestore(db, { path, createdBy: locals.user!.id });
+		return { restoreStarted: true };
+	},
+
+	/** Restores directly from an existing local copy — no download + re-upload detour. */
+	restoreLocal: async ({ request, locals }) => {
+		const form = await request.formData();
+		if (!isConfirmed(form)) {
+			return fail(400, { restoreError: 'confirm' });
+		}
+
+		const db = getDb();
+		if (await hasRunningBackupJob(db)) {
+			return fail(409, {
+				restoreError: 'Es läuft bereits ein Backup- oder Wiederherstellungsvorgang.'
+			});
+		}
+
+		let path: string;
+		try {
+			path = await stageFromLocal(String(form.get('name') ?? ''));
+		} catch (error) {
+			return fail(400, {
+				restoreError:
+					error instanceof Error ? error.message : 'Die lokale Sicherung wurde nicht gefunden.'
+			});
+		}
+
+		await runRestore(db, { path, createdBy: locals.user!.id });
+		return { restoreStarted: true };
+	},
+
+	/** Restores directly from an S3 object — no download + re-upload detour. */
+	restoreS3: async ({ request, locals }) => {
+		const form = await request.formData();
+		if (!isConfirmed(form)) {
+			return fail(400, { restoreError: 'confirm' });
+		}
+
+		const key = String(form.get('key') ?? '');
+		if (!key) return fail(400, { restoreError: 'Fehlender Schlüssel.' });
+
+		const db = getDb();
+		if (await hasRunningBackupJob(db)) {
+			return fail(409, {
+				restoreError: 'Es läuft bereits ein Backup- oder Wiederherstellungsvorgang.'
+			});
+		}
+
+		const { settings, secretAccessKey } = await readBackupCredentials(db);
+		if (!settings.s3.bucket || !secretAccessKey) {
+			return fail(400, { restoreError: 'S3 ist nicht vollständig konfiguriert.' });
+		}
+
+		let path: string;
+		try {
+			const client = createS3Client({ ...settings.s3, secretAccessKey });
+			path = await stageFromS3(client, { bucket: settings.s3.bucket, key });
+		} catch (error) {
+			return fail(400, {
+				restoreError:
+					error instanceof Error ? error.message : 'Herunterladen von S3 fehlgeschlagen.'
+			});
 		}
 
 		await runRestore(db, { path, createdBy: locals.user!.id });

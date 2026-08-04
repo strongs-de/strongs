@@ -1,12 +1,14 @@
+import { Readable } from 'node:stream';
 import { describe, expect, it, vi } from 'vitest';
 import {
 	DeleteObjectsCommand,
+	GetObjectCommand,
 	HeadBucketCommand,
 	ListObjectsV2Command,
 	PutObjectCommand,
 	type S3Client
 } from '@aws-sdk/client-s3';
-import { deleteKeys, listBackups, pruneRemote, testConnection } from './s3.ts';
+import { deleteKeys, getObjectStream, listBackups, pruneRemote, testConnection } from './s3.ts';
 
 function fakeClient(handler: (command: unknown) => unknown): S3Client {
 	return { send: vi.fn(async (command: unknown) => handler(command)) } as unknown as S3Client;
@@ -88,6 +90,39 @@ describe('pruneRemote', () => {
 		const count = await pruneRemote(client, { bucket: 'b', prefix: '', keep: 1 });
 		expect(count).toBe(1);
 		expect(deleted).toEqual(['strongs-20260101-030000.dump']);
+	});
+});
+
+describe('getObjectStream', () => {
+	it('requests the given bucket and key and returns the body and content length', async () => {
+		const client = fakeClient((command) => {
+			expect(command).toBeInstanceOf(GetObjectCommand);
+			const input = (command as GetObjectCommand).input;
+			expect(input.Bucket).toBe('b');
+			expect(input.Key).toBe('strongs/strongs-20260101-030000.dump');
+			return { Body: Readable.from(Buffer.from('PGDMP')), ContentLength: 5 };
+		});
+		const { body, sizeBytes } = await getObjectStream(client, {
+			bucket: 'b',
+			key: 'strongs/strongs-20260101-030000.dump'
+		});
+		expect(sizeBytes).toBe(5);
+		const chunks: Buffer[] = [];
+		for await (const chunk of body) chunks.push(chunk as Buffer);
+		expect(Buffer.concat(chunks).toString('ascii')).toBe('PGDMP');
+	});
+
+	it('defaults sizeBytes to 0 when the response has no ContentLength', async () => {
+		const client = fakeClient(() => ({ Body: Readable.from(Buffer.from('x')) }));
+		const { sizeBytes } = await getObjectStream(client, { bucket: 'b', key: 'k' });
+		expect(sizeBytes).toBe(0);
+	});
+
+	it('throws when the response has no body', async () => {
+		const client = fakeClient(() => ({}));
+		await expect(getObjectStream(client, { bucket: 'b', key: 'k' })).rejects.toThrow(
+			'Das S3-Objekt hat keinen Inhalt.'
+		);
 	});
 });
 
