@@ -41,9 +41,7 @@
 		previous={reader?.previous ? referencePath(reader.previous) : null}
 		next={reader?.next ? referencePath(reader.next) : null}
 		user={data?.user ?? null}
-		readerPreferences={reader
-			? { layout: data.readerLayout, fontScale: data.readerFontScale }
-			: null}
+		readerPreferences={reader ? { fontScale: data.readerFontScale } : null}
 	/>
 
 	{@render children()}

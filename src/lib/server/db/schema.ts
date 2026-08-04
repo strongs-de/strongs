@@ -270,7 +270,6 @@ export const commentaryEntries = pgTable(
 // --- accounts ---------------------------------------------------------------
 
 export const USER_ROLES = ['user', 'admin'] as const;
-export const READER_LAYOUTS = ['aligned', 'flow'] as const;
 export const THEMES = ['light', 'dark'] as const;
 
 export const users = pgTable(
@@ -290,11 +289,10 @@ export const users = pgTable(
 		/** Scripture font size as an integer percentage. */
 		readerFontScale: integer('reader_font_scale').notNull().default(100),
 		/**
-		 * Account-level fallbacks for reader layout and colour scheme, used only to seed a device that
-		 * has not set its own cookie yet — a device's own choice always wins afterwards. Null means "this
-		 * account has never set one", distinct from an explicit choice.
+		 * Account-level fallback for colour scheme, used only to seed a device that has not set its own
+		 * cookie yet — a device's own choice always wins afterwards. Null means "this account has never
+		 * set one", distinct from an explicit choice.
 		 */
-		readerLayout: text('reader_layout', { enum: READER_LAYOUTS }),
 		theme: text('theme', { enum: THEMES }),
 		emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
 		lastLoginAt: timestamp('last_login_at', { withTimezone: true }),

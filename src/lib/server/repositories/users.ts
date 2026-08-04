@@ -107,17 +107,6 @@ export async function updateReaderFontScale(
 	return normalized;
 }
 
-export async function updateReaderLayout(
-	db: Database,
-	userId: string,
-	layout: 'aligned' | 'flow'
-): Promise<void> {
-	await db
-		.update(users)
-		.set({ readerLayout: layout, updatedAt: new Date() })
-		.where(eq(users.id, userId));
-}
-
 export async function updateTheme(
 	db: Database,
 	userId: string,

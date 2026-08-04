@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
 	import { parseReference } from '$lib/bible/reference';
 	import { jumpToVerse } from '$lib/reader-location.svelte';
 	import { t } from '$lib/i18n';
+	import Menu from './Menu.svelte';
 	import ReaderViewMenu from './ReaderViewMenu.svelte';
 	import ThemeToggle from './ThemeToggle.svelte';
 
@@ -23,7 +23,7 @@
 		previous?: string | null;
 		next?: string | null;
 		user?: { displayName: string | null; email: string; role: string } | null;
-		readerPreferences?: { layout: 'aligned' | 'flow'; fontScale: number } | null;
+		readerPreferences?: { fontScale: number } | null;
 	} = $props();
 
 	/**
@@ -38,6 +38,7 @@
 		if (!focused) value = query;
 	});
 	let input: HTMLInputElement | undefined = $state();
+	let userMenu: Menu | undefined = $state();
 
 	async function submit(event: SubmitEvent) {
 		event.preventDefault();
@@ -123,47 +124,14 @@
 			<img src="/icon.png" alt="" class="size-9 rounded-sm sm:hidden" />
 		</a>
 
-		<form class="min-w-0 flex-1" onsubmit={submit} role="search">
-			<label class="sr-only" for="site-search">{t('nav.search.placeholder')}</label>
-			<div class="relative">
-				<svg
-					viewBox="0 0 20 20"
-					class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-400"
-					fill="currentColor"
-					aria-hidden="true"
-				>
-					<path
-						fill-rule="evenodd"
-						d="M9 3.5a5.5 5.5 0 1 0 3.66 9.605l3.617 3.618a.75.75 0 1 0 1.06-1.06l-3.617-3.618A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"
-					/>
-				</svg>
-				<input
-					bind:this={input}
-					bind:value
-					onfocus={() => (focused = true)}
-					onblur={() => (focused = false)}
-					id="site-search"
-					type="search"
-					autocomplete="off"
-					spellcheck="false"
-					enterkeyhint="search"
-					placeholder={t('nav.search.placeholder')}
-					class="w-full rounded-md border-2 border-stone-400 bg-stone-100/70 py-2 pr-3 pl-9 text-sm
-					       shadow-inner shadow-stone-900/3 placeholder:text-stone-400 focus:border-accent-500
-					       focus:bg-white focus:ring-3 focus:ring-accent-500/10 focus:outline-none dark:border-stone-600
-					       dark:bg-stone-900 dark:shadow-black/20 dark:placeholder:text-stone-500 dark:focus:bg-stone-900"
-				/>
-			</div>
-		</form>
-
-		<nav class="flex shrink-0 items-center gap-0.5 sm:gap-1">
+		<div class="flex min-w-0 flex-1 items-center justify-center gap-0.5">
 			{#if previous}
 				<a
 					href={previous}
 					rel="prev"
 					title={t('nav.previousChapter')}
 					aria-label={t('nav.previousChapter')}
-					class="rounded-md px-2 py-1.5 text-stone-500 hover:bg-stone-100 hover:text-stone-900
+					class="shrink-0 rounded-md px-2 py-1.5 text-stone-500 hover:bg-stone-100 hover:text-stone-900
 					       dark:hover:bg-stone-800 dark:hover:text-stone-100"
 				>
 					<svg viewBox="0 0 20 20" class="size-5" fill="currentColor" aria-hidden="true">
@@ -174,13 +142,47 @@
 					</svg>
 				</a>
 			{/if}
+
+			<form class="w-full max-w-sm min-w-0" onsubmit={submit} role="search">
+				<label class="sr-only" for="site-search">{t('nav.search.placeholder')}</label>
+				<div class="relative">
+					<svg
+						viewBox="0 0 20 20"
+						class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-400"
+						fill="currentColor"
+						aria-hidden="true"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M9 3.5a5.5 5.5 0 1 0 3.66 9.605l3.617 3.618a.75.75 0 1 0 1.06-1.06l-3.617-3.618A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"
+						/>
+					</svg>
+					<input
+						bind:this={input}
+						bind:value
+						onfocus={() => (focused = true)}
+						onblur={() => (focused = false)}
+						id="site-search"
+						type="search"
+						autocomplete="off"
+						spellcheck="false"
+						enterkeyhint="search"
+						placeholder={t('nav.search.placeholder')}
+						class="w-full rounded-md border-2 border-stone-400 bg-stone-100/70 py-2 pr-3 pl-9 text-sm
+						       shadow-inner shadow-stone-900/3 placeholder:text-stone-400 focus:border-accent-500
+						       focus:bg-white focus:ring-3 focus:ring-accent-500/10 focus:outline-none dark:border-stone-600
+						       dark:bg-stone-900 dark:shadow-black/20 dark:placeholder:text-stone-500 dark:focus:bg-stone-900"
+					/>
+				</div>
+			</form>
+
 			{#if next}
 				<a
 					href={next}
 					rel="next"
 					title={t('nav.nextChapter')}
 					aria-label={t('nav.nextChapter')}
-					class="rounded-md px-2 py-1.5 text-stone-500 hover:bg-stone-100 hover:text-stone-900
+					class="shrink-0 rounded-md px-2 py-1.5 text-stone-500 hover:bg-stone-100 hover:text-stone-900
 					       dark:hover:bg-stone-800 dark:hover:text-stone-100"
 				>
 					<svg viewBox="0 0 20 20" class="size-5" fill="currentColor" aria-hidden="true">
@@ -191,83 +193,70 @@
 					</svg>
 				</a>
 			{/if}
+		</div>
 
+		<nav class="flex shrink-0 items-center gap-0.5 sm:gap-1">
 			{#if readerPreferences}
-				<ReaderViewMenu layout={readerPreferences.layout} fontScale={readerPreferences.fontScale} />
+				<ReaderViewMenu fontScale={readerPreferences.fontScale} />
 			{:else}
 				<ThemeToggle />
 			{/if}
 
-			<a
-				href="/help"
-				title={t('nav.help')}
-				aria-label={t('nav.help')}
-				class="rounded-md px-2 py-1.5 text-stone-500 hover:bg-stone-100 hover:text-stone-900
-				       dark:hover:bg-stone-800 dark:hover:text-stone-100"
-				data-active={page.url.pathname === '/help' ? 'true' : undefined}
+			<button
+				type="button"
+				aria-label={t('nav.userMenu')}
+				aria-haspopup="menu"
+				class="flex items-center gap-1 rounded-md py-1.5 pr-1 pl-1.5 text-stone-600 hover:bg-stone-100
+				       dark:text-stone-300 dark:hover:bg-stone-800"
+				onclick={(event) => userMenu?.openAt(event.currentTarget)}
 			>
-				<svg viewBox="0 0 20 20" class="size-5" fill="currentColor" aria-hidden="true">
+				<svg viewBox="0 0 20 20" class="size-6 shrink-0" fill="currentColor" aria-hidden="true">
 					<path
 						fill-rule="evenodd"
-						d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a1.5 1.5 0 1 1 2.28 1.93c-.153.148-.353.302-.507.418l-.006.005a3.478 3.478 0 0 0-.51.465c-.163.19-.207.35-.207.44v.5a.75.75 0 0 0 1.5 0v-.443a2 2 0 0 1 .513-1.325A2.55 2.55 0 0 1 12 8.518 3 3 0 1 0 6.5 6.767a.75.75 0 1 0 1.44.418c.1-.34.278-.622.5-.845ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+						d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-5.5-2.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm-6.503 6.855A5.501 5.501 0 0 1 10 12a5.5 5.5 0 0 1 4.001 2.355 6.478 6.478 0 0 1-8.004 0Z"
 						clip-rule="evenodd"
 					/>
 				</svg>
-			</a>
-
-			{#if user}
-				<a
-					href="/lists"
-					class="hidden rounded-md px-2.5 py-2 text-sm font-medium text-stone-600 hover:bg-accent-50
-					       hover:text-accent-800 data-[active=true]:text-accent-700 sm:block dark:text-stone-300
-					       dark:hover:bg-accent-900/30 dark:hover:text-accent-300"
-					data-active={page.url.pathname.startsWith('/lists') ? 'true' : undefined}
-				>
-					{t('nav.lists')}
-				</a>
-				<a
-					href="/account"
-					class="hidden rounded-md px-2.5 py-2 text-sm font-medium text-stone-600 hover:bg-accent-50
-					       hover:text-accent-800 sm:block dark:text-stone-300 dark:hover:bg-accent-900/30
-					       dark:hover:text-accent-300"
-				>
-					{user.displayName ?? user.email}
-				</a>
-				{#if user.role === 'admin'}
-					<a
-						href="/admin"
-						class="hidden rounded-md px-2.5 py-2 text-sm font-medium text-stone-600 hover:bg-accent-50
-						       hover:text-accent-800 sm:block dark:text-stone-300 dark:hover:bg-accent-900/30
-						       dark:hover:text-accent-300"
-					>
-						{t('nav.admin')}
-					</a>
+				{#if user}
+					<span class="hidden max-w-32 truncate text-sm font-medium sm:block">
+						{user.displayName ?? user.email}
+					</span>
 				{/if}
-			{:else}
-				<a
-					href="/login"
-					class="rounded-md px-2 py-1.5 text-sm text-stone-600 hover:bg-stone-100
-					       dark:text-stone-300 dark:hover:bg-stone-800"
-					data-active={page.url.pathname === '/login' ? 'true' : undefined}
-				>
-					{t('nav.login')}
-				</a>
-			{/if}
+				<svg viewBox="0 0 20 20" class="size-4 shrink-0 text-stone-400" fill="currentColor">
+					<path
+						fill-rule="evenodd"
+						d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
+						clip-rule="evenodd"
+					/>
+				</svg>
+			</button>
 
-			<a
-				href="/impressum"
-				class="rounded-md px-1.5 py-1.5 text-xs text-stone-400 hover:text-stone-600
-				       dark:text-stone-500 dark:hover:text-stone-300"
-			>
-				{t('nav.impressum')}
-			</a>
-			<a
-				href="/datenschutz"
-				class="rounded-md px-1.5 py-1.5 text-xs text-stone-400 hover:text-stone-600
-				       dark:text-stone-500 dark:hover:text-stone-300"
-			>
-				{t('nav.datenschutz')}
-			</a>
+			<Menu bind:this={userMenu} label={t('nav.userMenu')}>
+				{#if user}
+					<a href="/account" role="menuitem" data-sveltekit-preload-data="hover"
+						>{t('nav.account')}</a
+					>
+					{#if user.role === 'admin'}
+						<a href="/admin" role="menuitem" data-sveltekit-preload-data="hover">{t('nav.admin')}</a
+						>
+					{/if}
+					<hr />
+					<a href="/help" role="menuitem">{t('nav.help')}</a>
+				{:else}
+					<a href="/help" role="menuitem">{t('nav.help')}</a>
+					<hr />
+					<a href="/login" role="menuitem">{t('nav.login')}</a>
+				{/if}
+				<hr />
+				<a href="/impressum" role="menuitem">{t('nav.impressum')}</a>
+				<a href="/datenschutz" role="menuitem">{t('nav.datenschutz')}</a>
+				{#if user}
+					<hr />
+					<form method="POST" action="/logout" role="none">
+						<button type="submit" role="menuitem">{t('auth.logout.submit')}</button>
+					</form>
+				{/if}
+			</Menu>
 		</nav>
 	</div>
 </header>

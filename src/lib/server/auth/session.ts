@@ -21,14 +21,7 @@ const RENEW_AFTER_MS = SESSION_DURATION_MS / 2;
 
 export type SessionUser = Pick<
 	User,
-	| 'id'
-	| 'email'
-	| 'displayName'
-	| 'role'
-	| 'readerColumns'
-	| 'readerFontScale'
-	| 'readerLayout'
-	| 'theme'
+	'id' | 'email' | 'displayName' | 'role' | 'readerColumns' | 'readerFontScale' | 'theme'
 >;
 
 function tokenToId(token: string): string {
@@ -92,7 +85,6 @@ export async function resolveSession(
 			role: users.role,
 			readerColumns: users.readerColumns,
 			readerFontScale: users.readerFontScale,
-			readerLayout: users.readerLayout,
 			theme: users.theme,
 			disabledAt: users.disabledAt
 		})
@@ -124,7 +116,6 @@ export async function resolveSession(
 			role: row.role,
 			readerColumns: row.readerColumns,
 			readerFontScale: row.readerFontScale,
-			readerLayout: row.readerLayout,
 			theme: row.theme
 		}
 	};
