@@ -134,3 +134,70 @@ export function moveColumn(columns: string[], from: number, to: number): string[
 }
 
 export { MAX_COLUMNS };
+
+/**
+ * Per-column widths for the reader grid, as fractions of the row that sum to 1.
+ *
+ * Kept in a cookie of `id:fraction` pairs, like `COLUMNS_COOKIE` keyed by resource id rather than
+ * position, so a drag-resize survives a reorder — the width follows the translation, not the slot.
+ */
+export const COLUMN_WIDTHS_COOKIE = 'column-widths';
+
+/** A column may not shrink below this share of the row, so a boundary drag can never squeeze a
+ *  neighbour into unreadable ribbon. */
+export const MIN_COLUMN_FRACTION = 0.12;
+
+/**
+ * Clamps every width to the minimum share and renormalizes so the row still sums to 1 — clamping
+ * alone could leave the total under or over the space the row actually has. Falls back to an equal
+ * split whenever the count does not match `count` (or a width is not a usable number), since a stale
+ * set of fractions cannot mean anything for a different number of columns.
+ */
+export function normalizeColumnWidths(widths: number[], count: number): number[] {
+	if (count <= 0) return [];
+	if (widths.length !== count || widths.some((width) => !Number.isFinite(width) || width <= 0)) {
+		return Array(count).fill(1 / count);
+	}
+
+	const clamped = widths.map((width) => Math.max(MIN_COLUMN_FRACTION, width));
+	const total = clamped.reduce((sum, width) => sum + width, 0);
+	return clamped.map((width) => width / total);
+}
+
+/**
+ * This device's stored widths, in the same order as `columnIds`, or `null` when the reader has not
+ * customized them (no cookie yet) or the stored id set no longer matches the current columns — an
+ * add or a remove since the widths were last saved leaves them meaning nothing, so the caller falls
+ * back to an even split rather than rendering a stale layout.
+ */
+export function resolveColumnWidths(cookies: Cookies, columnIds: string[]): number[] | null {
+	if (columnIds.length === 0) return null;
+
+	const stored = cookies.get(COLUMN_WIDTHS_COOKIE);
+	if (!stored) return null;
+
+	const byId = new Map<string, number>();
+	for (const pair of stored.split(',')) {
+		const [id, fraction] = pair.split(':');
+		if (id && fraction !== undefined) byId.set(id, Number(fraction));
+	}
+
+	if (byId.size !== columnIds.length || !columnIds.every((id) => byId.has(id))) return null;
+	return normalizeColumnWidths(
+		columnIds.map((id) => byId.get(id) ?? 0),
+		columnIds.length
+	);
+}
+
+export function writeColumnWidths(cookies: Cookies, columnIds: string[], widths: number[]): void {
+	const normalized = normalizeColumnWidths(widths, columnIds.length);
+	const value = columnIds
+		.map((id, index) => `${id}:${(normalized[index] ?? 0).toFixed(4)}`)
+		.join(',');
+	cookies.set(COLUMN_WIDTHS_COOKIE, value, {
+		path: '/',
+		maxAge: COOKIE_MAX_AGE_SECONDS,
+		httpOnly: false,
+		sameSite: 'lax'
+	});
+}

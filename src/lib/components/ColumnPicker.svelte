@@ -21,7 +21,9 @@
 		available,
 		chosen,
 		canRemove,
-		canAdd = false
+		canAdd = false,
+		flowSyncEnabled = true,
+		showFlowSyncToggle = false
 	}: {
 		index: number;
 		selected: ReadableResource;
@@ -31,6 +33,11 @@
 		canRemove: boolean;
 		/** Shows the "add a column" button; set on the last column only, so the grid keeps its shape. */
 		canAdd?: boolean;
+		/** Whether this column currently takes part in the flow layout's cross-column scroll sync. */
+		flowSyncEnabled?: boolean;
+		/** Shows the sync toggle at all; only meaningful in the flow layout, where columns scroll
+		 *  independently — the aligned layout has no per-column scrolling to opt out of. */
+		showFlowSyncToggle?: boolean;
 	} = $props();
 
 	let selectMenu: Menu | undefined = $state();
@@ -52,6 +59,49 @@
 			<circle cx="3" cy="15" r="1.2" /><circle cx="9" cy="15" r="1.2" />
 		</svg>
 	</span>
+
+	{#if showFlowSyncToggle}
+		<form
+			method="POST"
+			action="?/setColumnFlowSync"
+			use:enhance
+			class="flex items-center self-stretch"
+		>
+			<input type="hidden" name="resource" value={selected.id} />
+			<button
+				type="submit"
+				title={flowSyncEnabled ? t('reader.flowSyncDisable') : t('reader.flowSyncEnable')}
+				aria-label={flowSyncEnabled ? t('reader.flowSyncDisable') : t('reader.flowSyncEnable')}
+				aria-pressed={flowSyncEnabled}
+				class="inline-flex size-7 items-center justify-center rounded text-stone-400
+				       hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-200"
+				class:text-accent-600={flowSyncEnabled}
+				class:dark:text-accent-400={flowSyncEnabled}
+			>
+				<svg viewBox="0 0 20 20" class="size-4" fill="currentColor" aria-hidden="true">
+					<path
+						fill-rule="evenodd"
+						d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z"
+						clip-rule="evenodd"
+					/>
+					<path
+						fill-rule="evenodd"
+						d="M7.768 15.768a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3Z"
+						clip-rule="evenodd"
+					/>
+					{#if !flowSyncEnabled}
+						<path
+							d="M3.5 3.5l13 13"
+							stroke="currentColor"
+							stroke-width="1.5"
+							stroke-linecap="round"
+							fill="none"
+						/>
+					{/if}
+				</svg>
+			</button>
+		</form>
+	{/if}
 
 	<button
 		id="column-{index}"

@@ -152,6 +152,71 @@ test('verses stay aligned across columns', async ({ page }) => {
 	expect(new Set(verse16.map((cell) => cell.column)).size).toBe(verse16.length);
 });
 
+test('a column boundary can be dragged to resize the columns, and the split persists', async ({
+	page
+}) => {
+	await useAlignedLayout(page);
+	await page.goto('/Joh3');
+
+	// The desktop bar; the mobile tab-switcher bar shares the same test id but is hidden at this
+	// (default) viewport width and never renders a resize handle at all.
+	const bar = page.getByTestId('column-picker-bar').first();
+	const handle = bar.getByRole('separator');
+	await expect(handle).toHaveCount(1);
+
+	const barBox = (await bar.boundingBox())!;
+	const handleBox = (await handle.boundingBox())!;
+	const startX = handleBox.x + handleBox.width / 2;
+	const y = handleBox.y + handleBox.height / 2;
+	const targetX = startX + barBox.width * 0.2;
+
+	// Dispatches synthetic pointer events directly rather than driving `page.mouse`: the handler
+	// computes the new width from this event's own `clientX` against the position recorded at
+	// pointerdown, not incrementally, so one pointermove carrying the final coordinate is enough —
+	// and this sidesteps a CDP/headless-Chromium quirk where a real synthetic mouse-up can go
+	// undelivered if the element under the cursor was itself moved (by our own live-resize feedback)
+	// since the preceding mouse-move.
+	await handle.dispatchEvent('pointerdown', { clientX: startX, clientY: y, pointerId: 1 });
+	await page.evaluate(
+		([x, pointerY]) => {
+			window.dispatchEvent(
+				new PointerEvent('pointermove', { clientX: x, clientY: pointerY, bubbles: true })
+			);
+		},
+		[targetX, y]
+	);
+	await page.evaluate(() => {
+		window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+	});
+
+	// The boundary moved right, so the first column grew and the second shrank.
+	const columnHeaders = bar.locator('[role="group"]');
+	const [firstWidth, secondWidth] = await columnHeaders.evaluateAll((nodes) =>
+		nodes.map((node) => node.getBoundingClientRect().width)
+	);
+	expect(firstWidth).toBeGreaterThan(secondWidth * 1.3);
+
+	// The resize commits to a cookie once the drag ends.
+	await expect.poll(() => page.evaluate(() => document.cookie)).toContain('column-widths=');
+
+	// The split survives a reload.
+	await page.reload();
+	const [firstAfterReload, secondAfterReload] = await columnHeaders.evaluateAll((nodes) =>
+		nodes.map((node) => node.getBoundingClientRect().width)
+	);
+	expect(firstAfterReload).toBeGreaterThan(secondAfterReload * 1.3);
+
+	// And still applies after switching to the flow layout.
+	await page.getByRole('button', { name: 'Ansicht' }).click();
+	await page.getByRole('menuitem', { name: /Fließtext/ }).click();
+	const flowColumns = page.locator('.flow-column');
+	await expect(flowColumns).toHaveCount(2);
+	const [flowFirst, flowSecond] = await flowColumns.evaluateAll((nodes) =>
+		nodes.map((node) => node.getBoundingClientRect().width)
+	);
+	expect(flowFirst).toBeGreaterThan(flowSecond * 1.3);
+});
+
 test('the view menu switches to synchronized flowing text', async ({ page }) => {
 	await page.goto('/Joh3');
 	expect(await page.evaluate(() => window.scrollY)).toBe(0);
@@ -201,6 +266,54 @@ test('the view menu switches to synchronized flowing text', async ({ page }) => 
 	await expect(reader).toBeVisible();
 });
 
+test('a column can opt out of synchronized flowing-text scrolling on its own', async ({ page }) => {
+	// The fixture's chapter is short enough that almost any scroll position also crosses the endless-
+	// scroll thresholds, whose chapter-prepend compensation moves *every* column regardless of sync
+	// (by design — see onFlowScroll). Blocking it isolates the cross-column sync behaviour this test
+	// is actually about.
+	await page.route('**/api/reader/**', (route) => route.abort());
+	await page.goto('/Joh3');
+
+	const columns = page.locator('.flow-column');
+	await expect(columns).toHaveCount(2);
+
+	// Both columns start synced, so both toggles offer to disable it.
+	const disableToggle = page.getByRole('button', { name: 'Synchron scrollen deaktivieren' });
+	await expect(disableToggle).toHaveCount(2);
+	await disableToggle.nth(1).click();
+	await expect(page.getByRole('button', { name: 'Synchron scrollen aktivieren' })).toHaveCount(1);
+
+	// Let any in-flight sync from the initial mount settle, then take the second column's resting
+	// position as the baseline to compare against — rather than assuming it is 0, which the
+	// mount-time alignment (while still synced) need not leave it at.
+	await page.waitForTimeout(400);
+	const baseline = await columns.nth(1).evaluate((element) => element.scrollTop);
+
+	// Scrolling the still-synced first column must not move the column that opted out.
+	await columns.first().evaluate((element) => {
+		const verse = element.querySelector<HTMLElement>('[data-verse-key="43:3:17"]');
+		element.dispatchEvent(new WheelEvent('wheel', { deltaY: 100 }));
+		element.scrollTop = verse?.offsetTop ?? element.scrollHeight;
+		element.dispatchEvent(new Event('scroll'));
+	});
+	await page.waitForTimeout(400);
+	expect(await columns.nth(1).evaluate((element) => element.scrollTop)).toBe(baseline);
+
+	// Re-enabling resumes sync from the next real scroll: scrolling the first column back to the top
+	// re-anchors the second column on verse 16 instead of wherever it was left.
+	await page.getByRole('button', { name: 'Synchron scrollen aktivieren' }).click();
+	await expect(page.getByRole('button', { name: 'Synchron scrollen deaktivieren' })).toHaveCount(2);
+
+	await columns.first().evaluate((element) => {
+		element.dispatchEvent(new WheelEvent('wheel', { deltaY: -100 }));
+		element.scrollTop = 0;
+		element.dispatchEvent(new Event('scroll'));
+	});
+	await expect
+		.poll(() => columns.nth(1).evaluate((element) => element.scrollTop))
+		.not.toBe(baseline);
+});
+
 test('flowing text preloads the next chapter for endless scrolling', async ({ page }) => {
 	await page.goto('/Joh3');
 	await page.getByRole('button', { name: 'Ansicht' }).click();
@@ -216,6 +329,30 @@ test('a verse reference scrolls directly to the requested verse', async ({ page 
 
 	await expect(page.locator('.verse.highlighted').first()).toBeInViewport();
 	expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+});
+
+test('landing on a deep-linked verse settles once, without a spurious extra prepend', async ({
+	page
+}) => {
+	await useAlignedLayout(page);
+	await page.setViewportSize({ width: 900, height: 260 });
+	await page.goto('/Joh3,16');
+
+	await expect(page.locator('.verse.highlighted').first()).toBeInViewport();
+
+	// The scroll that lands on the deep-linked verse is our own programmatic scroll, not the reader
+	// scrolling, so it must not be misread as "the reader scrolled near the top of the stream" and
+	// spuriously prepend the previous chapter — nobody asked to see it yet. Before the fix, the
+	// unsuppressed `scrollIntoView` left exactly that scroll event unshielded.
+	await page.waitForTimeout(600);
+	await expect(page.locator('.aligned-chapter[data-chapter-key="43:2"]')).toHaveCount(0);
+
+	// And once the landing scroll has settled, nothing keeps nudging it further — two polls apart
+	// see the same position, rather than the page still fighting its own compensating scrolls.
+	const first = await page.evaluate(() => window.scrollY);
+	await page.waitForTimeout(150);
+	const second = await page.evaluate(() => window.scrollY);
+	expect(second).toBe(first);
 });
 
 test('changing the reference resets aligned scrolling and the visible chapter', async ({
@@ -497,6 +634,55 @@ test('on a phone the study panel is a sheet that leaves the verse visible', asyn
 	expect(sheetBox.height).toBeLessThan(780 * 0.75);
 	expect(verseBox.width).toBeGreaterThan(200);
 	expect(verseBox.y).toBeLessThan(sheetBox.y);
+});
+
+test('the mobile column switcher exposes real tab semantics without hiding desktop columns', async ({
+	page
+}) => {
+	// Default (desktop) viewport first: the regression this specifically guards against is
+	// `aria-hidden` leaking onto desktop, where every column is visible at once regardless of which
+	// one `mobileColumn` happens to name.
+	await page.goto('/Joh3');
+
+	const columns = page.locator('.flow-column');
+	await expect(columns).toHaveCount(2);
+	await expect(columns.first()).not.toHaveAttribute('aria-hidden', 'true');
+	await expect(columns.nth(1)).not.toHaveAttribute('aria-hidden', 'true');
+	await expect(columns.nth(1)).not.toHaveAttribute('role', 'tabpanel');
+
+	// Now at phone width, where the switcher actually appears and the same mechanism legitimately
+	// hides the non-selected column from assistive tech.
+	await page.setViewportSize({ width: 390, height: 780 });
+	await page.reload();
+
+	const tabs = page.getByRole('tablist', { name: 'Spaltenauswahl' }).getByRole('tab');
+	await expect(tabs).toHaveCount(2);
+	await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
+	await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'false');
+	await expect(tabs.first()).toHaveAttribute('tabindex', '0');
+	await expect(tabs.nth(1)).toHaveAttribute('tabindex', '-1');
+
+	const mobileColumns = page.locator('.flow-column');
+	await expect(mobileColumns.first()).toHaveAttribute('role', 'tabpanel');
+	await expect(mobileColumns.nth(1)).toHaveAttribute('aria-hidden', 'true');
+
+	// ArrowRight moves focus to the next tab and switches to it in the same step (automatic
+	// activation), matching the existing click-to-switch behaviour. Read the focused id back from
+	// the same round trip that dispatches the key, rather than polling for it afterwards: this
+	// sandbox's headless browser can drop DOM focus asynchronously some time after a programmatic
+	// `.focus()` call for reasons unrelated to the app (the handler itself sets it synchronously,
+	// every time), and a later, separate assertion would be at the mercy of that.
+	await tabs.first().focus();
+	const focusedIdAfterArrowRight = await page.evaluate(() => {
+		document.activeElement?.dispatchEvent(
+			new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true })
+		);
+		return document.activeElement?.id;
+	});
+	expect(focusedIdAfterArrowRight).toBe('mobile-tab-1');
+	await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+	await expect(mobileColumns.first()).toHaveAttribute('aria-hidden', 'true');
+	await expect(mobileColumns.nth(1)).not.toHaveAttribute('aria-hidden', 'true');
 });
 
 test('legacy URLs from the previous site still resolve', async ({ page }) => {
