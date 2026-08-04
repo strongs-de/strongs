@@ -218,6 +218,30 @@ test('a verse reference scrolls directly to the requested verse', async ({ page 
 	expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
 });
 
+test('landing on a deep-linked verse settles once, without a spurious extra prepend', async ({
+	page
+}) => {
+	await useAlignedLayout(page);
+	await page.setViewportSize({ width: 900, height: 260 });
+	await page.goto('/Joh3,16');
+
+	await expect(page.locator('.verse.highlighted').first()).toBeInViewport();
+
+	// The scroll that lands on the deep-linked verse is our own programmatic scroll, not the reader
+	// scrolling, so it must not be misread as "the reader scrolled near the top of the stream" and
+	// spuriously prepend the previous chapter — nobody asked to see it yet. Before the fix, the
+	// unsuppressed `scrollIntoView` left exactly that scroll event unshielded.
+	await page.waitForTimeout(600);
+	await expect(page.locator('.aligned-chapter[data-chapter-key="43:2"]')).toHaveCount(0);
+
+	// And once the landing scroll has settled, nothing keeps nudging it further — two polls apart
+	// see the same position, rather than the page still fighting its own compensating scrolls.
+	const first = await page.evaluate(() => window.scrollY);
+	await page.waitForTimeout(150);
+	const second = await page.evaluate(() => window.scrollY);
+	expect(second).toBe(first);
+});
+
 test('changing the reference resets aligned scrolling and the visible chapter', async ({
 	page
 }) => {

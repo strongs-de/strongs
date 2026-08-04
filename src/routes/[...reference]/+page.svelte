@@ -285,7 +285,15 @@
 	let jumpedSignature = '';
 	let suppressFlowScroll = false;
 	let suppressFlowTimer: ReturnType<typeof setTimeout> | undefined;
-	let suppressReaderScroll = false;
+	/**
+	 * How many in-flight programmatic scrolls are currently suppressing `onReaderWindowScroll`.
+	 *
+	 * A depth counter rather than a boolean: `loadAlignedPrevious`'s compensating `scrollBy` and a
+	 * `scrollToVerse` jump can overlap (a deep link landing while a background prepend is still
+	 * settling), and a boolean cleared by the first one to finish would let the second one's own
+	 * scroll events leak through as if the reader had scrolled.
+	 */
+	let suppressReaderScrollDepth = 0;
 	let flowSyncTimer: ReturnType<typeof setTimeout> | undefined;
 	/**
 	 * The element each flow column was last aligned to, indexed by column. A ranged block (a comment
@@ -335,7 +343,13 @@
 				// mistaken by `onReaderWindowScroll` for the reader having scrolled near the top of an
 				// accumulated stream — that would immediately prepend the previous chapter and scroll
 				// back down again, undoing the reset.
-				suppressProgrammaticReaderScroll();
+				//
+				// Only worth suppressing when the reset actually moves anything: a fresh page load is
+				// already at the top, so `scrollTo({ top: 0 })` causes no scroll event at all — nothing
+				// would ever clear the suppression except its timeout fallback, which would then blanket
+				// a real scroll the reader makes moments later (e.g. clicking straight into the next
+				// chapter) for no reason.
+				if (window.scrollY !== 0) suppressProgrammaticReaderScroll();
 				tick().then(() => window.scrollTo({ top: 0, behavior: 'instant' }));
 			}
 			if (data.readerLayout === 'aligned') {
@@ -355,18 +369,27 @@
 	}
 
 	/**
-	 * Suppresses `onReaderWindowScroll` for the one scroll event our own `window.scrollTo` reset
-	 * causes, the same way `suppressProgrammaticFlowScroll` shields the flow columns from their own
-	 * sync. Two animation frames comfortably span the async scroll event a browser dispatches after
-	 * `scrollTo`.
+	 * Suppresses `onReaderWindowScroll` for the one scroll our own code is about to cause — a
+	 * `window.scrollTo`/`scrollIntoView` reset, or `loadAlignedPrevious`'s compensating `scrollBy` —
+	 * the same way `suppressProgrammaticFlowScroll` shields the flow columns from their own sync.
+	 *
+	 * Cleared by the `scrollend` event, which is the actual "scroll has settled" signal rather than a
+	 * fixed number of animation frames (a timing guess that does not scale to momentum scrolling on
+	 * touch, where the browser keeps dispatching scroll events well past two frames). A `setTimeout`
+	 * fallback covers browsers that do not fire `scrollend` yet.
 	 */
 	function suppressProgrammaticReaderScroll() {
-		suppressReaderScroll = true;
-		requestAnimationFrame(() => {
-			requestAnimationFrame(() => {
-				suppressReaderScroll = false;
-			});
-		});
+		suppressReaderScrollDepth += 1;
+		let settled = false;
+		const finish = () => {
+			if (settled) return;
+			settled = true;
+			clearTimeout(fallback);
+			window.removeEventListener('scrollend', finish);
+			suppressReaderScrollDepth = Math.max(0, suppressReaderScrollDepth - 1);
+		};
+		window.addEventListener('scrollend', finish, { once: true });
+		const fallback = setTimeout(finish, 400);
 	}
 
 	async function fetchStreamChapter(reference: { book: number; chapter: number }) {
@@ -417,6 +440,7 @@
 		try {
 			streamChapters.unshift(await fetchStreamChapter(reference));
 			await tick();
+			suppressProgrammaticReaderScroll();
 			window.scrollBy(0, document.documentElement.scrollHeight - oldHeight);
 		} finally {
 			loadingPrevious = false;
@@ -443,7 +467,7 @@
 	 */
 	function onReaderWindowScroll() {
 		if (data.readerLayout !== 'aligned') return;
-		if (suppressReaderScroll) return;
+		if (suppressReaderScrollDepth > 0) return;
 		if (window.scrollY < 500) void loadAlignedPrevious();
 		if (document.documentElement.scrollHeight - window.scrollY - window.innerHeight < 900) {
 			void loadAlignedNext();
@@ -575,6 +599,7 @@
 			document.querySelector<HTMLElement>(`[data-verse-key="${key}"]`) ??
 			(allowHighlightedFallback ? document.querySelector<HTMLElement>('.verse.highlighted') : null);
 		if (!target) return false;
+		suppressProgrammaticReaderScroll();
 		target.scrollIntoView({ block: 'start' });
 		scheduleAddressBarUpdate(key);
 		return true;
