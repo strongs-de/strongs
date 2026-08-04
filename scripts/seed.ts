@@ -124,7 +124,9 @@ try {
 			email: SEED_ADMIN.email,
 			passwordHash: await hashPassword(SEED_ADMIN.password),
 			displayName: 'Seed Admin',
-			role: 'admin'
+			role: 'admin',
+			// Created directly, not through registration, so there is no activation link to click.
+			emailVerifiedAt: new Date()
 		});
 	}
 
