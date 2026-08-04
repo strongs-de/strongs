@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
+import { lastMailLinkTo } from './lib/mail-outbox.ts';
 
 /**
  * Admin backup and restore.
@@ -30,6 +31,10 @@ async function register(page: import('@playwright/test').Page, email: string): P
 	await page.getByLabel('Passwort', { exact: true }).fill(PASSWORD);
 	await page.getByLabel('Passwort wiederholen').fill(PASSWORD);
 	await page.getByRole('button', { name: 'Konto erstellen' }).click();
+	await expect(page).toHaveURL(/\/register\/check-email$/);
+
+	await page.goto(await lastMailLinkTo(email));
+	await page.getByRole('button', { name: 'Konto aktivieren' }).click();
 	await expect(page).toHaveURL(/\/account$/);
 }
 

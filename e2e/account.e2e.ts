@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { lastMailLinkTo } from './lib/mail-outbox.ts';
 
 /**
  * Accounts, verse lists and notes, and the admin area.
@@ -13,6 +14,12 @@ function uniqueEmail(): string {
 
 const PASSWORD = 'ein-sicheres-passwort';
 
+/**
+ * Registers an account and immediately follows the confirmation link, ending up signed in on
+ * `/account` — the same end state this helper had before registration required activation. Every
+ * other test in this file only cares about arriving there, not about the activation step itself
+ * (see register.e2e.ts for tests of that step).
+ */
 async function register(page: import('@playwright/test').Page, email: string): Promise<void> {
 	await page.goto('/register');
 	await page.getByLabel('E-Mail-Adresse').fill(email);
@@ -20,6 +27,10 @@ async function register(page: import('@playwright/test').Page, email: string): P
 	await page.getByLabel('Passwort', { exact: true }).fill(PASSWORD);
 	await page.getByLabel('Passwort wiederholen').fill(PASSWORD);
 	await page.getByRole('button', { name: 'Konto erstellen' }).click();
+	await expect(page).toHaveURL(/\/register\/check-email$/);
+
+	await page.goto(await lastMailLinkTo(email));
+	await page.getByRole('button', { name: 'Konto aktivieren' }).click();
 	await expect(page).toHaveURL(/\/account$/);
 }
 
