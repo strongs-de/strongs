@@ -7,6 +7,7 @@
 	 * on strongs.de. The endpoints themselves live under /api/v1; this page is content, so it sits at
 	 * /api directly.
 	 */
+	import Button from '$lib/components/Button.svelte';
 </script>
 
 <svelte:head>
@@ -26,6 +27,9 @@
 			Strong's lexicon, commentaries and search, plus a signed-in reader's own verse lists and
 			notes. Everything lives under <code>/api/v1</code>.
 		</p>
+		<Button href="/api/docs" variant="primary" class="mt-4"
+			>View the interactive API reference →</Button
+		>
 	</section>
 
 	<section class="mb-8">
