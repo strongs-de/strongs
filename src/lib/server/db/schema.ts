@@ -339,6 +339,27 @@ export const passwordResets = pgTable(
 	(table) => [index('password_resets_user_idx').on(table.userId)]
 );
 
+/**
+ * Account-activation tokens, mailed out on registration and again on request.
+ *
+ * Same shape as `password_resets` — only the hash of the token is stored — but with a 24-hour TTL
+ * rather than one hour, since nobody is expected to check their mail within minutes of signing up.
+ */
+export const emailVerifications = pgTable(
+	'email_verifications',
+	{
+		/** SHA-256 of the token that was mailed out. */
+		id: text('id').primaryKey(),
+		userId: uuid('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+		usedAt: timestamp('used_at', { withTimezone: true }),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(table) => [index('email_verifications_user_idx').on(table.userId)]
+);
+
 /** Failed login attempts, kept just long enough to throttle credential stuffing. */
 export const loginAttempts = pgTable(
 	'login_attempts',
