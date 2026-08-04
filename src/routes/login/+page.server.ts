@@ -27,7 +27,10 @@ export async function load({ locals, url }) {
 }
 
 export const actions = {
-	default: async ({ request, cookies, getClientAddress }) => {
+	// Named rather than default: SvelteKit forbids mixing a default action with named ones in the
+	// same route, and `resend` below needs to be named. The form in +page.svelte points at this
+	// explicitly via `action="?/login"`.
+	login: async ({ request, cookies, getClientAddress }) => {
 		const form = await request.formData();
 		const email = String(form.get('email') ?? '');
 		const password = String(form.get('password') ?? '');

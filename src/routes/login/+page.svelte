@@ -24,6 +24,7 @@
 	error={errorMessage}
 	{notice}
 	submitLabel={t('auth.login.submit')}
+	action="?/login"
 >
 	<input type="hidden" name="redirectTo" value={data.redirectTo} />
 	<TextField
