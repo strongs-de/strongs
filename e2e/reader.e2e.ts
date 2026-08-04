@@ -152,6 +152,71 @@ test('verses stay aligned across columns', async ({ page }) => {
 	expect(new Set(verse16.map((cell) => cell.column)).size).toBe(verse16.length);
 });
 
+test('a column boundary can be dragged to resize the columns, and the split persists', async ({
+	page
+}) => {
+	await useAlignedLayout(page);
+	await page.goto('/Joh3');
+
+	// The desktop bar; the mobile tab-switcher bar shares the same test id but is hidden at this
+	// (default) viewport width and never renders a resize handle at all.
+	const bar = page.getByTestId('column-picker-bar').first();
+	const handle = bar.getByRole('separator');
+	await expect(handle).toHaveCount(1);
+
+	const barBox = (await bar.boundingBox())!;
+	const handleBox = (await handle.boundingBox())!;
+	const startX = handleBox.x + handleBox.width / 2;
+	const y = handleBox.y + handleBox.height / 2;
+	const targetX = startX + barBox.width * 0.2;
+
+	// Dispatches synthetic pointer events directly rather than driving `page.mouse`: the handler
+	// computes the new width from this event's own `clientX` against the position recorded at
+	// pointerdown, not incrementally, so one pointermove carrying the final coordinate is enough —
+	// and this sidesteps a CDP/headless-Chromium quirk where a real synthetic mouse-up can go
+	// undelivered if the element under the cursor was itself moved (by our own live-resize feedback)
+	// since the preceding mouse-move.
+	await handle.dispatchEvent('pointerdown', { clientX: startX, clientY: y, pointerId: 1 });
+	await page.evaluate(
+		([x, pointerY]) => {
+			window.dispatchEvent(
+				new PointerEvent('pointermove', { clientX: x, clientY: pointerY, bubbles: true })
+			);
+		},
+		[targetX, y]
+	);
+	await page.evaluate(() => {
+		window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+	});
+
+	// The boundary moved right, so the first column grew and the second shrank.
+	const columnHeaders = bar.locator('[role="group"]');
+	const [firstWidth, secondWidth] = await columnHeaders.evaluateAll((nodes) =>
+		nodes.map((node) => node.getBoundingClientRect().width)
+	);
+	expect(firstWidth).toBeGreaterThan(secondWidth * 1.3);
+
+	// The resize commits to a cookie once the drag ends.
+	await expect.poll(() => page.evaluate(() => document.cookie)).toContain('column-widths=');
+
+	// The split survives a reload.
+	await page.reload();
+	const [firstAfterReload, secondAfterReload] = await columnHeaders.evaluateAll((nodes) =>
+		nodes.map((node) => node.getBoundingClientRect().width)
+	);
+	expect(firstAfterReload).toBeGreaterThan(secondAfterReload * 1.3);
+
+	// And still applies after switching to the flow layout.
+	await page.getByRole('button', { name: 'Ansicht' }).click();
+	await page.getByRole('menuitem', { name: /Fließtext/ }).click();
+	const flowColumns = page.locator('.flow-column');
+	await expect(flowColumns).toHaveCount(2);
+	const [flowFirst, flowSecond] = await flowColumns.evaluateAll((nodes) =>
+		nodes.map((node) => node.getBoundingClientRect().width)
+	);
+	expect(flowFirst).toBeGreaterThan(flowSecond * 1.3);
+});
+
 test('the view menu switches to synchronized flowing text', async ({ page }) => {
 	await page.goto('/Joh3');
 	expect(await page.evaluate(() => window.scrollY)).toBe(0);

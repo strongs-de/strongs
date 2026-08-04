@@ -113,6 +113,148 @@
 	}
 
 	/**
+	 * Drag-resizable column widths, as fractions of the row that sum to 1.
+	 *
+	 * `null` means "not customized yet" — the grid then falls back to an even split via the
+	 * `--column-track` CSS variable's own fallback, rather than this rendering an explicit (if
+	 * numerically equivalent) track of its own for no reason.
+	 */
+	let columnWidths = $state<number[] | null>(data.columnWidths);
+	/** Detects a reorder, add, remove or swap — not a mere navigation, which leaves the id list (and
+	 *  therefore this key) unchanged — so a resize commit's own round trip does not clobber the widths
+	 *  the reader just set. Kept separate from `streamColumnsKey` above: that one resets the *chapter*
+	 *  stream, this one only cares whether the *columns* changed. */
+	let columnWidthsKey = data.columns.map((column) => column.resource.id).join(',');
+	const MIN_COLUMN_FRACTION = 0.12;
+
+	$effect(() => {
+		const key = data.columns.map((column) => column.resource.id).join(',');
+		if (key !== columnWidthsKey) {
+			columnWidthsKey = key;
+			// The server already recomputed this in the new order (a reorder) or decided the old
+			// widths no longer apply (an add/remove/swap, where it comes back `null`) — either way,
+			// adopting its answer is correct, not just a reset.
+			columnWidths = data.columnWidths;
+		}
+	});
+
+	function equalColumnWidths(): number[] {
+		return data.columns.map(() => 1 / data.columns.length);
+	}
+
+	/** The row's grid track, or `undefined` while `columnWidths` is `null` so the CSS fallback (an
+	 *  even `repeat()` split) applies untouched. `minmax(0, …)` matches the original bare `1fr` tracks
+	 *  so a narrow custom width can still shrink below its content's own minimum, exactly like before. */
+	const columnTrack = $derived(
+		columnWidths
+			? columnWidths.map((width) => `minmax(0, ${width}fr)`).join(' ') +
+					(data.notesVisible ? ' minmax(0, 1fr)' : '')
+			: undefined
+	);
+	/** The desktop header bar sets `grid-template-columns` inline rather than through a class, so it
+	 *  cannot lean on the CSS variable's own fallback and needs the equivalent literal spelled out. */
+	const headerGridTemplate = $derived(
+		columnTrack ?? `repeat(${visibleColumnCount}, minmax(0, 1fr))`
+	);
+
+	/** Left-edge percentage, across the *whole* header row (including a visible notes column), of each
+	 *  boundary between two real columns — where the resize handles sit. */
+	const columnBoundaryPercents = $derived.by(() => {
+		const fractions = columnWidths ?? equalColumnWidths();
+		// Both branches of `fractions` already sum to 1 across the real columns as a group (an equal
+		// split of N columns is N × 1/N); the notes column, when visible, then adds one more same-sized
+		// unit, matching how `columnTrack` appends it as a further `1fr` after that group.
+		const totalUnits = 1 + (data.notesVisible ? 1 : 0);
+		const percents: number[] = [];
+		let cumulative = 0;
+		for (let index = 0; index < fractions.length - 1; index += 1) {
+			cumulative += fractions[index] ?? 0;
+			percents.push((cumulative / totalUnits) * 100);
+		}
+		return percents;
+	});
+
+	let columnHeaderBar = $state<HTMLElement>();
+	let isResizingColumns = false;
+	let resizeBoundaryIndex: number | null = null;
+	let resizeStartX = 0;
+	let resizeStartWidths: number[] = [];
+	let resizeBarWidth = 0;
+	let widthsForm = $state<HTMLFormElement | undefined>();
+	let widthsInput = $state<HTMLInputElement | undefined>();
+
+	function clampBoundary(widths: number[], boundaryIndex: number, nextLeft: number): number[] {
+		const next = [...widths];
+		const left = next[boundaryIndex] ?? 0;
+		const right = next[boundaryIndex + 1] ?? 0;
+		const pairTotal = left + right;
+		const clampedLeft = Math.max(
+			MIN_COLUMN_FRACTION,
+			Math.min(pairTotal - MIN_COLUMN_FRACTION, nextLeft)
+		);
+		next[boundaryIndex] = clampedLeft;
+		next[boundaryIndex + 1] = pairTotal - clampedLeft;
+		return next;
+	}
+
+	function startColumnResize(event: PointerEvent, boundaryIndex: number) {
+		if (!columnHeaderBar) return;
+		isResizingColumns = true;
+		resizeBoundaryIndex = boundaryIndex;
+		resizeStartX = event.clientX;
+		resizeStartWidths = columnWidths ?? equalColumnWidths();
+		resizeBarWidth = columnHeaderBar.getBoundingClientRect().width;
+	}
+
+	/** Bound to `<svelte:window>`, not the handle itself: a pointer that leaves the handle mid-drag
+	 *  (fast movement, or the handle itself moving out from under the pointer) must keep resizing. */
+	function onColumnResizeMove(event: PointerEvent) {
+		if (!isResizingColumns || resizeBoundaryIndex === null || resizeBarWidth <= 0) return;
+		const deltaFraction = (event.clientX - resizeStartX) / resizeBarWidth;
+		columnWidths = clampBoundary(
+			resizeStartWidths,
+			resizeBoundaryIndex,
+			(resizeStartWidths[resizeBoundaryIndex] ?? 0) + deltaFraction
+		);
+	}
+
+	function onColumnResizeEnd() {
+		if (!isResizingColumns) return;
+		isResizingColumns = false;
+		resizeBoundaryIndex = null;
+		commitColumnWidths();
+	}
+
+	/** Keyboard equivalent of a pointer drag: `ArrowLeft`/`ArrowRight` nudge one boundary a couple of
+	 *  percentage points and commit immediately, since there is no separate "release" event. */
+	function onResizeHandleKeydown(event: KeyboardEvent, boundaryIndex: number) {
+		const step = 0.02;
+		if (event.key === 'ArrowLeft') {
+			event.preventDefault();
+			columnWidths = clampBoundary(
+				columnWidths ?? equalColumnWidths(),
+				boundaryIndex,
+				(columnWidths ?? equalColumnWidths())[boundaryIndex]! - step
+			);
+			commitColumnWidths();
+		} else if (event.key === 'ArrowRight') {
+			event.preventDefault();
+			columnWidths = clampBoundary(
+				columnWidths ?? equalColumnWidths(),
+				boundaryIndex,
+				(columnWidths ?? equalColumnWidths())[boundaryIndex]! + step
+			);
+			commitColumnWidths();
+		}
+	}
+
+	function commitColumnWidths() {
+		if (!columnWidths || !widthsForm || !widthsInput) return;
+		widthsInput.value = columnWidths.join(',');
+		widthsForm.requestSubmit();
+	}
+
+	/**
 	 * Opens the verse menu, unless the reader meant to use the link.
 	 *
 	 * The verse number stays an `<a>` so it keeps working without scripting and still offers
@@ -736,7 +878,11 @@
 	}
 </script>
 
-<svelte:window onscroll={onReaderWindowScroll} />
+<svelte:window
+	onscroll={onReaderWindowScroll}
+	onpointermove={onColumnResizeMove}
+	onpointerup={onColumnResizeEnd}
+/>
 
 <svelte:head>
 	<title>{data.fullTitle} — strongs.de</title>
@@ -799,11 +945,12 @@
 			<!-- Column headers double as the translation picker. The bar sticks as one piece; a single
 			     header cell is never taller than itself and so could never stick on its own. -->
 			<div
-				class="sticky top-[calc(var(--header-height)+2.75rem)] z-10 mb-2 hidden gap-0 overflow-hidden rounded-md border
-				       border-stone-200 bg-stone-50/95 py-1.5 shadow-sm backdrop-blur sm:grid
-				       dark:border-stone-800 dark:bg-stone-950/95"
+				bind:this={columnHeaderBar}
+				class="relative sticky top-[calc(var(--header-height)+2.75rem)] z-10 mb-2 hidden gap-0
+				       overflow-hidden rounded-md border border-stone-200 bg-stone-50/95 py-1.5 shadow-sm
+				       backdrop-blur sm:grid dark:border-stone-800 dark:bg-stone-950/95"
 				data-testid="column-picker-bar"
-				style="grid-template-columns: repeat({visibleColumnCount}, minmax(0, 1fr))"
+				style="grid-template-columns: {headerGridTemplate}"
 			>
 				{#each data.columns as column (column.resource.id)}
 					<div
@@ -860,10 +1007,49 @@
 						</form>
 					</div>
 				{/if}
+
+				<!-- An overlay rather than something inside each column cell, so a handle can straddle two
+				     of them at once. `pointer-events-none` on the wrapper keeps it from intercepting clicks
+				     on the picker buttons underneath, everywhere except the thin strip of each handle. -->
+				<div class="pointer-events-none absolute inset-0">
+					{#each columnBoundaryPercents as percent, boundaryIndex (boundaryIndex)}
+						<!-- A focusable, draggable separator is the documented WAI-ARIA "window splitter"
+						     pattern (role="separator" + tabindex + arrow-key support), not an oversight the
+						     linter's generic "non-interactive element" heuristic accounts for. -->
+						<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+						<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+						<div
+							role="separator"
+							aria-orientation="vertical"
+							aria-label={t('reader.resizeColumns')}
+							aria-valuenow={Math.round(
+								(columnWidths ?? equalColumnWidths())[boundaryIndex]! * 100
+							)}
+							aria-valuemin={Math.round(MIN_COLUMN_FRACTION * 100)}
+							aria-valuemax={Math.round(
+								(1 - MIN_COLUMN_FRACTION * (data.columns.length - 1)) * 100
+							)}
+							tabindex="0"
+							class="column-resize-handle"
+							style="left: {percent}%"
+							onpointerdown={(event) => startColumnResize(event, boundaryIndex)}
+							onkeydown={(event) => onResizeHandleKeydown(event, boundaryIndex)}
+						></div>
+					{/each}
+				</div>
 			</div>
 			<form bind:this={reorderForm} method="POST" action="?/moveColumn" use:enhance class="hidden">
 				<input bind:this={reorderFromInput} type="hidden" name="from" />
 				<input bind:this={reorderToInput} type="hidden" name="to" />
+			</form>
+			<form
+				bind:this={widthsForm}
+				method="POST"
+				action="?/setColumnWidths"
+				use:enhance
+				class="hidden"
+			>
+				<input bind:this={widthsInput} type="hidden" name="widths" />
 			</form>
 
 			<!-- On a phone one column fits; tabs switch between translations. -->
@@ -933,7 +1119,12 @@
 					{t('reader.chapterEmpty')}
 				</p>
 			{:else if data.readerLayout === 'flow'}
-				<div class="flow-reader" style="--columns: {visibleColumnCount}" data-testid="flow-reader">
+				<div
+					class="flow-reader"
+					style="--columns: {visibleColumnCount}"
+					style:--column-track={columnTrack}
+					data-testid="flow-reader"
+				>
 					{#each data.columns as column, columnIndex (column.resource.id)}
 						<div
 							bind:this={flowColumns[columnIndex]}
@@ -1153,6 +1344,7 @@
 				<footer
 					class="license-grid grid text-xs text-stone-500 dark:text-stone-400"
 					style="--columns: {visibleColumnCount}"
+					style:--column-track={columnTrack}
 				>
 					{#each data.columns as column (column.resource.id)}
 						<div class:hidden-on-mobile={column.index !== mobileColumn}>
@@ -1178,6 +1370,7 @@
 						<div
 							class="verse-grid"
 							style="--columns: {visibleColumnCount}"
+							style:--column-track={columnTrack}
 							data-mobile-column={mobileColumn}
 						>
 							{#if data.notesVisible}
@@ -1369,6 +1562,7 @@
 						<footer
 							class="license-grid grid text-xs text-stone-500 dark:text-stone-400"
 							style="--columns: {visibleColumnCount}"
+							style:--column-track={columnTrack}
 						>
 							{#each data.columns as column (column.resource.id)}
 								<div class:hidden-on-mobile={column.index !== mobileColumn}>
@@ -1410,7 +1604,7 @@
 <style>
 	.verse-grid {
 		display: grid;
-		grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+		grid-template-columns: var(--column-track, repeat(var(--columns), minmax(0, 1fr)));
 		column-gap: 0;
 		align-items: start;
 		border-radius: 0.5rem;
@@ -1422,8 +1616,31 @@
 		background: rgb(28 25 23 / 0.28);
 	}
 
+	/* Sits on top of the column-picker bar, straddling the boundary between two columns. Only the
+	   thin strip itself takes pointer events — see the wrapper's `pointer-events-none` in the markup. */
+	.column-resize-handle {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		width: 10px;
+		margin-left: -5px;
+		cursor: col-resize;
+		touch-action: none;
+		pointer-events: auto;
+	}
+
+	.column-resize-handle:hover,
+	.column-resize-handle:focus-visible {
+		background: color-mix(in oklab, var(--color-accent-500) 35%, transparent);
+	}
+
+	.column-resize-handle:focus-visible {
+		outline: 2px solid var(--color-accent-500);
+		outline-offset: -2px;
+	}
+
 	.license-grid {
-		grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+		grid-template-columns: var(--column-track, repeat(var(--columns), minmax(0, 1fr)));
 		margin-top: 1.5rem;
 	}
 
@@ -1453,7 +1670,7 @@
 
 	.flow-reader {
 		display: grid;
-		grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+		grid-template-columns: var(--column-track, repeat(var(--columns), minmax(0, 1fr)));
 		height: max(28rem, calc(100dvh - var(--header-height) - 11.5rem));
 		overflow: hidden;
 		border: 1px solid color-mix(in oklab, var(--color-stone-300) 55%, transparent);
