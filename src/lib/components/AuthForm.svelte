@@ -7,6 +7,7 @@
 		error = null,
 		notice = null,
 		submitLabel,
+		action = undefined,
 		children,
 		footer
 	}: {
@@ -14,6 +15,8 @@
 		error?: string | null;
 		notice?: string | null;
 		submitLabel: string;
+		/** Targets a named action (e.g. `?/login`) instead of the route's default one. */
+		action?: string;
 		children: Snippet;
 		footer?: Snippet;
 	} = $props();
@@ -47,7 +50,7 @@
 		</p>
 	{/if}
 
-	<form method="POST" class="space-y-4">
+	<form {action} method="POST" class="space-y-4">
 		{@render children()}
 
 		<button

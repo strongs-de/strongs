@@ -11,8 +11,10 @@
  */
 
 import { execFileSync } from 'node:child_process';
+import { rm } from 'node:fs/promises';
 import postgres from 'postgres';
 import { testDatabaseUrl } from './lib/test-database.ts';
+import { MAIL_TEST_OUTBOX } from './lib/mail-outbox.ts';
 
 const base = process.env.DATABASE_URL;
 if (!base) {
@@ -53,5 +55,9 @@ try {
 }
 
 execFileSync('node', ['scripts/seed.ts'], { stdio: 'inherit', env: environment });
+
+// Stale links from a previous run cannot match a fresh run's unique email addresses, but there is no
+// reason to let the file grow forever either.
+await rm(MAIL_TEST_OUTBOX, { force: true });
 
 console.log(`end-to-end database ready: ${targetName}`);

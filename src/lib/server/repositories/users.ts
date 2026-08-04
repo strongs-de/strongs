@@ -6,7 +6,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { and, eq, gt, isNull, sql } from 'drizzle-orm';
 import { config } from '../config.ts';
 import type { Database } from '../db/client.ts';
-import { passwordResets, users, type User } from '../db/schema.ts';
+import { emailVerifications, passwordResets, users, type User } from '../db/schema.ts';
 import { hashPassword } from '../auth/password.ts';
 import { normalizeFontScale } from '../reader-preferences.ts';
 
@@ -167,6 +167,80 @@ export async function consumePasswordReset(
 	return row ?? null;
 }
 
+const EMAIL_VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Issues an account-activation token.
+ *
+ * Same idea as `createPasswordReset`: only the hash is stored, so the mailed link is the only copy.
+ * The TTL is generous compared to a password reset, since nobody is expected to check their mail
+ * within minutes of registering.
+ */
+export async function createEmailVerification(db: Database, userId: string): Promise<string> {
+	const token = randomBytes(32).toString('base64url');
+
+	await db.insert(emailVerifications).values({
+		id: createHash('sha256').update(token).digest('hex'),
+		userId,
+		expiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TOKEN_TTL_MS)
+	});
+
+	return token;
+}
+
+/**
+ * True when a token exists, is unused and unexpired. Read-only — used only to decide what the
+ * confirmation page shows before the person has clicked the button, so it must not burn the token
+ * itself (mail clients and link scanners prefetch links).
+ */
+export async function peekEmailVerification(db: Database, token: string): Promise<boolean> {
+	const id = createHash('sha256').update(token).digest('hex');
+
+	const [row] = await db
+		.select({ id: emailVerifications.id })
+		.from(emailVerifications)
+		.where(
+			and(
+				eq(emailVerifications.id, id),
+				isNull(emailVerifications.usedAt),
+				gt(emailVerifications.expiresAt, new Date())
+			)
+		)
+		.limit(1);
+
+	return row !== undefined;
+}
+
+/** Consumes an activation token, returning the user it belongs to. Single use. */
+export async function consumeEmailVerification(
+	db: Database,
+	token: string
+): Promise<{ userId: string } | null> {
+	const id = createHash('sha256').update(token).digest('hex');
+
+	const [row] = await db
+		.update(emailVerifications)
+		.set({ usedAt: new Date() })
+		.where(
+			and(
+				eq(emailVerifications.id, id),
+				isNull(emailVerifications.usedAt),
+				gt(emailVerifications.expiresAt, new Date())
+			)
+		)
+		.returning({ userId: emailVerifications.userId });
+
+	return row ?? null;
+}
+
+/** Marks an account's email address as confirmed, activating it. */
+export async function markEmailVerified(db: Database, userId: string): Promise<void> {
+	await db
+		.update(users)
+		.set({ emailVerifiedAt: new Date(), updatedAt: new Date() })
+		.where(eq(users.id, userId));
+}
+
 /** Admin listing, with a count of each account's verse lists. */
 export async function listUsers(db: Database): Promise<
 	{
@@ -177,6 +251,7 @@ export async function listUsers(db: Database): Promise<
 		createdAt: Date;
 		lastLoginAt: Date | null;
 		disabledAt: Date | null;
+		emailVerifiedAt: Date | null;
 		listCount: number;
 	}[]
 > {
@@ -188,10 +263,11 @@ export async function listUsers(db: Database): Promise<
 		created_at: string;
 		last_login_at: string | null;
 		disabled_at: string | null;
+		email_verified_at: string | null;
 		list_count: number;
 	}>(sql`
 		select u.id, u.email, u.display_name, u.role, u.created_at, u.last_login_at, u.disabled_at,
-		       count(l.id)::int as list_count
+		       u.email_verified_at, count(l.id)::int as list_count
 		from users u
 		left join verse_lists l on l.user_id = u.id
 		group by u.id
@@ -206,6 +282,7 @@ export async function listUsers(db: Database): Promise<
 		createdAt: new Date(row.created_at),
 		lastLoginAt: row.last_login_at ? new Date(row.last_login_at) : null,
 		disabledAt: row.disabled_at ? new Date(row.disabled_at) : null,
+		emailVerifiedAt: row.email_verified_at ? new Date(row.email_verified_at) : null,
 		listCount: Number(row.list_count)
 	}));
 }

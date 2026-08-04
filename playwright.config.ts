@@ -1,5 +1,6 @@
 import { defineConfig } from '@playwright/test';
 import { testDatabaseUrl } from './scripts/lib/test-database.ts';
+import { MAIL_TEST_OUTBOX } from './scripts/lib/mail-outbox.ts';
 
 /**
  * End-to-end tests run against a production build, since that is what the container serves, and
@@ -34,7 +35,9 @@ export default defineConfig({
 			SESSION_SECRET: 'e2e-session-secret-e2e-session-secret-0123',
 			// Lets the backup tests exercise the encrypted S3-secret path, not just the unconfigured one.
 			BACKUP_ENCRYPTION_KEY: 'e2e-backup-encryption-key-0123456789abcdef',
-			NODE_ENV: 'production'
+			NODE_ENV: 'production',
+			// See scripts/lib/mail-outbox.ts: recovers verification/reset links the app "sends" via mail.
+			MAIL_TEST_OUTBOX: MAIL_TEST_OUTBOX
 		}
 	}
 });

@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import { getDb } from '$lib/server/db';
 import { destroyAllSessions } from '$lib/server/auth/session';
 import {
+	createEmailVerification,
 	createPasswordReset,
 	listUsers,
 	setUserDisabled,
@@ -55,6 +56,21 @@ export const actions = {
 		return {
 			resetLink: new URL(`/password-reset/${token}`, config().ORIGIN).toString(),
 			resetFor: userId
+		};
+	},
+
+	/**
+	 * Issues a fresh account-activation link, for when someone never received (or lost) the original
+	 * one. Shown to the admin rather than emailed, same reasoning as `reset` above.
+	 */
+	verify: async ({ request }) => {
+		const form = await request.formData();
+		const userId = String(form.get('userId') ?? '');
+		const token = await createEmailVerification(getDb(), userId);
+
+		return {
+			verifyLink: new URL(`/register/verify/${token}`, config().ORIGIN).toString(),
+			verifyFor: userId
 		};
 	}
 };

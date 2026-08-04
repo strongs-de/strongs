@@ -42,7 +42,16 @@ const schema = z.object({
 	BACKUP_ENCRYPTION_KEY: z.preprocess(emptyStringAsUndefined, z.string().min(32).optional()),
 
 	/** Where database dumps are staged before they are streamed to the browser or to S3. */
-	BACKUP_TMP_DIR: z.string().default('./var/backups')
+	BACKUP_TMP_DIR: z.string().default('./var/backups'),
+
+	/**
+	 * When set, the logging mailer (see `mail/index.ts`) also appends every mail it "sends" to this
+	 * file as JSON lines. Only end-to-end tests set this — it lets a separate test process recover a
+	 * verification or password-reset link without a real mailbox. Combined with `BREVO_API_KEY` being
+	 * unset (the logging mailer only exists for that case), setting this alone in a real deployment
+	 * has no effect.
+	 */
+	MAIL_TEST_OUTBOX: z.preprocess(emptyStringAsUndefined, z.string().optional())
 });
 
 export type Config = z.infer<typeof schema>;

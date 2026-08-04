@@ -41,7 +41,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
       - run: pnpm run check
-      # Unit tests need no database: the domain layer and the parsers do no I/O.
+      # Most unit tests need no database, but the activation-token repository tests exercise real
+      # queries against the schema, so migrations still have to run against the service above.
+      - run: pnpm run db:migrate
       - run: pnpm run test:unit --run
 
   e2e:
