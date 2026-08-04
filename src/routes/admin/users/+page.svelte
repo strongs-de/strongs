@@ -28,6 +28,20 @@
 	</div>
 {/if}
 
+{#if form?.verifyLink}
+	<div
+		class="mb-4 rounded-md border border-stone-200 bg-stone-50 p-3 text-sm dark:border-stone-800 dark:bg-stone-900"
+	>
+		<p class="mb-1">Einmal-Link zur Aktivierung (24 Stunden gültig):</p>
+		<input
+			readonly
+			value={form.verifyLink}
+			onclick={(event) => event.currentTarget.select()}
+			class="w-full rounded border border-stone-300 px-2 py-1 font-mono text-xs dark:border-stone-700 dark:bg-stone-950"
+		/>
+	</div>
+{/if}
+
 <div class="overflow-x-auto">
 	<table class="w-full text-sm">
 		<thead class="text-left text-xs text-stone-500 dark:text-stone-400">
@@ -44,7 +58,12 @@
 		<tbody class="divide-y divide-stone-200 dark:divide-stone-800">
 			{#each data.users as user (user.id)}
 				<tr class:opacity-50={user.disabledAt}>
-					<td class="py-2 pr-3">{user.email}</td>
+					<td class="py-2 pr-3">
+						{user.email}
+						{#if !user.emailVerifiedAt}
+							<span class="ml-1 text-xs text-amber-700 dark:text-amber-400">(nicht aktiviert)</span>
+						{/if}
+					</td>
 					<td class="py-2 pr-3">{user.displayName ?? '—'}</td>
 					<td class="py-2 pr-3">
 						<form method="POST" action="?/role" class="flex items-center gap-1">
@@ -72,6 +91,14 @@
 									Passwort-Link
 								</button>
 							</form>
+							{#if !user.emailVerifiedAt}
+								<form method="POST" action="?/verify">
+									<input type="hidden" name="userId" value={user.id} />
+									<button type="submit" class="text-xs text-accent-600 hover:underline">
+										Aktivierungslink
+									</button>
+								</form>
+							{/if}
 							<form method="POST" action="?/disable">
 								<input type="hidden" name="userId" value={user.id} />
 								<input type="hidden" name="disabled" value={user.disabledAt ? 'false' : 'true'} />
