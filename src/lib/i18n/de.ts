@@ -166,11 +166,23 @@ export const de = {
 	'auth.login.submit': 'Anmelden',
 	'auth.login.failed': 'E-Mail-Adresse oder Passwort ist falsch.',
 	'auth.login.throttled': 'Zu viele Versuche. Bitte warte einen Moment.',
+	'auth.login.unverified': 'Bitte bestätige zuerst deine E-Mail-Adresse.',
 	'auth.register.title': 'Konto erstellen',
 	'auth.register.submit': 'Konto erstellen',
 	'auth.register.emailTaken': 'Für diese E-Mail-Adresse existiert bereits ein Konto.',
 	'auth.register.passwordMismatch': 'Die Passwörter stimmen nicht überein.',
 	'auth.register.passwordTooShort': 'Das Passwort muss mindestens {min} Zeichen lang sein.',
+	'auth.register.throttled': 'Zu viele Versuche. Bitte warte einen Moment.',
+	'auth.register.checkEmailTitle': 'Bitte bestätige deine E-Mail-Adresse',
+	'auth.register.checkEmailBody':
+		'Wir haben dir eine E-Mail mit einem Bestätigungslink geschickt. Öffne den Link, um dein Konto zu aktivieren.',
+	'auth.register.verifyTitle': 'Konto aktivieren',
+	'auth.register.verifyBody': 'Bestätige deine E-Mail-Adresse, um dein Konto zu aktivieren.',
+	'auth.register.verifySubmit': 'Konto aktivieren',
+	'auth.register.verifyInvalid': 'Dieser Link ist abgelaufen oder wurde bereits verwendet.',
+	'auth.register.resendVerification': 'Aktivierungslink erneut senden',
+	'auth.register.resendSent':
+		'Falls das Konto noch nicht aktiviert ist, ist eine neue E-Mail unterwegs.',
 	'auth.passwordReset.title': 'Passwort zurücksetzen',
 	'auth.passwordReset.submit': 'Link senden',
 	'auth.passwordReset.sent':
