@@ -71,6 +71,11 @@ export async function pruneLoginAttempts(db: Database): Promise<void> {
 /** Exported for tests, which need to know when the limit bites. */
 export const LIMITS = { WINDOW_MS, MAX_PER_EMAIL, MAX_PER_ADDRESS };
 
+/** Records a single attempt under an arbitrary subject, e.g. `register:<ip>`. */
+export async function recordAttempt(db: Database, subject: string): Promise<void> {
+	await db.insert(loginAttempts).values({ subject });
+}
+
 /** Used by the password-reset form, which is rate limited on the same table. */
 export async function countRecent(
 	db: Database,
