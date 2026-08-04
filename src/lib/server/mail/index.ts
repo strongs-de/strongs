@@ -6,6 +6,8 @@
  * without credentials, and it prints the reset link so a local password reset can be completed.
  */
 
+import { appendFile, mkdir } from 'node:fs/promises';
+import { dirname } from 'node:path';
 import { config } from '../config.ts';
 import { logger } from '../logger.ts';
 
@@ -59,6 +61,18 @@ function loggingMailer(): Mailer {
 				{ to: mail.to, subject: mail.subject, body: mail.text },
 				'mail not sent: BREVO_API_KEY is not configured'
 			);
+
+			// End-to-end tests run as a separate process from the app server and cannot read this
+			// process's log stream, so — only when explicitly opted in — mirror the mail to a file they
+			// can read instead. See the `MAIL_TEST_OUTBOX` doc comment in `config.ts`.
+			const outbox = config().MAIL_TEST_OUTBOX;
+			if (outbox) {
+				await mkdir(dirname(outbox), { recursive: true });
+				await appendFile(
+					outbox,
+					JSON.stringify({ to: mail.to, subject: mail.subject, text: mail.text }) + '\n'
+				);
+			}
 		}
 	};
 }
