@@ -39,6 +39,8 @@ export const de = {
 	'nav.theme.dark': 'Dunkles Design',
 	'nav.impressum': 'Impressum',
 	'nav.datenschutz': 'Datenschutz',
+	'nav.menu': 'Menü',
+	'nav.menuOpen': 'Menü öffnen',
 
 	// --- reader -------------------------------------------------------------
 	'reader.chooseTranslation': 'Übersetzung wählen',

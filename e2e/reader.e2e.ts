@@ -34,15 +34,21 @@ test('the root redirects into the reader', async ({ page }) => {
 	await expect(page).toHaveURL(/\/Joh1$/);
 });
 
-test('Impressum and Datenschutz are reachable from the site header', async ({ page }) => {
+test('Impressum and Datenschutz are reachable only from the global menu', async ({ page }) => {
 	await page.goto('/Joh3');
 
-	await page.getByRole('link', { name: 'Impressum' }).click();
+	// No longer direct top-bar links — only reachable through the global menu.
+	await expect(page.getByRole('banner').getByRole('link', { name: 'Impressum' })).toHaveCount(0);
+	await expect(page.getByRole('banner').getByRole('link', { name: 'Datenschutz' })).toHaveCount(0);
+
+	await page.getByRole('button', { name: 'Menü öffnen' }).click();
+	await page.getByRole('menuitem', { name: 'Impressum' }).click();
 	await expect(page).toHaveURL(/\/impressum$/);
 	await expect(page.getByRole('heading', { level: 1 })).toContainText('Impressum');
 
 	await page.goto('/Joh3');
-	await page.getByRole('link', { name: 'Datenschutz' }).click();
+	await page.getByRole('button', { name: 'Menü öffnen' }).click();
+	await page.getByRole('menuitem', { name: 'Datenschutz' }).click();
 	await expect(page).toHaveURL(/\/datenschutz$/);
 	await expect(page.getByRole('heading', { level: 1 })).toContainText('Datenschutzerklärung');
 });
