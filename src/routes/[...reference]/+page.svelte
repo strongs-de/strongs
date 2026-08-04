@@ -7,6 +7,7 @@
 	import { formatReference, referencePath, type VerseRef } from '$lib/bible/reference';
 	import { segmentsToText, splitVerseLead } from '$lib/bible/segments';
 	import { readerLocation, setJumpToVerse } from '$lib/reader-location.svelte';
+	import { verseHoverPopover } from '$lib/actions/verse-hover-popover';
 	import { t } from '$lib/i18n';
 	import ColumnPicker from '$lib/components/ColumnPicker.svelte';
 	import Menu from '$lib/components/Menu.svelte';
@@ -45,6 +46,13 @@
 
 	let verseMenu = $state<VerseMenu | undefined>();
 	let addColumnMenu = $state<Menu | undefined>();
+
+	/** The translation the commentary auto-link popover fetches verse text from: whichever Bible
+	 *  translation is actually showing in a column right now, so hovering a reference in a commentary
+	 *  shows the same text the reader is already reading, not some other fixed pick. */
+	const primaryBibleId = $derived(
+		data.columns.find((column) => column.resource.kind === 'bible')?.resource.id ?? null
+	);
 
 	const unusedResources = $derived(
 		data.readerResources.filter(
@@ -1041,8 +1049,13 @@
 													{#each entries as entry (entry.id)}
 														{#if entry.title}<h3 class="commentary-title">{entry.title}</h3>{/if}
 														<!-- Imported commentary is reduced to an allow-list by its parser. -->
-														<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-														<div class="commentary-body">{@html entry.bodyHtml}</div>
+														<div
+															class="commentary-body"
+															use:verseHoverPopover={{ bibleId: primaryBibleId }}
+														>
+															<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+															{@html entry.bodyHtml}
+														</div>
 													{/each}
 												</article>
 											{/if}
@@ -1271,8 +1284,13 @@
 														<h3 class="commentary-title">{entry.title}</h3>
 													{/if}
 													<!-- Imported commentary is reduced to an allow-list by its parser. -->
-													<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-													<div class="commentary-body">{@html entry.bodyHtml}</div>
+													<div
+														class="commentary-body"
+														use:verseHoverPopover={{ bibleId: primaryBibleId }}
+													>
+														<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+														{@html entry.bodyHtml}
+													</div>
 												{/each}
 											</article>
 										{/if}
