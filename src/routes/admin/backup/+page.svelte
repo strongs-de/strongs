@@ -138,8 +138,11 @@
 		Erstellt einen vollständigen Dump der Datenbank (pg_dump, Custom-Format) und lädt ihn direkt
 		herunter. Bei einer großen Datenbank kann das eine Weile dauern.
 	</p>
+	<!-- Without data-sveltekit-reload, SvelteKit's client router treats this as an SPA navigation and
+	     fetches __data.json (404, no +page here) instead of letting the browser download the file. -->
 	<a
 		href="/admin/backup/download"
+		data-sveltekit-reload
 		class="inline-block rounded-md bg-accent-600 px-4 py-2 text-sm font-medium text-white
 		       hover:bg-accent-700"
 	>
