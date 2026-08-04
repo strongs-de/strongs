@@ -55,6 +55,11 @@
 		data.columns.length < data.maxColumns && unusedResources.length > 0
 	);
 	const visibleColumnCount = $derived(data.columns.length + (data.notesVisible ? 1 : 0));
+	/** Which columns take part in the flow layout's cross-column scroll sync, in the same order as
+	 *  `data.columns`. Server-derived (from a cookie keyed by resource id), like `data.notesVisible` —
+	 *  the toggle round-trips through `?/setColumnFlowSync` rather than flipping local state, so it
+	 *  stays correct after a reorder or translation swap without any client-side bookkeeping of its own. */
+	const flowSyncEnabled = $derived(data.flowSyncEnabled);
 	const notesColumnIndex = $derived(data.columns.length);
 
 	function commentaryAt(
@@ -620,6 +625,7 @@
 	 * scrolled past the anchor line by the time this first runs), even though nothing was scrolled.
 	 */
 	function syncFlowColumns(sourceIndex = 0, trackAddress = false) {
+		if (!flowSyncEnabled[sourceIndex]) return;
 		const source = flowColumns[sourceIndex];
 		if (!source || data.readerLayout !== 'flow') return;
 		const anchorInset = 12;
@@ -633,6 +639,7 @@
 
 		for (let index = 0; index < flowColumns.length; index += 1) {
 			if (index === sourceIndex) continue;
+			if (!flowSyncEnabled[index]) continue;
 			const column = flowColumns[index];
 			const target = column && findVerseElement(column, anchor.dataset.verseKey, anchorVerse);
 			if (!column || !target) continue;
@@ -653,6 +660,7 @@
 	}
 
 	function makeFlowSource(columnIndex: number) {
+		if (!flowSyncEnabled[columnIndex]) return;
 		activeFlowSource = columnIndex;
 		if (suppressFlowTimer) clearTimeout(suppressFlowTimer);
 		suppressFlowScroll = false;
@@ -681,11 +689,15 @@
 	 */
 	function onFlowScroll(columnIndex: number) {
 		if (suppressFlowScroll) return;
-		activeFlowSource = columnIndex;
 		const source = flowColumns[columnIndex];
 		if (!source) return;
+		// Sync off does not stop this column's own endless-scroll loading below — only the two lines
+		// that would make it the sync source are skipped.
+		if (flowSyncEnabled[columnIndex]) {
+			activeFlowSource = columnIndex;
+			scheduleFlowSync(columnIndex);
+		}
 		updateVisibleChapter(source, 12);
-		scheduleFlowSync(columnIndex);
 		if (source.scrollTop < 500) void loadStreamPrevious();
 		if (source.scrollHeight - source.scrollTop - source.clientHeight < 900) void loadStreamNext();
 	}
@@ -821,6 +833,8 @@
 							chosen={data.columns.map((other) => other.resource.id)}
 							canRemove={data.columns.length > 1}
 							canAdd={canAddColumn && column.index === data.columns.length - 1}
+							flowSyncEnabled={flowSyncEnabled[column.index] ?? true}
+							showFlowSyncToggle={data.readerLayout === 'flow'}
 						/>
 					</div>
 				{/each}

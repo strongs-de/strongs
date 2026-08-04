@@ -60,6 +60,8 @@ export const de = {
 	'reader.viewFlowHint': 'Jede Übersetzung läuft ohne Lücken als fortlaufender Text.',
 	'reader.textSize': 'Textgröße',
 	'reader.colorScheme': 'Farbschema',
+	'reader.flowSyncEnable': 'Synchron scrollen aktivieren',
+	'reader.flowSyncDisable': 'Synchron scrollen deaktivieren',
 	'resource.group.bibles': 'Bibeln',
 	'resource.group.commentaries': 'Kommentare',
 	'resource.group.xrefs': 'Parallelstellen',

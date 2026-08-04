@@ -35,8 +35,10 @@ import {
 import {
 	MAX_FONT_SCALE,
 	MIN_FONT_SCALE,
+	readFlowSyncDisabled,
 	readFontScale,
 	readReaderLayout,
+	writeFlowSyncDisabled,
 	writeReaderLayout,
 	writeFontScale
 } from '$lib/server/reader-preferences';
@@ -157,6 +159,9 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 	const marked = locals.user
 		? await markedVersesByList(db, locals.user.id, reference.book, reference.chapter)
 		: [];
+	// Which columns have opted out of the flow layout's cross-column scroll sync, kept by resource id
+	// so the choice survives a reorder or a translation swap in the same slot.
+	const flowSyncDisabled = readFlowSyncDisabled(cookies);
 	const notesVisible = cookies.get('chapter-notes-visible') === '1';
 	const chapterNote =
 		locals.user && notesVisible
@@ -195,6 +200,10 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 				covers: coverage.get(id)?.has(reference.book) ?? false
 			};
 		}),
+		/** Whether each column (in the same order as `columns` above) takes part in the flow layout's
+		 *  cross-column scroll sync; a column not currently selected has nothing to intersect against
+		 *  and simply does not appear here. */
+		flowSyncEnabled: columns.map((id) => !flowSyncDisabled.has(id)),
 		navigation: {
 			previous: previousChapter(reference.book, reference.chapter),
 			next: nextChapter(reference.book, reference.chapter),
@@ -287,6 +296,20 @@ export const actions = {
 			httpOnly: false,
 			sameSite: 'lax'
 		});
+		return { success: true };
+	},
+
+	/** Flips one column's participation in the flow layout's cross-column scroll sync. Keyed by
+	 *  resource id rather than column index, like the cookie itself, so the choice survives a reorder. */
+	setColumnFlowSync: async ({ request, cookies }) => {
+		const form = await request.formData();
+		const resource = String(form.get('resource') ?? '');
+		if (!resource) return fail(400, { error: 'resource' });
+
+		const disabled = readFlowSyncDisabled(cookies);
+		if (disabled.has(resource)) disabled.delete(resource);
+		else disabled.add(resource);
+		writeFlowSyncDisabled(cookies, disabled);
 		return { success: true };
 	},
 
