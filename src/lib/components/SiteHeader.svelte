@@ -4,6 +4,7 @@
 	import { parseReference } from '$lib/bible/reference';
 	import { jumpToVerse } from '$lib/reader-location.svelte';
 	import { t } from '$lib/i18n';
+	import GlobalMenu from './GlobalMenu.svelte';
 	import ReaderViewMenu from './ReaderViewMenu.svelte';
 	import ThemeToggle from './ThemeToggle.svelte';
 
@@ -215,35 +216,7 @@
 				</svg>
 			</a>
 
-			{#if user}
-				<a
-					href="/lists"
-					class="hidden rounded-md px-2.5 py-2 text-sm font-medium text-stone-600 hover:bg-accent-50
-					       hover:text-accent-800 data-[active=true]:text-accent-700 sm:block dark:text-stone-300
-					       dark:hover:bg-accent-900/30 dark:hover:text-accent-300"
-					data-active={page.url.pathname.startsWith('/lists') ? 'true' : undefined}
-				>
-					{t('nav.lists')}
-				</a>
-				<a
-					href="/account"
-					class="hidden rounded-md px-2.5 py-2 text-sm font-medium text-stone-600 hover:bg-accent-50
-					       hover:text-accent-800 sm:block dark:text-stone-300 dark:hover:bg-accent-900/30
-					       dark:hover:text-accent-300"
-				>
-					{user.displayName ?? user.email}
-				</a>
-				{#if user.role === 'admin'}
-					<a
-						href="/admin"
-						class="hidden rounded-md px-2.5 py-2 text-sm font-medium text-stone-600 hover:bg-accent-50
-						       hover:text-accent-800 sm:block dark:text-stone-300 dark:hover:bg-accent-900/30
-						       dark:hover:text-accent-300"
-					>
-						{t('nav.admin')}
-					</a>
-				{/if}
-			{:else}
+			{#if !user}
 				<a
 					href="/login"
 					class="rounded-md px-2 py-1.5 text-sm text-stone-600 hover:bg-stone-100
@@ -254,20 +227,7 @@
 				</a>
 			{/if}
 
-			<a
-				href="/impressum"
-				class="rounded-md px-1.5 py-1.5 text-xs text-stone-400 hover:text-stone-600
-				       dark:text-stone-500 dark:hover:text-stone-300"
-			>
-				{t('nav.impressum')}
-			</a>
-			<a
-				href="/datenschutz"
-				class="rounded-md px-1.5 py-1.5 text-xs text-stone-400 hover:text-stone-600
-				       dark:text-stone-500 dark:hover:text-stone-300"
-			>
-				{t('nav.datenschutz')}
-			</a>
+			<GlobalMenu {user} />
 		</nav>
 	</div>
 </header>
