@@ -109,7 +109,8 @@
 		xhr.send(file);
 	}
 
-	const canRestore = $derived(stagedId !== '' && confirmText === data.restorePhrase);
+	const confirmMatches = $derived(confirmText === data.restorePhrase);
+	const canRestore = $derived(stagedId !== '' && confirmMatches);
 </script>
 
 <svelte:head><title>Backup — strongs.de</title></svelte:head>
@@ -130,6 +131,33 @@
 		Verfügung, wenn das Image die PostgreSQL-Client-Tools enthält.
 	</p>
 {/if}
+
+<!-- Bestätigung für Wiederherstellung — gilt für jede Wiederherstellen-Aktion auf dieser Seite: den
+     Datei-Upload unten, sowie "direkt wiederherstellen" bei den lokalen Kopien und den S3-Objekten. -->
+<section class="mb-8 max-w-2xl rounded-lg border border-red-300 p-4 dark:border-red-900">
+	<h2 class="mb-2 text-sm font-semibold tracking-wide text-red-700 uppercase dark:text-red-300">
+		Bestätigung für Wiederherstellung
+	</h2>
+	<p class="mb-3 text-sm text-stone-600 dark:text-stone-300">
+		Gilt für jede Wiederherstellung auf dieser Seite. Eine Wiederherstellung ersetzt den gesamten
+		Inhalt der Datenbank durch den Inhalt der gewählten Backup-Datei; vorher wird automatisch eine
+		Sicherung des aktuellen Zustands erstellt.
+	</p>
+	<label class="mb-1 block text-xs font-medium" for="confirm-global">
+		Zur Bestätigung <span class="font-mono">{data.restorePhrase}</span> eingeben:
+	</label>
+	<input
+		id="confirm-global"
+		bind:value={confirmText}
+		autocomplete="off"
+		class="w-full max-w-sm rounded-md border border-stone-300 px-2 py-1.5 text-sm dark:border-stone-700 dark:bg-stone-900"
+	/>
+	{#if form?.restoreError === 'confirm'}
+		<p class="mt-2 text-sm text-red-700 dark:text-red-300" role="alert">
+			Die Bestätigung stimmt nicht überein.
+		</p>
+	{/if}
+</section>
 
 <!-- Sofort-Backup -->
 <section class="mb-8 max-w-2xl rounded-lg border border-stone-200 p-4 dark:border-stone-800">
@@ -430,14 +458,36 @@
 			</h3>
 			<ul class="space-y-1 text-sm">
 				{#each data.localBackups as backup (backup.name)}
-					<li class="flex items-center justify-between gap-2">
+					<li class="flex flex-wrap items-center justify-between gap-2">
 						<span>{backup.name} — {formatBytes(backup.size)}</span>
-						<form method="POST" action="?/deleteLocal">
-							<input type="hidden" name="name" value={backup.name} />
-							<button type="submit" class="text-xs text-red-700 underline dark:text-red-300">
-								löschen
-							</button>
-						</form>
+						<div class="flex items-center gap-3">
+							<!-- data-sveltekit-reload: see the note on the "Sofort-Backup" download link above. -->
+							<a
+								href={`/admin/backup/download/local/${backup.name}`}
+								data-sveltekit-reload
+								class="text-xs text-accent-700 underline dark:text-accent-300"
+							>
+								herunterladen
+							</a>
+							<form method="POST" action="?/restoreLocal">
+								<input type="hidden" name="name" value={backup.name} />
+								<input type="hidden" name="confirm" value={confirmText} />
+								<button
+									type="submit"
+									disabled={!confirmMatches || running}
+									class="text-xs text-red-700 underline enabled:hover:text-red-800
+									       disabled:opacity-50 dark:text-red-300"
+								>
+									direkt wiederherstellen
+								</button>
+							</form>
+							<form method="POST" action="?/deleteLocal">
+								<input type="hidden" name="name" value={backup.name} />
+								<button type="submit" class="text-xs text-red-700 underline dark:text-red-300">
+									löschen
+								</button>
+							</form>
+						</div>
 					</li>
 				{/each}
 			</ul>
@@ -458,24 +508,51 @@
 			<p class="mt-2 text-xs text-red-700 dark:text-red-300">{form.remoteError}</p>
 		{/if}
 		{#if form?.remote}
-			<table class="mt-2 w-full text-xs">
-				<thead>
-					<tr class="text-left text-stone-500 dark:text-stone-400">
-						<th class="pb-1 font-medium">Datei</th>
-						<th class="pb-1 font-medium">Größe</th>
-						<th class="pb-1 font-medium">Datum</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each form.remote as object (object.key)}
-						<tr class:opacity-50={object.expired}>
-							<td class="py-0.5">{object.key}</td>
-							<td class="py-0.5">{formatBytes(object.size)}</td>
-							<td class="py-0.5">{dateFormat.format(new Date(object.lastModified))}</td>
+			<div class="overflow-x-auto">
+				<table class="mt-2 w-full text-xs">
+					<thead>
+						<tr class="text-left text-stone-500 dark:text-stone-400">
+							<th class="pb-1 font-medium">Datei</th>
+							<th class="pb-1 font-medium">Größe</th>
+							<th class="pb-1 font-medium">Datum</th>
+							<th class="pb-1 font-medium"></th>
+							<th class="pb-1 font-medium"></th>
 						</tr>
-					{/each}
-				</tbody>
-			</table>
+					</thead>
+					<tbody>
+						{#each form.remote as object (object.key)}
+							<tr class:opacity-50={object.expired}>
+								<td class="py-0.5">{object.key}</td>
+								<td class="py-0.5">{formatBytes(object.size)}</td>
+								<td class="py-0.5">{dateFormat.format(new Date(object.lastModified))}</td>
+								<td class="py-0.5 text-right whitespace-nowrap">
+									<a
+										href={`/admin/backup/download/s3?key=${encodeURIComponent(object.key)}`}
+										data-sveltekit-reload
+										class="text-accent-700 underline dark:text-accent-300"
+									>
+										herunterladen
+									</a>
+								</td>
+								<td class="py-0.5 text-right whitespace-nowrap">
+									<form method="POST" action="?/restoreS3">
+										<input type="hidden" name="key" value={object.key} />
+										<input type="hidden" name="confirm" value={confirmText} />
+										<button
+											type="submit"
+											disabled={!confirmMatches || running}
+											class="text-red-700 underline enabled:hover:text-red-800
+											       disabled:opacity-50 dark:text-red-300"
+										>
+											direkt wiederherstellen
+										</button>
+									</form>
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
 		{/if}
 	</div>
 </section>
@@ -498,12 +575,8 @@
 		Stand des Backups. Möglicherweise musst du dich anschließend neu anmelden.
 	</p>
 
-	{#if form?.error === 'confirm'}
-		<p class="mb-3 text-sm text-red-700 dark:text-red-300" role="alert">
-			Die Bestätigung stimmt nicht überein.
-		</p>
-	{:else if form?.error && typeof form.error === 'string'}
-		<p class="mb-3 text-sm text-red-700 dark:text-red-300" role="alert">{form.error}</p>
+	{#if form?.restoreError && form.restoreError !== 'confirm' && typeof form.restoreError === 'string'}
+		<p class="mb-3 text-sm text-red-700 dark:text-red-300" role="alert">{form.restoreError}</p>
 	{/if}
 	{#if form?.restoreStarted}
 		<p class="mb-3 text-sm">
@@ -532,18 +605,8 @@
 			{/if}
 		</div>
 		<input type="hidden" name="stagedId" value={stagedId} />
-
-		<div>
-			<label class="mb-1 block text-xs font-medium" for="confirm">
-				Zur Bestätigung <span class="font-mono">{data.restorePhrase}</span> eingeben:
-			</label>
-			<input
-				id="confirm"
-				name="confirm"
-				bind:value={confirmText}
-				class="w-full rounded-md border border-stone-300 px-2 py-1.5 text-sm dark:border-stone-700 dark:bg-stone-900"
-			/>
-		</div>
+		<input type="hidden" name="confirm" value={confirmText} />
+		<p class="text-xs text-stone-500 dark:text-stone-400">Bestätigungsphrase siehe oben.</p>
 
 		<button
 			type="submit"

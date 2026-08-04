@@ -7,6 +7,7 @@
 	import { formatReference, referencePath, type VerseRef } from '$lib/bible/reference';
 	import { segmentsToText, splitVerseLead } from '$lib/bible/segments';
 	import { readerLocation, setJumpToVerse } from '$lib/reader-location.svelte';
+	import { verseHoverPopover } from '$lib/actions/verse-hover-popover';
 	import { t } from '$lib/i18n';
 	import ColumnPicker from '$lib/components/ColumnPicker.svelte';
 	import StudySidebar from '$lib/components/StudySidebar.svelte';
@@ -52,6 +53,13 @@
 		if (unlinkedColumns.has(index)) unlinkedColumns.delete(index);
 		else unlinkedColumns.add(index);
 	}
+
+	/** The translation the commentary auto-link popover fetches verse text from: whichever Bible
+	 *  translation is actually showing in a column right now, so hovering a reference in a commentary
+	 *  shows the same text the reader is already reading, not some other fixed pick. */
+	const primaryBibleId = $derived(
+		data.columns.find((column) => column.resource.kind === 'bible')?.resource.id ?? null
+	);
 
 	const unusedResources = $derived(
 		data.readerResources.filter(
@@ -129,6 +137,148 @@
 	}
 
 	/**
+	 * Drag-resizable column widths, as fractions of the row that sum to 1.
+	 *
+	 * `null` means "not customized yet" — the grid then falls back to an even split via the
+	 * `--column-track` CSS variable's own fallback, rather than this rendering an explicit (if
+	 * numerically equivalent) track of its own for no reason.
+	 */
+	let columnWidths = $state<number[] | null>(data.columnWidths);
+	/** Detects a reorder, add, remove or swap — not a mere navigation, which leaves the id list (and
+	 *  therefore this key) unchanged — so a resize commit's own round trip does not clobber the widths
+	 *  the reader just set. Kept separate from `streamColumnsKey` above: that one resets the *chapter*
+	 *  stream, this one only cares whether the *columns* changed. */
+	let columnWidthsKey = data.columns.map((column) => column.resource.id).join(',');
+	const MIN_COLUMN_FRACTION = 0.12;
+
+	$effect(() => {
+		const key = data.columns.map((column) => column.resource.id).join(',');
+		if (key !== columnWidthsKey) {
+			columnWidthsKey = key;
+			// The server already recomputed this in the new order (a reorder) or decided the old
+			// widths no longer apply (an add/remove/swap, where it comes back `null`) — either way,
+			// adopting its answer is correct, not just a reset.
+			columnWidths = data.columnWidths;
+		}
+	});
+
+	function equalColumnWidths(): number[] {
+		return data.columns.map(() => 1 / data.columns.length);
+	}
+
+	/** The row's grid track, or `undefined` while `columnWidths` is `null` so the CSS fallback (an
+	 *  even `repeat()` split) applies untouched. `minmax(0, …)` matches the original bare `1fr` tracks
+	 *  so a narrow custom width can still shrink below its content's own minimum, exactly like before. */
+	const columnTrack = $derived(
+		columnWidths
+			? columnWidths.map((width) => `minmax(0, ${width}fr)`).join(' ') +
+					(data.notesVisible ? ' minmax(0, 1fr)' : '')
+			: undefined
+	);
+	/** The desktop header bar sets `grid-template-columns` inline rather than through a class, so it
+	 *  cannot lean on the CSS variable's own fallback and needs the equivalent literal spelled out. */
+	const headerGridTemplate = $derived(
+		columnTrack ?? `repeat(${visibleColumnCount}, minmax(0, 1fr))`
+	);
+
+	/** Left-edge percentage, across the *whole* header row (including a visible notes column), of each
+	 *  boundary between two real columns — where the resize handles sit. */
+	const columnBoundaryPercents = $derived.by(() => {
+		const fractions = columnWidths ?? equalColumnWidths();
+		// Both branches of `fractions` already sum to 1 across the real columns as a group (an equal
+		// split of N columns is N × 1/N); the notes column, when visible, then adds one more same-sized
+		// unit, matching how `columnTrack` appends it as a further `1fr` after that group.
+		const totalUnits = 1 + (data.notesVisible ? 1 : 0);
+		const percents: number[] = [];
+		let cumulative = 0;
+		for (let index = 0; index < fractions.length - 1; index += 1) {
+			cumulative += fractions[index] ?? 0;
+			percents.push((cumulative / totalUnits) * 100);
+		}
+		return percents;
+	});
+
+	let columnHeaderBar = $state<HTMLElement>();
+	let isResizingColumns = false;
+	let resizeBoundaryIndex: number | null = null;
+	let resizeStartX = 0;
+	let resizeStartWidths: number[] = [];
+	let resizeBarWidth = 0;
+	let widthsForm = $state<HTMLFormElement | undefined>();
+	let widthsInput = $state<HTMLInputElement | undefined>();
+
+	function clampBoundary(widths: number[], boundaryIndex: number, nextLeft: number): number[] {
+		const next = [...widths];
+		const left = next[boundaryIndex] ?? 0;
+		const right = next[boundaryIndex + 1] ?? 0;
+		const pairTotal = left + right;
+		const clampedLeft = Math.max(
+			MIN_COLUMN_FRACTION,
+			Math.min(pairTotal - MIN_COLUMN_FRACTION, nextLeft)
+		);
+		next[boundaryIndex] = clampedLeft;
+		next[boundaryIndex + 1] = pairTotal - clampedLeft;
+		return next;
+	}
+
+	function startColumnResize(event: PointerEvent, boundaryIndex: number) {
+		if (!columnHeaderBar) return;
+		isResizingColumns = true;
+		resizeBoundaryIndex = boundaryIndex;
+		resizeStartX = event.clientX;
+		resizeStartWidths = columnWidths ?? equalColumnWidths();
+		resizeBarWidth = columnHeaderBar.getBoundingClientRect().width;
+	}
+
+	/** Bound to `<svelte:window>`, not the handle itself: a pointer that leaves the handle mid-drag
+	 *  (fast movement, or the handle itself moving out from under the pointer) must keep resizing. */
+	function onColumnResizeMove(event: PointerEvent) {
+		if (!isResizingColumns || resizeBoundaryIndex === null || resizeBarWidth <= 0) return;
+		const deltaFraction = (event.clientX - resizeStartX) / resizeBarWidth;
+		columnWidths = clampBoundary(
+			resizeStartWidths,
+			resizeBoundaryIndex,
+			(resizeStartWidths[resizeBoundaryIndex] ?? 0) + deltaFraction
+		);
+	}
+
+	function onColumnResizeEnd() {
+		if (!isResizingColumns) return;
+		isResizingColumns = false;
+		resizeBoundaryIndex = null;
+		commitColumnWidths();
+	}
+
+	/** Keyboard equivalent of a pointer drag: `ArrowLeft`/`ArrowRight` nudge one boundary a couple of
+	 *  percentage points and commit immediately, since there is no separate "release" event. */
+	function onResizeHandleKeydown(event: KeyboardEvent, boundaryIndex: number) {
+		const step = 0.02;
+		if (event.key === 'ArrowLeft') {
+			event.preventDefault();
+			columnWidths = clampBoundary(
+				columnWidths ?? equalColumnWidths(),
+				boundaryIndex,
+				(columnWidths ?? equalColumnWidths())[boundaryIndex]! - step
+			);
+			commitColumnWidths();
+		} else if (event.key === 'ArrowRight') {
+			event.preventDefault();
+			columnWidths = clampBoundary(
+				columnWidths ?? equalColumnWidths(),
+				boundaryIndex,
+				(columnWidths ?? equalColumnWidths())[boundaryIndex]! + step
+			);
+			commitColumnWidths();
+		}
+	}
+
+	function commitColumnWidths() {
+		if (!columnWidths || !widthsForm || !widthsInput) return;
+		widthsInput.value = columnWidths.join(',');
+		widthsForm.requestSubmit();
+	}
+
+	/**
 	 * Opens the verse menu, unless the reader meant to use the link.
 	 *
 	 * The verse number stays an `<a>` so it keeps working without scripting and still offers
@@ -170,6 +320,55 @@
 
 	/** Which column a reader is looking at on a phone, where only one fits. */
 	let mobileColumn = $state(0);
+
+	/**
+	 * Whether the phone-width layout (one column visible, switched by tabs) is actually in effect —
+	 * not merely "the reader happens to be on a phone", since a desktop window can be narrowed too.
+	 *
+	 * `mobileColumn` only means something once this is true: on desktop every column is visible at
+	 * once, so gating `role="tabpanel"`/`aria-hidden` purely on `columnIndex !== mobileColumn` would
+	 * incorrectly hide every non-selected column from assistive tech there too, even though a sighted
+	 * desktop reader sees them all just fine.
+	 */
+	let isMobileViewport = $state(false);
+
+	$effect(() => {
+		const query = window.matchMedia('(max-width: 639px)');
+		isMobileViewport = query.matches;
+		const onChange = (event: MediaQueryListEvent) => {
+			isMobileViewport = event.matches;
+		};
+		query.addEventListener('change', onChange);
+		return () => query.removeEventListener('change', onChange);
+	});
+
+	let mobileTablist = $state<HTMLElement | undefined>();
+
+	/**
+	 * Roving focus for the mobile column tabs, matching `Menu.svelte`'s own arrow-key handling.
+	 * "Automatic activation": moving focus also switches `mobileColumn`, the same as a click — there
+	 * is no separate "activate" step, matching the existing click-to-switch behaviour exactly.
+	 */
+	function onMobileTabKeydown(event: KeyboardEvent) {
+		if (!mobileTablist) return;
+		const tabs = [...mobileTablist.querySelectorAll<HTMLElement>('[role="tab"]')];
+		if (tabs.length === 0) return;
+
+		const current = tabs.indexOf(document.activeElement as HTMLElement);
+		let next: number | null = null;
+
+		if (event.key === 'ArrowRight') next = (current + 1) % tabs.length;
+		else if (event.key === 'ArrowLeft') next = (current - 1 + tabs.length) % tabs.length;
+		else if (event.key === 'Home') next = 0;
+		else if (event.key === 'End') next = tabs.length - 1;
+
+		if (next === null) return;
+		event.preventDefault();
+		const target = tabs[next];
+		target?.focus();
+		const index = Number(target?.id.replace('mobile-tab-', ''));
+		if (Number.isFinite(index)) mobileColumn = index;
+	}
 
 	/** Strong's number shown in the study sidebar, kept in the URL hash so it can be shared. */
 	let activeStrong = $state<{ strong: string; word: string; reference: string } | null>(null);
@@ -562,6 +761,7 @@
 	}
 
 	function makeFlowSource(columnIndex: number) {
+		if (unlinkedColumns.has(columnIndex)) return;
 		activeFlowSource = columnIndex;
 		if (suppressFlowTimer) clearTimeout(suppressFlowTimer);
 		suppressFlowScroll = false;
@@ -590,11 +790,15 @@
 	 */
 	function onFlowScroll(columnIndex: number) {
 		if (suppressFlowScroll) return;
-		activeFlowSource = columnIndex;
 		const source = flowColumns[columnIndex];
 		if (!source) return;
+		// Sync off does not stop this column's own endless-scroll loading below — only the two lines
+		// that would make it the sync source are skipped.
+		if (!unlinkedColumns.has(columnIndex)) {
+			activeFlowSource = columnIndex;
+			scheduleFlowSync(columnIndex);
+		}
 		updateVisibleChapter(source, 12);
-		scheduleFlowSync(columnIndex);
 		if (source.scrollTop < 500) void loadStreamPrevious();
 		if (source.scrollHeight - source.scrollTop - source.clientHeight < 900) void loadStreamNext();
 	}
@@ -630,6 +834,8 @@
 		return null;
 	}
 </script>
+
+<svelte:window onpointermove={onColumnResizeMove} onpointerup={onColumnResizeEnd} />
 
 <svelte:head>
 	<title>{data.fullTitle} — strongs.de</title>
@@ -692,11 +898,12 @@
 			<!-- Column headers double as the translation picker. The bar sticks as one piece; a single
 			     header cell is never taller than itself and so could never stick on its own. -->
 			<div
-				class="sticky top-[calc(var(--header-height)+2.75rem)] z-10 mb-2 hidden gap-0 overflow-hidden rounded-md border
-				       border-stone-200 bg-stone-50/95 py-1.5 shadow-sm backdrop-blur sm:grid
-				       dark:border-stone-800 dark:bg-stone-950/95"
+				bind:this={columnHeaderBar}
+				class="relative sticky top-[calc(var(--header-height)+2.75rem)] z-10 mb-2 hidden gap-0
+				       overflow-hidden rounded-md border border-stone-200 bg-stone-50/95 py-1.5 shadow-sm
+				       backdrop-blur sm:grid dark:border-stone-800 dark:bg-stone-950/95"
 				data-testid="column-picker-bar"
-				style="grid-template-columns: repeat({visibleColumnCount}, minmax(0, 1fr))"
+				style="grid-template-columns: {headerGridTemplate}"
 			>
 				{#each data.columns as column (column.resource.id)}
 					<div
@@ -753,10 +960,49 @@
 						</form>
 					</div>
 				{/if}
+
+				<!-- An overlay rather than something inside each column cell, so a handle can straddle two
+				     of them at once. `pointer-events-none` on the wrapper keeps it from intercepting clicks
+				     on the picker buttons underneath, everywhere except the thin strip of each handle. -->
+				<div class="pointer-events-none absolute inset-0">
+					{#each columnBoundaryPercents as percent, boundaryIndex (boundaryIndex)}
+						<!-- A focusable, draggable separator is the documented WAI-ARIA "window splitter"
+						     pattern (role="separator" + tabindex + arrow-key support), not an oversight the
+						     linter's generic "non-interactive element" heuristic accounts for. -->
+						<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+						<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+						<div
+							role="separator"
+							aria-orientation="vertical"
+							aria-label={t('reader.resizeColumns')}
+							aria-valuenow={Math.round(
+								(columnWidths ?? equalColumnWidths())[boundaryIndex]! * 100
+							)}
+							aria-valuemin={Math.round(MIN_COLUMN_FRACTION * 100)}
+							aria-valuemax={Math.round(
+								(1 - MIN_COLUMN_FRACTION * (data.columns.length - 1)) * 100
+							)}
+							tabindex="0"
+							class="column-resize-handle"
+							style="left: {percent}%"
+							onpointerdown={(event) => startColumnResize(event, boundaryIndex)}
+							onkeydown={(event) => onResizeHandleKeydown(event, boundaryIndex)}
+						></div>
+					{/each}
+				</div>
 			</div>
 			<form bind:this={reorderForm} method="POST" action="?/moveColumn" use:enhance class="hidden">
 				<input bind:this={reorderFromInput} type="hidden" name="from" />
 				<input bind:this={reorderToInput} type="hidden" name="to" />
+			</form>
+			<form
+				bind:this={widthsForm}
+				method="POST"
+				action="?/setColumnWidths"
+				use:enhance
+				class="hidden"
+			>
+				<input bind:this={widthsInput} type="hidden" name="widths" />
 			</form>
 
 			<!-- On a phone one column fits; tabs switch between translations. -->
@@ -766,62 +1012,89 @@
 				       dark:border-stone-800 dark:bg-stone-950/95"
 				data-testid="column-picker-bar"
 			>
-				{#each data.columns as column (column.resource.id)}
-					<span
-						class="mobile-tab flex shrink-0 items-center gap-1 rounded-full px-1 py-1 pl-3 text-sm"
-						class:bg-accent-600={mobileColumn === column.index}
-						class:text-white={mobileColumn === column.index}
-						class:bg-stone-100={mobileColumn !== column.index}
-						class:dark:bg-stone-800={mobileColumn !== column.index}
-					>
+				<!-- The tablist container itself is never a stop on the Tab key — only the tabs are, via
+			     their own roving tabindex below — so it does not need one of its own either. -->
+				<!-- svelte-ignore a11y_interactive_supports_focus -->
+				<div
+					bind:this={mobileTablist}
+					role="tablist"
+					aria-label={t('reader.mobileColumnsTablist')}
+					class="contents"
+					onkeydown={onMobileTabKeydown}
+				>
+					{#each data.columns as column (column.resource.id)}
+						<span
+							class="mobile-tab flex shrink-0 items-center gap-1 rounded-full px-1 py-1 pl-3 text-sm"
+							class:bg-accent-600={mobileColumn === column.index}
+							class:text-white={mobileColumn === column.index}
+							class:bg-stone-100={mobileColumn !== column.index}
+							class:dark:bg-stone-800={mobileColumn !== column.index}
+						>
+							<button
+								type="button"
+								role="tab"
+								id="mobile-tab-{column.index}"
+								aria-selected={mobileColumn === column.index}
+								aria-controls="mobile-tabpanel-{column.index}"
+								tabindex={mobileColumn === column.index ? 0 : -1}
+								class="shrink-0"
+								aria-label={mobileColumn === column.index
+									? `${t('reader.chooseTranslation')}: ${column.resource.abbrev}`
+									: column.resource.abbrev}
+								onclick={() => {
+									if (mobileColumn === column.index) openTranslationDialog(column.index);
+									else mobileColumn = column.index;
+								}}
+							>
+								{column.resource.abbrev}
+							</button>
+							{#if data.columns.length > 1}
+								<form method="POST" action="?/removeColumn" use:enhance>
+									<input type="hidden" name="index" value={column.index} />
+									<button
+										type="submit"
+										aria-label="{t('reader.removeColumn')}: {column.resource.abbrev}"
+										class="inline-flex size-5 shrink-0 items-center justify-center rounded-full opacity-70 hover:opacity-100"
+										onclick={(event) => {
+											if (mobileColumn === column.index)
+												mobileColumn = Math.max(0, column.index - 1);
+											event.stopPropagation();
+										}}
+									>
+										<svg
+											viewBox="0 0 20 20"
+											class="size-3.5"
+											fill="currentColor"
+											aria-hidden="true"
+										>
+											<path
+												d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"
+											/>
+										</svg>
+									</button>
+								</form>
+							{/if}
+						</span>
+					{/each}
+					{#if data.notesVisible}
 						<button
 							type="button"
-							class="shrink-0"
-							aria-label={mobileColumn === column.index
-								? `${t('reader.chooseTranslation')}: ${column.resource.abbrev}`
-								: column.resource.abbrev}
-							onclick={() => {
-								if (mobileColumn === column.index) openTranslationDialog(column.index);
-								else mobileColumn = column.index;
-							}}
+							role="tab"
+							id="mobile-tab-{notesColumnIndex}"
+							aria-selected={mobileColumn === notesColumnIndex}
+							aria-controls="mobile-tabpanel-{notesColumnIndex}"
+							tabindex={mobileColumn === notesColumnIndex ? 0 : -1}
+							class="mobile-tab shrink-0 rounded-full px-3 py-1 text-sm"
+							class:bg-accent-600={mobileColumn === notesColumnIndex}
+							class:text-white={mobileColumn === notesColumnIndex}
+							class:bg-stone-100={mobileColumn !== notesColumnIndex}
+							class:dark:bg-stone-800={mobileColumn !== notesColumnIndex}
+							onclick={() => (mobileColumn = notesColumnIndex)}
 						>
-							{column.resource.abbrev}
+							{t('lists.note')}
 						</button>
-						{#if data.columns.length > 1}
-							<form method="POST" action="?/removeColumn" use:enhance>
-								<input type="hidden" name="index" value={column.index} />
-								<button
-									type="submit"
-									aria-label="{t('reader.removeColumn')}: {column.resource.abbrev}"
-									class="inline-flex size-5 shrink-0 items-center justify-center rounded-full opacity-70 hover:opacity-100"
-									onclick={(event) => {
-										if (mobileColumn === column.index) mobileColumn = Math.max(0, column.index - 1);
-										event.stopPropagation();
-									}}
-								>
-									<svg viewBox="0 0 20 20" class="size-3.5" fill="currentColor" aria-hidden="true">
-										<path
-											d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"
-										/>
-									</svg>
-								</button>
-							</form>
-						{/if}
-					</span>
-				{/each}
-				{#if data.notesVisible}
-					<button
-						type="button"
-						class="shrink-0 rounded-full px-3 py-1 text-sm"
-						class:bg-accent-600={mobileColumn === notesColumnIndex}
-						class:text-white={mobileColumn === notesColumnIndex}
-						class:bg-stone-100={mobileColumn !== notesColumnIndex}
-						class:dark:bg-stone-800={mobileColumn !== notesColumnIndex}
-						onclick={() => (mobileColumn = notesColumnIndex)}
-					>
-						{t('lists.note')}
-					</button>
-				{/if}
+					{/if}
+				</div>
 
 				{#if canAddColumn}
 					<button
@@ -842,15 +1115,23 @@
 					{t('reader.chapterEmpty')}
 				</p>
 			{:else}
-				<div class="flow-reader" style="--columns: {visibleColumnCount}" data-testid="flow-reader">
+				<div
+					class="flow-reader"
+					style="--columns: {visibleColumnCount}"
+					style:--column-track={columnTrack}
+					data-testid="flow-reader"
+				>
 					{#each data.columns as column, columnIndex (column.resource.id)}
 						<div
 							bind:this={flowColumns[columnIndex]}
 							data-flow-column-index={columnIndex}
 							class="flow-column"
 							class:hidden-on-mobile={columnIndex !== mobileColumn}
-							role="region"
-							aria-label={column.resource.name}
+							role={isMobileViewport ? 'tabpanel' : 'region'}
+							id={isMobileViewport ? `mobile-tabpanel-${columnIndex}` : undefined}
+							aria-labelledby={isMobileViewport ? `mobile-tab-${columnIndex}` : undefined}
+							aria-label={isMobileViewport ? undefined : column.resource.name}
+							aria-hidden={isMobileViewport && columnIndex !== mobileColumn}
 							onwheel={() => makeFlowSource(columnIndex)}
 							ontouchstart={() => makeFlowSource(columnIndex)}
 							onpointerdown={() => makeFlowSource(columnIndex)}
@@ -989,8 +1270,13 @@
 													{#each entries as entry (entry.id)}
 														{#if entry.title}<h3 class="commentary-title">{entry.title}</h3>{/if}
 														<!-- Imported commentary is reduced to an allow-list by its parser. -->
-														<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-														<div class="commentary-body">{@html entry.bodyHtml}</div>
+														<div
+															class="commentary-body"
+															use:verseHoverPopover={{ bibleId: primaryBibleId }}
+														>
+															<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+															{@html entry.bodyHtml}
+														</div>
 													{/each}
 												</article>
 											{/if}
@@ -1037,6 +1323,10 @@
 						<aside
 							class="flow-column flow-note"
 							class:hidden-on-mobile={mobileColumn !== notesColumnIndex}
+							role={isMobileViewport ? 'tabpanel' : undefined}
+							id={isMobileViewport ? `mobile-tabpanel-${notesColumnIndex}` : undefined}
+							aria-labelledby={isMobileViewport ? `mobile-tab-${notesColumnIndex}` : undefined}
+							aria-hidden={isMobileViewport && mobileColumn !== notesColumnIndex}
 						>
 							{#each streamChapters as stream (`note:${stream.reference.book}:${stream.reference.chapter}`)}
 								<div
@@ -1062,6 +1352,7 @@
 				<footer
 					class="license-grid grid text-xs text-stone-500 dark:text-stone-400"
 					style="--columns: {visibleColumnCount}"
+					style:--column-track={columnTrack}
 				>
 					{#each data.columns as column (column.resource.id)}
 						<div class:hidden-on-mobile={column.index !== mobileColumn}>
@@ -1103,14 +1394,65 @@
 />
 
 <style>
+	/* Sits on top of the column-picker bar, straddling the boundary between two columns. Only the
+	   thin strip itself takes pointer events — see the wrapper's `pointer-events-none` in the markup. */
+	.column-resize-handle {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		width: 10px;
+		margin-left: -5px;
+		cursor: col-resize;
+		touch-action: none;
+		pointer-events: auto;
+	}
+
+	.column-resize-handle:hover,
+	.column-resize-handle:focus-visible {
+		background: color-mix(in oklab, var(--color-accent-500) 35%, transparent);
+	}
+
+	.column-resize-handle:focus-visible {
+		outline: 2px solid var(--color-accent-500);
+		outline-offset: -2px;
+	}
+
+	/* The mobile column tabs. The pill's background already shows which one is selected; the
+	   underline is a second, less color-dependent cue, and the one that actually animates. */
+	.mobile-tab {
+		position: relative;
+	}
+
+	.mobile-tab::after {
+		position: absolute;
+		right: 20%;
+		bottom: -0.35rem;
+		left: 20%;
+		height: 2px;
+		border-radius: 1px;
+		background: var(--color-accent-500);
+		opacity: 0;
+		transition: opacity 150ms ease;
+		content: '';
+	}
+
+	.mobile-tab[aria-selected='true']::after {
+		opacity: 1;
+	}
+
+	.mobile-tab:focus-visible {
+		outline: 2px solid var(--color-accent-500);
+		outline-offset: 2px;
+	}
+
 	.license-grid {
-		grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+		grid-template-columns: var(--column-track, repeat(var(--columns), minmax(0, 1fr)));
 		margin-top: 1.5rem;
 	}
 
 	.flow-reader {
 		display: grid;
-		grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+		grid-template-columns: var(--column-track, repeat(var(--columns), minmax(0, 1fr)));
 		height: max(28rem, calc(100dvh - var(--header-height) - 11.5rem));
 		overflow: hidden;
 		border: 1px solid color-mix(in oklab, var(--color-stone-300) 55%, transparent);

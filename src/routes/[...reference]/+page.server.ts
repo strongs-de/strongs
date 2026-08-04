@@ -14,9 +14,11 @@ import {
 	addColumn,
 	moveColumn,
 	resolveColumns,
+	resolveColumnWidths,
 	removeColumn,
 	setColumn,
-	writeColumns
+	writeColumns,
+	writeColumnWidths
 } from '$lib/server/columns';
 import { loadChapter } from '$lib/server/repositories/chapter';
 import { loadReferenceResources } from '$lib/server/repositories/reference-resources';
@@ -189,6 +191,9 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 				covers: coverage.get(id)?.has(reference.book) ?? false
 			};
 		}),
+		/** Custom per-column widths, in the same order as `columns` above, or `null` when the reader has
+		 *  not resized anything — the client then falls back to an even split via CSS. */
+		columnWidths: resolveColumnWidths(cookies, columns),
 		navigation: {
 			previous: previousChapter(reference.book, reference.chapter),
 			next: nextChapter(reference.book, reference.chapter),
@@ -269,6 +274,24 @@ export const actions = {
 			locals.user,
 			moveColumn(resolveColumns(cookies, bibles, locals.user?.readerColumns), from, to)
 		);
+		return { success: true };
+	},
+
+	/** Commits a drag-resize of the column boundaries. Widths are normalized and clamped again here —
+	 *  the client already does both live, but a request is never trusted at face value. */
+	setColumnWidths: async ({ request, cookies, locals }) => {
+		const form = await request.formData();
+		const widths = String(form.get('widths') ?? '')
+			.split(',')
+			.map(Number);
+
+		const bibles = await listReaderResources(getDb());
+		const columns = resolveColumns(cookies, bibles, locals.user?.readerColumns);
+		if (widths.length !== columns.length || widths.some((width) => !Number.isFinite(width))) {
+			return fail(400, { error: 'widths' });
+		}
+
+		writeColumnWidths(cookies, columns, widths);
 		return { success: true };
 	},
 

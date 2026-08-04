@@ -1,21 +1,60 @@
 import { open } from 'node:fs/promises';
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
+import { lastMailLinkTo } from './lib/mail-outbox.ts';
 
 /**
  * Admin backup and restore.
  *
  * The destructive full restore round-trip is deliberately not included here: it drops and recreates
  * every table in the shared e2e database, which any other test running concurrently would trip over.
- * These tests cover the parts that do not require that: navigation/authorisation, the manual download
- * (which does need `pg_dump` on the host, hence the `hasPgDump` guard), S3 settings persistence
- * without leaking the secret, and the restore flow's server-side guards (wrong confirmation phrase,
- * invalid file) — submitted by calling `form.requestSubmit()` directly rather than clicking the
- * (client-disabled) submit button, since the check that actually matters is the server's.
+ * That applies just as much to the two direct-restore sources (an existing local copy, an S3 object) as
+ * it does to the upload path — none of the three are exercised end to end here. These tests cover the
+ * parts that do not require that: navigation/authorisation, the manual download (which does need
+ * `pg_dump` on the host, hence the `hasPgDump` guard), S3 settings persistence without leaking the
+ * secret, downloading an existing local copy directly, and every restore path's server-side guards
+ * (wrong confirmation phrase, invalid file) — submitted by calling `form.requestSubmit()` directly
+ * rather than clicking the (client-disabled) submit button, since the check that actually matters is
+ * the server's.
+ *
+ * Restoring directly from an S3 object is not covered at all: the admin UI only ever renders a
+ * restore-from-S3 button for an object returned by `?/listRemote`, which itself requires a reachable,
+ * writable bucket — not available in this environment or in CI. `s3.spec.ts` and `jobs.spec.ts` cover
+ * `getObjectStream`/`stageFromS3` against a mocked S3 client instead (see the summary in the PR/commit
+ * description for what that does and does not prove).
  */
+
+/** Matches `BACKUP_FILE_PATTERN` in `src/lib/server/backup/retention.ts`. */
+function fakeBackupName(offsetSeconds: number): string {
+	const at = new Date(Date.now() + offsetSeconds * 1000);
+	const pad = (n: number) => String(n).padStart(2, '0');
+	const stamp =
+		`${at.getUTCFullYear()}${pad(at.getUTCMonth() + 1)}${pad(at.getUTCDate())}-` +
+		`${pad(at.getUTCHours())}${pad(at.getUTCMinutes())}${pad(at.getUTCSeconds())}`;
+	return `strongs-${stamp}.dump`;
+}
+
+/**
+ * `BACKUP_TMP_DIR`'s default (see `.env.example`), which the e2e `webServer` does not override —
+ * matches what `src/lib/server/config.ts` resolves to when the preview server and this test process
+ * share the same working directory and filesystem, as they do here.
+ */
+function localBackupsDir(): string {
+	return join(process.cwd(), 'var', 'backups');
+}
+
+function writeFakeLocalBackup(name: string, content: Buffer): string {
+	const dir = localBackupsDir();
+	mkdirSync(dir, { recursive: true });
+	const path = join(dir, name);
+	writeFileSync(path, content);
+	return path;
+}
+
+const VALID_DUMP_HEADER = Buffer.concat([Buffer.from('PGDMP', 'ascii'), Buffer.alloc(16)]);
 
 function uniqueEmail(): string {
 	return `e2e-backup-${Math.random().toString(36).slice(2, 10)}@example.com`;
@@ -30,6 +69,10 @@ async function register(page: import('@playwright/test').Page, email: string): P
 	await page.getByLabel('Passwort', { exact: true }).fill(PASSWORD);
 	await page.getByLabel('Passwort wiederholen').fill(PASSWORD);
 	await page.getByRole('button', { name: 'Konto erstellen' }).click();
+	await expect(page).toHaveURL(/\/register\/check-email$/);
+
+	await page.goto(await lastMailLinkTo(email));
+	await page.getByRole('button', { name: 'Konto aktivieren' }).click();
 	await expect(page).toHaveURL(/\/account$/);
 }
 
@@ -151,4 +194,95 @@ test('restore refuses a file that is not a pg_dump', async ({ page }) => {
 
 	await page.getByLabel('Backup-Datei (.dump)').setInputFiles(path);
 	await expect(page.getByText(/keine gültige Backup-Datei/)).toBeVisible();
+});
+
+test('an existing local backup copy has its own download link and can be downloaded directly', async ({
+	page
+}) => {
+	// No `pg_dump` involved at all: this is a plain file already sitting where the scheduled backup
+	// would have left it, downloaded through the new per-row link — not the throwaway dump the
+	// "Sofort-Backup" button generates.
+	const name = fakeBackupName(0);
+	const path = writeFakeLocalBackup(name, VALID_DUMP_HEADER);
+
+	try {
+		await loginAsAdmin(page);
+		await page.goto('/admin/backup');
+
+		const row = page.locator('li').filter({ hasText: name });
+		await expect(row).toBeVisible();
+
+		const downloadPromise = page.waitForEvent('download');
+		await row.getByRole('link', { name: 'herunterladen' }).click();
+		const download = await downloadPromise;
+
+		expect(download.suggestedFilename()).toBe(name);
+		const downloadedPath = await download.path();
+		expect(downloadedPath).not.toBeNull();
+		expect(readFileSync(downloadedPath!).subarray(0, 5).toString('ascii')).toBe('PGDMP');
+
+		// Unlike `/admin/backup/download` (a fresh, throwaway dump), this is a durable copy — the
+		// route must not have deleted it after streaming.
+		expect(existsSync(path)).toBe(true);
+	} finally {
+		rmSync(path, { force: true });
+	}
+});
+
+test('restoreLocal refuses a wrong confirmation phrase', async ({ page }) => {
+	const name = fakeBackupName(1);
+	const path = writeFakeLocalBackup(name, VALID_DUMP_HEADER);
+
+	try {
+		await loginAsAdmin(page);
+		await page.goto('/admin/backup');
+
+		const row = page.locator('li').filter({ hasText: name });
+		await expect(row).toBeVisible();
+
+		await page.getByLabel(/Zur Bestätigung/).fill('falsch');
+		// Same reasoning as the upload form's equivalent test: the disabled button is convenience
+		// only, so the direct `requestSubmit()` is what proves the server enforces this independently.
+		await row
+			.locator('form[action="?/restoreLocal"]')
+			.evaluate((form) => (form as HTMLFormElement).requestSubmit());
+
+		await expect(page.getByText('Die Bestätigung stimmt nicht überein.')).toBeVisible();
+		await expect(page.getByText('Sicherung vor Wiederherstellung')).toHaveCount(0);
+		await expect(page.getByText('Wiederherstellung', { exact: true })).toHaveCount(0);
+	} finally {
+		rmSync(path, { force: true });
+	}
+});
+
+test('restoreLocal refuses a file that is not a valid pg_dump, without deleting it', async ({
+	page
+}) => {
+	// A file that matches the naming pattern but not the pg_dump magic bytes — e.g. corrupted on disk.
+	// The confirmation phrase is correct here, which is exactly the point: staging must reject the file
+	// on its content *before* a restore (and its mandatory pre-restore safety dump) is ever started.
+	const name = fakeBackupName(2);
+	const path = writeFakeLocalBackup(name, Buffer.from('not a dump'));
+
+	try {
+		await loginAsAdmin(page);
+		await page.goto('/admin/backup');
+
+		const row = page.locator('li').filter({ hasText: name });
+		await expect(row).toBeVisible();
+
+		await page.getByLabel(/Zur Bestätigung/).fill('WIEDERHERSTELLEN');
+		await row
+			.locator('form[action="?/restoreLocal"]')
+			.evaluate((form) => (form as HTMLFormElement).requestSubmit());
+
+		await expect(page.getByText('Das ist keine gültige Backup-Datei.')).toBeVisible();
+		await expect(page.getByText('Sicherung vor Wiederherstellung')).toHaveCount(0);
+		await expect(page.getByText('Wiederherstellung', { exact: true })).toHaveCount(0);
+		// The rejected file is a pre-existing local backup, not a throwaway upload — staging must not
+		// have deleted it merely for failing the format check.
+		expect(existsSync(path)).toBe(true);
+	} finally {
+		rmSync(path, { force: true });
+	}
 });

@@ -14,7 +14,9 @@
 					? t('auth.register.passwordTooShort', { min: data.minPasswordLength })
 					: form?.error === 'email'
 						? t('auth.email')
-						: null
+						: form?.error === 'throttled'
+							? t('auth.register.throttled')
+							: null
 	);
 </script>
 
@@ -51,6 +53,23 @@
 		autocomplete="new-password"
 		required
 	/>
+
+	<!--
+		Honeypot: a native input, not TextField, since a person must never be able to focus, read or
+		fill it. A script that fills every field in the form (rather than the ones a person sees) trips
+		it; the server then answers as if registration succeeded without creating an account.
+	-->
+	<div class="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+		<label for="company">Firma</label>
+		<input
+			type="text"
+			id="company"
+			name="company"
+			tabindex="-1"
+			autocomplete="off"
+			style="opacity: 0; pointer-events: none;"
+		/>
+	</div>
 
 	{#snippet footer()}
 		<p>

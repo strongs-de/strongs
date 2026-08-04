@@ -20,6 +20,7 @@
  */
 
 import { parseReference } from '../reference.ts';
+import { autoLinkProse } from '../auto-link.ts';
 import { attribute, readXml } from './xml.ts';
 import { splitDelimited } from './detect.ts';
 import { readLines } from './usfm.ts';
@@ -366,7 +367,9 @@ const KEEP_TAGS = new Set(['p', 'br', 'em', 'i', 'strong', 'b', 'ul', 'ol', 'li'
  * Reduces an untrusted body to plain text plus a small set of formatting tags.
  *
  * Everything is escaped first and only the allowed tags are put back, so no attribute — and therefore
- * no event handler, style or URL — survives from the source.
+ * no event handler, style or URL — survives from the source. Bible references mentioned in the text
+ * are auto-linked last, once the result is already safe, limited-tag HTML that {@link autoLinkProse}
+ * can scan without risking any markup it does not already know how to leave alone.
  */
 export function sanitizeHtml(value: string): string {
 	const escaped = escapeHtml(stripTags(value));
@@ -375,14 +378,14 @@ export function sanitizeHtml(value: string): string {
 		(_match, slash: string, tag: string) => `<${slash}${tag.toLowerCase()}>`
 	);
 
-	return (
-		withTags
-			// Markdown-style emphasis is common in hand-written commentary files.
-			.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-			.replace(/(^|\s)\*([^*]+)\*/g, '$1<em>$2</em>')
-			.replace(/\s+/g, ' ')
-			.trim()
-	);
+	const rendered = withTags
+		// Markdown-style emphasis is common in hand-written commentary files.
+		.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+		.replace(/(^|\s)\*([^*]+)\*/g, '$1<em>$2</em>')
+		.replace(/\s+/g, ' ')
+		.trim();
+
+	return autoLinkProse(rendered);
 }
 
 /** Removes tags that are not in the allow list, keeping their text content. */

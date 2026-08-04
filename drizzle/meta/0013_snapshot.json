@@ -1,6 +1,6 @@
 {
-  "id": "4e502a90-2af8-4d4c-9dd6-e38699c51f5f",
-  "prevId": "650b1fc8-8456-4669-98ba-02a3c328baf7",
+  "id": "06f062f1-98a5-4550-8e53-51aa2ab3f8e3",
+  "prevId": "4e502a90-2af8-4d4c-9dd6-e38699c51f5f",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1647,12 +1647,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": 100
-        },
-        "reader_layout": {
-          "name": "reader_layout",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         },
         "theme": {
           "name": "theme",

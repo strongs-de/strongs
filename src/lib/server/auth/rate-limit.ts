@@ -16,6 +16,13 @@ import { loginAttempts } from '../db/schema.ts';
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_PER_EMAIL = 8;
 const MAX_PER_ADDRESS = 30;
+/**
+ * Registration sees legitimately higher volume per address than a login failure or a password
+ * reset — several people signing up from behind the same office or campus NAT is normal, a script
+ * creating dozens of accounts a minute is not. Higher than `MAX_PER_ADDRESS`, still well below what
+ * scripted abuse needs to be a nuisance.
+ */
+const MAX_REGISTRATIONS_PER_ADDRESS = 50;
 
 export async function recordFailedLogin(
 	db: Database,
@@ -69,7 +76,17 @@ export async function pruneLoginAttempts(db: Database): Promise<void> {
 }
 
 /** Exported for tests, which need to know when the limit bites. */
-export const LIMITS = { WINDOW_MS, MAX_PER_EMAIL, MAX_PER_ADDRESS };
+export const LIMITS = {
+	WINDOW_MS,
+	MAX_PER_EMAIL,
+	MAX_PER_ADDRESS,
+	MAX_REGISTRATIONS_PER_ADDRESS
+};
+
+/** Records a single attempt under an arbitrary subject, e.g. `register:<ip>`. */
+export async function recordAttempt(db: Database, subject: string): Promise<void> {
+	await db.insert(loginAttempts).values({ subject });
+}
 
 /** Used by the password-reset form, which is rate limited on the same table. */
 export async function countRecent(

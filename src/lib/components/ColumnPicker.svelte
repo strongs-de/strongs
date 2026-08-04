@@ -96,8 +96,10 @@
 		{#if linked !== undefined}
 			<button
 				type="button"
-				title={linked ? t('reader.unlinkColumn') : t('reader.linkColumn')}
-				aria-label="{linked ? t('reader.unlinkColumn') : t('reader.linkColumn')}: {selected.abbrev}"
+				title={linked ? t('reader.flowSyncDisable') : t('reader.flowSyncEnable')}
+				aria-label="{linked
+					? t('reader.flowSyncDisable')
+					: t('reader.flowSyncEnable')}: {selected.abbrev}"
 				aria-pressed={linked}
 				class="relative inline-flex size-7 shrink-0 items-center justify-center rounded hover:bg-stone-100
 			       dark:hover:bg-stone-800"

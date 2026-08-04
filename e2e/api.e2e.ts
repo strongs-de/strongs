@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { lastMailLinkTo } from './lib/mail-outbox.ts';
 
 /**
  * The public API: the domain gate and rate limiting (`hooks.server.ts` + `lib/server/api/`), and the
@@ -20,12 +21,17 @@ async function registerAndCreateKey(
 	page: import('@playwright/test').Page,
 	scope: 'public' | 'personal'
 ): Promise<string> {
+	const email = uniqueEmail();
 	await page.goto('/register');
-	await page.getByLabel('E-Mail-Adresse').fill(uniqueEmail());
+	await page.getByLabel('E-Mail-Adresse').fill(email);
 	await page.getByLabel('Anzeigename').fill('E2E');
 	await page.getByLabel('Passwort', { exact: true }).fill('ein-sicheres-passwort');
 	await page.getByLabel('Passwort wiederholen').fill('ein-sicheres-passwort');
 	await page.getByRole('button', { name: 'Konto erstellen' }).click();
+	await expect(page).toHaveURL(/\/register\/check-email$/);
+
+	await page.goto(await lastMailLinkTo(email));
+	await page.getByRole('button', { name: 'Konto aktivieren' }).click();
 	await expect(page).toHaveURL(/\/account$/);
 
 	await page.getByLabel('Name', { exact: true }).fill(`E2E ${scope}`);
@@ -145,13 +151,31 @@ test('GET /api/v1/lists and /api/v1/notes need a session or a personal-scope key
 	expect(notes.status()).toBe(403);
 });
 
+test('/api/docs renders the interactive API reference from the OpenAPI document', async ({
+	page
+}) => {
+	const spec = await page.request.get('/openapi.json');
+	expect(spec.status()).toBe(200);
+	expect((await spec.json()).info.title).toBe('strongs.de API');
+
+	await page.goto('/api/docs');
+	await expect(page).toHaveTitle(/API-Referenz/);
+	await expect(page.getByText('strongs.de API').first()).toBeVisible();
+	await expect(page.getByText('/api/v1/books').first()).toBeVisible();
+});
+
 test('a signed-in session reads its own lists and notes through the API', async ({ page }) => {
+	const email = uniqueEmail();
 	await page.goto('/register');
-	await page.getByLabel('E-Mail-Adresse').fill(uniqueEmail());
+	await page.getByLabel('E-Mail-Adresse').fill(email);
 	await page.getByLabel('Anzeigename').fill('E2E');
 	await page.getByLabel('Passwort', { exact: true }).fill('ein-sicheres-passwort');
 	await page.getByLabel('Passwort wiederholen').fill('ein-sicheres-passwort');
 	await page.getByRole('button', { name: 'Konto erstellen' }).click();
+	await expect(page).toHaveURL(/\/register\/check-email$/);
+
+	await page.goto(await lastMailLinkTo(email));
+	await page.getByRole('button', { name: 'Konto aktivieren' }).click();
 	await expect(page).toHaveURL(/\/account$/);
 
 	// A real in-page fetch, not the request fixture: only a browser attaches the session cookie and
