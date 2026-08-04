@@ -47,7 +47,7 @@ execFileSync('node', ['scripts/migrate.ts'], { stdio: 'inherit', env: environmen
 // Start from a clean slate: content only, so the schema and migration history stay put.
 const db = postgres(target, { max: 1, onnotice: () => {} });
 try {
-	await db`truncate resources, users, import_jobs, login_attempts, settings cascade`;
+	await db`truncate resources, users, import_jobs, login_attempts, settings, backup_jobs cascade`;
 } finally {
 	await db.end();
 }

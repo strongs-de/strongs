@@ -26,8 +26,13 @@ services:
       MAIL_FROM_NAME: ${MAIL_FROM_NAME:-strongs.de}
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      # Encrypts the S3 secret access key stored in the settings table (admin-configured backups).
+      BACKUP_ENCRYPTION_KEY: ${SERVICE_BASE64_64_BACKUP:?}
     volumes:
       - uploads:/app/var/uploads
+      # Local safety-net copies of scheduled backups, alongside S3 (see /admin/backup). Same volume
+      # name the old `backup` sidecar used, so its existing dumps stay on disk and restorable.
+      - backups:/app/var/backups
     healthcheck:
       test:
         [
@@ -57,24 +62,6 @@ services:
       timeout: 5s
       retries: 10
       start_period: 20s
-
-  backup:
-    image: prodrigestivill/postgres-backup-local:17-alpine
-    restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      POSTGRES_HOST: db
-      POSTGRES_DB: strongs
-      POSTGRES_USER: strongs
-      POSTGRES_PASSWORD: ${SERVICE_PASSWORD_POSTGRES:?}
-      SCHEDULE: '@daily'
-      BACKUP_KEEP_DAYS: '30'
-      BACKUP_KEEP_WEEKS: '8'
-      BACKUP_KEEP_MONTHS: '12'
-    volumes:
-      - backups:/backups
 
 volumes:
   pgdata:

@@ -7,6 +7,7 @@
 		{ href: '/admin', label: 'Übersicht' },
 		{ href: '/admin/resources', label: 'Ressourcen' },
 		{ href: '/admin/import', label: 'Importieren' },
+		{ href: '/admin/backup', label: 'Backup' },
 		{ href: '/admin/users', label: 'Nutzer' }
 	];
 </script>

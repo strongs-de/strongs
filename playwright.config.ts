@@ -32,6 +32,8 @@ export default defineConfig({
 			DATABASE_URL: databaseUrl,
 			ORIGIN: 'http://localhost:4173',
 			SESSION_SECRET: 'e2e-session-secret-e2e-session-secret-0123',
+			// Lets the backup tests exercise the encrypted S3-secret path, not just the unconfigured one.
+			BACKUP_ENCRYPTION_KEY: 'e2e-backup-encryption-key-0123456789abcdef',
 			NODE_ENV: 'production'
 		}
 	}

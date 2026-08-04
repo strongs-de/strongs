@@ -7,6 +7,8 @@ import { logger } from '$lib/server/logger';
 import { authenticateApiRequest, type ApiAuth } from '$lib/server/api/gate';
 import { checkApiRateLimit, KEYED_LIMIT, TRUSTED_LIMIT } from '$lib/server/api/rate-limit';
 import { apiError } from '$lib/server/api/errors';
+import { cleanStaleStagedFiles, failInterruptedBackupJobs } from '$lib/server/backup/jobs';
+import { startBackupScheduler } from '$lib/server/backup/scheduler';
 
 /**
  * Runs once when the server starts.
@@ -18,12 +20,18 @@ export const init: ServerInit = async () => {
 	const db = getDb();
 	try {
 		await failInterruptedJobs(db);
+		await failInterruptedBackupJobs(db);
 		await pruneExpiredSessions(db);
+		await cleanStaleStagedFiles();
 	} catch (error) {
 		// A database that is not up yet must not stop the server from booting: the healthcheck will
 		// report unhealthy until it is, which is the signal the deployment watches.
 		logger.warn({ err: error }, 'startup housekeeping skipped');
 	}
+
+	// Outside the try/catch above: a database that is briefly unreachable at boot must not permanently
+	// leave the site without a scheduler until the next deploy.
+	startBackupScheduler(db);
 };
 
 /**

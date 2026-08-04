@@ -561,6 +561,40 @@ export const settings = pgTable('settings', {
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 });
 
+export const BACKUP_JOB_TYPES = ['download', 'scheduled', 'pre-restore', 'restore'] as const;
+export const BACKUP_JOB_STATES = ['queued', 'running', 'done', 'failed'] as const;
+export const BACKUP_TRIGGERS = ['manual', 'schedule'] as const;
+
+/**
+ * One row per backup or restore run: the admin UI's only source of truth for whether last night's
+ * scheduled backup worked. `pre-restore` rows are the automatic safety dumps taken before a restore.
+ */
+export const backupJobs = pgTable(
+	'backup_jobs',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		type: text('type', { enum: BACKUP_JOB_TYPES }).notNull(),
+		state: text('state', { enum: BACKUP_JOB_STATES }).notNull().default('queued'),
+		trigger: text('trigger', { enum: BACKUP_TRIGGERS }).notNull().default('manual'),
+		/** Dump file name, e.g. `strongs-20260804-030000.dump`. */
+		fileName: text('file_name'),
+		/** Where the result ended up: `s3://bucket/key`, `local:/app/var/backups/…`, or `download`. */
+		location: text('location'),
+		sizeBytes: bigint('size_bytes', { mode: 'number' }),
+		/** Human-readable status line, mirroring `import_jobs.message`. */
+		message: text('message'),
+		error: text('error'),
+		createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+		startedAt: timestamp('started_at', { withTimezone: true }),
+		finishedAt: timestamp('finished_at', { withTimezone: true }),
+		...timestamps
+	},
+	(table) => [
+		index('backup_jobs_state_idx').on(table.state, table.createdAt),
+		index('backup_jobs_type_idx').on(table.type, table.createdAt)
+	]
+);
+
 export type Resource = typeof resources.$inferSelect;
 export type NewResource = typeof resources.$inferInsert;
 export type Verse = typeof verses.$inferSelect;
@@ -575,3 +609,4 @@ export type VerseList = typeof verseLists.$inferSelect;
 export type VerseListItem = typeof verseListItems.$inferSelect;
 export type ChapterNote = typeof chapterNotes.$inferSelect;
 export type ImportJob = typeof importJobs.$inferSelect;
+export type BackupJob = typeof backupJobs.$inferSelect;
