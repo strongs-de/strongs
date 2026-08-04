@@ -7,8 +7,10 @@
  */
 
 import { createReadStream } from 'node:fs';
+import type { Readable } from 'node:stream';
 import {
 	DeleteObjectsCommand,
+	GetObjectCommand,
 	HeadBucketCommand,
 	ListObjectsV2Command,
 	PutObjectCommand,
@@ -59,6 +61,23 @@ export async function uploadFile(
 		});
 	}
 	await upload.done();
+}
+
+/**
+ * Streams a single object back rather than buffering it, so a large dump does not sit in memory
+ * before being forwarded to the browser — the download/restore counterpart of `uploadFile`.
+ */
+export async function getObjectStream(
+	client: S3Client,
+	options: { bucket: string; key: string }
+): Promise<{ body: Readable; sizeBytes: number }> {
+	const result = await client.send(
+		new GetObjectCommand({ Bucket: options.bucket, Key: options.key })
+	);
+	if (!result.Body) throw new Error('Das S3-Objekt hat keinen Inhalt.');
+	// The Node.js runtime of the SDK always resolves `Body` to a `Readable`; only the browser runtime
+	// would give a web `ReadableStream` instead, which does not apply here.
+	return { body: result.Body as Readable, sizeBytes: result.ContentLength ?? 0 };
 }
 
 /** Paginated listing of every object under `prefix`. */

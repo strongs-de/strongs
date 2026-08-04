@@ -6,8 +6,12 @@
  * restarts is marked failed on the next boot (`failInterruptedBackupJobs`) rather than resumed.
  */
 
-import { mkdir, readdir, rm, stat } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { createWriteStream } from 'node:fs';
+import { mkdir, open, readdir, rm, stat, copyFile } from 'node:fs/promises';
+import { pipeline } from 'node:stream/promises';
 import { join } from 'node:path';
+import type { S3Client } from '@aws-sdk/client-s3';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { config } from '../config.ts';
@@ -17,8 +21,8 @@ import { backupJobs, type BackupJob } from '../db/schema.ts';
 import { refreshStrongStatisticsBlocking } from '../db/statistics.ts';
 import { invalidateResourceCache } from '../repositories/resources.ts';
 import { pruneExpiredSessions } from '../auth/session.ts';
-import { dumpToFile, restoreFromFile } from './pg.ts';
-import { createS3Client, uploadFile, pruneRemote } from './s3.ts';
+import { dumpToFile, isCustomFormatDump, restoreFromFile } from './pg.ts';
+import { createS3Client, getObjectStream, uploadFile, pruneRemote } from './s3.ts';
 import {
 	backupFileName,
 	BACKUP_FILE_PATTERN,
@@ -200,6 +204,67 @@ export async function cleanStaleStagedFiles(): Promise<void> {
 			// Racing with an in-flight upload of the same file; leave it alone.
 		}
 	}
+}
+
+// --- staging an existing backup for direct restore ------------------------------
+
+async function assertCustomFormatDump(path: string): Promise<void> {
+	const handle = await open(path, 'r');
+	const head = Buffer.alloc(5);
+	try {
+		await handle.read(head, 0, 5, 0);
+	} finally {
+		await handle.close();
+	}
+	if (!isCustomFormatDump(head)) {
+		await rm(path, { force: true });
+		throw new Error('Das ist keine gültige Backup-Datei.');
+	}
+}
+
+/**
+ * Copies an existing local backup into a fresh staged path so it can be restored directly, without a
+ * detour through download + re-upload.
+ *
+ * Always a *copy*: `executeRestore`'s `finally` block unconditionally deletes the path it was given,
+ * so handing it the original file would delete that local backup as a side effect of restoring it.
+ */
+export async function stageFromLocal(name: string): Promise<string> {
+	if (!BACKUP_FILE_PATTERN.test(name)) throw new Error('Ungültiger Dateiname.');
+	const dir = config().BACKUP_TMP_DIR;
+	const source = join(dir, name);
+	await mkdir(dir, { recursive: true });
+	const dest = stagedDumpPath(randomUUID());
+	try {
+		await copyFile(source, dest);
+	} catch {
+		throw new Error('Die lokale Sicherung wurde nicht gefunden.');
+	}
+	await assertCustomFormatDump(dest);
+	return dest;
+}
+
+/**
+ * Streams an S3 object into a fresh staged path, exactly like `/admin/backup/upload` does for an
+ * HTTP upload, so it can be restored directly without downloading and re-uploading it by hand.
+ *
+ * Same copy-not-original rule as `stageFromLocal`: the staged path is always a new file.
+ */
+export async function stageFromS3(
+	client: S3Client,
+	options: { bucket: string; key: string }
+): Promise<string> {
+	await mkdir(config().BACKUP_TMP_DIR, { recursive: true });
+	const dest = stagedDumpPath(randomUUID());
+	try {
+		const { body } = await getObjectStream(client, options);
+		await pipeline(body, createWriteStream(dest));
+	} catch (error) {
+		await rm(dest, { force: true }).catch(() => {});
+		throw error;
+	}
+	await assertCustomFormatDump(dest);
+	return dest;
 }
 
 // --- manual download -----------------------------------------------------------
