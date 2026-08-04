@@ -151,6 +151,19 @@ test('GET /api/v1/lists and /api/v1/notes need a session or a personal-scope key
 	expect(notes.status()).toBe(403);
 });
 
+test('/api/docs renders the interactive API reference from the OpenAPI document', async ({
+	page
+}) => {
+	const spec = await page.request.get('/openapi.json');
+	expect(spec.status()).toBe(200);
+	expect((await spec.json()).info.title).toBe('strongs.de API');
+
+	await page.goto('/api/docs');
+	await expect(page).toHaveTitle(/API-Referenz/);
+	await expect(page.getByText('strongs.de API').first()).toBeVisible();
+	await expect(page.getByText('/api/v1/books').first()).toBeVisible();
+});
+
 test('a signed-in session reads its own lists and notes through the API', async ({ page }) => {
 	const email = uniqueEmail();
 	await page.goto('/register');
