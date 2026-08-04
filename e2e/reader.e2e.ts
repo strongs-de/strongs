@@ -62,6 +62,14 @@ test('the help page is reachable from the site header', async ({ page }) => {
 	await expect(page.getByRole('heading', { level: 1 })).toContainText('Hilfe');
 });
 
+test('the about page loads with a visible heading', async ({ page }) => {
+	const response = await page.goto('/about');
+
+	expect(response?.status()).toBe(200);
+	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('strongs.de');
+});
+
 test('a reference shows the chapter in parallel columns', async ({ page }) => {
 	await useAlignedLayout(page);
 	await page.goto('/Joh3,16');
