@@ -5,6 +5,7 @@
 	import { verseHoverPopover } from '$lib/actions/verse-hover-popover';
 	import MorphologyList from './MorphologyList.svelte';
 	import BookDistribution from './BookDistribution.svelte';
+	import GlossChart from './GlossChart.svelte';
 
 	/**
 	 * The study panel: dictionary entry, morphology, how the word is rendered, and every place it
@@ -110,10 +111,6 @@
 			page = 1;
 		}
 	});
-
-	const maxGloss = $derived(
-		payload?.glosses.reduce((max, gloss) => Math.max(max, gloss.occurrences), 0) ?? 0
-	);
 </script>
 
 <svelte:window onkeydown={onWindowKeydown} onclick={onWindowClick} />
@@ -252,20 +249,7 @@
 						<h3 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">
 							{t('strong.translations')}
 						</h3>
-						<ul class="space-y-1">
-							{#each payload.glosses as gloss (gloss.display)}
-								<li class="flex items-center gap-2">
-									<span class="w-32 shrink-0 truncate" title={gloss.display}>{gloss.display}</span>
-									<span
-										class="h-1.5 rounded-full bg-accent-500/70"
-										style="width: {Math.max(4, (gloss.occurrences / Math.max(1, maxGloss)) * 100)}%"
-									></span>
-									<span class="shrink-0 text-xs text-stone-500 dark:text-stone-400">
-										{formatNumber(gloss.occurrences)}
-									</span>
-								</li>
-							{/each}
-						</ul>
+						<GlossChart glosses={payload.glosses} groupBelowPercent={3} centerLabel />
 					</section>
 				{/if}
 

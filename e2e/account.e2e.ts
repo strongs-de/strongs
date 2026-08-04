@@ -34,6 +34,12 @@ async function register(page: import('@playwright/test').Page, email: string): P
 	await expect(page).toHaveURL(/\/account$/);
 }
 
+/** Verse lists live under their own section of the settings dashboard now, not a page of their own. */
+async function gotoLists(page: import('@playwright/test').Page): Promise<void> {
+	await page.goto('/account');
+	await page.getByRole('button', { name: 'Verslisten & Notizen' }).click();
+}
+
 test('registration, sign out and sign in again', async ({ page }) => {
 	const email = uniqueEmail();
 	await register(page, email);
@@ -41,7 +47,9 @@ test('registration, sign out and sign in again', async ({ page }) => {
 
 	await page.getByRole('button', { name: 'Abmelden' }).click();
 	// Signing out lands on the reader, so the check is that the session is gone, not the address.
-	await expect(page.getByRole('link', { name: 'Anmelden' })).toBeVisible();
+	// Anmelden lives in the consolidated user menu now.
+	await page.getByRole('button', { name: 'Konto-Menü' }).click();
+	await expect(page.getByRole('menuitem', { name: 'Anmelden' })).toBeVisible();
 
 	await page.goto('/account');
 	await expect(page).toHaveURL(/\/login/);
@@ -82,6 +90,9 @@ test('a reader gets a default highlight palette, can rename a colour and add one
 }) => {
 	await register(page, uniqueEmail());
 
+	// Versmarkierungen live under the "Darstellung" section of the settings dashboard now.
+	await page.getByRole('button', { name: 'Darstellung' }).click();
+
 	const rows = page.locator('form[action="?/renameHighlightStyle"]');
 	await expect(rows).toHaveCount(10);
 
@@ -90,6 +101,7 @@ test('a reader gets a default highlight palette, can rename a colour and add one
 
 	// The name survives a reload — the whole point of naming a colour is to keep the label.
 	await page.reload();
+	await page.getByRole('button', { name: 'Darstellung' }).click();
 	await expect(rows.first().getByRole('textbox')).toHaveValue('Verheißungen');
 
 	const addForm = page.locator('form[action="?/addHighlightStyle"]');
@@ -117,8 +129,8 @@ test('a wrong password is refused', async ({ page }) => {
 test('a verse list keeps its verses and notes', async ({ page }) => {
 	await register(page, uniqueEmail());
 
-	// Create a list. Lists live in the main navigation now, not on the settings page.
-	await page.goto('/lists');
+	// Create a list from the settings dashboard's "Verslisten & Notizen" section.
+	await gotoLists(page);
 	await page.getByPlaceholder('Neue Versliste').fill('Meine Studienliste');
 	await page.getByRole('button', { name: 'Neue Versliste' }).click();
 	await expect(page).toHaveURL(/\/lists\//);
@@ -144,25 +156,21 @@ test('a verse list keeps its verses and notes', async ({ page }) => {
 
 test('chapter notes follow the visible chapter while scrolling', async ({ page }) => {
 	await register(page, uniqueEmail());
-	// The note for chapter 2 is filled in before switching to flowing text below; in the aligned grid
-	// every loaded chapter's note editor is on the page at once (just scrolled off), so it can be
-	// filled without first scrolling anything into view — flowing text, now the default for a fresh
-	// visitor, keeps every chapter but the current one's note editor hidden until it becomes visible.
+
+	// Chapter 2's note is seeded through the action directly rather than through the editor: flowing
+	// text (the only layout now) keeps every loaded chapter's note editor in the DOM but hides all but
+	// the current one, and chapter 2 here is short enough that the reader's own eager next-chapter
+	// preload can flip the visible chapter away from it before the editor is reachable.
+	const seedResponse = await page.request.post('/1Mo2?/saveChapterNote', {
+		headers: { origin: 'http://localhost:4173' },
+		form: { reference: '1Mo2', note: 'Notiz für Kapitel zwei' }
+	});
+	expect(seedResponse.ok()).toBeTruthy();
 	await page
 		.context()
-		.addCookies([{ name: 'reader-layout', value: 'aligned', url: 'http://localhost:4173' }]);
+		.addCookies([{ name: 'chapter-notes-visible', value: '1', url: 'http://localhost:4173' }]);
+
 	await page.goto('/1Mo1');
-
-	await page.getByRole('button', { name: 'Notizspalte einblenden' }).click();
-	const noteForm = page
-		.locator('form[action="?/saveChapterNote"]')
-		.filter({ has: page.locator('input[name="reference"][value="1Mo2"]') });
-	await noteForm.getByRole('textbox', { name: 'Notiz' }).fill('Notiz für Kapitel zwei');
-	await noteForm.getByRole('button', { name: 'Speichern' }).click();
-
-	await page.getByRole('button', { name: 'Ansicht' }).click();
-	await page.getByRole('menuitem', { name: /Fließtext/ }).click();
-
 	const firstTextColumn = page.locator('.flow-column').first();
 	const visibleNote = page.locator('.flow-note > div:not(.hidden-note)');
 	await expect(visibleNote.locator('.note-chapter-title')).toHaveText('1.Mose 1');
@@ -201,7 +209,7 @@ test('chapter notes follow the visible chapter while scrolling', async ({ page }
 test('a shared list is readable without an account', async ({ page, browser }) => {
 	await register(page, uniqueEmail());
 
-	await page.goto('/lists');
+	await gotoLists(page);
 	await page.getByPlaceholder('Neue Versliste').fill('Geteilte Liste');
 	await page.getByRole('button', { name: 'Neue Versliste' }).click();
 	await page.getByPlaceholder('Joh 3,16').fill('1Mo 1,1');
@@ -228,7 +236,7 @@ test('the verse menu creates a list and adds the verse in one step', async ({ pa
 	await page.locator('#Joh3_16').getByRole('link', { name: 'Vers Johannes 3,16' }).click();
 	await page.getByRole('menuitem', { name: 'Neue Liste mit diesem Vers' }).click();
 
-	await page.goto('/lists');
+	await gotoLists(page);
 	await expect(page.getByRole('link', { name: /Johannes 3,16/ })).toBeVisible();
 	await page.getByRole('link', { name: /Johannes 3,16/ }).click();
 	await expect(page.getByRole('link', { name: 'Johannes 3,16' })).toBeVisible();
@@ -261,26 +269,10 @@ test('a signed-in reader can highlight a verse with a colour and clear it', asyn
 	await expect(verse).not.toHaveCSS('background-color', 'rgb(253, 230, 138)');
 });
 
-test('a highlight also renders in the aligned-columns layout', async ({ page }) => {
-	await register(page, uniqueEmail());
-	await page
-		.context()
-		.addCookies([{ name: 'reader-layout', value: 'aligned', url: 'http://localhost:4173' }]);
-
-	await page.goto('/Joh3');
-	await page.locator('#Joh3_16').getByRole('link', { name: 'Vers Johannes 3,16' }).click();
-	await page.locator('.swatches .swatch').first().click();
-
-	await expect(page.locator('[data-verse-key="43:3:16"]').first()).toHaveCSS(
-		'background-color',
-		'rgb(253, 230, 138)'
-	);
-});
-
 test('the verse menu ticks and unticks an existing list', async ({ page }) => {
 	await register(page, uniqueEmail());
 
-	await page.goto('/lists');
+	await gotoLists(page);
 	await page.getByPlaceholder('Neue Versliste').fill('Merkverse');
 	await page.getByRole('button', { name: 'Neue Versliste' }).click();
 

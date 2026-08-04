@@ -7,17 +7,6 @@ import { expect, test, type Page } from '@playwright/test';
  * SEEDCOMMENTARY, plus three dictionary entries.
  */
 
-/**
- * Flowing text is the default for a fresh visitor; the tests below exercise the column grid
- * specifically, so they ask for it explicitly rather than depending on which layout happens to be
- * the default.
- */
-async function useAlignedLayout(page: Page): Promise<void> {
-	await page
-		.context()
-		.addCookies([{ name: 'reader-layout', value: 'aligned', url: 'http://localhost:4173' }]);
-}
-
 /** The commentary fixture is not a default column, so tests exercising it must select it explicitly. */
 async function useCommentaryColumn(page: Page): Promise<void> {
 	await page.context().addCookies([
@@ -37,17 +26,18 @@ test('the root redirects into the reader', async ({ page }) => {
 test('Impressum and Datenschutz are reachable only from the global menu', async ({ page }) => {
 	await page.goto('/Joh3');
 
-	// No longer direct top-bar links — only reachable through the global menu.
+	// No longer direct top-bar links — only reachable through the consolidated user menu.
 	await expect(page.getByRole('banner').getByRole('link', { name: 'Impressum' })).toHaveCount(0);
 	await expect(page.getByRole('banner').getByRole('link', { name: 'Datenschutz' })).toHaveCount(0);
 
-	await page.getByRole('button', { name: 'Menü öffnen' }).click();
+	// Both live in the consolidated user menu now, styled as menu items rather than plain links.
+	await page.getByRole('button', { name: 'Konto-Menü' }).click();
 	await page.getByRole('menuitem', { name: 'Impressum' }).click();
 	await expect(page).toHaveURL(/\/impressum$/);
 	await expect(page.getByRole('heading', { level: 1 })).toContainText('Impressum');
 
 	await page.goto('/Joh3');
-	await page.getByRole('button', { name: 'Menü öffnen' }).click();
+	await page.getByRole('button', { name: 'Konto-Menü' }).click();
 	await page.getByRole('menuitem', { name: 'Datenschutz' }).click();
 	await expect(page).toHaveURL(/\/datenschutz$/);
 	await expect(page.getByRole('heading', { level: 1 })).toContainText('Datenschutzerklärung');
@@ -56,7 +46,9 @@ test('Impressum and Datenschutz are reachable only from the global menu', async 
 test('the help page is reachable from the site header', async ({ page }) => {
 	await page.goto('/Joh3');
 
-	await page.getByRole('link', { name: 'Hilfe' }).click();
+	// Hilfe lives in the consolidated user menu now, alongside the account links.
+	await page.getByRole('button', { name: 'Konto-Menü' }).click();
+	await page.getByRole('menuitem', { name: 'Hilfe' }).click();
 
 	await expect(page).toHaveURL(/\/help$/);
 	await expect(page.getByRole('heading', { level: 1 })).toContainText('Hilfe');
@@ -71,7 +63,6 @@ test('the about page loads with a visible heading', async ({ page }) => {
 });
 
 test('a reference shows the chapter in parallel columns', async ({ page }) => {
-	await useAlignedLayout(page);
 	await page.goto('/Joh3,16');
 
 	await expect(page.getByRole('heading', { level: 1 })).toContainText('Johannes');
@@ -85,12 +76,10 @@ test('a reference shows the chapter in parallel columns', async ({ page }) => {
 	).toBeVisible();
 
 	// The requested verse is highlighted.
-	await expect(page.locator('.verse.highlighted').first()).toBeVisible();
+	await expect(page.locator('.flow-verse.highlighted').first()).toBeVisible();
 });
 
-test('commentary text is formatted the same as scripture text, in both layouts', async ({
-	page
-}) => {
+test('commentary text is formatted the same as scripture text', async ({ page }) => {
 	await useCommentaryColumn(page);
 
 	await page.goto('/Joh3,16');
@@ -118,58 +107,11 @@ test('commentary text is formatted the same as scripture text, in both layouts',
 			.first()
 			.evaluate((el) => getComputedStyle(el).fontFamily)
 	);
-
-	await useAlignedLayout(page);
-	await page.goto('/Joh3,16');
-	const alignedCommentary = page.locator('.reference-cell .commentary-body').first();
-	await expect(alignedCommentary).toContainText('bekannteste Vers');
-	expect(
-		await page
-			.locator('.reference-cell')
-			.first()
-			.evaluate((el) => getComputedStyle(el).fontSize)
-	).toBe(
-		await page
-			.locator('.verse')
-			.first()
-			.evaluate((el) => getComputedStyle(el).fontSize)
-	);
-	expect(
-		await page
-			.locator('.reference-cell')
-			.first()
-			.evaluate((el) => getComputedStyle(el).fontFamily)
-	).toBe(
-		await page
-			.locator('.verse')
-			.first()
-			.evaluate((el) => getComputedStyle(el).fontFamily)
-	);
-});
-
-test('verses stay aligned across columns', async ({ page }) => {
-	await useAlignedLayout(page);
-	await page.goto('/Joh3');
-
-	// The two cells for verse 16 must start on the same grid row, which is what alignment means here.
-	const rows = await page.locator('.verse').evaluateAll((nodes) =>
-		nodes.map((node) => ({
-			row: getComputedStyle(node).gridRowStart,
-			column: getComputedStyle(node).gridColumnStart,
-			text: node.textContent?.slice(0, 12) ?? ''
-		}))
-	);
-
-	const verse16 = rows.filter((cell) => cell.text.trim().startsWith('16'));
-	expect(verse16.length).toBeGreaterThan(1);
-	expect(new Set(verse16.map((cell) => cell.row)).size).toBe(1);
-	expect(new Set(verse16.map((cell) => cell.column)).size).toBe(verse16.length);
 });
 
 test('a column boundary can be dragged to resize the columns, and the split persists', async ({
 	page
 }) => {
-	await useAlignedLayout(page);
 	await page.goto('/Joh3');
 
 	// The desktop bar; the mobile tab-switcher bar shares the same test id but is hidden at this
@@ -219,26 +161,16 @@ test('a column boundary can be dragged to resize the columns, and the split pers
 		nodes.map((node) => node.getBoundingClientRect().width)
 	);
 	expect(firstAfterReload).toBeGreaterThan(secondAfterReload * 1.3);
-
-	// And still applies after switching to the flow layout.
-	await page.getByRole('button', { name: 'Ansicht' }).click();
-	await page.getByRole('menuitem', { name: /Fließtext/ }).click();
-	const flowColumns = page.locator('.flow-column');
-	await expect(flowColumns).toHaveCount(2);
-	const [flowFirst, flowSecond] = await flowColumns.evaluateAll((nodes) =>
-		nodes.map((node) => node.getBoundingClientRect().width)
-	);
-	expect(flowFirst).toBeGreaterThan(flowSecond * 1.3);
 });
 
-test('the view menu switches to synchronized flowing text', async ({ page }) => {
+test('flowing text keeps columns scroll-synchronized', async ({ page }) => {
 	await page.goto('/Joh3');
 	expect(await page.evaluate(() => window.scrollY)).toBe(0);
 
 	await page.getByRole('button', { name: 'Ansicht' }).click();
 	await expect(page.getByRole('menuitemradio', { name: 'Helles Design' })).toBeVisible();
 	await expect(page.getByRole('menuitemradio', { name: 'Dunkles Design' })).toBeVisible();
-	await page.getByRole('menuitem', { name: /Fließtext/ }).click();
+	await page.keyboard.press('Escape');
 
 	const reader = page.getByTestId('flow-reader');
 	await expect(reader).toBeVisible();
@@ -275,7 +207,7 @@ test('the view menu switches to synchronized flowing text', async ({ page }) => 
 		.poll(() => columns.first().evaluate((element) => element.scrollTop))
 		.not.toBe(firstPosition);
 
-	// The preference survives a regular navigation.
+	// The reader stays in flowing text across a regular navigation, too.
 	await page.goto('/Joh3');
 	await expect(reader).toBeVisible();
 });
@@ -330,72 +262,16 @@ test('a column can opt out of synchronized flowing-text scrolling on its own', a
 
 test('flowing text preloads the next chapter for endless scrolling', async ({ page }) => {
 	await page.goto('/Joh3');
-	await page.getByRole('button', { name: 'Ansicht' }).click();
-	await page.getByRole('menuitem', { name: /Fließtext/ }).click();
-
 	await expect(page.locator('[data-chapter-key="43:4"]').first()).toBeAttached();
 });
 
 test('a verse reference scrolls directly to the requested verse', async ({ page }) => {
-	await useAlignedLayout(page);
 	await page.setViewportSize({ width: 900, height: 260 });
 	await page.goto('/1Mo1,3');
 
-	await expect(page.locator('.verse.highlighted').first()).toBeInViewport();
-	expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
-});
-
-test('landing on a deep-linked verse settles once, without a spurious extra prepend', async ({
-	page
-}) => {
-	await useAlignedLayout(page);
-	await page.setViewportSize({ width: 900, height: 260 });
-	await page.goto('/Joh3,16');
-
-	await expect(page.locator('.verse.highlighted').first()).toBeInViewport();
-
-	// The scroll that lands on the deep-linked verse is our own programmatic scroll, not the reader
-	// scrolling, so it must not be misread as "the reader scrolled near the top of the stream" and
-	// spuriously prepend the previous chapter — nobody asked to see it yet. Before the fix, the
-	// unsuppressed `scrollIntoView` left exactly that scroll event unshielded.
-	await page.waitForTimeout(600);
-	await expect(page.locator('.aligned-chapter[data-chapter-key="43:2"]')).toHaveCount(0);
-
-	// And once the landing scroll has settled, nothing keeps nudging it further — two polls apart
-	// see the same position, rather than the page still fighting its own compensating scrolls.
-	const first = await page.evaluate(() => window.scrollY);
-	await page.waitForTimeout(150);
-	const second = await page.evaluate(() => window.scrollY);
-	expect(second).toBe(first);
-});
-
-test('changing the reference resets aligned scrolling and the visible chapter', async ({
-	page
-}) => {
-	await useAlignedLayout(page);
-	await page.setViewportSize({ width: 900, height: 260 });
-	await page.goto('/1Mo1,3');
-	expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
-
-	await page.getByRole('searchbox').fill('Joh 3');
-	await page.getByRole('searchbox').press('Enter');
-
-	await expect(page).toHaveURL(/\/Joh3$/);
-	await expect(page.getByTestId('reader-location')).toContainText('Johannes 3');
-	await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
-});
-
-test('the aligned chapter label follows endless scrolling', async ({ page }) => {
-	await useAlignedLayout(page);
-	await page.setViewportSize({ width: 900, height: 300 });
-	await page.goto('/1Mo1');
-
-	const nextChapter = page.locator('.aligned-chapter[data-chapter-key="1:2"]');
-	await expect(nextChapter).toBeAttached();
-	await nextChapter.scrollIntoViewIfNeeded();
-	await page.evaluate(() => window.scrollBy(0, 100));
-
-	await expect(page.getByTestId('reader-location')).toContainText('1.Mose 2');
+	await expect(page.locator('.flow-verse.highlighted').first()).toBeAttached();
+	const column = page.locator('.flow-column').first();
+	await expect.poll(() => column.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
 });
 
 test('chapter navigation moves forwards and backwards', async ({ page }) => {
@@ -532,13 +408,13 @@ test('the column selection persists across navigations', async ({ page }) => {
 	await page.goto('/Joh3');
 
 	// Put the second translation in the first column. The fixture now spans more than one resource
-	// kind (bibles and a commentary), so the menu groups them under an expandable "Bibeln" submenu.
+	// kind (bibles and a commentary), so the dialog groups them under a "Bibeln" category.
 	await page.locator('#column-0').click();
-	await page.getByRole('menuitem', { name: 'Bibeln' }).click();
+	await page.getByRole('button', { name: 'Bibeln' }).click();
 	await page
 		.locator('form[action="?/setColumn"]')
 		.filter({ has: page.locator('input[name="resource"][value="SEEDPLAIN"]') })
-		.getByRole('menuitem')
+		.getByRole('button')
 		.click();
 	await expect(page.locator('#column-0')).toContainText('Schlicht');
 
@@ -558,8 +434,8 @@ test('a closed column can be opened again', async ({ page }) => {
 	await expect(page.locator('button[id^="column-"]')).toHaveCount(1);
 
 	await page.getByRole('button', { name: 'Spalte hinzufügen' }).first().click();
-	await page.getByRole('menuitem', { name: 'Bibeln' }).click();
-	await page.locator('form[action="?/addColumn"]').getByRole('menuitem').first().click();
+	await page.getByRole('button', { name: 'Bibeln' }).click();
+	await page.locator('form[action="?/addColumn"]').getByRole('button').first().click();
 
 	await expect(page.locator('button[id^="column-"]')).toHaveCount(2);
 

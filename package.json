@@ -34,6 +34,7 @@
 		"@aws-sdk/lib-storage": "^3.1101.0",
 		"@node-rs/argon2": "^2.0.2",
 		"@scalar/api-reference": "^1.64.0",
+		"chart.js": "^4.5.1",
 		"drizzle-orm": "^0.45.2",
 		"pino": "^10.3.1",
 		"postgres": "^3.4.9",

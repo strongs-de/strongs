@@ -18,14 +18,7 @@ declare global {
 			/** Set by the auth hook when the request carries a valid session cookie. */
 			user: Pick<
 				User,
-				| 'id'
-				| 'email'
-				| 'displayName'
-				| 'role'
-				| 'readerColumns'
-				| 'readerFontScale'
-				| 'readerLayout'
-				| 'theme'
+				'id' | 'email' | 'displayName' | 'role' | 'readerColumns' | 'readerFontScale' | 'theme'
 			> | null;
 			/** Session id, needed to renew or revoke the session. */
 			sessionId: string | null;

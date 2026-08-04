@@ -4,10 +4,8 @@ import { MAX_COLUMNS, resolveColumns, writeColumns } from '$lib/server/columns';
 import { updateReaderColumns } from '$lib/server/repositories/users';
 import {
 	readFontScale,
-	readReaderLayout,
 	readTheme,
 	writeFontScale,
-	writeReaderLayout,
 	writeTheme
 } from '$lib/server/reader-preferences';
 
@@ -29,8 +27,6 @@ export async function load({ cookies, locals }) {
 	writeColumns(cookies, columns);
 	const readerFontScale = readFontScale(cookies, locals.user?.readerFontScale);
 	writeFontScale(cookies, readerFontScale);
-	const readerLayout = readReaderLayout(cookies, locals.user?.readerLayout);
-	writeReaderLayout(cookies, readerLayout);
 	const theme = readTheme(cookies, locals.user?.theme);
 	if (theme) writeTheme(cookies, theme);
 
@@ -39,7 +35,6 @@ export async function load({ cookies, locals }) {
 		readerResources,
 		columns,
 		readerFontScale,
-		readerLayout,
 		theme,
 		// The limit lives in $lib/server, so the reader cannot import it to decide whether to offer a
 		// further column.

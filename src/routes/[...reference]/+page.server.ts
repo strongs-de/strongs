@@ -29,19 +29,11 @@ import {
 	listBibles,
 	listReaderResources
 } from '$lib/server/repositories/resources';
-import {
-	updateReaderColumns,
-	updateReaderFontScale,
-	updateReaderLayout
-} from '$lib/server/repositories/users';
+import { updateReaderColumns, updateReaderFontScale } from '$lib/server/repositories/users';
 import {
 	MAX_FONT_SCALE,
 	MIN_FONT_SCALE,
-	readFlowSyncDisabled,
 	readFontScale,
-	readReaderLayout,
-	writeFlowSyncDisabled,
-	writeReaderLayout,
 	writeFontScale
 } from '$lib/server/reader-preferences';
 import {
@@ -161,9 +153,6 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 	const marked = locals.user
 		? await markedVersesByList(db, locals.user.id, reference.book, reference.chapter)
 		: [];
-	// Which columns have opted out of the flow layout's cross-column scroll sync, kept by resource id
-	// so the choice survives a reorder or a translation swap in the same slot.
-	const flowSyncDisabled = readFlowSyncDisabled(cookies);
 	const notesVisible = cookies.get('chapter-notes-visible') === '1';
 	const chapterNote =
 		locals.user && notesVisible
@@ -202,10 +191,6 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 				covers: coverage.get(id)?.has(reference.book) ?? false
 			};
 		}),
-		/** Whether each column (in the same order as `columns` above) takes part in the flow layout's
-		 *  cross-column scroll sync; a column not currently selected has nothing to intersect against
-		 *  and simply does not appear here. */
-		flowSyncEnabled: columns.map((id) => !flowSyncDisabled.has(id)),
 		/** Custom per-column widths, in the same order as `columns` above, or `null` when the reader has
 		 *  not resized anything — the client then falls back to an even split via CSS. */
 		columnWidths: resolveColumnWidths(cookies, columns),
@@ -322,20 +307,6 @@ export const actions = {
 		return { success: true };
 	},
 
-	/** Flips one column's participation in the flow layout's cross-column scroll sync. Keyed by
-	 *  resource id rather than column index, like the cookie itself, so the choice survives a reorder. */
-	setColumnFlowSync: async ({ request, cookies }) => {
-		const form = await request.formData();
-		const resource = String(form.get('resource') ?? '');
-		if (!resource) return fail(400, { error: 'resource' });
-
-		const disabled = readFlowSyncDisabled(cookies);
-		if (disabled.has(resource)) disabled.delete(resource);
-		else disabled.add(resource);
-		writeFlowSyncDisabled(cookies, disabled);
-		return { success: true };
-	},
-
 	saveChapterNote: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
 		const form = await request.formData();
@@ -361,17 +332,6 @@ export const actions = {
 		writeFontScale(cookies, next);
 		if (locals.user) await updateReaderFontScale(getDb(), locals.user.id, next);
 		return { success: true };
-	},
-
-	setReaderLayout: async ({ request, cookies, locals }) => {
-		const form = await request.formData();
-		const layout = String(form.get('layout') ?? '');
-		if (layout !== 'aligned' && layout !== 'flow') {
-			return fail(400, { error: 'readerLayout' });
-		}
-		writeReaderLayout(cookies, layout);
-		if (locals.user) await updateReaderLayout(getDb(), locals.user.id, layout);
-		return { success: true, layout: readReaderLayout(cookies, locals.user?.readerLayout) };
 	},
 
 	/**

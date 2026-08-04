@@ -31,7 +31,7 @@
 
 <main class="mx-auto w-full max-w-3xl space-y-6 px-4 py-8">
 	<nav class="text-sm">
-		<a class="text-stone-500 hover:text-accent-600 dark:text-stone-400" href="/lists">
+		<a class="text-stone-500 hover:text-accent-600 dark:text-stone-400" href="/account#lists">
 			← {t('lists.backToOverview')}
 		</a>
 	</nav>
