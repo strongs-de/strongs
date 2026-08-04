@@ -2,16 +2,17 @@
 
 ## Deploying
 
-`compose.yaml` is the whole stack: the app, PostgreSQL 17 and a nightly `pg_dump` sidecar. Add it in
-Coolify as a **Docker Compose** resource, assign a domain to the `app` service, and set:
+`compose.yaml` is the whole stack: the app and PostgreSQL 17. Add it in Coolify as a **Docker
+Compose** resource, assign a domain to the `app` service, and set:
 
-| Variable                    | Where it comes from                                             |
-| --------------------------- | --------------------------------------------------------------- |
-| `SERVICE_PASSWORD_POSTGRES` | Coolify generates it; shared by app, database and backups       |
-| `SERVICE_BASE64_64_SESSION` | Coolify generates it; signs session cookies                     |
-| `BREVO_API_KEY`             | Brevo; without it, mails are written to the log instead of sent |
-| `MAIL_FROM`                 | must be a sender Brevo has verified                             |
-| `BOOTSTRAP_ADMIN_EMAIL`     | the first account registered with this address becomes an admin |
+| Variable                    | Where it comes from                                                     |
+| --------------------------- | ----------------------------------------------------------------------- |
+| `SERVICE_PASSWORD_POSTGRES` | Coolify generates it; shared by app and database                        |
+| `SERVICE_BASE64_64_SESSION` | Coolify generates it; signs session cookies                             |
+| `SERVICE_BASE64_64_BACKUP`  | Coolify generates it; encrypts the S3 secret key set in `/admin/backup` |
+| `BREVO_API_KEY`             | Brevo; without it, mails are written to the log instead of sent         |
+| `MAIL_FROM`                 | must be a sender Brevo has verified                                     |
+| `BOOTSTRAP_ADMIN_EMAIL`     | the first account registered with this address becomes an admin         |
 
 Migrations run in the container's entrypoint before the server starts, so a deploy that changes the
 schema needs nothing extra. A failed migration stops the boot, and the healthcheck keeps the old
@@ -26,25 +27,37 @@ container serving.
 
 ## Backups
 
-The `backup` service runs `pg_dump` nightly into the `backups` volume, keeping 30 daily, 8 weekly and 12
-monthly dumps.
+Backup and restore live in the admin UI at `/admin/backup` (admins only) — there is no separate
+sidecar container. The app shells out to `pg_dump`/`pg_restore` itself, so the runtime image includes
+a matching `postgresql-client-17` (see the `Dockerfile`).
 
-Verifying a backup — worth doing once now rather than for the first time in an emergency:
+**Manual download**: "Backup herunterladen" dumps the database (`pg_dump --format=custom`) and streams
+it straight to the browser — nothing is retained on the server afterwards.
 
-```sh
-# newest dump
-docker compose exec backup ls -t /backups/daily | head -1
+**Scheduled S3 backup**: configurable per instance — endpoint, region, bucket, path prefix, access
+key/secret (the secret is encrypted at rest with `BACKUP_ENCRYPTION_KEY`, never stored in plain text),
+a schedule preset (hourly/daily/weekly + time of day) and retention (how many dumps to keep in the
+bucket, and how many to additionally keep in the local `backups` volume as a safety net if S3 is
+unreachable). A minute-granularity in-process scheduler checks whether a run is due; every run — manual
+or scheduled — becomes a row in the "Verlauf" history, so "did last night's backup work" is answerable
+without a shell.
 
-# restore it into a scratch database
-docker compose exec db createdb -U strongs restore_check
-docker compose exec backup sh -c 'gunzip -c /backups/daily/<file>.sql.gz' \
-  | docker compose exec -T db psql -U strongs -d restore_check
+**Restore**: uploads a `.dump` file and requires typing a confirmation phrase — both checked
+server-side, not just by the disabled button. Before anything is touched, an automatic safety dump of
+the current state is taken (locally, and to S3 if configured); if that safety dump fails, the restore
+does not proceed. After a successful `pg_restore`, pending migrations are re-applied (a dump taken
+before a schema change restores the old schema), the Strong's statistics materialized views are
+refreshed (their data is not part of a dump), and caches are invalidated. The admin's own session may
+no longer exist in the restored data — a fresh login can be necessary afterwards.
 
-# sanity check, then drop it
-docker compose exec db psql -U strongs -d restore_check -c \
-  'select count(*) from verses; select count(*) from verse_lists;'
-docker compose exec db dropdb -U strongs restore_check
-```
+Only logical dumps are covered here (no point-in-time recovery). If the acceptable data-loss window
+ever needs to be tighter than "since the last scheduled dump", the upgrade path is continuous WAL
+archiving (`pgBackRest`/`wal-g`) — a bigger change, out of scope for now.
+
+Verifying the S3 path works — worth doing once now rather than for the first time in an emergency: fill
+in the S3 fields in `/admin/backup` and click "Verbindung testen", which writes and deletes a marker
+object (proving write access, not just reachability), then "Jetzt sichern" and confirm the run appears
+as "fertig" in the history and the object shows up under "Im Bucket vorhanden".
 
 Only user data is irreplaceable. Translations can be re-imported from their source files, which is why
 uploads are archived in the `uploads` volume — back that up too, or keep the sources elsewhere.
@@ -88,6 +101,16 @@ address in 15 minutes, and rows age out on their own. To clear it immediately:
 
 **Someone cannot receive the reset mail.** `/admin/users` issues a one-time link and shows it on screen.
 
+**A backup or restore sits at "läuft".** Same story as an import: it was interrupted by a restart, and
+is marked failed at the next boot. Retry from `/admin/backup`.
+
+**A scheduled backup fails with "`pg_dump` ist ... nicht installiert".** The runtime image is missing
+`postgresql-client-17` — check the `Dockerfile`'s PGDG install step survived a recent change.
+
+**A scheduled backup fails to reach S3.** "Verbindung testen" in `/admin/backup` reports the
+underlying error (wrong endpoint, expired credentials, a bucket policy that allows read but not
+write).
+
 ## Log lines worth alerting on
 
 Logs are JSON on stdout, collected by Coolify.
@@ -95,4 +118,5 @@ Logs are JSON on stdout, collected by Coolify.
 - `"slow request"` — a request over 500 ms, with its path. A handful during an import is expected;
   a steady stream means a query has lost its index.
 - `"import failed"` — with the reason.
+- `"backup failed"` / `"restore failed"` — with the reason; check `/admin/backup` for the full error.
 - `"mail not sent: BREVO_API_KEY is not configured"` — password resets are silently not arriving.

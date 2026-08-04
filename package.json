@@ -30,6 +30,8 @@
 		"test:e2e:only": "playwright test"
 	},
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.1101.0",
+		"@aws-sdk/lib-storage": "^3.1101.0",
 		"@node-rs/argon2": "^2.0.2",
 		"drizzle-orm": "^0.45.2",
 		"pino": "^10.3.1",

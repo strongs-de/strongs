@@ -14,6 +14,7 @@ env:
   DATABASE_URL: postgres://strongs:strongs@localhost:5432/strongs
   SESSION_SECRET: ci-secret-ci-secret-ci-secret-ci-secret-0123
   ORIGIN: http://localhost:4173
+  BACKUP_ENCRYPTION_KEY: ci-backup-encryption-key-ci-backup-encryption-key
 
 jobs:
   check:
@@ -66,6 +67,17 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
+      # Ubuntu's own postgresql-client is older than the postgres:17-alpine service, and pg_dump
+      # refuses to talk to a newer server; the admin backup feature needs the matching client.
+      - name: Install postgresql-client-17 (PGDG)
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-client-17
       # Creates its own database, migrates and seeds the fixture, then runs against a production build.
       - run: pnpm run test:e2e
       - uses: actions/upload-artifact@v4

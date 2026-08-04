@@ -32,7 +32,17 @@ const schema = z.object({
 	 * Email address that is granted the admin role on first registration. Lets you bootstrap the
 	 * very first admin account without touching the database by hand.
 	 */
-	BOOTSTRAP_ADMIN_EMAIL: z.preprocess(emptyStringAsUndefined, z.string().email().optional())
+	BOOTSTRAP_ADMIN_EMAIL: z.preprocess(emptyStringAsUndefined, z.string().email().optional()),
+
+	/**
+	 * Encrypts the S3 secret access key stored in the `settings` table. Optional: without it, manual
+	 * backup/restore still work, but the scheduled S3 backup cannot be configured.
+	 * Generate with: openssl rand -base64 48
+	 */
+	BACKUP_ENCRYPTION_KEY: z.preprocess(emptyStringAsUndefined, z.string().min(32).optional()),
+
+	/** Where database dumps are staged before they are streamed to the browser or to S3. */
+	BACKUP_TMP_DIR: z.string().default('./var/backups')
 });
 
 export type Config = z.infer<typeof schema>;

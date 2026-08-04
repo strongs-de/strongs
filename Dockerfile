@@ -27,18 +27,32 @@ WORKDIR /app
 
 # CrossWire's own reader handles the compressed zText/zCom module formats; unzip expands uploaded
 # raw ZIP packages into an isolated temporary SWORD library.
+#
+# Debian bookworm's own `postgresql-client` is version 15, and `pg_dump`/`pg_restore` refuse to talk
+# to a newer server (db is postgres:17-alpine) — hence the PGDG repository instead of the plain
+# package. Do not "simplify" this back to `apt-get install postgresql-client`.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends diatheke unzip \
+    && apt-get install -y --no-install-recommends diatheke unzip ca-certificates curl gnupg \
+    && install -d /usr/share/postgresql-common/pgdg \
+    && curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+         https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+    && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" \
+         > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-client-17 \
+    && apt-get purge -y curl gnupg && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production \
     PORT=3000 \
     BODY_SIZE_LIMIT=Infinity \
-    UPLOAD_DIR=/app/var/uploads
+    UPLOAD_DIR=/app/var/uploads \
+    BACKUP_TMP_DIR=/app/var/backups
 
-# Resource imports read the uploaded file back from disk, so the directory must survive restarts;
-# it is mounted as a volume in compose.yaml.
-RUN mkdir -p /app/var/uploads && chown -R node:node /app/var
+# Resource imports read the uploaded file back from disk, and backup dumps are staged before they are
+# streamed to the browser or to S3, so both directories must survive restarts; both are mounted as
+# volumes in compose.yaml.
+RUN mkdir -p /app/var/uploads /app/var/backups && chown -R node:node /app/var
 
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/build ./build
