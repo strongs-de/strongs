@@ -62,6 +62,20 @@ test('the about page loads with a visible heading', async ({ page }) => {
 	await expect(page.getByRole('heading', { level: 1 })).toContainText('strongs.de');
 });
 
+test('the search field opens a keyboard-accessible Bible book chooser', async ({ page }) => {
+	await page.goto('/Joh1');
+	await page.locator('#site-search').click();
+
+	const chooser = page.getByRole('dialog', { name: 'Bibelstelle wählen' });
+	await expect(chooser).toBeVisible();
+	await expect(chooser.getByRole('link', { name: /Matthäus/ })).toBeVisible();
+
+	await chooser.getByRole('link', { name: /Matthäus/ }).focus();
+	await expect(chooser.getByRole('link', { name: /Matthäus/ })).toBeFocused();
+	await page.keyboard.press('Enter');
+	await expect(page).toHaveURL(/\/Mt1$/);
+});
+
 test('a reference shows the chapter in parallel columns', async ({ page }) => {
 	await page.goto('/Joh3,16');
 
@@ -114,17 +128,37 @@ test('a column boundary can be dragged to resize the columns, and the split pers
 }) => {
 	await page.goto('/Joh3');
 
-	// The desktop bar; the mobile tab-switcher bar shares the same test id but is hidden at this
-	// (default) viewport width and never renders a resize handle at all.
+	// The splitter sits halfway down the desktop reading area, where the resized columns themselves
+	// make its purpose visible. The phone layout switches columns with tabs and renders no splitter.
 	const bar = page.getByTestId('column-picker-bar').first();
-	const handle = bar.getByRole('separator');
+	const reader = page.getByTestId('flow-reader');
+	const handle = reader.getByRole('separator');
 	await expect(handle).toHaveCount(1);
 
-	const barBox = (await bar.boundingBox())!;
+	// The header's surrounding surface has equal padding on both sides, but its inner grid must still
+	// align exactly with the reading cards below it.
+	const headerBoxes = await bar.locator('[role="group"]').evaluateAll((nodes) =>
+		nodes.map((node) => {
+			const box = node.getBoundingClientRect();
+			return { x: box.x, width: box.width };
+		})
+	);
+	const columnBoxes = await reader.locator('.flow-column').evaluateAll((nodes) =>
+		nodes.map((node) => {
+			const box = node.getBoundingClientRect();
+			return { x: box.x, width: box.width };
+		})
+	);
+	for (const [index, headerBox] of headerBoxes.entries()) {
+		expect(Math.abs(headerBox.x - columnBoxes[index]!.x)).toBeLessThan(1);
+		expect(Math.abs(headerBox.width - columnBoxes[index]!.width)).toBeLessThan(1);
+	}
+
+	const readerBox = (await reader.boundingBox())!;
 	const handleBox = (await handle.boundingBox())!;
 	const startX = handleBox.x + handleBox.width / 2;
 	const y = handleBox.y + handleBox.height / 2;
-	const targetX = startX + barBox.width * 0.2;
+	const targetX = startX + readerBox.width * 0.2;
 
 	// Dispatches synthetic pointer events directly rather than driving `page.mouse`: the handler
 	// computes the new width from this event's own `clientX` against the position recorded at
@@ -167,10 +201,9 @@ test('flowing text keeps columns scroll-synchronized', async ({ page }) => {
 	await page.goto('/Joh3');
 	expect(await page.evaluate(() => window.scrollY)).toBe(0);
 
-	await page.getByRole('button', { name: 'Ansicht' }).click();
-	await expect(page.getByRole('menuitemradio', { name: 'Helles Design' })).toBeVisible();
-	await expect(page.getByRole('menuitemradio', { name: 'Dunkles Design' })).toBeVisible();
-	await page.keyboard.press('Escape');
+	await expect(page.getByRole('button', { name: 'Bibeltext verkleinern' })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Bibeltext vergrößern' })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Dunkles Design' })).toBeVisible();
 
 	const reader = page.getByTestId('flow-reader');
 	await expect(reader).toBeVisible();
@@ -210,6 +243,27 @@ test('flowing text keeps columns scroll-synchronized', async ({ page }) => {
 	// The reader stays in flowing text across a regular navigation, too.
 	await page.goto('/Joh3');
 	await expect(reader).toBeVisible();
+});
+
+test('mouse-wheel scrolling uses smaller steps for close reading', async ({ page }) => {
+	await page.goto('/Joh3');
+	const column = page.locator('.flow-column').first();
+
+	const scrolledBy = await column.evaluate((element) => {
+		element.scrollTop = 0;
+		const before = element.scrollTop;
+		element.dispatchEvent(
+			new WheelEvent('wheel', {
+				deltaY: 100,
+				deltaMode: WheelEvent.DOM_DELTA_PIXEL,
+				bubbles: true,
+				cancelable: true
+			})
+		);
+		return element.scrollTop - before;
+	});
+
+	expect(scrolledBy).toBe(55);
 });
 
 test('a column can opt out of synchronized flowing-text scrolling on its own', async ({ page }) => {

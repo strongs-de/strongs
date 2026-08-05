@@ -123,7 +123,7 @@
 			options: {
 				responsive: true,
 				maintainAspectRatio: false,
-				cutout: '58%',
+				cutout: '68%',
 				animation: { duration: 200 },
 				plugins: {
 					legend: {
@@ -193,7 +193,7 @@
 <style>
 	.canvas-wrap {
 		position: relative;
-		height: 220px;
+		height: 290px;
 	}
 
 	.sr-only {

@@ -25,12 +25,12 @@
 </script>
 
 <section
-	class="overflow-hidden rounded-xl border border-stone-200/90 bg-white shadow-[0_4px_18px_rgb(28_25_23/0.05)]
-	       dark:border-stone-800 dark:bg-stone-900/70 dark:shadow-black/15"
+	class="overflow-hidden rounded-2xl border border-stone-200/80 bg-[color:var(--surface)] shadow-[var(--shadow-soft)]
+	       dark:border-white/8"
 >
 	{#if title || actions}
 		<header
-			class="flex items-start justify-between gap-4 bg-stone-50/70 px-4 py-3.5 sm:px-5 dark:bg-stone-900/80"
+			class="flex items-start justify-between gap-5 bg-stone-50/55 px-5 py-4 sm:px-6 dark:bg-white/2"
 		>
 			<div class="min-w-0">
 				{#if title}<h2 class="font-serif text-lg font-semibold text-stone-800 dark:text-stone-100">
@@ -44,12 +44,12 @@
 		</header>
 	{/if}
 
-	<div class="border-t border-stone-200 px-4 py-4 sm:px-5 dark:border-stone-800">
+	<div class="border-t border-stone-200/80 px-5 py-5 sm:px-6 dark:border-white/8">
 		{@render children()}
 	</div>
 
 	{#if footer}
-		<footer class="border-t border-stone-200 px-4 py-3 text-sm sm:px-5 dark:border-stone-800">
+		<footer class="border-t border-stone-200/80 px-5 py-3.5 text-sm sm:px-6 dark:border-white/8">
 			{@render footer()}
 		</footer>
 	{/if}

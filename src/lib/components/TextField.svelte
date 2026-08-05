@@ -39,9 +39,9 @@
 		{value}
 		aria-invalid={error ? 'true' : undefined}
 		aria-describedby={error ? `${name}-error` : undefined}
-		class="w-full rounded-md border bg-white px-3 py-2.5 text-sm shadow-inner shadow-stone-900/3
+		class="w-full rounded-xl border bg-[color:var(--surface-raised)] px-3.5 py-2.5 text-sm shadow-sm
 		       read-only:bg-stone-50 read-only:text-stone-500 focus:ring-3 focus:ring-accent-500/10
-		       focus:outline-none dark:bg-stone-900
+		       focus:outline-none dark:bg-white/5
 		       dark:read-only:bg-stone-900/60 dark:read-only:text-stone-400
 		       {error
 			? 'border-red-400 focus:border-red-500 dark:border-red-800'

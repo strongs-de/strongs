@@ -89,13 +89,13 @@
 	}}
 >
 	{#if context}
-		<div class="flex h-full min-h-0">
+		<div class="flex h-full min-h-0 flex-col sm:flex-row">
 			<nav
-				class="flex w-44 shrink-0 flex-col gap-0.5 overflow-y-auto border-r border-stone-200 p-3
-				       sm:w-56 dark:border-stone-800"
+				class="flex shrink-0 gap-1 overflow-x-auto border-b border-stone-200/80 p-3
+				       sm:w-52 sm:flex-col sm:overflow-y-auto sm:border-r sm:border-b-0 sm:p-4 dark:border-white/8"
 			>
 				<p
-					class="mb-1 px-2 text-xs font-semibold tracking-wide text-stone-400 uppercase dark:text-stone-500"
+					class="mb-2 hidden px-2 text-[0.68rem] font-bold tracking-[0.12em] text-stone-400 uppercase sm:block dark:text-stone-500"
 				>
 					{t('dialog.categories')}
 				</p>
@@ -127,23 +127,30 @@
 							{/if}
 						</svg>
 						<span class="truncate">{group.label}</span>
+						<span class="category-count">{group.resources.length}</span>
 					</button>
 				{/each}
 			</nav>
 
 			<div class="flex min-w-0 flex-1 flex-col">
-				<div
-					class="flex items-center justify-between gap-3 border-b border-stone-200 p-3 dark:border-stone-800"
-				>
-					<h2 class="font-serif text-lg font-semibold text-stone-800 dark:text-stone-100">
-						{activeGroup?.label}
-					</h2>
+				<div class="flex items-start justify-between gap-4 px-4 pt-4 sm:px-6 sm:pt-5">
+					<div>
+						<p
+							class="text-[0.68rem] font-bold tracking-[0.12em] text-accent-700 uppercase dark:text-accent-300"
+						>
+							{context.action === '?/addColumn' ? t('reader.addColumn') : label}
+						</p>
+						<h2
+							class="mt-0.5 text-xl font-semibold tracking-tight text-stone-900 dark:text-stone-50"
+						>
+							{activeGroup?.label}
+						</h2>
+					</div>
 					<button
 						type="button"
 						onclick={close}
 						aria-label={t('action.close')}
-						class="inline-flex size-8 items-center justify-center rounded-md text-stone-400
-						       hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-200"
+						class="icon-button -mt-1"
 					>
 						<svg viewBox="0 0 20 20" class="size-5" fill="currentColor" aria-hidden="true">
 							<path
@@ -153,7 +160,7 @@
 					</button>
 				</div>
 
-				<div class="p-3">
+				<div class="px-4 py-4 sm:px-6">
 					<div class="relative">
 						<svg
 							viewBox="0 0 20 20"
@@ -172,14 +179,14 @@
 							placeholder={t('dialog.searchTranslation')}
 							autocomplete="off"
 							spellcheck="false"
-							class="w-full rounded-md border-2 border-stone-300 bg-stone-50 py-2 pr-3 pl-9 text-sm
-							       focus:border-accent-500 focus:bg-white focus:ring-3 focus:ring-accent-500/10
-							       focus:outline-none dark:border-stone-700 dark:bg-stone-900"
+							class="w-full rounded-xl border border-stone-300 bg-white py-2.5 pr-3 pl-9 text-sm shadow-sm
+							       focus:border-accent-500 focus:ring-3 focus:ring-accent-500/10 focus:outline-none
+							       dark:border-white/12 dark:bg-white/5 dark:text-stone-100 dark:placeholder:text-stone-500"
 						/>
 					</div>
 				</div>
 
-				<ul class="min-h-0 flex-1 space-y-1.5 overflow-y-auto px-3 pb-3">
+				<ul class="resource-grid min-h-0 flex-1 overflow-y-auto px-4 pb-5 sm:px-6">
 					{#each visible as resource (resource.id)}
 						{@const isSelected = resource.id === context.selectedId}
 						{@const isChosen = !isSelected && context.chosen.includes(resource.id)}
@@ -198,16 +205,25 @@
 								{/if}
 								<input type="hidden" name="resource" value={resource.id} />
 								<button type="submit" class="entry" class:selected={isSelected}>
-									<span class="min-w-0 flex-1">
-										<span class="block truncate font-semibold">{resource.name}</span>
-										{#if resource.abbrev !== resource.name}
-											<span class="block truncate text-xs text-stone-400">{resource.abbrev}</span>
-										{/if}
+									<span
+										class="cover"
+										class:commentary={resource.kind === 'commentary'}
+										class:xrefs={resource.kind === 'xrefs'}
+										aria-hidden="true"
+									>
+										<span class="cover-mark" aria-hidden="true">✦</span>
+										<span class="cover-title">{resource.abbrev}</span>
+										<span class="cover-rule"></span>
+										<span class="cover-kind">{activeGroup?.label}</span>
+									</span>
+									<span class="resource-meta">
+										<span class="resource-name">{resource.name}</span>
+										<span class="resource-abbrev">{resource.abbrev}</span>
 									</span>
 									{#if isSelected}
 										<svg
 											viewBox="0 0 20 20"
-											class="size-5 shrink-0 text-accent-600 dark:text-accent-400"
+											class="selected-check"
 											fill="currentColor"
 											aria-hidden="true"
 										>
@@ -217,16 +233,9 @@
 												clip-rule="evenodd"
 											/>
 										</svg>
-									{:else}
-										<span
-											class="size-5 shrink-0 rounded-full border-2 border-stone-300 dark:border-stone-600"
-											aria-hidden="true"
-										></span>
 									{/if}
 									{#if isChosen}
-										<span class="shrink-0 text-xs text-stone-400" title={t('resource.inUse')}
-											>•</span
-										>
+										<span class="in-use" title={t('resource.inUse')}>{t('resource.inUse')}</span>
 									{/if}
 								</button>
 							</form>
@@ -247,40 +256,40 @@
 		position: fixed;
 		inset: 0;
 		margin: auto;
-		width: min(48rem, calc(100vw - 2rem));
-		height: min(34rem, calc(100dvh - 2rem));
+		width: min(64rem, calc(100vw - 2rem));
+		height: min(42rem, calc(100dvh - 2rem));
 		max-width: none;
 		max-height: none;
 		padding: 0;
 		border: 1px solid var(--color-stone-200);
-		border-radius: 0.75rem;
-		background: white;
+		border-radius: 1rem;
+		background: var(--surface-raised);
 		box-shadow:
 			0 20px 25px -5px rgb(0 0 0 / 0.15),
 			0 8px 10px -6px rgb(0 0 0 / 0.1);
 	}
 
 	.translation-dialog::backdrop {
-		background: rgb(28 25 23 / 0.45);
-		backdrop-filter: blur(4px);
+		background: rgb(17 24 18 / 0.55);
+		backdrop-filter: blur(7px);
 	}
 
 	:global(.dark) .translation-dialog {
 		border-color: var(--color-stone-700);
-		background: var(--color-stone-900);
+		background: var(--surface-raised);
 	}
 
 	.category {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		border-radius: 0.375rem;
-		border-left: 2px solid transparent;
-		padding: 0.5rem 0.5rem;
+		border-radius: 0.625rem;
+		padding: 0.6rem 0.7rem;
 		color: var(--color-stone-600);
 		font-size: 0.875rem;
 		font-weight: 500;
 		text-align: left;
+		white-space: nowrap;
 	}
 
 	:global(.dark) .category {
@@ -296,9 +305,25 @@
 	}
 
 	.category.active {
-		border-left-color: var(--color-accent-500);
 		background: color-mix(in oklab, var(--color-accent-500) 10%, transparent);
 		color: var(--color-accent-700);
+	}
+
+	.category-count {
+		margin-left: auto;
+		min-width: 1.45rem;
+		padding: 0.08rem 0.35rem;
+		border-radius: 999px;
+		background: color-mix(in oklab, currentColor 8%, transparent);
+		font-size: 0.68rem;
+		text-align: center;
+	}
+
+	.resource-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		align-content: start;
+		gap: 1rem;
 	}
 
 	:global(.dark) .category.active {
@@ -306,26 +331,140 @@
 	}
 
 	.entry {
-		display: flex;
+		position: relative;
+		display: grid;
+		grid-template-columns: 4.35rem minmax(0, 1fr);
 		width: 100%;
-		align-items: center;
-		gap: 0.75rem;
-		border: 2px solid var(--color-stone-200);
-		border-radius: 0.5rem;
-		padding: 0.625rem 0.875rem;
+		min-height: 7.2rem;
+		align-items: stretch;
+		gap: 0.9rem;
+		border: 1px solid var(--color-stone-200);
+		border-radius: 0.8rem;
+		padding: 0.65rem;
+		background: color-mix(in oklab, var(--surface) 88%, transparent);
+		box-shadow: 0 1px 2px rgb(28 25 23 / 0.04);
+		color: var(--color-stone-900);
 		text-align: left;
+		transition:
+			transform 150ms ease,
+			border-color 150ms ease,
+			box-shadow 150ms ease;
 	}
 
 	:global(.dark) .entry {
 		border-color: var(--color-stone-700);
+		color: var(--color-stone-100);
 	}
 
 	.entry:hover {
 		border-color: color-mix(in oklab, var(--color-accent-500) 50%, var(--color-stone-200));
+		transform: translateY(-2px);
+		box-shadow: 0 8px 20px rgb(28 25 23 / 0.09);
 	}
 
 	.entry.selected {
 		border-color: var(--color-accent-500);
 		background: color-mix(in oklab, var(--color-accent-500) 6%, transparent);
+	}
+
+	.cover {
+		display: flex;
+		min-width: 0;
+		flex-direction: column;
+		justify-content: flex-end;
+		padding: 0.55rem;
+		border-radius: 0.35rem 0.55rem 0.55rem 0.35rem;
+		background: linear-gradient(145deg, #397a49, #173e2a);
+		box-shadow:
+			inset 3px 0 rgb(255 255 255 / 0.13),
+			0 3px 7px rgb(28 25 23 / 0.18);
+		color: white;
+	}
+
+	.cover.commentary {
+		background: linear-gradient(145deg, #786547, #46351f);
+	}
+	.cover.xrefs {
+		background: linear-gradient(145deg, #526b78, #293c47);
+	}
+	.cover-mark {
+		margin-bottom: auto;
+		font-size: 0.7rem;
+		opacity: 0.72;
+	}
+	.cover-title {
+		overflow: hidden;
+		font-family: var(--font-serif);
+		font-size: 0.8rem;
+		font-weight: 700;
+		line-height: 1.15;
+		text-overflow: ellipsis;
+	}
+	.cover-rule {
+		width: 1.25rem;
+		margin: 0.32rem 0;
+		border-top: 1px solid rgb(255 255 255 / 0.45);
+	}
+	.cover-kind {
+		overflow: hidden;
+		font-size: 0.48rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		text-overflow: ellipsis;
+		opacity: 0.72;
+	}
+	.resource-meta {
+		display: flex;
+		min-width: 0;
+		flex-direction: column;
+		justify-content: center;
+	}
+	.resource-name {
+		display: -webkit-box;
+		overflow: hidden;
+		font-weight: 650;
+		line-height: 1.3;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+	}
+	.resource-abbrev {
+		margin-top: 0.35rem;
+		color: var(--color-stone-500);
+		font-size: 0.72rem;
+	}
+
+	:global(.dark) .resource-abbrev {
+		color: var(--color-stone-400);
+	}
+	.selected-check {
+		position: absolute;
+		top: 0.55rem;
+		right: 0.55rem;
+		width: 1.25rem;
+		color: var(--color-accent-600);
+	}
+	.in-use {
+		position: absolute;
+		right: 0.55rem;
+		bottom: 0.55rem;
+		color: var(--color-stone-400);
+		font-size: 0.62rem;
+	}
+
+	@media (max-width: 639px) {
+		.translation-dialog {
+			width: calc(100vw - 1rem);
+			height: calc(100dvh - 1rem);
+		}
+		.resource-grid {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.category {
+			flex: 0 0 auto;
+		}
+		.category-count {
+			display: none;
+		}
 	}
 </style>

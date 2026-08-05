@@ -82,7 +82,7 @@
 		width: 100%;
 		height: 7.5rem;
 		margin-bottom: 0.75rem;
-		overflow-x: auto;
+		overflow-x: hidden;
 		border-bottom: 2px solid var(--color-stone-200);
 	}
 
@@ -145,11 +145,13 @@
 	}
 
 	.books.compact {
+		grid-template-columns: repeat(var(--book-count), minmax(1.2rem, 1fr));
 		height: 5.75rem;
 		margin-bottom: 0.35rem;
 	}
 
 	.books.compact .book {
+		min-width: 1.2rem;
 		grid-template-rows: 1rem 3rem 1.25rem;
 	}
 </style>

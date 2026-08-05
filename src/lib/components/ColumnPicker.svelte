@@ -40,7 +40,7 @@
 	} = $props();
 </script>
 
-<div class="flex min-h-8 min-w-0 items-center gap-0.5">
+<div class="flex min-h-10 min-w-0 items-center gap-0.5">
 	<span
 		class="drag-handle inline-flex cursor-grab touch-none items-center px-1 text-stone-300
 		       active:cursor-grabbing dark:text-stone-600"
@@ -57,15 +57,25 @@
 	<button
 		id="column-{index}"
 		type="button"
-		class="max-w-full min-w-0 truncate rounded-md border-2 border-stone-300 px-2 py-1 text-left
-		       text-sm font-semibold text-stone-700 transition hover:bg-white hover:shadow-sm
-		       focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 dark:border-stone-600
-		       dark:text-stone-200 dark:hover:bg-stone-800"
+		class="group flex min-h-10 min-w-0 flex-1 items-center gap-2 rounded-lg px-2.5 text-left text-sm
+		       font-semibold text-stone-700 transition-colors hover:bg-accent-50/80 hover:text-accent-800
+		       focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 dark:text-stone-200
+		       dark:hover:bg-accent-900/20 dark:hover:text-accent-200"
 		aria-label={t('reader.chooseTranslation')}
 		aria-haspopup="dialog"
 		onclick={() => onOpenTranslation(index)}
 	>
-		{selected.abbrev}
+		<span class="truncate">{selected.abbrev}</span>
+		<svg
+			viewBox="0 0 20 20"
+			class="size-3.5 shrink-0 text-stone-400 transition-transform group-hover:translate-x-0.5"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="1.6"
+			aria-hidden="true"
+		>
+			<path d="m7.5 5 5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
+		</svg>
 	</button>
 
 	<div class="ml-auto flex shrink-0 items-center gap-0.5">

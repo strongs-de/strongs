@@ -146,10 +146,10 @@
 		max-width: min(20rem, calc(100vw - 1rem));
 		max-height: calc(100dvh - 1rem);
 		overflow-y: auto;
-		padding: 0.25rem;
+		padding: 0.35rem;
 		border: 1px solid var(--color-stone-200);
-		border-radius: 0.5rem;
-		background: white;
+		border-radius: 0.75rem;
+		background: var(--surface-raised);
 		box-shadow:
 			0 10px 15px -3px rgb(0 0 0 / 0.1),
 			0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -164,7 +164,7 @@
 
 	:global(.dark) .menu {
 		border-color: var(--color-stone-700);
-		background: var(--color-stone-900);
+		background: var(--surface-raised);
 		color: var(--color-stone-100);
 	}
 
@@ -176,9 +176,9 @@
 		align-items: center;
 		gap: 0.5rem;
 		width: 100%;
-		padding: 0.375rem 0.5rem;
+		padding: 0.48rem 0.6rem;
 		border: 0;
-		border-radius: 0.25rem;
+		border-radius: 0.5rem;
 		background: none;
 		color: inherit;
 		font: inherit;

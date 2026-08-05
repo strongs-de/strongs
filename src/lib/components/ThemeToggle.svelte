@@ -35,21 +35,33 @@
 	onclick={toggle}
 	title={dark ? t('nav.theme.light') : t('nav.theme.dark')}
 	aria-label={dark ? t('nav.theme.light') : t('nav.theme.dark')}
-	class="rounded-md px-2 py-1.5 text-stone-500 hover:bg-stone-100 hover:text-stone-900
-	       dark:hover:bg-stone-800 dark:hover:text-stone-100"
+	class="icon-button"
 >
 	{#if dark}
-		<svg viewBox="0 0 20 20" class="size-5" fill="currentColor" aria-hidden="true">
+		<svg
+			viewBox="0 0 24 24"
+			class="size-5"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="1.7"
+			aria-hidden="true"
+		>
+			<circle cx="12" cy="12" r="3.5" />
 			<path
-				d="M10 2a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 10 2ZM10 15a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 10 15ZM10 6a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM2.75 9.25a.75.75 0 0 0 0 1.5h1.5a.75.75 0 0 0 0-1.5h-1.5ZM15.75 9.25a.75.75 0 0 0 0 1.5h1.5a.75.75 0 0 0 0-1.5h-1.5ZM4.4 4.4a.75.75 0 0 1 1.06 0l1.06 1.06A.75.75 0 1 1 5.46 6.52L4.4 5.46a.75.75 0 0 1 0-1.06ZM13.48 13.48a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 1 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 0-1.06ZM15.6 4.4a.75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06L14.54 4.4a.75.75 0 0 1 1.06 0ZM6.52 13.48a.75.75 0 0 1 0 1.06L5.46 15.6A.75.75 0 1 1 4.4 14.54l1.06-1.06a.75.75 0 0 1 1.06 0Z"
+				d="M12 2.75v2M12 19.25v2M2.75 12h2M19.25 12h2M5.45 5.45l1.4 1.4M17.15 17.15l1.4 1.4M18.55 5.45l-1.4 1.4M6.85 17.15l-1.4 1.4"
+				stroke-linecap="round"
 			/>
 		</svg>
 	{:else}
-		<svg viewBox="0 0 20 20" class="size-5" fill="currentColor" aria-hidden="true">
-			<path
-				fill-rule="evenodd"
-				d="M7.455 2.004a.75.75 0 0 1 .26.77 7 7 0 0 0 9.958 7.967.75.75 0 0 1 1.067.853A8.5 8.5 0 1 1 6.647 1.921a.75.75 0 0 1 .808.083Z"
-			/>
+		<svg
+			viewBox="0 0 24 24"
+			class="size-5"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="1.7"
+			aria-hidden="true"
+		>
+			<path d="M20.3 15.1A8.7 8.7 0 0 1 8.9 3.7 8.7 8.7 0 1 0 20.3 15.1Z" stroke-linejoin="round" />
 		</svg>
 	{/if}
 </button>

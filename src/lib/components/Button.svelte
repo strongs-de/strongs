@@ -34,7 +34,7 @@
 	} = $props();
 
 	const base =
-		'inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md font-semibold ' +
+		'inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg font-semibold ' +
 		'whitespace-nowrap shadow-sm transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50';
 
 	const sizes = {
@@ -47,9 +47,8 @@
 			'border border-accent-700/20 bg-accent-600 text-white hover:-translate-y-px hover:bg-accent-700 ' +
 			'hover:shadow-md enabled:active:translate-y-0 enabled:active:bg-accent-800',
 		secondary:
-			'border border-stone-300 bg-white text-stone-800 hover:border-accent-400 hover:bg-accent-50/60 ' +
-			'dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-stone-600 ' +
-			'dark:hover:bg-stone-800',
+			'border border-stone-300 bg-[color:var(--surface-raised)] text-stone-800 hover:border-accent-400 hover:bg-accent-50/60 ' +
+			'dark:border-white/12 dark:text-stone-100 dark:hover:border-white/20 dark:hover:bg-white/7',
 		ghost:
 			'text-stone-600 hover:bg-stone-100 hover:text-stone-900 ' +
 			'dark:text-stone-300 dark:hover:bg-stone-800 dark:hover:text-stone-100',

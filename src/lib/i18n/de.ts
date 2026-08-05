@@ -16,6 +16,7 @@ export const de = {
 	'action.save': 'Speichern',
 	'action.delete': 'Löschen',
 	'action.close': 'Schließen',
+	'action.clear': 'Eingabe löschen',
 	'action.back': 'Zurück',
 	'action.retry': 'Erneut versuchen',
 	'action.more': 'Mehr',
@@ -113,8 +114,13 @@ export const de = {
 	'statistics.clearFilter': 'Buchfilter aufheben',
 	'search.hint.phrase':
 		'Setze mehrere Wörter in Anführungszeichen, um genau diese Folge zu suchen.',
-	'search.hint.strong':
-		'Gib G oder H mit einer Nummer ein, z.B. G26, um nach einem Urtextwort zu suchen.',
+	'search.hint.strong': 'Urtextsuche: Gib zum Beispiel G26 oder H430 ein.',
+	'search.help.title': 'Bibelstelle wählen',
+	'search.help.subtitle': 'Wähle ein Buch oder gib Kapitel und Vers direkt in das Suchfeld ein.',
+	'search.help.oldTestament': 'Altes Testament',
+	'search.help.newTestament': 'Neues Testament',
+	'search.help.strong': 'Nach einem Urtextwort suchen',
+	'search.help.phrase': 'Nach einer genauen Wortfolge suchen',
 
 	// --- account ------------------------------------------------------------
 	'auth.email': 'E-Mail-Adresse',

@@ -150,6 +150,7 @@
 	 *  stream, this one only cares whether the *columns* changed. */
 	let columnWidthsKey = data.columns.map((column) => column.resource.id).join(',');
 	const MIN_COLUMN_FRACTION = 0.12;
+	const NOTES_COLUMN_FRACTION = 0.504;
 
 	$effect(() => {
 		const key = data.columns.map((column) => column.resource.id).join(',');
@@ -172,8 +173,10 @@
 	const columnTrack = $derived(
 		columnWidths
 			? columnWidths.map((width) => `minmax(0, ${width}fr)`).join(' ') +
-					(data.notesVisible ? ' minmax(0, 1fr)' : '')
-			: undefined
+					(data.notesVisible ? ` minmax(0, ${NOTES_COLUMN_FRACTION}fr)` : '')
+			: data.notesVisible
+				? `repeat(${data.columns.length}, minmax(0, 1fr)) minmax(0, ${NOTES_COLUMN_FRACTION}fr)`
+				: undefined
 	);
 	/** The desktop header bar sets `grid-template-columns` inline rather than through a class, so it
 	 *  cannot lean on the CSS variable's own fallback and needs the equivalent literal spelled out. */
@@ -181,24 +184,33 @@
 		columnTrack ?? `repeat(${visibleColumnCount}, minmax(0, 1fr))`
 	);
 
-	/** Left-edge percentage, across the *whole* header row (including a visible notes column), of each
-	 *  boundary between two real columns — where the resize handles sit. */
-	const columnBoundaryPercents = $derived.by(() => {
+	/** Position of each boundary between two real columns. A pure percentage only centers the middle
+	 *  splitter: CSS Grid removes every gap before distributing the fractional tracks, so the outer
+	 *  splitters also need a small gap-dependent offset. */
+	const columnBoundaries = $derived.by(() => {
 		const fractions = columnWidths ?? equalColumnWidths();
 		// Both branches of `fractions` already sum to 1 across the real columns as a group (an equal
 		// split of N columns is N × 1/N); the notes column, when visible, then adds one more same-sized
 		// unit, matching how `columnTrack` appends it as a further `1fr` after that group.
-		const totalUnits = 1 + (data.notesVisible ? 1 : 0);
-		const percents: number[] = [];
+		const totalUnits = 1 + (data.notesVisible ? NOTES_COLUMN_FRACTION : 0);
+		const gapCount = visibleColumnCount - 1;
+		const boundaries: { percent: number; offsetRem: number }[] = [];
 		let cumulative = 0;
 		for (let index = 0; index < fractions.length - 1; index += 1) {
 			cumulative += fractions[index] ?? 0;
-			percents.push((cumulative / totalUnits) * 100);
+			const fraction = cumulative / totalUnits;
+			boundaries.push({
+				percent: fraction * 100,
+				// Both the header and reader use Tailwind's `gap-3`, i.e. 0.75rem. This moves the
+				// handle from the fractional track edge to the exact centre of its adjacent gap.
+				offsetRem: 0.75 * (index + 0.5 - gapCount * fraction)
+			});
 		}
-		return percents;
+		return boundaries;
 	});
 
 	let columnHeaderBar = $state<HTMLElement>();
+	let flowReader = $state<HTMLElement>();
 	let isResizingColumns = false;
 	let resizeBoundaryIndex: number | null = null;
 	let resizeStartX = 0;
@@ -222,12 +234,15 @@
 	}
 
 	function startColumnResize(event: PointerEvent, boundaryIndex: number) {
-		if (!columnHeaderBar) return;
+		if (!flowReader) return;
 		isResizingColumns = true;
 		resizeBoundaryIndex = boundaryIndex;
 		resizeStartX = event.clientX;
 		resizeStartWidths = columnWidths ?? equalColumnWidths();
-		resizeBarWidth = columnHeaderBar.getBoundingClientRect().width;
+		const style = getComputedStyle(flowReader);
+		resizeBarWidth =
+			flowReader.getBoundingClientRect().width -
+			parseFloat(style.columnGap) * (visibleColumnCount - 1);
 	}
 
 	/** Bound to `<svelte:window>`, not the handle itself: a pointer that leaves the handle mid-drag
@@ -506,6 +521,9 @@
 	let suppressFlowScroll = false;
 	let suppressFlowTimer: ReturnType<typeof setTimeout> | undefined;
 	let flowSyncTimer: ReturnType<typeof setTimeout> | undefined;
+	let flowHasContentAbove = $state<boolean[]>([]);
+	let flowHasContentBelow = $state<boolean[]>([]);
+	const WHEEL_SCROLL_FACTOR = 0.55;
 	/**
 	 * The element each flow column was last aligned to, indexed by column. A ranged block (a comment
 	 * spanning several verses, or a merged Bible cell) should hold still while the reader is anywhere
@@ -768,6 +786,24 @@
 		if (flowSyncTimer) clearTimeout(flowSyncTimer);
 	}
 
+	/** Native mouse-wheel steps vary widely between browsers and operating systems and can move several
+	 *  lines at once. Reducing the normalized vertical delta makes close reading more precise without
+	 *  changing touch scrolling, scrollbar dragging or keyboard navigation. */
+	function onFlowWheel(event: WheelEvent, columnIndex: number) {
+		makeFlowSource(columnIndex);
+		if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+
+		const column = event.currentTarget as HTMLElement;
+		const normalizedDelta =
+			event.deltaMode === 1
+				? event.deltaY * 16
+				: event.deltaMode === 2
+					? event.deltaY * column.clientHeight
+					: event.deltaY;
+		event.preventDefault();
+		column.scrollTop += normalizedDelta * WHEEL_SCROLL_FACTOR;
+	}
+
 	/**
 	 * Debounces the cross-column sync so it runs once the scroll has settled rather than on every
 	 * scroll event. On touch devices a drag fires continuous scroll events with no gaps, so this
@@ -789,9 +825,10 @@
 	 * scrollbar dragging, or keyboard paging), and this handler is the one signal that always fires.
 	 */
 	function onFlowScroll(columnIndex: number) {
-		if (suppressFlowScroll) return;
 		const source = flowColumns[columnIndex];
 		if (!source) return;
+		updateFlowEdgeState(columnIndex, source);
+		if (suppressFlowScroll) return;
 		// Sync off does not stop this column's own endless-scroll loading below — only the two lines
 		// that would make it the sync source are skipped.
 		if (!unlinkedColumns.has(columnIndex)) {
@@ -803,10 +840,19 @@
 		if (source.scrollHeight - source.scrollTop - source.clientHeight < 900) void loadStreamNext();
 	}
 
+	function updateFlowEdgeState(columnIndex: number, source: HTMLElement) {
+		flowHasContentAbove[columnIndex] = source.scrollTop > 4;
+		flowHasContentBelow[columnIndex] =
+			source.scrollHeight - source.scrollTop - source.clientHeight > 4;
+	}
+
 	$effect(() => {
 		tick().then(() => {
 			syncFlowColumns(activeFlowSource);
-			void loadStreamNext();
+			flowColumns.forEach((column, index) => updateFlowEdgeState(index, column));
+			void loadStreamNext().then(() => {
+				flowColumns.forEach((column, index) => updateFlowEdgeState(index, column));
+			});
 		});
 	});
 
@@ -853,43 +899,45 @@
 	<!-- No `overflow-x` here: it would make this a scroll container, and every `sticky` inside it
 	     would then stick to a box that never scrolls vertically. The grid's `minmax(0, 1fr)` tracks
 	     cannot overflow anyway. -->
-	<main class="bg-white/65 dark:bg-stone-950/45">
+	<main>
 		<div
-			class="mx-auto max-w-[var(--content-max-width)] px-3 py-4 sm:px-5 sm:py-5"
+			class="mx-auto max-w-[var(--content-max-width)] px-3 py-5 sm:px-6 sm:py-6"
 			class:pb-sheet={activeStrong !== null}
 		>
 			<div
-				class="sticky top-[var(--header-height)] z-20 -mx-3 mb-2 flex h-11 items-center gap-2
-				       border-b border-stone-200 bg-white/95 px-3 backdrop-blur sm:-mx-5 sm:px-5
-				       dark:border-stone-800 dark:bg-stone-950/95"
+				class="mb-5 flex items-center gap-3 pt-2 pb-1 sm:mb-6 sm:pt-3 sm:pb-2"
 				data-testid="reader-location"
 			>
 				<h1
-					class="mr-auto truncate font-serif text-xl font-semibold tracking-tight text-stone-800 sm:text-2xl
+					class="mr-auto truncate text-3xl font-semibold tracking-[-0.035em] text-stone-900 sm:text-4xl
 					       dark:text-stone-100"
 				>
 					{visibleStreamChapter?.fullTitle ?? data.fullTitle}
 				</h1>
-				<p class="hidden text-xs text-stone-500 xl:block dark:text-stone-400">
-					{t('search.hint.strong')}
-				</p>
 				{#if data.user}
 					<form method="POST" action="?/toggleNotes" use:enhance>
 						<button
 							type="submit"
-							class="inline-flex items-center gap-1.5 rounded-md border border-stone-200 px-2.5 py-1.5
-							       text-xs font-medium text-stone-600 hover:border-accent-400 hover:text-accent-700
-							       dark:border-stone-700 dark:text-stone-300 dark:hover:text-accent-300"
+							title={data.notesVisible ? t('reader.hideNotes') : t('reader.showNotes')}
+							aria-label={data.notesVisible ? t('reader.hideNotes') : t('reader.showNotes')}
+							class="notes-toggle"
+							class:active={data.notesVisible}
 							aria-pressed={data.notesVisible}
 						>
-							<svg viewBox="0 0 20 20" class="size-4" fill="currentColor" aria-hidden="true">
+							<svg
+								viewBox="0 0 20 20"
+								class="size-4"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.5"
+								aria-hidden="true"
+							>
 								<path
-									d="M4.75 3A1.75 1.75 0 0 0 3 4.75v10.5C3 16.22 3.78 17 4.75 17h10.5c.97 0 1.75-.78 1.75-1.75V4.75C17 3.78 16.22 3 15.25 3H4.75Zm2 3.25a.75.75 0 0 1 .75-.75h5a.75.75 0 0 1 0 1.5h-5a.75.75 0 0 1-.75-.75Zm0 3.75a.75.75 0 0 1 .75-.75h5a.75.75 0 0 1 0 1.5h-5a.75.75 0 0 1-.75-.75Zm.75 3a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
+									d="M5 3.75h10A1.25 1.25 0 0 1 16.25 5v10A1.25 1.25 0 0 1 15 16.25H5A1.25 1.25 0 0 1 3.75 15V5A1.25 1.25 0 0 1 5 3.75Z"
 								/>
+								<path d="M7 7h6M7 10h6M7 13h3.5" stroke-linecap="round" />
 							</svg>
-							<span class="hidden sm:inline">
-								{data.notesVisible ? t('reader.hideNotes') : t('reader.showNotes')}
-							</span>
+							<span class="hidden sm:inline">{t('reader.notesColumn')}</span>
 						</button>
 					</form>
 				{/if}
@@ -899,9 +947,8 @@
 			     header cell is never taller than itself and so could never stick on its own. -->
 			<div
 				bind:this={columnHeaderBar}
-				class="relative sticky top-[calc(var(--header-height)+2.75rem)] z-10 mb-2 hidden gap-0
-				       overflow-hidden rounded-md border border-stone-200 bg-stone-50/95 py-1.5 shadow-sm
-				       backdrop-blur sm:grid dark:border-stone-800 dark:bg-stone-950/95"
+				class="relative sticky top-[var(--header-height)] z-10 -mx-2 mb-3 hidden gap-3
+				       rounded-xl bg-[color:var(--paper)]/94 p-2 backdrop-blur-xl sm:grid"
 				data-testid="column-picker-bar"
 				style="grid-template-columns: {headerGridTemplate}"
 			>
@@ -910,7 +957,7 @@
 						draggable="true"
 						role="group"
 						aria-label="{column.resource.abbrev}: {t('reader.dragColumn')}"
-						class="min-w-0 border-r border-stone-200 last:border-r-0 dark:border-stone-800"
+						class="min-w-0 rounded-lg border border-stone-200/80 bg-[color:var(--surface)] px-1 shadow-sm dark:border-white/8"
 						class:opacity-40={draggedColumn === column.index}
 						class:ring-2={dropColumn === column.index}
 						class:ring-accent-400={dropColumn === column.index}
@@ -960,36 +1007,6 @@
 						</form>
 					</div>
 				{/if}
-
-				<!-- An overlay rather than something inside each column cell, so a handle can straddle two
-				     of them at once. `pointer-events-none` on the wrapper keeps it from intercepting clicks
-				     on the picker buttons underneath, everywhere except the thin strip of each handle. -->
-				<div class="pointer-events-none absolute inset-0">
-					{#each columnBoundaryPercents as percent, boundaryIndex (boundaryIndex)}
-						<!-- A focusable, draggable separator is the documented WAI-ARIA "window splitter"
-						     pattern (role="separator" + tabindex + arrow-key support), not an oversight the
-						     linter's generic "non-interactive element" heuristic accounts for. -->
-						<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-						<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-						<div
-							role="separator"
-							aria-orientation="vertical"
-							aria-label={t('reader.resizeColumns')}
-							aria-valuenow={Math.round(
-								(columnWidths ?? equalColumnWidths())[boundaryIndex]! * 100
-							)}
-							aria-valuemin={Math.round(MIN_COLUMN_FRACTION * 100)}
-							aria-valuemax={Math.round(
-								(1 - MIN_COLUMN_FRACTION * (data.columns.length - 1)) * 100
-							)}
-							tabindex="0"
-							class="column-resize-handle"
-							style="left: {percent}%"
-							onpointerdown={(event) => startColumnResize(event, boundaryIndex)}
-							onkeydown={(event) => onResizeHandleKeydown(event, boundaryIndex)}
-						></div>
-					{/each}
-				</div>
 			</div>
 			<form bind:this={reorderForm} method="POST" action="?/moveColumn" use:enhance class="hidden">
 				<input bind:this={reorderFromInput} type="hidden" name="from" />
@@ -1007,7 +1024,7 @@
 
 			<!-- On a phone one column fits; tabs switch between translations. -->
 			<div
-				class="sticky top-[calc(var(--header-height)+2.75rem)] z-10 -mx-3 flex gap-1 overflow-x-auto border-b
+				class="sticky top-[var(--header-height)] z-10 -mx-3 flex gap-1 overflow-x-auto border-b
 				       border-stone-200 bg-white/95 px-3 py-2 backdrop-blur sm:hidden
 				       dark:border-stone-800 dark:bg-stone-950/95"
 				data-testid="column-picker-bar"
@@ -1116,11 +1133,77 @@
 				</p>
 			{:else}
 				<div
+					bind:this={flowReader}
 					class="flow-reader"
 					style="--columns: {visibleColumnCount}"
 					style:--column-track={columnTrack}
 					data-testid="flow-reader"
 				>
+					<!-- The splitter belongs to the text it resizes. Keeping its overlay outside the individual
+					     scrolling columns leaves it stationary and centered while either text column scrolls. -->
+					<div class="pointer-events-none absolute inset-0 z-10 hidden sm:block">
+						{#each columnBoundaries as boundary, boundaryIndex (boundaryIndex)}
+							<!-- A focusable, draggable separator is the documented WAI-ARIA window-splitter
+							     pattern and also supports ArrowLeft/ArrowRight. -->
+							<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+							<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+							<div
+								role="separator"
+								aria-orientation="vertical"
+								aria-label={t('reader.resizeColumns')}
+								aria-valuenow={Math.round(
+									(columnWidths ?? equalColumnWidths())[boundaryIndex]! * 100
+								)}
+								aria-valuemin={Math.round(MIN_COLUMN_FRACTION * 100)}
+								aria-valuemax={Math.round(
+									(1 - MIN_COLUMN_FRACTION * (data.columns.length - 1)) * 100
+								)}
+								tabindex="0"
+								class="column-resize-handle"
+								style="left: calc({boundary.percent}% {boundary.offsetRem >= 0
+									? '+'
+									: '-'} {Math.abs(boundary.offsetRem)}rem)"
+								onpointerdown={(event) => startColumnResize(event, boundaryIndex)}
+								onkeydown={(event) => onResizeHandleKeydown(event, boundaryIndex)}
+							>
+								<span aria-hidden="true"><i></i><i></i><i></i></span>
+							</div>
+						{/each}
+					</div>
+
+					<div class="flow-fade-grid pointer-events-none absolute inset-0 z-5 hidden sm:grid">
+						{#each data.columns as column, columnIndex (column.resource.id)}
+							<div class="relative min-w-0">
+								<span
+									class="flow-edge-fade top"
+									class:visible={flowHasContentAbove[columnIndex]}
+									aria-hidden="true"
+								></span>
+								<span
+									class="flow-edge-fade bottom"
+									class:visible={flowHasContentBelow[columnIndex]}
+									aria-hidden="true"
+								></span>
+							</div>
+						{/each}
+						{#if data.notesVisible}<div></div>{/if}
+					</div>
+
+					{#if mobileColumn < data.columns.length}
+						<div class="pointer-events-none absolute inset-0 z-5 sm:hidden">
+							<span
+								class="flow-edge-fade top"
+								class:visible={flowHasContentAbove[mobileColumn]}
+								aria-hidden="true"
+							></span>
+							<span
+								class="flow-edge-fade bottom"
+								class:visible={flowHasContentBelow[mobileColumn]}
+								aria-hidden="true"
+							></span>
+						</div>
+					{/if}
+
 					{#each data.columns as column, columnIndex (column.resource.id)}
 						<div
 							bind:this={flowColumns[columnIndex]}
@@ -1132,7 +1215,7 @@
 							aria-labelledby={isMobileViewport ? `mobile-tab-${columnIndex}` : undefined}
 							aria-label={isMobileViewport ? undefined : column.resource.name}
 							aria-hidden={isMobileViewport && columnIndex !== mobileColumn}
-							onwheel={() => makeFlowSource(columnIndex)}
+							onwheel={(event) => onFlowWheel(event, columnIndex)}
 							ontouchstart={() => makeFlowSource(columnIndex)}
 							onpointerdown={() => makeFlowSource(columnIndex)}
 							onfocusin={() => makeFlowSource(columnIndex)}
@@ -1394,27 +1477,103 @@
 />
 
 <style>
-	/* Sits on top of the column-picker bar, straddling the boundary between two columns. Only the
-	   thin strip itself takes pointer events — see the wrapper's `pointer-events-none` in the markup. */
+	.notes-toggle {
+		display: inline-flex;
+		height: 2.25rem;
+		align-items: center;
+		gap: 0.5rem;
+		padding-inline: 0.625rem;
+		border-radius: 0.5rem;
+		background: var(--color-stone-100);
+		color: var(--color-stone-600);
+		font-size: 0.75rem;
+		font-weight: 500;
+		transition:
+			color 130ms ease,
+			background 130ms ease;
+	}
+
+	.notes-toggle:hover {
+		background: var(--color-stone-200);
+	}
+	.notes-toggle.active {
+		background: var(--color-accent-100);
+		color: var(--color-accent-800);
+	}
+	:global(.dark) .notes-toggle {
+		background: rgb(255 255 255 / 0.06);
+		color: var(--color-stone-300);
+	}
+	:global(.dark) .notes-toggle:hover {
+		background: rgb(255 255 255 / 0.1);
+	}
+	:global(.dark) .notes-toggle.active {
+		background: color-mix(in oklab, var(--color-accent-800) 35%, transparent);
+		color: var(--color-accent-200);
+	}
+
+	/* Straddles the boundary halfway down the reading area. Only the handle itself takes pointer
+	   events, so the transparent overlay around it never blocks text selection or scrolling. */
 	.column-resize-handle {
 		position: absolute;
-		top: 0;
-		bottom: 0;
-		width: 10px;
-		margin-left: -5px;
+		top: 50%;
+		display: flex;
+		width: 18px;
+		height: 3.25rem;
+		margin-left: -9px;
+		transform: translateY(-50%);
+		align-items: center;
+		justify-content: center;
+		border-radius: 999px;
 		cursor: col-resize;
 		touch-action: none;
 		pointer-events: auto;
 	}
 
+	.column-resize-handle span {
+		display: flex;
+		width: 0.75rem;
+		height: 1.7rem;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.16rem;
+		border: 1px solid var(--color-stone-300);
+		border-radius: 999px;
+		background: var(--surface-raised);
+		box-shadow: 0 1px 3px rgb(28 25 23 / 0.12);
+		color: var(--color-stone-400);
+	}
+
+	.column-resize-handle i {
+		display: block;
+		width: 2px;
+		height: 2px;
+		border-radius: 999px;
+		background: currentColor;
+	}
+
 	.column-resize-handle:hover,
 	.column-resize-handle:focus-visible {
-		background: color-mix(in oklab, var(--color-accent-500) 35%, transparent);
+		background: color-mix(in oklab, var(--color-accent-500) 12%, transparent);
+	}
+
+	.column-resize-handle:hover span,
+	.column-resize-handle:focus-visible span {
+		border-color: var(--color-accent-500);
+		color: var(--color-accent-600);
 	}
 
 	.column-resize-handle:focus-visible {
 		outline: 2px solid var(--color-accent-500);
-		outline-offset: -2px;
+		outline-offset: 1px;
+	}
+
+	:global(.dark) .column-resize-handle span {
+		border-color: var(--color-stone-600);
+		background: var(--surface-raised);
+		box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+		color: var(--color-stone-500);
 	}
 
 	/* The mobile column tabs. The pill's background already shows which one is selected; the
@@ -1451,18 +1610,17 @@
 	}
 
 	.flow-reader {
+		position: relative;
 		display: grid;
 		grid-template-columns: var(--column-track, repeat(var(--columns), minmax(0, 1fr)));
+		gap: 0.75rem;
 		height: max(28rem, calc(100dvh - var(--header-height) - 11.5rem));
 		overflow: hidden;
-		border: 1px solid color-mix(in oklab, var(--color-stone-300) 55%, transparent);
-		border-radius: 0.5rem;
-		background: rgb(255 255 255 / 0.42);
+		background: transparent;
 	}
 
 	:global(.dark) .flow-reader {
-		border-color: color-mix(in oklab, var(--color-stone-700) 65%, transparent);
-		background: rgb(28 25 23 / 0.28);
+		background: transparent;
 	}
 
 	.flow-column {
@@ -1470,15 +1628,54 @@
 		overflow-y: auto;
 		overscroll-behavior-y: contain;
 		scrollbar-width: none;
-		border-left: 1px solid color-mix(in oklab, var(--color-stone-300) 55%, transparent);
+		border: 1px solid var(--line);
+		border-radius: 0.75rem;
+		background: var(--surface);
+		box-shadow: var(--shadow-soft);
 	}
 
 	.flow-column::-webkit-scrollbar {
 		display: none;
 	}
 
-	.flow-column:first-child {
-		border-left: 0;
+	.flow-fade-grid {
+		grid-template-columns: var(--column-track, repeat(var(--columns), minmax(0, 1fr)));
+		gap: 0.75rem;
+	}
+
+	/* These veils live above the scrolling content but below the splitter, so text fades softly while
+	   card borders and the resize control remain crisp. */
+	.flow-edge-fade {
+		position: absolute;
+		right: 1px;
+		left: 1px;
+		height: 1.5rem;
+		opacity: 0;
+		transition: opacity 140ms ease;
+	}
+
+	.flow-edge-fade.top {
+		top: 1px;
+		background: linear-gradient(
+			to bottom,
+			var(--surface) 0%,
+			color-mix(in oklab, var(--surface) 82%, transparent) 38%,
+			transparent 100%
+		);
+	}
+
+	.flow-edge-fade.bottom {
+		bottom: 1px;
+		background: linear-gradient(
+			to top,
+			var(--surface) 0%,
+			color-mix(in oklab, var(--surface) 82%, transparent) 38%,
+			transparent 100%
+		);
+	}
+
+	.flow-edge-fade.visible {
+		opacity: 1;
 	}
 
 	/* Enough trailing room for the final verse to become the top anchor as well. Without this, a
@@ -1490,11 +1687,11 @@
 	}
 
 	:global(.dark) .flow-column {
-		border-left-color: color-mix(in oklab, var(--color-stone-700) 65%, transparent);
+		border-color: var(--line);
 	}
 
 	.flow-chapter {
-		padding: 0.8rem 0.9rem 1.4rem;
+		padding: 1.05rem 1.2rem 1.65rem;
 		text-align: justify;
 		text-justify: inter-word;
 	}
@@ -1517,10 +1714,12 @@
 	}
 
 	.flow-heading {
-		margin: 1rem 0 0.25rem;
+		margin: 1.35rem 0 0.45rem;
 		font-family: var(--font-sans);
-		font-size: 0.8rem;
-		font-weight: 600;
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.045em;
+		text-transform: uppercase;
 		color: var(--color-stone-500);
 	}
 
@@ -1528,8 +1727,8 @@
 		display: inline;
 		margin: 0;
 		font-family: var(--font-serif);
-		font-size: calc(1.19rem * var(--reader-font-scale, 1));
-		line-height: 1.72;
+		font-size: calc(1.08rem * var(--reader-font-scale, 1));
+		line-height: 1.65;
 		hyphens: auto;
 	}
 
@@ -1566,10 +1765,10 @@
 		/* flow-root, not just overflow: hidden, so the floated verse number below is contained even
 		   when an entry is shorter than the number's own line height. */
 		display: flow-root;
-		margin-bottom: 1rem;
+		margin-bottom: 1.15rem;
 		font-family: var(--font-serif);
-		font-size: calc(1.19rem * var(--reader-font-scale, 1));
-		line-height: 1.72;
+		font-size: calc(1.08rem * var(--reader-font-scale, 1));
+		line-height: 1.65;
 	}
 
 	.flow-note {

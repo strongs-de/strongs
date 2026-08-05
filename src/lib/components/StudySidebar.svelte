@@ -133,10 +133,10 @@
 	       border-stone-200 bg-white shadow-2xl sm:inset-x-auto sm:top-[var(--header-height)]
 	       sm:right-[max(0px,calc((100vw-var(--content-max-width))/2-28rem))] sm:bottom-auto
 	       sm:h-[calc(100dvh-var(--header-height))] sm:max-h-none
-	       sm:w-[28rem]
+	       sm:w-[32rem]
 	       sm:rounded-none sm:border-0 sm:border-l
 	       sm:shadow-[-8px_0_24px_rgb(28_25_23/0.04)]
-	       lg:right-[max(0px,calc((100vw-var(--content-max-width))/2-32rem))] lg:w-[32rem]
+	       lg:right-[max(0px,calc((100vw-var(--content-max-width))/2-36rem))] lg:w-[36rem]
 	       dark:border-stone-800 dark:bg-stone-900"
 	aria-label={t('sidebar.tab.strong')}
 >
@@ -182,16 +182,33 @@
 				{/if}
 			{:else if payload.entry}
 				<!-- Headword: the original word, its transliteration and pronunciation. -->
-				<p
-					class="mb-1 text-2xl leading-snug"
-					lang={payload.entry.language}
-					dir={payload.entry.language === 'hbo' ? 'rtl' : 'ltr'}
-					style="font-family: var({payload.entry.language === 'hbo'
-						? '--font-hebrew'
-						: '--font-greek'})"
-				>
-					{payload.original?.word ?? payload.entry.lemma}
-				</p>
+				<div class="mb-1 flex items-start justify-between gap-3">
+					<p
+						class="min-w-0 text-2xl leading-snug"
+						lang={payload.entry.language}
+						dir={payload.entry.language === 'hbo' ? 'rtl' : 'ltr'}
+						style="font-family: var({payload.entry.language === 'hbo'
+							? '--font-hebrew'
+							: '--font-greek'})"
+					>
+						{payload.original?.word ?? payload.entry.lemma}
+					</p>
+					{#if payload.statistics.occurrences > 0}
+						<a class="all-occurrences" href="/{strong}">
+							{t('strong.showAll')}
+							<svg
+								viewBox="0 0 20 20"
+								class="size-3.5"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.6"
+								aria-hidden="true"
+							>
+								<path d="m7 4 6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</a>
+					{/if}
+				</div>
 				<p class="mb-3 text-xs text-stone-500 dark:text-stone-400">
 					{#if payload.entry.transliteration}<span>{payload.entry.transliteration}</span>{/if}
 					{#if payload.entry.pronunciation}
@@ -318,13 +335,6 @@
 								</button>
 							</div>
 						{/if}
-
-						<a
-							class="mt-3 inline-block text-xs text-accent-600 hover:underline dark:text-accent-400"
-							href="/{strong}"
-						>
-							{t('strong.showAll')}
-						</a>
 					</section>
 				{/if}
 			{/if}
@@ -397,6 +407,37 @@
 
 	.lexicon :global(.verse-ref:hover) {
 		text-decoration-style: solid;
+	}
+
+	.all-occurrences {
+		display: inline-flex;
+		flex: 0 0 auto;
+		align-items: center;
+		gap: 0.3rem;
+		margin-top: 0.1rem;
+		padding: 0.38rem 0.55rem 0.38rem 0.7rem;
+		border-radius: 0.5rem;
+		background: var(--color-accent-100);
+		color: var(--color-accent-800);
+		font-family: var(--font-sans);
+		font-size: 0.72rem;
+		font-weight: 650;
+		text-decoration: none;
+		transition:
+			background 130ms ease,
+			transform 130ms ease;
+	}
+
+	.all-occurrences:hover {
+		background: var(--color-accent-200);
+		transform: translateY(-1px);
+	}
+	:global(.dark) .all-occurrences {
+		background: color-mix(in oklab, var(--color-accent-800) 42%, transparent);
+		color: var(--color-accent-200);
+	}
+	:global(.dark) .all-occurrences:hover {
+		background: color-mix(in oklab, var(--color-accent-700) 52%, transparent);
 	}
 
 	/* Groups the related words listed under a "Wortfamilie:" heading, so they read as belonging to it
