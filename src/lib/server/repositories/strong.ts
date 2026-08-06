@@ -159,18 +159,22 @@ export async function loadStrongOccurrences(
 	db: Database,
 	strong: StrongId,
 	resourceId: string,
-	options: { page?: number; pageSize?: number; book?: number } = {}
+	options: { page?: number; pageSize?: number; book?: number; gloss?: string } = {}
 ): Promise<OccurrencePage> {
 	const pageSize = options.pageSize ?? 25;
 	const page = Math.max(1, options.page ?? 1);
 	const offset = (page - 1) * pageSize;
 	const bookCondition = options.book ? sql`and book_id = ${options.book}` : sql``;
+	const glossCondition = options.gloss?.trim()
+		? sql`and lower(btrim(word)) = lower(btrim(${options.gloss}))`
+		: sql``;
 
 	const [{ count } = { count: 0 }] = await db.execute<{ count: number }>(sql`
 		select count(distinct ${verseWords.verseId})::int as count
 		from ${verseWords}
 		where ${verseWords.resourceId} = ${resourceId} and ${verseWords.strong} = ${strong}
 		${bookCondition}
+		${glossCondition}
 	`);
 
 	const rows = await db.execute<{
@@ -187,6 +191,7 @@ export async function loadStrongOccurrences(
 			from ${verseWords}
 			where resource_id = ${resourceId} and strong = ${strong}
 			${bookCondition}
+			${glossCondition}
 			order by verse_id, position
 		) w
 		join ${verses} v on v.id = w.verse_id

@@ -20,7 +20,8 @@
 		{ "name": "Lexicon", "description": "Strong's number lookups." },
 		{ "name": "Search", "description": "Full-text search across translations." },
 		{ "name": "Lists", "description": "A signed-in reader's own verse lists." },
-		{ "name": "Notes", "description": "A signed-in reader's own chapter and verse notes." }
+		{ "name": "Notes", "description": "A signed-in reader's own chapter and verse notes." },
+		{ "name": "Highlights", "description": "A signed-in reader's own highlighted verses." }
 	],
 	"paths": {
 		"/api/v1/books": {
@@ -210,6 +211,20 @@
 						"required": false,
 						"description": "Page of the occurrence list.",
 						"schema": { "type": "integer", "minimum": 1, "default": 1 }
+					},
+					{
+						"name": "book",
+						"in": "query",
+						"required": false,
+						"description": "Restrict occurrences to one canonical book id.",
+						"schema": { "type": "integer", "minimum": 1, "maximum": 66 }
+					},
+					{
+						"name": "gloss",
+						"in": "query",
+						"required": false,
+						"description": "Restrict occurrences to one translation rendering from the glosses list. Matching ignores case and surrounding whitespace; it can be combined with book.",
+						"schema": { "type": "string", "example": "geliebt" }
 					}
 				],
 				"responses": {
@@ -376,6 +391,54 @@
 							}
 						}
 					},
+					"429": { "$ref": "#/components/responses/RateLimited" }
+				}
+			}
+		},
+		"/api/v1/highlights": {
+			"get": {
+				"operationId": "listMyHighlightedVerses",
+				"summary": "The caller's highlighted verses for one colour",
+				"description": "Returns every verse the caller marked with one highlight style, optionally with text from a selected translation. Requires a signed-in session or a `personal`-scope API key.",
+				"tags": ["Highlights"],
+				"security": [{ "bearerAuth": [] }],
+				"x-rate-limit": "120 requests/min per API key, 300 requests/min per IP for same-origin requests.",
+				"parameters": [
+					{
+						"name": "style",
+						"in": "query",
+						"required": false,
+						"description": "One of the caller's highlight-style UUIDs. Required unless color is supplied.",
+						"schema": { "type": "string", "format": "uuid" }
+					},
+					{
+						"name": "color",
+						"in": "query",
+						"required": false,
+						"description": "One of the caller's palette colours, e.g. #fde68a. Used when style is omitted.",
+						"schema": { "type": "string", "example": "#fde68a" }
+					},
+					{
+						"name": "resource",
+						"in": "query",
+						"required": false,
+						"description": "Bible resource whose text is attached. Defaults to the first available Bible.",
+						"schema": { "type": "string", "example": "SEEDDE" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The style and every verse marked with it.",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HighlightedVersesResponse" }
+							}
+						}
+					},
+					"400": { "description": "Neither style nor a known palette color was supplied." },
+					"401": { "$ref": "#/components/responses/Unauthorized" },
+					"403": { "$ref": "#/components/responses/PersonalScopeRequired" },
+					"404": { "description": "The style does not belong to the caller, or the requested Bible is unknown." },
 					"429": { "$ref": "#/components/responses/RateLimited" }
 				}
 			}
@@ -736,7 +799,8 @@
 					"occurrences",
 					"original",
 					"morphology",
-					"statisticsResource"
+					"statisticsResource",
+					"filters"
 				],
 				"properties": {
 					"strong": { "type": "string" },
@@ -764,6 +828,14 @@
 					"statisticsResource": {
 						"type": ["string", "null"],
 						"description": "Which resource id the statistics, book counts, glosses and occurrences were computed from."
+					},
+					"filters": {
+						"type": "object",
+						"required": ["book", "gloss"],
+						"properties": {
+							"book": { "type": ["integer", "null"] },
+							"gloss": { "type": ["string", "null"] }
+						}
 					}
 				}
 			},
@@ -903,6 +975,41 @@
 					"updatedAt": { "type": "string", "format": "date-time" },
 					"listId": { "type": ["string", "null"], "format": "uuid", "description": "Set for a verse-list-item note." },
 					"listTitle": { "type": ["string", "null"], "description": "Set for a verse-list-item note." }
+				}
+			},
+			"HighlightStyle": {
+				"type": "object",
+				"required": ["id", "color", "name"],
+				"properties": {
+					"id": { "type": "string", "format": "uuid" },
+					"color": { "type": "string", "example": "#fde68a" },
+					"name": { "type": ["string", "null"] }
+				}
+			},
+			"HighlightedVerse": {
+				"type": "object",
+				"required": ["id", "book", "chapter", "verse", "segments", "updatedAt"],
+				"properties": {
+					"id": { "type": "string", "format": "uuid" },
+					"book": { "type": "integer" },
+					"chapter": { "type": "integer" },
+					"verse": { "type": "integer" },
+					"segments": {
+						"oneOf": [
+							{ "type": "array", "items": { "$ref": "#/components/schemas/VerseSegment" } },
+							{ "type": "null" }
+						]
+					},
+					"updatedAt": { "type": "string", "format": "date-time" }
+				}
+			},
+			"HighlightedVersesResponse": {
+				"type": "object",
+				"required": ["style", "verses", "resource"],
+				"properties": {
+					"style": { "$ref": "#/components/schemas/HighlightStyle" },
+					"verses": { "type": "array", "items": { "$ref": "#/components/schemas/HighlightedVerse" } },
+					"resource": { "type": ["string", "null"] }
 				}
 			}
 		}

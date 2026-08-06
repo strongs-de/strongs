@@ -57,8 +57,8 @@
 	let activeSection = $state<Section>(isSection(initialHash) ? initialHash : 'profileSecurity');
 
 	const sections = [
-		{ id: 'lists' as const, label: t('lists.title') },
 		{ id: 'profileSecurity' as const, label: t('account.nav.profileSecurity') },
+		{ id: 'lists' as const, label: t('lists.title') },
 		{ id: 'appearance' as const, label: t('account.appearance') }
 	];
 </script>
@@ -440,7 +440,7 @@
 
 					<ul class="space-y-2">
 						{#each data.highlightStyles as style (style.id)}
-							<li class="flex items-center gap-2">
+							<li class="flex flex-wrap items-center gap-2 sm:flex-nowrap">
 								<span
 									class="size-6 shrink-0 rounded-full border border-stone-300 dark:border-stone-600"
 									style="background-color: {style.color}"
@@ -466,6 +466,14 @@
 									/>
 									<Button type="submit" size="sm" variant="secondary">{t('action.save')}</Button>
 								</form>
+								<Button
+									type="button"
+									size="sm"
+									variant="ghost"
+									href="/account/highlights/{style.id}"
+								>
+									{t('highlights.showVerses')}
+								</Button>
 							</li>
 						{/each}
 					</ul>

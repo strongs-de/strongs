@@ -259,7 +259,27 @@ test('a signed-in reader can highlight a verse with a colour and clear it', asyn
 	await page.reload();
 	await expect(verse).toHaveCSS('background-color', 'rgb(253, 230, 138)');
 
+	// The account links to a complete list for this colour, and the same data is available through
+	// the personal API using the style id from that link.
+	await page.goto('/account#appearance');
+	await page.getByRole('button', { name: 'Darstellung' }).click();
+	const showVerses = page.getByRole('link', { name: 'Verse anzeigen' }).first();
+	const href = await showVerses.getAttribute('href');
+	const styleId = href!.split('/').at(-1)!;
+	const highlights = await page.evaluate(() =>
+		fetch(`/api/v1/highlights?color=${encodeURIComponent('#fde68a')}&resource=SEEDDE`).then(
+			(response) => response.json()
+		)
+	);
+	expect(styleId).toBeTruthy();
+	expect(highlights.verses).toEqual(
+		expect.arrayContaining([expect.objectContaining({ book: 43, chapter: 3, verse: 16 })])
+	);
+	await showVerses.click();
+	await expect(page.getByRole('link', { name: 'Johannes 3,16' })).toBeVisible();
+
 	// Picking the same swatch again clears the highlight instead of re-applying it.
+	await page.goto('/Joh3');
 	await page.locator('#Joh3_16').getByRole('link', { name: 'Vers Johannes 3,16' }).click();
 	await expect(swatches.first()).toHaveAttribute('aria-pressed', 'true');
 	await swatches.first().click();

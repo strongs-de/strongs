@@ -99,6 +99,8 @@ describe('arrangeChapter', () => {
 		);
 
 		expect(chapter.headings.get(1)).toBe('Der gute Hirte');
+		expect(chapter.rows[0]?.cells[0]?.heading).toBe('Der gute Hirte');
+		expect(chapter.rows[0]?.cells[1]?.heading).toBeNull();
 	});
 
 	it('keeps the column order of the request, not of the query result', () => {

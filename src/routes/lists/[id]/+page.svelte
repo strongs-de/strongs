@@ -31,9 +31,9 @@
 
 <main class="mx-auto w-full max-w-3xl space-y-6 px-4 py-8">
 	<nav class="text-sm">
-		<a class="text-stone-500 hover:text-accent-600 dark:text-stone-400" href="/account#lists">
+		<Button href="/account#lists" size="sm" variant="secondary">
 			← {t('lists.backToOverview')}
-		</a>
+		</Button>
 	</nav>
 
 	<header class="space-y-3">
@@ -155,8 +155,10 @@
 	     without scripting. -->
 	<details class="text-right">
 		<summary
-			class="inline-block cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium text-red-700
-			       hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/60"
+			class="inline-block cursor-pointer rounded-lg border border-red-300 bg-[color:var(--surface-raised)]
+			       px-3 py-1.5 text-sm font-semibold text-red-700 shadow-sm transition-colors
+			       hover:border-red-400 hover:bg-red-50 dark:border-red-900 dark:text-red-300
+			       dark:hover:bg-red-950/60"
 		>
 			{t('lists.delete')}
 		</summary>

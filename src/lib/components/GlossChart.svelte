@@ -23,13 +23,18 @@
 	let {
 		glosses,
 		groupBelowPercent,
-		centerLabel = false
+		centerLabel = false,
+		hrefForGloss,
+		activeGloss = null
 	}: {
 		glosses: { display: string; occurrences: number }[];
 		/** Renderings below this share of the total are folded into one "+N andere" slice. */
 		groupBelowPercent?: number;
 		/** Shows the total rendering count and occurrences in the donut's hollow centre. */
 		centerLabel?: boolean;
+		/** Makes every ungrouped rendering a filter link in full-page statistics views. */
+		hrefForGloss?: (gloss: string) => string;
+		activeGloss?: string | null;
 	} = $props();
 
 	const SHADES = ['700', '600', '500', '400', '300', '200', '100', '50'];
@@ -188,6 +193,27 @@
 			{/each}
 		</tbody>
 	</table>
+
+	{#if hrefForGloss}
+		<ul class="gloss-filters" aria-label={t('strong.filterTranslation')}>
+			{#each glosses as gloss (gloss.display)}
+				<li>
+					<a
+						href={hrefForGloss(gloss.display)}
+						class:active={activeGloss?.toLocaleLowerCase('de') ===
+							gloss.display.toLocaleLowerCase('de')}
+						aria-current={activeGloss?.toLocaleLowerCase('de') ===
+						gloss.display.toLocaleLowerCase('de')
+							? 'true'
+							: undefined}
+					>
+						<span>{gloss.display}</span>
+						<small>{formatNumber(gloss.occurrences)}</small>
+					</a>
+				</li>
+			{/each}
+		</ul>
+	{/if}
 </div>
 
 <style>
@@ -203,5 +229,40 @@
 		overflow: hidden;
 		clip: rect(0, 0, 0, 0);
 		white-space: nowrap;
+	}
+
+	.gloss-filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+		margin-top: 0.75rem;
+	}
+
+	.gloss-filters a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.3rem 0.55rem;
+		border: 1px solid var(--color-stone-300);
+		border-radius: 999px;
+		color: var(--color-stone-700);
+		font-size: 0.75rem;
+		text-decoration: none;
+	}
+
+	.gloss-filters a:hover,
+	.gloss-filters a.active {
+		border-color: var(--color-accent-600);
+		background: var(--color-accent-50);
+		color: var(--color-accent-800);
+	}
+
+	.gloss-filters small {
+		color: var(--color-stone-500);
+	}
+
+	:global(.dark) .gloss-filters a {
+		border-color: var(--color-stone-700);
+		color: var(--color-stone-300);
 	}
 </style>

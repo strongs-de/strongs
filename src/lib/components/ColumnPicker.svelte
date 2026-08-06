@@ -40,7 +40,7 @@
 	} = $props();
 </script>
 
-<div class="flex min-h-10 min-w-0 items-center gap-0.5">
+<div class="column-control flex min-h-10 min-w-0 items-center gap-0.5">
 	<span
 		class="drag-handle inline-flex cursor-grab touch-none items-center px-1 text-stone-300
 		       active:cursor-grabbing dark:text-stone-600"
@@ -157,3 +157,21 @@
 		{/if}
 	</div>
 </div>
+
+<style>
+	@media (min-width: 640px) and (max-width: 1280px), (update: slow), (monochrome) {
+		.column-control {
+			min-height: 3rem;
+			color: var(--color-stone-800);
+		}
+
+		.column-control :global(button) {
+			min-width: 2.5rem;
+			min-height: 2.5rem;
+		}
+
+		.drag-handle {
+			color: var(--color-stone-600);
+		}
+	}
+</style>

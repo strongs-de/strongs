@@ -72,7 +72,9 @@
 
 <style>
 	.book-distribution {
-		overflow: hidden;
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		scrollbar-width: thin;
 	}
 
 	.books {
@@ -153,5 +155,22 @@
 	.books.compact .book {
 		min-width: 1.2rem;
 		grid-template-rows: 1rem 3rem 1.25rem;
+	}
+
+	@media (max-width: 639px) {
+		.books {
+			min-width: max(100%, calc(var(--book-count) * 2rem));
+			height: 6.5rem;
+		}
+
+		.book {
+			grid-template-rows: 1rem 3.75rem 1.5rem;
+			min-width: 2rem;
+		}
+
+		.count,
+		.name {
+			font-size: 0.7rem;
+		}
 	}
 </style>

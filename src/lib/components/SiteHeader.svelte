@@ -573,13 +573,24 @@
 
 	@media (max-width: 639px) {
 		.search-helper {
-			position: fixed !important;
-			top: calc(var(--header-height) + 0.5rem) !important;
-			right: auto !important;
-			left: 0.5rem !important;
-			width: calc(100vw - 1rem) !important;
-			transform: none !important;
-			translate: none !important;
+			display: none;
+		}
+	}
+
+	/* E-ink tablets commonly report a desktop-sized viewport, but subtle translucent controls and
+	   hover-only boundaries are almost invisible on their low-contrast, slow-refresh displays. */
+	@media (min-width: 640px) and (max-width: 1280px), (update: slow), (monochrome) {
+		:global(.icon-button) {
+			min-width: 2.75rem;
+			min-height: 2.75rem;
+			border: 1px solid var(--color-stone-400);
+			background: var(--surface-raised);
+			color: var(--color-stone-800);
+		}
+
+		.search-helper {
+			border-color: var(--color-stone-400);
+			backdrop-filter: none;
 		}
 	}
 </style>

@@ -150,7 +150,6 @@
 	 *  stream, this one only cares whether the *columns* changed. */
 	let columnWidthsKey = data.columns.map((column) => column.resource.id).join(',');
 	const MIN_COLUMN_FRACTION = 0.12;
-	const NOTES_COLUMN_FRACTION = 0.504;
 
 	$effect(() => {
 		const key = data.columns.map((column) => column.resource.id).join(',');
@@ -173,9 +172,9 @@
 	const columnTrack = $derived(
 		columnWidths
 			? columnWidths.map((width) => `minmax(0, ${width}fr)`).join(' ') +
-					(data.notesVisible ? ` minmax(0, ${NOTES_COLUMN_FRACTION}fr)` : '')
+					(data.notesVisible ? ` minmax(0, ${1 / data.columns.length}fr)` : '')
 			: data.notesVisible
-				? `repeat(${data.columns.length}, minmax(0, 1fr)) minmax(0, ${NOTES_COLUMN_FRACTION}fr)`
+				? `repeat(${visibleColumnCount}, minmax(0, 1fr))`
 				: undefined
 	);
 	/** The desktop header bar sets `grid-template-columns` inline rather than through a class, so it
@@ -192,7 +191,7 @@
 		// Both branches of `fractions` already sum to 1 across the real columns as a group (an equal
 		// split of N columns is N × 1/N); the notes column, when visible, then adds one more same-sized
 		// unit, matching how `columnTrack` appends it as a further `1fr` after that group.
-		const totalUnits = 1 + (data.notesVisible ? NOTES_COLUMN_FRACTION : 0);
+		const totalUnits = 1 + (data.notesVisible ? 1 / data.columns.length : 0);
 		const gapCount = visibleColumnCount - 1;
 		const boundaries: { percent: number; offsetRem: number }[] = [];
 		let cumulative = 0;
@@ -1225,7 +1224,6 @@
 								<p class="loading-chapter" aria-live="polite">…</p>
 							{/if}
 							{#each streamChapters as stream (`${stream.reference.book}:${stream.reference.chapter}`)}
-								{@const streamHeadings = new Map(stream.chapter.headings)}
 								{@const firstVerse = firstCellVerse(stream, column.bibleCellIndex)}
 								<section
 									class="flow-chapter"
@@ -1234,8 +1232,8 @@
 									{#each stream.chapter.rows as row (row.verse)}
 										{@const cell =
 											column.bibleCellIndex === null ? null : row.cells[column.bibleCellIndex]}
-										{#if streamHeadings.has(row.verse) && column.resource.kind === 'bible'}
-											<h3 class="flow-heading">{streamHeadings.get(row.verse)}</h3>
+										{#if column.resource.kind === 'bible' && cell?.heading}
+											<h3 class="flow-heading">{cell.heading}</h3>
 										{/if}
 										{#if column.resource.kind === 'bible' && cell}
 											{@const [leadSegments, remainingSegments] = splitVerseLead(cell.segments)}
@@ -1574,6 +1572,26 @@
 		background: var(--surface-raised);
 		box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
 		color: var(--color-stone-500);
+	}
+
+	@media (min-width: 640px) and (max-width: 1280px), (update: slow), (monochrome) {
+		.notes-toggle {
+			height: 2.75rem;
+			border: 1px solid var(--color-stone-400);
+			background: var(--surface-raised);
+			color: var(--color-stone-800);
+			font-size: 0.8125rem;
+			font-weight: 650;
+		}
+
+		.column-resize-handle span {
+			width: 1rem;
+			height: 2.25rem;
+			border-width: 2px;
+			border-color: var(--color-stone-500);
+			color: var(--color-stone-700);
+			box-shadow: none;
+		}
 	}
 
 	/* The mobile column tabs. The pill's background already shows which one is selected; the

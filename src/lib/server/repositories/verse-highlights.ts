@@ -5,9 +5,10 @@
  * matching a physical highlighter.
  */
 
-import { and, eq } from 'drizzle-orm';
+import { and, asc, eq, sql } from 'drizzle-orm';
 import type { Database } from '../db/client.ts';
-import { highlightStyles, verseHighlights } from '../db/schema.ts';
+import type { VerseSegment } from '../../bible/segments.ts';
+import { highlightStyles, verseHighlights, verses } from '../db/schema.ts';
 
 export type ChapterHighlight = {
 	verse: number;
@@ -15,6 +16,59 @@ export type ChapterHighlight = {
 	color: string;
 	name: string | null;
 };
+
+export type HighlightedVerse = {
+	id: string;
+	book: number;
+	chapter: number;
+	verse: number;
+	segments: VerseSegment[] | null;
+	updatedAt: Date;
+};
+
+/** All verses carrying one palette colour, with text from the requested Bible where available. */
+export async function listHighlightedVerses(
+	db: Database,
+	userId: string,
+	styleId: string,
+	resourceId: string | null
+): Promise<{
+	style: { id: string; color: string; name: string | null };
+	verses: HighlightedVerse[];
+} | null> {
+	const [style] = await db
+		.select({ id: highlightStyles.id, color: highlightStyles.color, name: highlightStyles.name })
+		.from(highlightStyles)
+		.where(and(eq(highlightStyles.id, styleId), eq(highlightStyles.userId, userId)))
+		.limit(1);
+	if (!style) return null;
+
+	const highlighted = await db
+		.select({
+			id: verseHighlights.id,
+			book: verseHighlights.bookId,
+			chapter: verseHighlights.chapter,
+			verse: verseHighlights.verse,
+			segments: verses.segments,
+			updatedAt: verseHighlights.updatedAt
+		})
+		.from(verseHighlights)
+		.leftJoin(
+			verses,
+			resourceId
+				? and(
+						eq(verses.resourceId, resourceId),
+						eq(verses.bookId, verseHighlights.bookId),
+						eq(verses.chapter, verseHighlights.chapter),
+						eq(verses.verse, verseHighlights.verse)
+					)
+				: sql`false`
+		)
+		.where(and(eq(verseHighlights.userId, userId), eq(verseHighlights.styleId, styleId)))
+		.orderBy(asc(verseHighlights.bookId), asc(verseHighlights.chapter), asc(verseHighlights.verse));
+
+	return { style, verses: highlighted };
+}
 
 export async function loadChapterHighlights(
 	db: Database,

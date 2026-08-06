@@ -25,13 +25,14 @@ export async function load({ params, setHeaders, url }) {
 
 	// Normalise padded or lower-case spellings to one canonical URL.
 	if (strong !== params.strong) {
-		redirect(301, params.page ? `/${strong}/${params.page}` : `/${strong}`);
+		redirect(301, `${params.page ? `/${strong}/${params.page}` : `/${strong}`}${url.search}`);
 	}
 
 	const page = params.page ? Number.parseInt(params.page, 10) : 1;
 	if (!Number.isInteger(page) || page < 1) error(404, 'Ungültige Seite');
 	const requestedBook = Number.parseInt(url.searchParams.get('book') ?? '', 10);
 	const book = isValidBookId(requestedBook) ? requestedBook : undefined;
+	const gloss = (url.searchParams.get('gloss') ?? '').trim().slice(0, 200) || undefined;
 
 	const db = getDb();
 	const bibles = await listBibles(db);
@@ -47,7 +48,7 @@ export async function load({ params, setHeaders, url }) {
 		loadStrongStatistics(db, strong, statisticsResource),
 		loadStrongBookCounts(db, strong, statisticsResource),
 		loadStrongGlosses(db, strong, statisticsResource, 20),
-		loadStrongOccurrences(db, strong, statisticsResource, { page, pageSize: 30, book })
+		loadStrongOccurrences(db, strong, statisticsResource, { page, pageSize: 30, book, gloss })
 	]);
 
 	if (occurrences.total === 0 && !entry) {
@@ -58,7 +59,7 @@ export async function load({ params, setHeaders, url }) {
 		});
 	}
 
-	if (page > occurrences.pageCount) redirect(302, `/${strong}`);
+	if (page > occurrences.pageCount) redirect(302, `/${strong}${url.search}`);
 
 	setHeaders({ 'cache-control': 'public, max-age=0, s-maxage=3600' });
 
@@ -67,6 +68,7 @@ export async function load({ params, setHeaders, url }) {
 	return {
 		strong,
 		book: book ?? null,
+		gloss: gloss ?? null,
 		entry: entry ?? null,
 		statistics,
 		bookCounts,

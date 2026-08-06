@@ -133,6 +133,21 @@ test('GET /api/v1/strong/:id returns the lexicon entry', async ({ request }) => 
 	expect(body.entry.lemma).toBe('ἀγαπάω');
 });
 
+test('GET /api/v1/strong/:id combines book and translation-rendering filters', async ({
+	request
+}) => {
+	const response = await request.get('/api/v1/strong/G25?resources=SEEDDE&book=43&gloss=geliebt', {
+		headers: trusted
+	});
+	expect(response.status()).toBe(200);
+	const body = await response.json();
+	expect(body.filters).toEqual({ book: 43, gloss: 'geliebt' });
+	expect(body.occurrences.total).toBeGreaterThan(0);
+	expect(body.occurrences.occurrences).toEqual(
+		expect.arrayContaining([expect.objectContaining({ book: 43, chapter: 3, verse: 16 })])
+	);
+});
+
 test('GET /api/v1/search finds a word', async ({ request }) => {
 	const response = await request.get('/api/v1/search?q=geliebt', { headers: trusted });
 	expect(response.status()).toBe(200);

@@ -3,6 +3,7 @@
 	import { formatNumber, t } from '$lib/i18n';
 	import HighlightedVerse from '$lib/components/HighlightedVerse.svelte';
 	import BookDistribution from '$lib/components/BookDistribution.svelte';
+	import Button from '$lib/components/Button.svelte';
 
 	let { data } = $props();
 
@@ -65,12 +66,14 @@
 			activeBook={data.book}
 		/>
 		{#if data.book}
-			<a
-				class="-mt-2 mb-4 inline-block text-xs text-accent-600 hover:underline dark:text-accent-400"
+			<Button
 				href="/search?q={encodeURIComponent(data.query)}"
+				size="sm"
+				variant="secondary"
+				class="-mt-2 mb-4"
 			>
 				{t('statistics.clearFilter')}
-			</a>
+			</Button>
 		{/if}
 
 		<ol class="space-y-4">
@@ -86,13 +89,7 @@
 						)}
 					</a>
 
-					<div
-						class="mt-1 grid gap-3"
-						style="grid-template-columns: repeat({Math.min(
-							data.columns.length,
-							2
-						)}, minmax(0, 1fr))"
-					>
+					<div class="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
 						{#each hit.cells as cell, index (index)}
 							{#if cell}
 								<div>

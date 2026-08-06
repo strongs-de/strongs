@@ -1,14 +1,26 @@
 <script lang="ts">
 	import { formatReference, referencePath } from '$lib/bible/reference';
+	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import { formatNumber, t } from '$lib/i18n';
 	import { verseHoverPopover } from '$lib/actions/verse-hover-popover';
 	import VerseText from '$lib/components/VerseText.svelte';
 	import GlossChart from '$lib/components/GlossChart.svelte';
 	import BookDistribution from '$lib/components/BookDistribution.svelte';
+	import Button from '$lib/components/Button.svelte';
 
 	let { data } = $props();
 
 	const pageBase = $derived(`/${data.strong}`);
+
+	function filterQuery(options: { book?: number | null; gloss?: string | null }): string {
+		const query = new SvelteURLSearchParams();
+		const book = options.book === undefined ? data.book : options.book;
+		const gloss = options.gloss === undefined ? data.gloss : options.gloss;
+		if (book) query.set('book', String(book));
+		if (gloss) query.set('gloss', gloss);
+		const value = query.toString();
+		return value ? `?${value}` : '';
+	}
 </script>
 
 <svelte:head>
@@ -58,25 +70,65 @@
 				{#if data.resource}<span class="text-stone-400"> · {data.resource.abbrev}</span>{/if}
 			</p>
 
+			{#if data.glosses.length > 0}
+				<details
+					class="mb-5 rounded-lg border border-stone-200 p-3 lg:hidden dark:border-stone-800"
+				>
+					<summary class="cursor-pointer text-sm font-semibold">
+						{t('strong.filterTranslation')}{data.gloss ? `: ${data.gloss}` : ''}
+					</summary>
+					<ul class="mt-3 flex flex-wrap gap-1.5">
+						{#each data.glosses as gloss (gloss.display)}
+							<li>
+								<a
+									class="inline-flex rounded-full border border-stone-300 px-2.5 py-1 text-xs dark:border-stone-700"
+									class:border-accent-600={data.gloss?.toLocaleLowerCase('de') ===
+										gloss.display.toLocaleLowerCase('de')}
+									class:bg-accent-50={data.gloss?.toLocaleLowerCase('de') ===
+										gloss.display.toLocaleLowerCase('de')}
+									href="/{data.strong}{filterQuery({ gloss: gloss.display })}"
+								>
+									{gloss.display} · {formatNumber(gloss.occurrences)}
+								</a>
+							</li>
+						{/each}
+					</ul>
+					{#if data.gloss}
+						<Button
+							href="/{data.strong}{filterQuery({ gloss: null })}"
+							size="sm"
+							variant="secondary"
+							class="mt-3"
+						>
+							{t('strong.clearTranslationFilter')}
+						</Button>
+					{/if}
+				</details>
+			{/if}
+
 			<div class="mb-6">
 				<BookDistribution
 					counts={data.bookCounts}
-					hrefForBook={(book) => `/${data.strong}?book=${book}`}
+					hrefForBook={(book) => `/${data.strong}${filterQuery({ book })}`}
 					activeBook={data.book}
 				/>
 				{#if data.book}
-					<a
-						class="mt-1 inline-block text-xs text-accent-600 hover:underline dark:text-accent-400"
-						href="/{data.strong}"
+					<Button
+						href="/{data.strong}{filterQuery({ book: null })}"
+						size="sm"
+						variant="secondary"
+						class="mt-1"
 					>
 						{t('statistics.clearFilter')}
-					</a>
+					</Button>
 				{/if}
 			</div>
 
 			<ol class="space-y-3">
 				{#each data.occurrences.occurrences as occurrence (`${occurrence.book}-${occurrence.chapter}-${occurrence.verse}`)}
-					<li class="border-l-2 border-stone-200 pl-3 dark:border-stone-700">
+					<li
+						class="rounded-lg border border-stone-200 p-3 sm:rounded-none sm:border-0 sm:border-l-2 sm:py-0 sm:pr-0 dark:border-stone-700"
+					>
 						<a
 							class="text-xs font-semibold text-accent-600 hover:underline dark:text-accent-400"
 							href="{referencePath({
@@ -104,9 +156,7 @@
 							class="rounded border border-stone-300 px-3 py-1 hover:border-accent-500 dark:border-stone-700"
 							href="{data.occurrences.page === 2
 								? pageBase
-								: `${pageBase}/${data.occurrences.page - 1}`}{data.book
-								? `?book=${data.book}`
-								: ''}"
+								: `${pageBase}/${data.occurrences.page - 1}`}{filterQuery({})}"
 							rel="prev">←</a
 						>
 					{/if}
@@ -119,7 +169,7 @@
 					{#if data.occurrences.page < data.occurrences.pageCount}
 						<a
 							class="rounded border border-stone-300 px-3 py-1 hover:border-accent-500 dark:border-stone-700"
-							href="{pageBase}/{data.occurrences.page + 1}{data.book ? `?book=${data.book}` : ''}"
+							href="{pageBase}/{data.occurrences.page + 1}{filterQuery({})}"
 							rel="next">→</a
 						>
 					{/if}
@@ -162,7 +212,21 @@
 					<p class="mb-2 text-xs text-stone-500 dark:text-stone-400">
 						{t('strong.translationsHint')}
 					</p>
-					<GlossChart glosses={data.glosses} />
+					<GlossChart
+						glosses={data.glosses}
+						hrefForGloss={(gloss) => `/${data.strong}${filterQuery({ gloss })}`}
+						activeGloss={data.gloss}
+					/>
+					{#if data.gloss}
+						<Button
+							href="/{data.strong}{filterQuery({ gloss: null })}"
+							size="sm"
+							variant="secondary"
+							class="mt-2"
+						>
+							{t('strong.clearTranslationFilter')}
+						</Button>
+					{/if}
 				</section>
 			{/if}
 
