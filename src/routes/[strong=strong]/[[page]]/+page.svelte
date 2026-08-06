@@ -25,7 +25,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.strong}{data.entry ? ` — ${data.entry.lemma}` : ''} — strongs.de</title>
+	<title>{data.strong}{data.entry ? ` — ${data.entry.lemma}` : ''} — Akribos</title>
 	<meta
 		name="description"
 		content="{data.strong}: {data.entry?.definitionHtml

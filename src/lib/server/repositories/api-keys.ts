@@ -16,7 +16,7 @@ export type ApiKeyScope = 'public' | 'personal';
 /** Keys a user can hold at once; there is no legitimate use for more from the account page. */
 export const MAX_API_KEYS = 20;
 
-const KEY_PREFIX = 'sk_strongs_';
+const KEY_PREFIX = 'sk_akribos_';
 /** Characters of the secret part shown in the list, so a key stays identifiable once created. */
 const PREFIX_VISIBLE_CHARS = 8;
 

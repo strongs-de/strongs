@@ -1,17 +1,17 @@
 <svelte:head>
-	<title>Über — strongs.de</title>
+	<title>Über — Akribos</title>
 	<meta
 		name="description"
-		content="strongs.de: mehrere Bibelübersetzungen und Kommentare parallel lesen, Strong-Nummern im Urtext nachschlagen, eigene Verslisten und Notizen führen — mit offener API für Entwickler."
+		content="Akribos: mehrere Bibelübersetzungen und Kommentare parallel lesen, Strong-Nummern im Urtext nachschlagen, eigene Verslisten und Notizen führen — mit offener API für Entwickler."
 	/>
 </svelte:head>
 
 <main class="prose-like mx-auto w-full max-w-2xl px-4 py-8">
-	<h1 class="mb-6 text-2xl font-semibold">Über strongs.de</h1>
+	<h1 class="mb-6 text-2xl font-semibold">Über Akribos</h1>
 
 	<section class="mb-8">
 		<p class="text-stone-700 dark:text-stone-300">
-			strongs.de ist ein Online-Bibelleser, der mehrere Übersetzungen und Kommentare nebeneinander
+			Akribos ist ein Online-Bibelleser, der mehrere Übersetzungen und Kommentare nebeneinander
 			zeigt und jedes Wort im griechischen oder hebräischen Urtext bis zu seiner Strong-Nummer
 			zurückverfolgbar macht. Keine Installation, keine Werbung — einfach eine Bibelstelle eingeben
 			und lesen.

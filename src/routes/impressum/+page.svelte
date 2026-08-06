@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Impressum — strongs.de</title>
+	<title>Impressum — Akribos</title>
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
@@ -21,7 +21,7 @@
 		<p class="text-stone-700 dark:text-stone-300">
 			E-Mail: <a
 				class="text-accent-600 hover:underline dark:text-accent-400"
-				href="mailto:info@strongs.de">info@strongs.de</a
+				href="mailto:info@akribos.de">info@akribos.de</a
 			>
 		</p>
 	</section>

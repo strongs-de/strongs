@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Datenschutz — strongs.de</title>
+	<title>Datenschutz — Akribos</title>
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
@@ -13,8 +13,8 @@
 			Hosleite 13<br />
 			95478 Kemnath<br />
 			E-Mail:
-			<a class="text-accent-600 hover:underline dark:text-accent-400" href="mailto:info@strongs.de"
-				>info@strongs.de</a
+			<a class="text-accent-600 hover:underline dark:text-accent-400" href="mailto:info@akribos.de"
+				>info@akribos.de</a
 			>
 		</p>
 	</section>
@@ -44,10 +44,10 @@
 	<section class="mb-8">
 		<h2 class="mb-2 text-lg font-semibold">Sitzungs-Cookie</h2>
 		<p class="text-stone-700 dark:text-stone-300">
-			Nach der Anmeldung setzt strongs.de ein Cookie, das ausschließlich ein zufälliges
-			Sitzungs-Token enthält; der Anmeldestatus selbst wird serverseitig gespeichert. Ohne dieses
-			Cookie könnte die Website den Anmeldestatus nicht erhalten. Es ist damit technisch notwendig
-			im Sinne von § 25 Abs. 2 TTDSG und erfordert keine gesonderte Einwilligung.
+			Nach der Anmeldung setzt Akribos ein Cookie, das ausschließlich ein zufälliges Sitzungs-Token
+			enthält; der Anmeldestatus selbst wird serverseitig gespeichert. Ohne dieses Cookie könnte die
+			Website den Anmeldestatus nicht erhalten. Es ist damit technisch notwendig im Sinne von § 25
+			Abs. 2 TTDSG und erfordert keine gesonderte Einwilligung.
 		</p>
 	</section>
 
@@ -107,8 +107,8 @@
 		<p class="text-stone-700 dark:text-stone-300">
 			Kontobezogene Daten werden gespeichert, solange das Konto besteht. Eine Löschung des Kontos
 			und der zugehörigen Daten kann jederzeit formlos per E-Mail an
-			<a class="text-accent-600 hover:underline dark:text-accent-400" href="mailto:info@strongs.de"
-				>info@strongs.de</a
+			<a class="text-accent-600 hover:underline dark:text-accent-400" href="mailto:info@akribos.de"
+				>info@akribos.de</a
 			> verlangt werden.
 		</p>
 	</section>

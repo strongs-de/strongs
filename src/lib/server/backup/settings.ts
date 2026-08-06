@@ -23,7 +23,7 @@ const s3Schema = z.object({
 	region: z.string().default('auto'),
 	bucket: z.string().default(''),
 	/** Normalised by `normalizePrefix`: no leading slash, single trailing slash when non-empty. */
-	prefix: z.string().default('strongs/'),
+	prefix: z.string().default('akribos/'),
 	accessKeyId: z.string().default(''),
 	/** AES-256-GCM token from `crypto.ts`, or `''` if never configured. Never plaintext. */
 	secretAccessKey: z.string().default(''),

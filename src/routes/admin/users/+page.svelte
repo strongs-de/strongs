@@ -4,7 +4,7 @@
 	const dateFormat = new Intl.DateTimeFormat('de-DE', { dateStyle: 'short' });
 </script>
 
-<svelte:head><title>Nutzer — strongs.de</title></svelte:head>
+<svelte:head><title>Nutzer — Akribos</title></svelte:head>
 
 <h1 class="mb-5 text-xl font-semibold">Nutzer</h1>
 

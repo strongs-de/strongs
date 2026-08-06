@@ -9,8 +9,8 @@ export function GET({ setHeaders }) {
 
 	return json(
 		{
-			name: 'strongs.de — Die Bibel im Urtext studieren',
-			short_name: 'strongs.de',
+			name: 'Akribos — Die Bibel im Urtext studieren',
+			short_name: 'Akribos',
 			description:
 				'Bibelübersetzungen parallel lesen, mit Strong-Nummern, Grammatik und Wörterbuch zum Urtext.',
 			start_url: '/',
@@ -19,7 +19,7 @@ export function GET({ setHeaders }) {
 			lang: 'de',
 			background_color: '#ffffff',
 			theme_color: '#1c1917',
-			icons: [{ src: '/favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }]
+			icons: [{ src: '/icon.png', sizes: '1326x1326', type: 'image/png', purpose: 'any' }]
 		},
 		{ headers: { 'content-type': 'application/manifest+json' } }
 	);

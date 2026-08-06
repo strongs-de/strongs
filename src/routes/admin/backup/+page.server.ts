@@ -118,7 +118,7 @@ export const actions = {
 				endpoint: String(form.get('endpoint') ?? '').trim(),
 				region: String(form.get('region') ?? '').trim() || 'auto',
 				bucket,
-				prefix: String(form.get('prefix') ?? '').trim() || 'strongs/',
+				prefix: String(form.get('prefix') ?? '').trim() || 'akribos/',
 				accessKeyId,
 				secretAccessKey: secretInput,
 				forcePathStyle: form.get('forcePathStyle') === 'on'

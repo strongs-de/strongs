@@ -9,7 +9,7 @@
 	let deleting = $state<string | null>(null);
 </script>
 
-<svelte:head><title>Ressourcen — strongs.de</title></svelte:head>
+<svelte:head><title>Ressourcen — Akribos</title></svelte:head>
 
 <div class="mb-5 flex items-baseline justify-between gap-4">
 	<h1 class="text-xl font-semibold">Ressourcen</h1>

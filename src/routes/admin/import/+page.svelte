@@ -50,7 +50,7 @@
 	const needsTarget = $derived(selectedFormat === 'tsp');
 </script>
 
-<svelte:head><title>Importieren — strongs.de</title></svelte:head>
+<svelte:head><title>Importieren — Akribos</title></svelte:head>
 
 <h1 class="mb-1 text-xl font-semibold">Ressource importieren</h1>
 <p class="mb-5 max-w-2xl text-sm text-stone-600 dark:text-stone-300">

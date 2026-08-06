@@ -2,8 +2,8 @@
 
 export type BackupObject = { key: string; lastModified: Date; size: number };
 
-/** Backup file names this app produces, e.g. `strongs-20260804-030000.dump`. */
-export const BACKUP_FILE_PATTERN = /^strongs-\d{8}-\d{6}\.dump$/;
+/** Backup file names this app produces. The legacy prefix keeps existing backups restorable. */
+export const BACKUP_FILE_PATTERN = /^(?:akribos|strongs)-\d{8}-\d{6}\.dump$/;
 
 /** Sub-prefix that pre-restore safety dumps are uploaded under; never touched by ordinary pruning. */
 export const PRE_RESTORE_SEGMENT = 'pre-restore/';
@@ -16,7 +16,7 @@ export function backupFileName(at: Date): string {
 	const hour = pad(at.getUTCHours());
 	const minute = pad(at.getUTCMinutes());
 	const second = pad(at.getUTCSeconds());
-	return `strongs-${year}${month}${day}-${hour}${minute}${second}.dump`;
+	return `akribos-${year}${month}${day}-${hour}${minute}${second}.dump`;
 }
 
 function baseName(key: string): string {

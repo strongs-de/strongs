@@ -9,7 +9,7 @@
 </script>
 
 <svelte:head
-	><title>{t('highlights.versesTitle', { name: styleName })} — strongs.de</title></svelte:head
+	><title>{t('highlights.versesTitle', { name: styleName })} — Akribos</title></svelte:head
 >
 
 <main class="mx-auto w-full max-w-3xl space-y-6 px-4 py-8">

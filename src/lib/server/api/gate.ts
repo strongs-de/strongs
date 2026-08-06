@@ -2,7 +2,7 @@
  * Public API authentication gate.
  *
  * Decides, for a request under `/api/v1`, whether it may proceed without an API key (the
- * `strongs.de` frontend itself) or must present one — and if it presents one, resolves its owner
+ * Akribos frontend itself) or must present one — and if it presents one, resolves its owner
  * and scope.
  *
  * A caveat worth being explicit about: `Origin` and `Sec-Fetch-Site` are only unspoofable for an

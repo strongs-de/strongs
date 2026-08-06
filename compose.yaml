@@ -22,8 +22,8 @@ services:
       ADDRESS_HEADER: x-forwarded-for
       XFF_DEPTH: '1'
       BREVO_API_KEY: ${BREVO_API_KEY:-}
-      MAIL_FROM: ${MAIL_FROM:-noreply@strongs.de}
-      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-strongs.de}
+      MAIL_FROM: ${MAIL_FROM:-noreply@akribos.de}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Akribos}
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       # Encrypts the S3 secret access key stored in the settings table (admin-configured backups).

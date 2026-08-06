@@ -27,10 +27,10 @@
 </script>
 
 <svelte:head>
-	<title>API-Referenz — strongs.de</title>
+	<title>API-Referenz — Akribos</title>
 	<meta
 		name="description"
-		content="Interactive, try-it-out reference for the strongs.de public API, generated from its OpenAPI document."
+		content="Interactive, try-it-out reference for the Akribos public API, generated from its OpenAPI document."
 	/>
 </svelte:head>
 

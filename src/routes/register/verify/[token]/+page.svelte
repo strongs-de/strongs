@@ -6,7 +6,7 @@
 	const invalid = $derived(form?.error === 'token' || !data.valid);
 </script>
 
-<svelte:head><title>{t('auth.register.verifyTitle')} — strongs.de</title></svelte:head>
+<svelte:head><title>{t('auth.register.verifyTitle')} — Akribos</title></svelte:head>
 
 <main
 	class="mx-auto my-8 w-[calc(100%-2rem)] max-w-sm rounded-xl border border-stone-200 bg-white px-6 py-7

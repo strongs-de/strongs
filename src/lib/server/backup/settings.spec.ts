@@ -10,7 +10,7 @@ describe('backupSettingsSchema', () => {
 				endpoint: '',
 				region: 'auto',
 				bucket: '',
-				prefix: 'strongs/',
+				prefix: 'akribos/',
 				accessKeyId: '',
 				secretAccessKey: '',
 				forcePathStyle: true
@@ -24,7 +24,7 @@ describe('backupSettingsSchema', () => {
 		const parsed = backupSettingsSchema.parse({ s3: { enabled: true, bucket: 'my-bucket' } });
 		expect(parsed.s3.enabled).toBe(true);
 		expect(parsed.s3.bucket).toBe('my-bucket');
-		expect(parsed.s3.prefix).toBe('strongs/');
+		expect(parsed.s3.prefix).toBe('akribos/');
 		expect(parsed.schedule.preset).toBe('daily');
 	});
 });
@@ -47,7 +47,7 @@ describe('normalizePrefix', () => {
 	});
 
 	it('leaves an already-normalised prefix unchanged', () => {
-		expect(normalizePrefix('strongs/backups/')).toBe('strongs/backups/');
+		expect(normalizePrefix('akribos/backups/')).toBe('akribos/backups/');
 	});
 });
 

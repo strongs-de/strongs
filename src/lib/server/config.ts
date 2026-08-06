@@ -12,7 +12,7 @@ const emptyStringAsUndefined = (value: unknown) => (value === '' ? undefined : v
 const schema = z.object({
 	DATABASE_URL: z.string().min(1),
 
-	/** Public origin, e.g. `https://www.strongs.de`. Required by adapter-node for CSRF checks. */
+	/** Public origin, e.g. `https://akribos.de`. Required by adapter-node for CSRF checks. */
 	ORIGIN: z.string().url().default('http://localhost:5173'),
 
 	/** Secret used to sign cookies. Must be stable across restarts and unique per deployment. */
@@ -23,8 +23,8 @@ const schema = z.object({
 
 	/** Transactional email via Brevo. When unset, the app logs mails instead of sending them. */
 	BREVO_API_KEY: z.string().optional(),
-	MAIL_FROM: z.string().email().default('noreply@strongs.de'),
-	MAIL_FROM_NAME: z.string().default('strongs.de'),
+	MAIL_FROM: z.string().email().default('noreply@akribos.de'),
+	MAIL_FROM_NAME: z.string().default('Akribos'),
 
 	LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
 

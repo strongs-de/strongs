@@ -20,7 +20,7 @@
 	);
 </script>
 
-<svelte:head><title>{t('auth.register.title')} — strongs.de</title></svelte:head>
+<svelte:head><title>{t('auth.register.title')} — Akribos</title></svelte:head>
 
 <AuthForm title={t('auth.register.title')} error={message} submitLabel={t('auth.register.submit')}>
 	<TextField

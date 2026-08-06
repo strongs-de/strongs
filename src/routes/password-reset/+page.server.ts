@@ -31,9 +31,9 @@ export const actions = {
 			try {
 				await mailer().send({
 					to: user.email,
-					subject: 'strongs.de: Passwort zurücksetzen',
+					subject: 'Akribos: Passwort zurücksetzen',
 					text: [
-						'Du hast angefordert, dein Passwort auf strongs.de zurückzusetzen.',
+						'Du hast angefordert, dein Passwort bei Akribos zurückzusetzen.',
 						'',
 						`Öffne dazu diesen Link: ${link}`,
 						'',

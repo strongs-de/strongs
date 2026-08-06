@@ -18,7 +18,7 @@
 	const kindLabel = (kind: string) => t(`resource.kind.${kind}` as MessageKey);
 </script>
 
-<svelte:head><title>Verwaltung — strongs.de</title></svelte:head>
+<svelte:head><title>Verwaltung — Akribos</title></svelte:head>
 
 <h1 class="mb-5 text-xl font-semibold">Übersicht</h1>
 

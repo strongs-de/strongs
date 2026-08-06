@@ -17,7 +17,7 @@
 	const notice = $derived(!form?.error && form?.resent ? t('auth.register.resendSent') : null);
 </script>
 
-<svelte:head><title>{t('auth.login.title')} — strongs.de</title></svelte:head>
+<svelte:head><title>{t('auth.login.title')} — Akribos</title></svelte:head>
 
 <AuthForm
 	title={t('auth.login.title')}

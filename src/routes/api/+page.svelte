@@ -4,28 +4,28 @@
 	 *
 	 * English, unlike the rest of the site's UI: this page is for developers, not readers, and the
 	 * docs/architecture.md convention keeps English to code and docs, German to content people read
-	 * on strongs.de. The endpoints themselves live under /api/v1; this page is content, so it sits at
+	 * on Akribos. The endpoints themselves live under /api/v1; this page is content, so it sits at
 	 * /api directly.
 	 */
 	import Button from '$lib/components/Button.svelte';
 </script>
 
 <svelte:head>
-	<title>API — strongs.de</title>
+	<title>API — Akribos</title>
 	<meta
 		name="description"
-		content="Public API for strongs.de: bible text, lexicon, search, verse lists and notes."
+		content="Public API for Akribos: bible text, lexicon, search, verse lists and notes."
 	/>
 </svelte:head>
 
 <main class="prose-like mx-auto w-full max-w-2xl px-4 py-8">
-	<h1 class="mb-6 text-2xl font-semibold">strongs.de API</h1>
+	<h1 class="mb-6 text-2xl font-semibold">Akribos API</h1>
 
 	<section class="mb-8">
 		<p class="text-stone-700 dark:text-stone-300">
-			Read-only access to the content strongs.de itself is built on: bible translations, the
-			Strong's lexicon, commentaries and search, plus a signed-in reader's own verse lists and
-			notes. Everything lives under <code>/api/v1</code>.
+			Read-only access to the content Akribos itself is built on: bible translations, the Strong's
+			lexicon, commentaries and search, plus a signed-in reader's own verse lists and notes.
+			Everything lives under <code>/api/v1</code>.
 		</p>
 		<Button href="/api/docs" variant="primary" class="mt-4"
 			>View the interactive API reference →</Button
@@ -35,11 +35,11 @@
 	<section class="mb-8">
 		<h2 class="mb-2 text-lg font-semibold">Authentication</h2>
 		<p class="mb-3 text-stone-700 dark:text-stone-300">
-			A request from strongs.de's own frontend needs nothing extra — it's recognised as same-origin.
+			A request from Akribos' own frontend needs nothing extra — it's recognised as same-origin.
 			Everything else must send an API key:
 		</p>
 		<pre class="overflow-x-auto rounded-md bg-stone-100 px-3 py-2 text-xs dark:bg-stone-800"><code
-				>Authorization: Bearer sk_strongs_…</code
+				>Authorization: Bearer sk_akribos_…</code
 			></pre>
 		<p class="mt-3 text-stone-700 dark:text-stone-300">
 			Create a key from your <a
@@ -154,8 +154,8 @@
 		<h2 class="mb-2 text-lg font-semibold">What's not here yet</h2>
 		<p class="text-stone-700 dark:text-stone-300">
 			This first version is read-only: creating or editing a list, adding a verse, or writing a note
-			all still happen through the site itself, not through the API. strongs.de's own frontend does
-			not yet read through these endpoints either — today it uses the same repository code directly,
+			all still happen through the site itself, not through the API. Akribos' own frontend does not
+			yet read through these endpoints either — today it uses the same repository code directly,
 			without an HTTP round trip.
 		</p>
 	</section>

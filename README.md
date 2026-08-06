@@ -1,4 +1,4 @@
-# strongs.de
+# Akribos
 
 Bible study site with parallel translations, Strong's numbers, Greek and Hebrew lexicons,
 morphology, cross references and verse lists.

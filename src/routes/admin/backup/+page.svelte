@@ -113,7 +113,7 @@
 	const canRestore = $derived(stagedId !== '' && confirmMatches);
 </script>
 
-<svelte:head><title>Backup — strongs.de</title></svelte:head>
+<svelte:head><title>Backup — Akribos</title></svelte:head>
 
 <h1 class="mb-1 text-xl font-semibold">Backup und Wiederherstellung</h1>
 <p class="mb-5 max-w-2xl text-sm text-stone-600 dark:text-stone-300">
@@ -278,7 +278,7 @@
 					id="prefix"
 					name="prefix"
 					bind:value={prefix}
-					placeholder="strongs/"
+					placeholder="akribos/"
 					class="w-full rounded-md border border-stone-300 px-2 py-1.5 text-sm dark:border-stone-700 dark:bg-stone-900"
 				/>
 			</div>

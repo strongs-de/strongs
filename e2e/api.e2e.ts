@@ -40,7 +40,7 @@ async function registerAndCreateKey(
 	}
 	await page.getByRole('button', { name: 'Schlüssel erstellen' }).click();
 
-	const shown = await page.locator('code').filter({ hasText: 'sk_strongs_' }).textContent();
+	const shown = await page.locator('code').filter({ hasText: 'sk_akribos_' }).textContent();
 	return shown!.trim();
 }
 
@@ -52,7 +52,7 @@ test('a request with no origin and no API key is refused', async ({ request }) =
 
 test('an invalid API key is refused', async ({ request }) => {
 	const response = await request.get('/api/v1/ping', {
-		headers: { authorization: 'Bearer sk_strongs_does-not-exist' }
+		headers: { authorization: 'Bearer sk_akribos_does-not-exist' }
 	});
 	expect(response.status()).toBe(401);
 	expect((await response.json()).error.code).toBe('invalid_api_key');
@@ -171,11 +171,11 @@ test('/api/docs renders the interactive API reference from the OpenAPI document'
 }) => {
 	const spec = await page.request.get('/openapi.json');
 	expect(spec.status()).toBe(200);
-	expect((await spec.json()).info.title).toBe('strongs.de API');
+	expect((await spec.json()).info.title).toBe('Akribos API');
 
 	await page.goto('/api/docs');
 	await expect(page).toHaveTitle(/API-Referenz/);
-	await expect(page.getByText('strongs.de API').first()).toBeVisible();
+	await expect(page.getByText('Akribos API').first()).toBeVisible();
 	await expect(page.getByText('/api/v1/books').first()).toBeVisible();
 });
 

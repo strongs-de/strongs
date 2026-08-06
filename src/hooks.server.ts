@@ -92,7 +92,7 @@ async function guardApiRequest(
 	if (!gate.ok) {
 		const message =
 			gate.code === 'missing_api_key'
-				? 'This request needs an API key. See https://strongs.de/api for how to get one.'
+				? 'This request needs an API key. See https://akribos.de/api for how to get one.'
 				: 'This API key is invalid or has been revoked.';
 		return apiError(gate.status, gate.code, message);
 	}

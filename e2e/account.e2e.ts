@@ -69,9 +69,9 @@ test('an API key can be created, shown once and revoked', async ({ page }) => {
 
 	await expect(page.getByText('Schlüssel erstellt')).toBeVisible();
 	const shownKey = (
-		await page.locator('code').filter({ hasText: 'sk_strongs_' }).textContent()
+		await page.locator('code').filter({ hasText: 'sk_akribos_' }).textContent()
 	)?.trim();
-	expect(shownKey).toMatch(/^sk_strongs_/);
+	expect(shownKey).toMatch(/^sk_akribos_/);
 
 	const keyItem = page.locator('li', { hasText: 'Meine App' });
 	await expect(keyItem).toContainText('Auch persönliche Daten');

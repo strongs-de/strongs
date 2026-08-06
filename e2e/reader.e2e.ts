@@ -59,7 +59,7 @@ test('the about page loads with a visible heading', async ({ page }) => {
 
 	expect(response?.status()).toBe(200);
 	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-	await expect(page.getByRole('heading', { level: 1 })).toContainText('strongs.de');
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('Akribos');
 });
 
 test('the search field opens a keyboard-accessible Bible book chooser', async ({ page }) => {
@@ -667,7 +667,7 @@ test('the homepage link clears the remembered chapter instead of bouncing back t
 	await page.goto('/Joh3');
 	await expect(page).toHaveURL(/\/Joh3$/);
 
-	await page.getByRole('link', { name: 'Strongs.de – Startseite' }).click();
+	await page.getByRole('link', { name: 'Akribos – Startseite' }).click();
 
 	await expect(page).toHaveURL(/\/Joh1$/);
 });

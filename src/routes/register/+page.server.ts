@@ -59,9 +59,9 @@ export const actions = {
 		try {
 			await mailer().send({
 				to: result.user.email,
-				subject: 'strongs.de: Bitte bestätige deine E-Mail-Adresse',
+				subject: 'Akribos: Bitte bestätige deine E-Mail-Adresse',
 				text: [
-					'Willkommen bei strongs.de!',
+					'Willkommen bei Akribos!',
 					'',
 					`Bitte bestätige deine E-Mail-Adresse über diesen Link: ${link}`,
 					'',

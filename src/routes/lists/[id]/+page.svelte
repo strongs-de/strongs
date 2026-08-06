@@ -27,7 +27,7 @@
 	}
 </script>
 
-<svelte:head><title>{data.list.title} — strongs.de</title></svelte:head>
+<svelte:head><title>{data.list.title} — Akribos</title></svelte:head>
 
 <main class="mx-auto w-full max-w-3xl space-y-6 px-4 py-8">
 	<nav class="text-sm">

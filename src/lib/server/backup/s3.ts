@@ -143,11 +143,11 @@ export async function testConnection(
 	client: S3Client,
 	options: { bucket: string; prefix: string }
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-	const markerKey = `${options.prefix}.strongs-connection-test`;
+	const markerKey = `${options.prefix}.akribos-connection-test`;
 	try {
 		await client.send(new HeadBucketCommand({ Bucket: options.bucket }));
 		await client.send(
-			new PutObjectCommand({ Bucket: options.bucket, Key: markerKey, Body: 'strongs.de' })
+			new PutObjectCommand({ Bucket: options.bucket, Key: markerKey, Body: 'Akribos' })
 		);
 		await deleteKeys(client, { bucket: options.bucket, keys: [markerKey] });
 		return { ok: true };

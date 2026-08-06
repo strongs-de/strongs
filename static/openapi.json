@@ -1,15 +1,15 @@
 {
 	"openapi": "3.1.0",
 	"info": {
-		"title": "strongs.de API",
+		"title": "Akribos API",
 		"version": "1.0.0",
-		"description": "Read-only access to the content strongs.de itself is built on: bible translations, the Strong's lexicon, commentaries and search, plus a signed-in reader's own verse lists and notes. Everything lives under `/api/v1`.\n\n## Authentication\n\nA request from strongs.de's own frontend needs nothing extra — it is recognised as same-origin. Everything else must send an API key:\n\n```\nAuthorization: Bearer sk_strongs_...\n```\n\nCreate a key from your [account page](/account) once signed in. Each key has a scope, chosen when it is created:\n\n- `public` — bible text, lexicon, commentaries, search\n- `personal` — the above, plus the key owner's own verse lists and notes\n\n## Rate limits\n\n120 requests per minute per API key (300 requests per minute per IP for same-origin requests without a key). Exceeding it returns `429` with a `Retry-After` header, in seconds.\n\n## Errors\n\nEvery error response has the same shape:\n\n```json\n{ \"error\": { \"code\": \"unknown_bible\", \"message\": \"No bible with id 'kjv'.\" } }\n```\n\n## What's not here yet\n\nThis first version is read-only: creating or editing a list, adding a verse, or writing a note all still happen through the site itself, not through the API.",
+		"description": "Read-only access to the content Akribos itself is built on: bible translations, the Strong's lexicon, commentaries and search, plus a signed-in reader's own verse lists and notes. Everything lives under `/api/v1`.\n\n## Authentication\n\nA request from Akribos' own frontend needs nothing extra — it is recognised as same-origin. Everything else must send an API key:\n\n```\nAuthorization: Bearer sk_akribos_...\n```\n\nCreate a key from your [account page](/account) once signed in. Each key has a scope, chosen when it is created:\n\n- `public` — bible text, lexicon, commentaries, search\n- `personal` — the above, plus the key owner's own verse lists and notes\n\n## Rate limits\n\n120 requests per minute per API key (300 requests per minute per IP for same-origin requests without a key). Exceeding it returns `429` with a `Retry-After` header, in seconds.\n\n## Errors\n\nEvery error response has the same shape:\n\n```json\n{ \"error\": { \"code\": \"unknown_bible\", \"message\": \"No bible with id 'kjv'.\" } }\n```\n\n## What's not here yet\n\nThis first version is read-only: creating or editing a list, adding a verse, or writing a note all still happen through the site itself, not through the API.",
 		"contact": {
-			"url": "https://strongs.de/api"
+			"url": "https://akribos.de/api"
 		}
 	},
 	"servers": [
-		{ "url": "https://strongs.de", "description": "Production" },
+		{ "url": "https://akribos.de", "description": "Production" },
 		{ "url": "http://localhost:5173", "description": "Local development" }
 	],
 	"security": [{}, { "bearerAuth": [] }],
@@ -482,8 +482,8 @@
 			"bearerAuth": {
 				"type": "http",
 				"scheme": "bearer",
-				"bearerFormat": "sk_strongs_...",
-				"description": "An API key created from the account page, sent as `Authorization: Bearer sk_strongs_...`. Not required for a same-origin request from strongs.de's own frontend, which is recognised automatically."
+				"bearerFormat": "sk_akribos_...",
+				"description": "An API key created from the account page, sent as `Authorization: Bearer sk_akribos_...`. Not required for a same-origin request from Akribos' own frontend, which is recognised automatically."
 			}
 		},
 		"responses": {
@@ -497,7 +497,7 @@
 								"value": {
 									"error": {
 										"code": "missing_api_key",
-										"message": "This request needs an API key. See https://strongs.de/api for how to get one."
+										"message": "This request needs an API key. See https://akribos.de/api for how to get one."
 									}
 								}
 							},

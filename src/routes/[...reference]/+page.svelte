@@ -883,7 +883,7 @@
 <svelte:window onpointermove={onColumnResizeMove} onpointerup={onColumnResizeEnd} />
 
 <svelte:head>
-	<title>{data.fullTitle} — strongs.de</title>
+	<title>{data.fullTitle} — Akribos</title>
 	<meta
 		name="description"
 		content="{data.fullTitle} in {data.columns

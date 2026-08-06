@@ -8,10 +8,10 @@
 </script>
 
 <svelte:head>
-	<title>Hilfe — strongs.de</title>
+	<title>Hilfe — Akribos</title>
 	<meta
 		name="description"
-		content="Wie du auf strongs.de Bibelstellen findest, nach Wörtern suchst und mit Strong-Nummern im Urtext arbeitest."
+		content="Wie du auf Akribos Bibelstellen findest, nach Wörtern suchst und mit Strong-Nummern im Urtext arbeitest."
 	/>
 </svelte:head>
 

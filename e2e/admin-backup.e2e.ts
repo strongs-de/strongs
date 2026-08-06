@@ -34,7 +34,7 @@ function fakeBackupName(offsetSeconds: number): string {
 	const stamp =
 		`${at.getUTCFullYear()}${pad(at.getUTCMonth() + 1)}${pad(at.getUTCDate())}-` +
 		`${pad(at.getUTCHours())}${pad(at.getUTCMinutes())}${pad(at.getUTCSeconds())}`;
-	return `strongs-${stamp}.dump`;
+	return `akribos-${stamp}.dump`;
 }
 
 /**
@@ -120,7 +120,7 @@ test('a manual backup can be downloaded and appears in the history', async ({ pa
 	await page.getByRole('link', { name: 'Backup herunterladen' }).click();
 	const download = await downloadPromise;
 
-	expect(download.suggestedFilename()).toMatch(/^strongs-\d{8}-\d{6}\.dump$/);
+	expect(download.suggestedFilename()).toMatch(/^akribos-\d{8}-\d{6}\.dump$/);
 	const path = await download.path();
 	expect(path).not.toBeNull();
 

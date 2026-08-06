@@ -13,7 +13,7 @@
 </script>
 
 <svelte:head>
-	<title>{notFound ? t('error.notFound.title') : t('error.server.title')} — strongs.de</title>
+	<title>{notFound ? t('error.notFound.title') : t('error.server.title')} — Akribos</title>
 	<meta name="robots" content="noindex" />
 </svelte:head>
 

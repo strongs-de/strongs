@@ -6,7 +6,7 @@
 	let { form } = $props();
 </script>
 
-<svelte:head><title>{t('auth.passwordReset.title')} — strongs.de</title></svelte:head>
+<svelte:head><title>{t('auth.passwordReset.title')} — Akribos</title></svelte:head>
 
 <AuthForm
 	title={t('auth.passwordReset.title')}

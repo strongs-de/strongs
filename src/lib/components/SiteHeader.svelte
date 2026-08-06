@@ -162,9 +162,9 @@
 			onclick={goHome}
 			data-sveltekit-preload-data="off"
 			class="group shrink-0 focus-visible:rounded-sm"
-			aria-label="Strongs.de – Startseite"
+			aria-label="Akribos – Startseite"
 		>
-			<img src="/logo.png" alt="Strongs.de" class="hidden h-10 w-auto sm:block" />
+			<img src="/logo.png" alt="Akribos" class="hidden h-10 w-auto sm:block" />
 			<img src="/icon.png" alt="" class="size-9 rounded-sm sm:hidden" />
 		</a>
 

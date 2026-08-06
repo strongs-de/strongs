@@ -595,7 +595,7 @@ export const backupJobs = pgTable(
 		type: text('type', { enum: BACKUP_JOB_TYPES }).notNull(),
 		state: text('state', { enum: BACKUP_JOB_STATES }).notNull().default('queued'),
 		trigger: text('trigger', { enum: BACKUP_TRIGGERS }).notNull().default('manual'),
-		/** Dump file name, e.g. `strongs-20260804-030000.dump`. */
+		/** Dump file name, e.g. `akribos-20260804-030000.dump`. */
 		fileName: text('file_name'),
 		/** Where the result ended up: `s3://bucket/key`, `local:/app/var/backups/…`, or `download`. */
 		location: text('location'),

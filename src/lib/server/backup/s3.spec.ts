@@ -75,8 +75,8 @@ describe('deleteKeys', () => {
 describe('pruneRemote', () => {
 	it('lists then deletes only the expired keys', async () => {
 		const objects = [
-			{ Key: 'strongs-20260101-030000.dump', LastModified: new Date('2026-01-01'), Size: 1 },
-			{ Key: 'strongs-20260102-030000.dump', LastModified: new Date('2026-01-02'), Size: 1 }
+			{ Key: 'akribos-20260101-030000.dump', LastModified: new Date('2026-01-01'), Size: 1 },
+			{ Key: 'akribos-20260102-030000.dump', LastModified: new Date('2026-01-02'), Size: 1 }
 		];
 		let deleted: string[] = [];
 		const client = fakeClient((command) => {
@@ -89,7 +89,7 @@ describe('pruneRemote', () => {
 		});
 		const count = await pruneRemote(client, { bucket: 'b', prefix: '', keep: 1 });
 		expect(count).toBe(1);
-		expect(deleted).toEqual(['strongs-20260101-030000.dump']);
+		expect(deleted).toEqual(['akribos-20260101-030000.dump']);
 	});
 });
 
@@ -99,12 +99,12 @@ describe('getObjectStream', () => {
 			expect(command).toBeInstanceOf(GetObjectCommand);
 			const input = (command as GetObjectCommand).input;
 			expect(input.Bucket).toBe('b');
-			expect(input.Key).toBe('strongs/strongs-20260101-030000.dump');
+			expect(input.Key).toBe('akribos/akribos-20260101-030000.dump');
 			return { Body: Readable.from(Buffer.from('PGDMP')), ContentLength: 5 };
 		});
 		const { body, sizeBytes } = await getObjectStream(client, {
 			bucket: 'b',
-			key: 'strongs/strongs-20260101-030000.dump'
+			key: 'akribos/akribos-20260101-030000.dump'
 		});
 		expect(sizeBytes).toBe(5);
 		const chunks: Buffer[] = [];
@@ -129,7 +129,7 @@ describe('getObjectStream', () => {
 describe('testConnection', () => {
 	it('reports ok when head/put/delete succeed', async () => {
 		const client = fakeClient(() => ({}));
-		expect(await testConnection(client, { bucket: 'b', prefix: 'strongs/' })).toEqual({ ok: true });
+		expect(await testConnection(client, { bucket: 'b', prefix: 'akribos/' })).toEqual({ ok: true });
 	});
 
 	it('reports the underlying error message on failure', async () => {
@@ -137,7 +137,7 @@ describe('testConnection', () => {
 			if (command instanceof HeadBucketCommand) throw new Error('access denied');
 			return {};
 		});
-		const result = await testConnection(client, { bucket: 'b', prefix: 'strongs/' });
+		const result = await testConnection(client, { bucket: 'b', prefix: 'akribos/' });
 		expect(result).toEqual({ ok: false, message: 'access denied' });
 	});
 
@@ -147,7 +147,7 @@ describe('testConnection', () => {
 			if (command instanceof PutObjectCommand) putKey = command.input.Key;
 			return {};
 		});
-		await testConnection(client, { bucket: 'b', prefix: 'strongs/' });
-		expect(putKey).toBe('strongs/.strongs-connection-test');
+		await testConnection(client, { bucket: 'b', prefix: 'akribos/' });
+		expect(putKey).toBe('akribos/.akribos-connection-test');
 	});
 });

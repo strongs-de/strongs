@@ -9,7 +9,7 @@
  */
 export const de = {
 	// --- generic ------------------------------------------------------------
-	'app.name': 'strongs.de',
+	'app.name': 'Akribos',
 	'app.tagline': 'Die Bibel im Urtext studieren',
 	'action.search': 'Suchen',
 	'action.cancel': 'Abbrechen',
@@ -150,7 +150,7 @@ export const de = {
 	'account.saved': 'Gespeichert.',
 	'account.emailHint': 'Die E-Mail-Adresse kann nicht geändert werden.',
 	'account.apiKeys': 'API-Schlüssel',
-	'account.apiKeysHint': 'Für den eigenen Zugriff auf die öffentliche API von strongs.de.',
+	'account.apiKeysHint': 'Für den eigenen Zugriff auf die öffentliche API von Akribos.',
 	'apiKeys.name': 'Name',
 	'apiKeys.namePlaceholder': 'z.B. Meine App',
 	'apiKeys.scope': 'Zugriff',

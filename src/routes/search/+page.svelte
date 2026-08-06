@@ -17,7 +17,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.query ? `${data.query} — Suche` : 'Suche'} — strongs.de</title>
+	<title>{data.query ? `${data.query} — Suche` : 'Suche'} — Akribos</title>
 	<!-- Result pages are not useful in an index and change with the reader's column selection. -->
 	<meta name="robots" content="noindex, follow" />
 </svelte:head>
