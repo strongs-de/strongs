@@ -93,6 +93,22 @@ test('a reference shows the chapter in parallel columns', async ({ page }) => {
 	await expect(page.locator('.flow-verse.highlighted').first()).toBeVisible();
 });
 
+test('the full Strong occurrence page is usable on a phone', async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.goto('/G25');
+
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('ἀγαπάω');
+	await expect(page.getByText('Bedeutung und Herkunft')).toBeVisible();
+	await expect(page.getByText('Nach Übersetzungsvariante filtern')).toBeVisible();
+	await expect(page.getByText('Nach Bibelbuch filtern')).toBeVisible();
+	await expect(page.getByRole('link', { name: 'Johannes 3,16' })).toBeVisible();
+
+	const viewportDoesNotOverflow = await page.evaluate(
+		() => document.documentElement.scrollWidth <= window.innerWidth
+	);
+	expect(viewportDoesNotOverflow).toBe(true);
+});
+
 test('commentary text is formatted the same as scripture text', async ({ page }) => {
 	await useCommentaryColumn(page);
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { formatReference, referencePath } from '$lib/bible/reference';
+	import { bookShortName } from '$lib/bible/book-names';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import { formatNumber, t } from '$lib/i18n';
 	import { verseHoverPopover } from '$lib/actions/verse-hover-popover';
@@ -34,7 +35,7 @@
 </svelte:head>
 
 <main class="mx-auto w-full max-w-[90rem] px-3 py-5 sm:px-5">
-	<header class="mb-6">
+	<header class="mb-5 sm:mb-6">
 		<p class="text-xs font-semibold tracking-wide text-stone-500 uppercase">
 			{t('strong.title', { id: data.strong })}
 		</p>
@@ -57,8 +58,56 @@
 		{/if}
 	</header>
 
+	{#if data.entry}
+		<details
+			class="mb-5 rounded-xl border border-stone-200 bg-[color:var(--surface)] shadow-sm lg:hidden dark:border-stone-800"
+		>
+			<summary class="cursor-pointer px-4 py-3 text-sm font-semibold">
+				{t('strong.lexiconDetails')}
+			</summary>
+			<div class="space-y-4 border-t border-stone-200 px-4 py-4 text-sm dark:border-stone-800">
+				{#if data.entry.definitionHtml}
+					<section>
+						<h2 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">
+							{t('strong.definition')}
+						</h2>
+						<div class="lexicon" use:verseHoverPopover={{ bibleId: data.primaryBibleId }}>
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+							{@html data.entry.definitionHtml}
+						</div>
+					</section>
+				{/if}
+				{#if data.entry.derivationHtml}
+					<section>
+						<h2 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">
+							{t('strong.derivation')}
+						</h2>
+						<div class="lexicon" use:verseHoverPopover={{ bibleId: data.primaryBibleId }}>
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+							{@html data.entry.derivationHtml}
+						</div>
+					</section>
+				{/if}
+				{#if data.entry.seeAlso.length > 0}
+					<section>
+						<h2 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">
+							{t('action.more')}
+						</h2>
+						<ul class="flex flex-wrap gap-1.5">
+							{#each data.entry.seeAlso as reference (reference)}
+								<li>
+									<Button href="/{reference}" size="sm" variant="secondary">{reference}</Button>
+								</li>
+							{/each}
+						</ul>
+					</section>
+				{/if}
+			</div>
+		</details>
+	{/if}
+
 	<div class="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(22rem,1fr)]">
-		<section>
+		<section class="min-w-0">
 			<h2 class="mb-2 text-sm font-semibold tracking-wide text-stone-500 uppercase">
 				{t('strong.occurrences')}
 			</h2>
@@ -106,7 +155,42 @@
 				</details>
 			{/if}
 
-			<div class="mb-6">
+			{#if data.bookCounts.some((entry) => entry.count > 0)}
+				<details
+					class="mb-5 rounded-lg border border-stone-200 bg-[color:var(--surface)] p-3 lg:hidden dark:border-stone-800"
+				>
+					<summary class="cursor-pointer text-sm font-semibold">
+						{t('strong.filterBook')}{data.book ? `: ${bookShortName(data.book)}` : ''}
+					</summary>
+					<ul class="mt-3 grid grid-cols-3 gap-2 min-[420px]:grid-cols-4">
+						{#each data.bookCounts.filter((entry) => entry.count > 0) as entry (entry.book)}
+							<li>
+								<a
+									class="flex min-h-11 items-center justify-between gap-1 rounded-lg border border-stone-300 px-2.5 py-2 text-xs font-medium dark:border-stone-700"
+									class:border-accent-600={data.book === entry.book}
+									class:bg-accent-50={data.book === entry.book}
+									href="/{data.strong}{filterQuery({ book: entry.book })}"
+								>
+									<span>{bookShortName(entry.book)}</span>
+									<span class="text-stone-500">{formatNumber(entry.count)}</span>
+								</a>
+							</li>
+						{/each}
+					</ul>
+					{#if data.book}
+						<Button
+							href="/{data.strong}{filterQuery({ book: null })}"
+							size="sm"
+							variant="secondary"
+							class="mt-3"
+						>
+							{t('statistics.clearFilter')}
+						</Button>
+					{/if}
+				</details>
+			{/if}
+
+			<div class="mb-6 hidden lg:block">
 				<BookDistribution
 					counts={data.bookCounts}
 					hrefForBook={(book) => `/${data.strong}${filterQuery({ book })}`}
@@ -124,13 +208,15 @@
 				{/if}
 			</div>
 
-			<ol class="space-y-3">
+			<ol class="space-y-3" aria-label={t('strong.occurrences')}>
 				{#each data.occurrences.occurrences as occurrence (`${occurrence.book}-${occurrence.chapter}-${occurrence.verse}`)}
 					<li
-						class="rounded-lg border border-stone-200 p-3 sm:rounded-none sm:border-0 sm:border-l-2 sm:py-0 sm:pr-0 dark:border-stone-700"
+						class="min-w-0 rounded-xl border border-stone-200 bg-[color:var(--surface)] p-4 shadow-sm
+						       sm:rounded-none sm:border-0 sm:border-l-2 sm:bg-transparent sm:py-0 sm:pr-0 sm:shadow-none
+						       dark:border-stone-700"
 					>
 						<a
-							class="text-xs font-semibold text-accent-600 hover:underline dark:text-accent-400"
+							class="inline-flex min-h-8 items-center text-sm font-semibold text-accent-700 hover:underline dark:text-accent-400"
 							href="{referencePath({
 								book: occurrence.book,
 								chapter: occurrence.chapter,
@@ -142,7 +228,9 @@
 								{ style: 'full' }
 							)}
 						</a>
-						<p class="scripture-sized mt-0.5 font-serif leading-relaxed">
+						<p
+							class="scripture-sized mt-1 min-w-0 font-serif leading-relaxed [overflow-wrap:anywhere]"
+						>
 							<VerseText segments={occurrence.segments} activeStrong={data.strong} />
 						</p>
 					</li>
@@ -150,10 +238,13 @@
 			</ol>
 
 			{#if data.occurrences.pageCount > 1}
-				<nav class="mt-6 flex items-center gap-3 text-sm" aria-label="Seiten">
+				<nav
+					class="mt-6 flex items-center justify-center gap-3 text-sm sm:justify-start"
+					aria-label="Seiten"
+				>
 					{#if data.occurrences.page > 1}
 						<a
-							class="rounded border border-stone-300 px-3 py-1 hover:border-accent-500 dark:border-stone-700"
+							class="inline-flex size-11 items-center justify-center rounded-lg border border-stone-300 text-lg hover:border-accent-500 dark:border-stone-700"
 							href="{data.occurrences.page === 2
 								? pageBase
 								: `${pageBase}/${data.occurrences.page - 1}`}{filterQuery({})}"
@@ -168,7 +259,7 @@
 					</span>
 					{#if data.occurrences.page < data.occurrences.pageCount}
 						<a
-							class="rounded border border-stone-300 px-3 py-1 hover:border-accent-500 dark:border-stone-700"
+							class="inline-flex size-11 items-center justify-center rounded-lg border border-stone-300 text-lg hover:border-accent-500 dark:border-stone-700"
 							href="{pageBase}/{data.occurrences.page + 1}{filterQuery({})}"
 							rel="next">→</a
 						>
@@ -177,7 +268,7 @@
 			{/if}
 		</section>
 
-		<aside class="space-y-6 text-sm">
+		<aside class="hidden space-y-6 text-sm lg:block">
 			{#if data.entry?.definitionHtml}
 				<section>
 					<h2 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">

@@ -94,6 +94,8 @@ export const de = {
 		'So oft wird dieses Wort in der gewählten Übersetzung mit dem jeweiligen Begriff wiedergegeben.',
 	'strong.filterTranslation': 'Nach Übersetzungsvariante filtern',
 	'strong.clearTranslationFilter': 'Übersetzungsfilter aufheben',
+	'strong.lexiconDetails': 'Bedeutung und Herkunft',
+	'strong.filterBook': 'Nach Bibelbuch filtern',
 	'strong.showAll': 'Alle Stellen anzeigen',
 	'strong.notFound': 'Diese Strong-Nummer existiert nicht.',
 	'strong.tryOther': 'Vielleicht meintest du {id}?',
