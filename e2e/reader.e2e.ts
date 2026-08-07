@@ -261,6 +261,46 @@ test('flowing text keeps columns scroll-synchronized', async ({ page }) => {
 	await expect(reader).toBeVisible();
 });
 
+test('a delayed follower scroll event cannot steal a rapidly reused source column', async ({
+	page
+}) => {
+	// Keep endless-scroll requests out of this timing regression: it isolates the delayed scroll event
+	// emitted by cross-column alignment while the reader immediately wheels the source again.
+	await page.route('**/api/reader/**', (route) => route.abort());
+	await page.setViewportSize({ width: 900, height: 260 });
+	await page.goto('/Joh3');
+
+	const columns = page.locator('.flow-column');
+	await expect(columns).toHaveCount(2);
+	await page.waitForTimeout(250);
+
+	const finalSourcePosition = await columns.evaluateAll(async ([first, second]) => {
+		const source = first as HTMLElement;
+		const follower = second as HTMLElement;
+		const verse17 = source.querySelector<HTMLElement>('[data-verse-key="43:3:17"]');
+		if (!verse17) throw new Error('fixture verse 17 is missing');
+
+		// First let the normal debounce align the follower to verse 17. Its native scroll event is now
+		// programmatic and suppressed for a short window.
+		source.scrollTop = verse17.offsetTop;
+		source.dispatchEvent(new Event('scroll'));
+		await new Promise((resolve) => setTimeout(resolve, 155));
+
+		// The reader immediately uses the real source again. A queued follower event delivered in the
+		// same frame must remain suppressed instead of replacing this new source choice.
+		source.dispatchEvent(
+			new WheelEvent('wheel', { deltaY: -100, bubbles: true, cancelable: true })
+		);
+		source.scrollTop = 0;
+		source.dispatchEvent(new Event('scroll'));
+		follower.dispatchEvent(new Event('scroll'));
+		await new Promise((resolve) => setTimeout(resolve, 200));
+		return source.scrollTop;
+	});
+
+	expect(finalSourcePosition).toBe(0);
+});
+
 test('mouse-wheel scrolling uses smaller steps for close reading', async ({ page }) => {
 	await page.goto('/Joh3');
 	const column = page.locator('.flow-column').first();
@@ -280,6 +320,43 @@ test('mouse-wheel scrolling uses smaller steps for close reading', async ({ page
 	});
 
 	expect(scrolledBy).toBe(55);
+});
+
+test('the first scroll after reload stays anchored while the previous chapter is prepended', async ({
+	page
+}) => {
+	await page.setViewportSize({ width: 900, height: 300 });
+	await page.goto('/1Mo2');
+	await page.reload();
+
+	const column = page.locator('.flow-column').first();
+	await column.dispatchEvent('wheel', {
+		deltaY: 1,
+		deltaMode: 0,
+		bubbles: true,
+		cancelable: true
+	});
+	await expect(column.locator('[data-chapter-key="1:1"]')).toBeAttached();
+
+	const firstVisibleVerse = await column.evaluate((element) => {
+		const top = element.getBoundingClientRect().top + 12;
+		return [...element.querySelectorAll<HTMLElement>('[data-verse-key]')].find(
+			(verse) => verse.getBoundingClientRect().bottom > top
+		)?.dataset.verseKey;
+	});
+	expect(firstVisibleVerse).toBe('1:2:1');
+});
+
+test('the chapter number opens the menu for the hidden first verse number', async ({ page }) => {
+	await page.goto('/1Mo1');
+
+	// Verse 1 keeps its number visually hidden: the displayed chapter number is its menu control.
+	await expect(page.locator('.verse-number').filter({ hasText: /^1$/ })).toHaveCount(0);
+	const chapterNumber = page.getByRole('link', { name: 'Vers 1.Mose 1,1' }).first();
+	await expect(chapterNumber).toHaveText('1');
+	await chapterNumber.click();
+
+	await expect(page.getByRole('menu', { name: 'Vers 1.Mose 1,1' })).toBeVisible();
 });
 
 test('a column can opt out of synchronized flowing-text scrolling on its own', async ({ page }) => {

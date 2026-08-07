@@ -1,0 +1,89 @@
+# Akribos – Arbeitsnotizen für Agents
+
+Diese Datei ist die dauerhafte Orientierung für Änderungen in diesem Repository. Sie muss bei jeder
+Architekturänderung und bei neuen, nicht offensichtlichen Invarianten im selben Change aktualisiert
+werden. Ausführlichere Hintergrundtexte liegen in `docs/architecture.md`, `docs/importing.md` und
+`docs/operations.md`.
+
+## Projekt und Befehle
+
+Akribos ist eine SvelteKit-5-Anwendung (Runes) mit TypeScript, PostgreSQL/Drizzle und einem Node-Adapter.
+Paketmanager ist `pnpm` (Node >= 24).
+
+- `pnpm check`: Svelte- und TypeScript-Prüfung
+- `pnpm lint`: Prettier-Check und ESLint
+- `pnpm test:unit --run`: Unit-Tests
+- `pnpm test:e2e`: eigene Testdatenbank vorbereiten, Produktions-Build starten, Playwright ausführen
+- Einen Reader-Test gezielt ausführen: `pnpm test:e2e:only e2e/reader.e2e.ts -g "Testname"`
+
+Vor dem Abschluss mindestens `pnpm check` und die für den Change relevanten Tests ausführen. Keine
+Migration manuell erfinden, wenn eine Schemaänderung mit Drizzle generiert werden kann. Bestehende,
+fremde Änderungen im Worktree nicht überschreiben.
+
+## Verzeichnis- und Schichtenmodell
+
+- `src/lib/bible/`: reine Domänenlogik (Bücher, Referenzen, Segmentmodell, Parser), ohne Server-I/O
+- `src/lib/server/`: Datenbank, Repositories, Auth, Mail, Import und serverseitige Einstellungen
+- `src/lib/components/`: wiederverwendbare Svelte-Komponenten
+- `src/routes/`: SvelteKit-Seiten, Form Actions und API-Endpunkte
+- `drizzle/`: Migrationen und Snapshots
+- `scripts/`: Migration, Import, Seed und E2E-Datenbank
+- `data/`: gebündelte Bibel-, Wörterbuch- und Importquelldaten
+- `e2e/`: Playwright-Tests gegen den Seed aus `scripts/seed.ts`
+
+Die Abhängigkeitsrichtung ist wichtig: `src/lib/bible` importiert niemals aus `src/lib/server`. Bibeltext
+wird als sichere strukturierte Segmente plus flacher Suchtext gespeichert. Die UI rendert Segmente mit
+`VerseText.svelte`; importiertes HTML darf nicht ungeprüft in den Bibeltext gelangen.
+
+## Reader-Architektur
+
+Der zentrale Reader ist `src/routes/[...reference]/+page.svelte`; sein Server-Load und seine Form Actions
+liegen in der gleichnamigen `+page.server.ts`. Die REST-Nachladung für Endless Scrolling erfolgt über
+`src/routes/api/reader/[book]/[chapter]/+server.ts`.
+
+Der Reader zeigt jede Ressource in einer eigenen `.flow-column`. Alle geladenen Kapitel stehen in
+`streamChapters`; DOM-Schlüssel sind `book:chapter` beziehungsweise für Verse `book:chapter:verse`.
+`flowColumns` enthält die Scrollcontainer in Spaltenreihenfolge. Ein Kapitel vor oder hinter dem
+aktuellen wird nahe der Scrollkante nachgeladen.
+
+Wichtige Scroll-Invarianten:
+
+- Nur echte Nutzerscrolls dürfen eine Spalte zur Quelle machen und die URL aktualisieren.
+  Programmatische Ausrichtung läuft über `suppressProgrammaticFlowScroll(index)`. Die Sperre ist
+  zwingend **pro Spalte**: Eine Interaktion darf nur die Sperre ihrer eigenen Spalte aufheben, weil
+  verspätete Scroll-Events automatisch ausgerichteter Nebenspalten sonst die Quelle übernehmen.
+- `syncFlowColumns()` richtet andere, verknüpfte Spalten am ersten sichtbaren
+  `[data-verse-key]` aus. Zusammengefasste Versbereiche werden über `data-verse-end` berücksichtigt.
+- Beim Voranstellen eines Kapitels müssen sowohl `scrollHeight` als auch `scrollTop` unmittelbar
+  **vor** der DOM-Mutation (nach dem Fetch) gespeichert werden. So bleibt Touch-Momentum während des
+  Fetches erhalten. Browser-Scroll-Anchoring kann `scrollTop` während `tick()` selbst verändern; eine
+  Berechnung aus dem nachträglichen Wert kompensiert doppelt und erzeugt Sprünge.
+- Die URL wird beim Lesen mit `replaceState` nachgeführt. `reader-location.svelte.ts` koppelt diese
+  Position an das Suchfeld, ohne eine Servernavigation auszulösen.
+- Vers 1 hat absichtlich keine sichtbare Versnummer. Die sichtbare `.flow-chapter-number` ist deshalb
+  ein Link und öffnet über `onVerseNumberClick()` dasselbe `VerseMenu` für den ersten Vers. Sie darf
+  nicht wieder in ein rein dekoratives `span` umgewandelt werden.
+
+Es existiert nur eine `VerseMenu`-Instanz für den ganzen Reader. Ein Klick übergibt Anker, Referenz,
+Text und Highlight-Zustand an `openAt()`; so werden nicht hunderte Menüs und Formulare im Fließtext
+gerendert. Highlights werden optimistisch in `streamChapters` aktualisiert, Listenmarkierungen im
+reaktiven `marks`-Set.
+
+## Daten, Suche und Sicherheit
+
+Die kanonischen 66 Bücher und Referenzregeln liegen in Code unter `src/lib/bible/`. `verses.segments`
+enthält die Darstellung, `verses.text` die Suche. Strong-Wörter sind zusätzlich normalisiert in
+`verse_words`; Statistiken und Suchbegriffe werden materialisiert und nach Imports aktualisiert.
+
+Öffentliche Seiten dürfen CDN-Caching verwenden; personalisierte Reader-Seiten sind `private,
+no-store`. Form Actions und APIs müssen Authentifizierung und Besitz serverseitig prüfen. Bestehende
+Parser-/Sanitizer-Grenzen nicht durch `{@html}` umgehen; die wenigen erlaubten HTML-Stellen sind für
+bereits bereinigte Importformate dokumentiert.
+
+## Teststrategie
+
+Domänenlogik wird nahe dem Modul mit Vitest getestet (`*.spec.ts`). Browserinteraktion, Scrollen,
+Navigation, Formulare und responsive Zustände gehören in Playwright. Die E2E-Fixture ist bewusst klein;
+bei neuen Reader-Fällen zuerst prüfen, welche Bücher/Verse `scripts/seed.ts` tatsächlich enthält.
+Regressionstests sollen das beobachtbare Verhalten prüfen (sichtbarer Anker, Menürolle, URL), nicht nur
+interne Variablennamen.

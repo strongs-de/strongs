@@ -517,8 +517,16 @@
 	let streamSignature = '';
 	let streamColumnsKey = data.columns.map((column) => column.resource.id).join(',');
 	let jumpedSignature = '';
-	let suppressFlowScroll = false;
-	let suppressFlowTimer: ReturnType<typeof setTimeout> | undefined;
+	/**
+	 * Columns whose next scroll events were caused by our own alignment/prepend compensation.
+	 *
+	 * This must be tracked per column. With one global flag, a wheel event in the column the reader is
+	 * actually touching cleared the protection for every other column too. A slightly later scroll
+	 * event from an automatically moved, differently laid-out translation could then become the source
+	 * and pull the touched column many verses forward.
+	 */
+	const suppressedFlowColumns = new SvelteSet<number>();
+	let suppressFlowTimers: (ReturnType<typeof setTimeout> | undefined)[] = [];
 	let flowSyncTimer: ReturnType<typeof setTimeout> | undefined;
 	let flowHasContentAbove = $state<boolean[]>([]);
 	let flowHasContentBelow = $state<boolean[]>([]);
@@ -573,11 +581,13 @@
 		}
 	});
 
-	function suppressProgrammaticFlowScroll() {
-		suppressFlowScroll = true;
-		if (suppressFlowTimer) clearTimeout(suppressFlowTimer);
-		suppressFlowTimer = setTimeout(() => {
-			suppressFlowScroll = false;
+	function suppressProgrammaticFlowScroll(columnIndex: number) {
+		suppressedFlowColumns.add(columnIndex);
+		const currentTimer = suppressFlowTimers[columnIndex];
+		if (currentTimer) clearTimeout(currentTimer);
+		suppressFlowTimers[columnIndex] = setTimeout(() => {
+			suppressedFlowColumns.delete(columnIndex);
+			suppressFlowTimers[columnIndex] = undefined;
 		}, 80);
 	}
 
@@ -591,15 +601,23 @@
 		const reference = streamChapters[0]?.navigation.previous;
 		if (!reference || flowColumns.length === 0 || loadingPrevious) return;
 		loadingPrevious = true;
-		const oldHeights = flowColumns.map((column) => column?.scrollHeight ?? 0);
 		try {
 			const chapter = await fetchStreamChapter(reference);
+			// Capture immediately before the mutation, not before the request: touch momentum may continue
+			// while the chapter is in flight and that genuine user movement must not be rolled back.
+			const oldHeights = flowColumns.map((column) => column?.scrollHeight ?? 0);
+			// Keep the pre-mutation positions as well as the heights. Browsers may apply CSS scroll
+			// anchoring as soon as the prepended chapter reaches the DOM and increase `scrollTop` on their
+			// own. Reading `column.scrollTop` after `tick()` and adding the height delta to that value would
+			// then compensate twice — the race behind the occasional multi-verse/chapter jump on the first
+			// quick wheel or touch scroll after a reload.
+			const oldScrollTops = flowColumns.map((column) => column?.scrollTop ?? 0);
 			streamChapters.unshift(chapter);
 			await tick();
 			for (const [index, column] of flowColumns.entries()) {
 				if (column) {
-					const next = column.scrollTop + column.scrollHeight - (oldHeights[index] ?? 0);
-					suppressProgrammaticFlowScroll();
+					const next = (oldScrollTops[index] ?? 0) + column.scrollHeight - (oldHeights[index] ?? 0);
+					suppressProgrammaticFlowScroll(index);
 					column.scrollTop = next;
 				}
 			}
@@ -716,7 +734,7 @@
 					target.getBoundingClientRect().top -
 					column.getBoundingClientRect().top -
 					12;
-				suppressProgrammaticFlowScroll();
+				suppressProgrammaticFlowScroll(index);
 				column.scrollTop = next;
 			}
 		}
@@ -772,7 +790,7 @@
 
 			const columnTop = column.getBoundingClientRect().top + anchorInset;
 			const next = column.scrollTop + target.getBoundingClientRect().top - columnTop;
-			suppressProgrammaticFlowScroll();
+			suppressProgrammaticFlowScroll(index);
 			column.scrollTop = next;
 		}
 	}
@@ -780,8 +798,12 @@
 	function makeFlowSource(columnIndex: number) {
 		if (unlinkedColumns.has(columnIndex)) return;
 		activeFlowSource = columnIndex;
-		if (suppressFlowTimer) clearTimeout(suppressFlowTimer);
-		suppressFlowScroll = false;
+		// A real interaction only overrides suppression for the column being touched. Other columns may
+		// still have delayed scroll events queued from our own alignment and must remain suppressed.
+		const suppressTimer = suppressFlowTimers[columnIndex];
+		if (suppressTimer) clearTimeout(suppressTimer);
+		suppressFlowTimers[columnIndex] = undefined;
+		suppressedFlowColumns.delete(columnIndex);
 		if (flowSyncTimer) clearTimeout(flowSyncTimer);
 	}
 
@@ -818,7 +840,7 @@
 	}
 
 	/**
-	 * Any scroll that was not caused by our own sync (`suppressFlowScroll`) makes that column the
+	 * Any scroll that was not caused by our own sync (`suppressedFlowColumns`) makes that column the
 	 * source, regardless of whether a preceding wheel/pointer/touch/focus event already marked it as
 	 * one — those events do not fire for every way a column can be scrolled (e.g. some trackpads,
 	 * scrollbar dragging, or keyboard paging), and this handler is the one signal that always fires.
@@ -827,7 +849,7 @@
 		const source = flowColumns[columnIndex];
 		if (!source) return;
 		updateFlowEdgeState(columnIndex, source);
-		if (suppressFlowScroll) return;
+		if (suppressedFlowColumns.has(columnIndex)) return;
 		// Sync off does not stop this column's own endless-scroll loading below — only the two lines
 		// that would make it the sync source are skipped.
 		if (!unlinkedColumns.has(columnIndex)) {
@@ -1256,9 +1278,40 @@
 											>
 												<span class="verse-lead">
 													{#if cell.verse === firstVerse}
-														<span class="flow-chapter-number" title={stream.fullTitle}>
+														<a
+															class="flow-chapter-number"
+															class:in-list={stream.reference.book === data.reference.book &&
+																stream.reference.chapter === data.reference.chapter &&
+																inAnyList.has(cell.verse)}
+															title={stream.fullTitle}
+															href={referencePath({
+																book: stream.reference.book,
+																chapter: stream.reference.chapter,
+																verse: cell.verse
+															})}
+															aria-haspopup="menu"
+															aria-label={t('verse.menu', {
+																reference: formatReference(
+																	{
+																		book: stream.reference.book,
+																		chapter: stream.reference.chapter,
+																		verse: cell.verse
+																	},
+																	{ style: 'full' }
+																)
+															})}
+															onclick={(event) =>
+																onVerseNumberClick(
+																	event,
+																	stream.reference.book,
+																	stream.reference.chapter,
+																	cell.verse,
+																	cell.verseEnd,
+																	cell.segments
+																)}
+														>
 															{stream.reference.chapter}
-														</span>
+														</a>
 													{/if}
 													{#if cell.verse !== 1 || cell.verse !== firstVerse}
 														<a
@@ -1719,12 +1772,22 @@
 	}
 
 	.flow-chapter-number {
+		display: inline;
 		margin-right: 0.28em;
+		padding: 0;
 		font-family: var(--font-serif);
 		font-size: 1.45em;
 		font-weight: 800;
 		line-height: 0;
 		color: var(--color-stone-900);
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	.flow-chapter-number:hover,
+	.flow-chapter-number:focus-visible,
+	.flow-chapter-number.in-list {
+		color: var(--color-accent-600);
 	}
 
 	:global(.dark) .flow-chapter-number {
