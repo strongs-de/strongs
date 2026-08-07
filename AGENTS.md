@@ -75,6 +75,13 @@ Die kanonischen 66 Bücher und Referenzregeln liegen in Code unter `src/lib/bibl
 enthält die Darstellung, `verses.text` die Suche. Strong-Wörter sind zusätzlich normalisiert in
 `verse_words`; Statistiken und Suchbegriffe werden materialisiert und nach Imports aktualisiert.
 
+Mehrere Lexika können dieselbe Strong-Nummer abdecken (`lexicon_entries` hat einen zusammengesetzten
+Schlüssel aus `resourceId` und `strong`); `loadStrongEntry()` zeigt davon nur das mit der niedrigsten
+`resources.sortOrder`, ohne die anderen zu verschmelzen. Griechische Strong-Nummern reichen bis 6020,
+nicht bis zum eigentlichen Ende des Wörterbuchs (5624): Gerhard Kautz' deutsches Lexikon
+(`data/stronggreek_de_kautz.xml`, siehe `docs/importing.md`) nummeriert seinen Anhang mit
+Synonymgruppen 5801-6020 durch.
+
 Öffentliche Seiten dürfen CDN-Caching verwenden; personalisierte Reader-Seiten sind `private,
 no-store`. Form Actions und APIs müssen Authentifizierung und Besitz serverseitig prüfen. Bestehende
 Parser-/Sanitizer-Grenzen nicht durch `{@html}` umgehen; die wenigen erlaubten HTML-Stellen sind für

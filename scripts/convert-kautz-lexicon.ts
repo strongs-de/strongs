@@ -1,26 +1,34 @@
 /**
- * Converts Gerhard Kautz' German Greek-Strong lexicon (plain text, published at sermon-online.com) into
- * the `strongsdictionary` XML format that `data/strongsgreek.xml` already uses, so it can be imported
- * through the normal `pnpm data:import` path with no parser changes.
+ * Converts Gerhard Kautz' German Greek-Strong lexicon into the `strongsdictionary` XML format that
+ * `data/strongsgreek.xml` already uses, so it can be imported through the normal `pnpm data:import`
+ * path with no parser changes.
+ *
+ * Kautz gave permission by email (on file) to include the converted lexicon on this site and in this
+ * repository, on the condition that no factual changes are made to his text, that bold/italic
+ * typesetting and the `I.) II.) 1.) 2.) 1a.)` structure survive, and that his copyright notice is
+ * carried over verbatim — all of which this script does.
+ *
+ * The preferred source is his own Word manuscript (richer than the plain-text/HTML mirrors published
+ * at sermon-online.com: it is the only one that still carries bold/italic runs, and it also contains
+ * the copyright line and the abbreviation glossary, so nothing has to be supplied separately). Convert
+ * it to HTML first — `pandoc` preserves paragraph-per-line structure and `<strong>`/`<em>` runs, which
+ * is exactly what this script expects:
+ *
+ *   pandoc -f docx -t html --wrap=preserve -o data/private/kautz-source.html data/private/kautz.docx
+ *   node scripts/convert-kautz-lexicon.ts data/private/kautz-source.html data/stronggreek_de_kautz.xml
+ *
+ * A plain-text source (the sermon-online.com mirror) also still works, just without bold/italic and
+ * without the abbreviation glossary (pass `--abbreviations` to supply one separately in that case).
  *
  * Kautz' source has no Greek unicode headwords, only German transliteration, so this borrows the
  * lemma, BETA code, SBL transliteration and pronunciation from the existing public-domain
  * `data/strongsgreek.xml` by Strong's number, and carries Kautz' German text over as the definition.
  *
- * Only the dictionary body (Strong's numbers 1-5624) is converted. The trailing "Liste der Synonyme"
- * appendix reuses the same numbered-block layout for synonym groups rather than individual entries and
- * is out of scope; the two placeholder numbers 5625/5626 ("word has more than one number" / "not
- * translated") are dropped the same way the English dictionary's "Not Used" gaps are.
- *
- * Kautz' licence permits personal use and PDF redistribution, but not republishing a converted/altered
- * version — see the licence text at the top of the source file. The output of this script is for local,
- * personal use only until that is separately cleared with the copyright holder. For the same reason,
- * this script contains no text of Kautz' own: the glossary of abbreviations it can gloss as `<abbr>`
- * tooltips (see {@link loadAbbreviations}) is read from a JSON file kept outside this repository, e.g.
- * `data/private/kautz-abbreviations.json` (a plain `{ "Gräz.": "explanation", ... }` map) — without one,
- * conversion still works, just without tooltips.
- *
- *   node scripts/convert-kautz-lexicon.ts data/private/kautz-source.txt data/private/stronggreek_de_kautz.xml
+ * The dictionary body (Strong's numbers 1-5624) is converted, and so is the trailing synonym-group
+ * appendix (5801-6020, headed "Synonyme" instead of a transliteration) that Kautz asked not to be
+ * forgotten — see {@link SYNONYM_MIN}. The two placeholder numbers in between, 5625/5626 ("word has
+ * more than one number" / "not translated"), are dropped the same way the English dictionary's "Not
+ * Used" gaps are.
  */
 
 import { readFile, writeFile } from 'node:fs/promises';
@@ -29,7 +37,19 @@ import { findBookId } from '../src/lib/bible/book-names.ts';
 import { referencePath } from '../src/lib/bible/reference.ts';
 
 const MAX_GREEK_NUMBER = 5624;
+/** Kautz' own supplementary numbering for the synonym-group appendix; see the module doc comment. */
+const SYNONYM_MIN = 5801;
+const SYNONYM_MAX = 6020;
 const DEFAULT_ABBREVIATIONS_PATH = 'data/private/kautz-abbreviations.json';
+
+/** Marks a run of bold/italic text through the pipeline; swapped for real tags only once, at the end
+ *  (see {@link main}), so none of the regex-based passes in between (sense splitting, abbreviation and
+ *  reference scanning) have to be taught about markup — Private Use Area code points aren't `\p{L}`,
+ *  so they are invisible to every word-boundary check those passes make. */
+const BOLD_OPEN = '\uE010';
+const BOLD_CLOSE = '\uE011';
+const ITALIC_OPEN = '\uE012';
+const ITALIC_CLOSE = '\uE013';
 
 type Enrichment = {
 	beta?: string;
@@ -37,6 +57,10 @@ type Enrichment = {
 	translit?: string;
 	pronunciation?: string;
 };
+
+/** Stand-in for the missing `<greek>` info on a synonym-appendix entry (see {@link SYNONYM_MIN}): it
+ *  has no headword of its own, just the literal label the source prints in its place. */
+const SYNONYM_ENRICHMENT: Enrichment = { unicode: 'Synonyme' };
 
 type KautzEntry = {
 	number: number;
@@ -71,16 +95,81 @@ async function loadEnrichment(path: string): Promise<Map<number, Enrichment>> {
 	return map;
 }
 
-/** Splits the raw text into entries at 7-digit zero-padded number lines, keeping only 1-5624. */
-function splitEntries(text: string): KautzEntry[] {
-	const lines = text.replace(/^\uFEFF/, '').split(/\r\n|\r|\n/);
+/** Splits a plain-text source (the sermon-online.com mirror) into lines, one per source line. There is
+ *  no markup to carry, so this is a thin wrapper kept only so both source kinds go through the same
+ *  {@link splitEntries}. */
+function linesFromPlainText(text: string): string[] {
+	return text.replace(/^\uFEFF/, '').split(/\r\n|\r|\n/);
+}
+
+/**
+ * Splits a pandoc-generated HTML source (`pandoc -f docx -t html --wrap=preserve`, see the module doc
+ * comment) into lines, one per original paragraph — which, in Kautz' manuscript, means one per visual
+ * line: he hard-breaks a new Word paragraph at roughly print-column width rather than letting a line
+ * wrap, the same convention his plain-text export follows. `<strong>`/`<em>` become {@link BOLD_OPEN}
+ * /{@link ITALIC_OPEN} markers rather than real tags so every later regex-based pass stays oblivious to
+ * them; a manual `<br />` inside one paragraph (rare, but it happens) splits into two output lines, the
+ * same as a paragraph break. `<u>` (used only for the Gräz./LXX/Wortfamilie labels' underline, which
+ * every consumer of this text already recognises by the label wording, not the styling) and `<a>` links
+ * Kautz occasionally cites (e.g. a Wikipedia source) are dropped, keeping only their text.
+ */
+function linesFromHtml(html: string): string[] {
+	const lines: string[] = [];
+
+	for (const raw of html.split(/\r\n|\r|\n/)) {
+		const trimmed = raw.trim();
+		// Transparent list wrappers: pandoc renders a Word numbered-list paragraph style this way
+		// (Kautz applies it to the occasional single line, apparently by accident), but the list
+		// structure carries no meaning here — only the text inside does.
+		const paragraph =
+			/^<p(?:\s[^>]*)?>([\s\S]*)<\/p>$/.exec(trimmed) ??
+			/^<li>\s*<p(?:\s[^>]*)?>([\s\S]*)<\/p>\s*<\/li>$/.exec(trimmed);
+		if (!paragraph) continue;
+
+		const inline = paragraph[1]!
+			.replace(/<a\b[^>]*>/gi, '')
+			.replace(/<\/a>/gi, '')
+			.replace(/<\/?u>/gi, '')
+			.replace(/<strong>/gi, BOLD_OPEN)
+			.replace(/<\/strong>/gi, BOLD_CLOSE)
+			.replace(/<em>/gi, ITALIC_OPEN)
+			.replace(/<\/em>/gi, ITALIC_CLOSE);
+
+		for (const part of inline.split(/<br\s*\/?>/gi)) {
+			lines.push(part.replaceAll('&amp;', '&').trim());
+		}
+	}
+
+	return lines;
+}
+
+/** Strips the bold/italic markers, for text that ends up somewhere markup can't reach (an HTML `title`
+ *  attribute, e.g. an `<abbr>` tooltip — see {@link extractAbbreviationsFromLines}). */
+function stripMarkers(text: string): string {
+	return text
+		.replaceAll(BOLD_OPEN, '')
+		.replaceAll(BOLD_CLOSE, '')
+		.replaceAll(ITALIC_OPEN, '')
+		.replaceAll(ITALIC_CLOSE, '');
+}
+
+/** Whether a Strong's number is one this script converts: the dictionary body, or Kautz' synonym
+ *  appendix (see {@link SYNONYM_MIN}). The gap between them (5625-5800) is deliberately excluded. */
+function isConvertibleNumber(number: number): boolean {
+	return (
+		(number >= 1 && number <= MAX_GREEK_NUMBER) || (number >= SYNONYM_MIN && number <= SYNONYM_MAX)
+	);
+}
+
+/** Splits pre-extracted source lines into entries at 7-digit zero-padded number lines. */
+function splitEntries(lines: string[]): KautzEntry[] {
 	const entries: KautzEntry[] = [];
 
 	let number: number | undefined;
 	let buffer: string[] = [];
 
 	const flush = () => {
-		if (number !== undefined && number >= 1 && number <= MAX_GREEK_NUMBER) {
+		if (number !== undefined && isConvertibleNumber(number)) {
 			const firstContent = buffer.findIndex((line) => line.trim().length > 0);
 			// No headword line at all means this is one of Kautz' own gap placeholders.
 			if (firstContent !== -1) {
@@ -117,9 +206,13 @@ function splitHeader(body: string): { etymology: string; rest: string } {
 
 	if (!lines[index]?.trim().startsWith('√')) return { etymology: '', rest: body };
 
-	// Gräz./LXX/Synonyme notes sit right below the etymology with no blank line in between, but belong
-	// in the definition, not the derivation.
-	const followsAsNote = /^(Gräz\.|LXX[.:]|Synonyme siehe:|Wortfamilie:)/i;
+	// Gräz./LXX/Synonyme notes and the first sense both sit right below the etymology with no blank
+	// line in between, but belong in the definition, not the derivation. Without the sense markers
+	// here too, an etymology that itself wraps onto a second physical line (e.g. "…aleph (d. erste
+	// Buchstabe d. hebr. Alphabets);\nBuchstabe (3)") and is followed directly by "I.) …" swallows the
+	// entire definition into the derivation, since nothing would ever stop the loop below.
+	const followsAsNote =
+		/^(Gräz\.|LXX[.:]|Synonyme siehe:|Wortfamilie:|[IVXLCDM]+\.?\)|\d{1,2}[a-z]?\))/i;
 	const etymologyLines: string[] = [];
 	while (
 		index < lines.length &&
@@ -295,6 +388,62 @@ async function loadAbbreviations(path: string): Promise<Record<string, string>> 
 	}
 }
 
+/**
+ * The heading text (stripped of markers) that opens and closes Kautz' "4. Abkürzungsverzeichnis samt
+ * grammatikalischen Erklärungen" section, so its content can be sliced out of the full line list. Both
+ * carry their section number: the table of contents lists the same titles without one, so matching the
+ * numbered form is what tells the real heading apart from its own table-of-contents entry.
+ */
+const ABBREVIATIONS_START = '4. Abkürzungsverzeichnis samt grammatikalischen Erklärungen';
+const ABBREVIATIONS_END = '5. Liste der Synonyme mit deren Strong-Nummern';
+
+/**
+ * Parses Kautz' own abbreviation glossary straight out of the manuscript (section 4), now that
+ * redistributing his text is licensed — so nothing has to be kept in a private JSON file just to get
+ * `<abbr>` tooltips (see {@link loadAbbreviations}, still used for a plain-text source).
+ *
+ * Entries read `KEY = explanation`, sometimes several comma-separated keys sharing one explanation
+ * (`f., ff. = folgend(e), …`), sometimes wrapping onto further lines with no `=` of their own. A few
+ * keys are defined twice for genuinely different meanings (`Konj.` is both Konjunktiv and Konjunktion);
+ * both explanations are kept, joined with " / ", rather than the second silently overwriting the first.
+ */
+function extractAbbreviationsFromLines(lines: string[]): Record<string, string> {
+	const startIndex = lines.findIndex((line) => stripMarkers(line).trim() === ABBREVIATIONS_START);
+	const endIndex = lines.findIndex((line) => stripMarkers(line).trim() === ABBREVIATIONS_END);
+	if (startIndex === -1 || endIndex === -1 || endIndex <= startIndex) return {};
+
+	const glossary: Record<string, string> = {};
+	let currentKeys: string[] = [];
+	const keyLine = /^([^=]{1,40}?)\s*=\s*(.*)$/;
+
+	for (const raw of lines.slice(startIndex + 1, endIndex)) {
+		const trimmed = stripMarkers(raw).trim();
+		if (!trimmed) continue;
+
+		const match = keyLine.exec(trimmed);
+		if (match) {
+			currentKeys = match[1]!
+				.split(',')
+				.map((key) => key.trim())
+				.filter(Boolean);
+			for (const key of currentKeys) {
+				glossary[key] = glossary[key] ? `${glossary[key]} / ${match[2]}` : match[2]!;
+			}
+		} else if (currentKeys.length > 0) {
+			for (const key of currentKeys) glossary[key] += ` ${trimmed}`;
+		}
+	}
+
+	return glossary;
+}
+
+/** Kautz' copyright line, read verbatim from the manuscript's own title block rather than retyped here,
+ *  so an update to his own wording (a new "(Update N/YYYY)") is picked up automatically. */
+function extractCopyrightFromLines(lines: string[]): string | undefined {
+	const line = lines.find((entry) => stripMarkers(entry).trim().startsWith('Copyright'));
+	return line ? stripMarkers(line).trim() : undefined;
+}
+
 /** Wraps every recurring Kautz abbreviation ("Gräz.", "Subst.Fem.", "ua." …) in a native tooltip. */
 function wrapAbbreviationTokens(text: string, placeholder: (tag: string) => string): string {
 	let out = '';
@@ -401,16 +550,20 @@ const SENSE_MARKER =
  * own entry, not a continuation of the numbering above), so those lines must stay attached to the
  * `number transliteration` line that introduces the word rather than starting fresh top-level groups.
  * Only a new `number transliteration` line starts a new group there.
+ *
+ * A synonym-appendix entry (see {@link SYNONYM_MIN}) uses that same "one `number word` per member"
+ * shape for its *entire* body, with no "Wortfamilie:" label of its own — `forceWordFamilyMode` puts it
+ * in that mode from the start instead.
  */
-function groupIntoSenses(rest: string): string[] {
+function groupIntoSenses(rest: string, forceWordFamilyMode = false): string[] {
 	const groups: string[] = [];
-	let inWortfamilieBlock = false;
+	let inWortfamilieBlock = forceWordFamilyMode;
 
 	for (const raw of rest.split('\n')) {
 		const trimmed = raw.trim();
 		if (!trimmed) continue;
 
-		if (/^Wortfamilie:$/i.test(trimmed)) {
+		if (!forceWordFamilyMode && /^Wortfamilie:$/i.test(trimmed)) {
 			groups.push(trimmed);
 			inWortfamilieBlock = true;
 			continue;
@@ -486,12 +639,37 @@ function isMajorBreak(sense: string): boolean {
 	return /^([IVXLCDM]+\.?\)|Wortfamilie:)/i.test(sense);
 }
 
-function renderBody(rest: string): string {
-	const senses = groupIntoSenses(rest);
+/** Matches a synonym-appendix member's own line, e.g. "126 αιδιος: immerwährend; …" — a number
+ *  followed by the actual Greek word, as opposed to a connecting sentence comparing two members, which
+ *  also starts with a bare number but continues in German, e.g. "154 und 2065 werden zwar …". */
+const SYNONYM_MEMBER = /^0*(\d{1,4})\s+([Ͱ-Ͽἀ-῿][^\s]*)\s*(.*)$/;
+
+/**
+ * Renders one line of a synonym-appendix entry (see {@link SYNONYM_MIN}): either a member definition,
+ * matched by {@link SYNONYM_MEMBER} and lightly indented like a Wortfamilie member, or a connecting
+ * sentence comparing members. Unlike an etymology line, that connecting sentence is ordinary German
+ * prose that may itself cite a Bible verse (e.g. "In Joh 16:19.23 werden beide Wörter …"), so it goes
+ * through {@link renderProse} — which recognises verse references — rather than
+ * {@link renderWortfamilieWord}'s bare-number-as-Strong's-reference linking, which would otherwise turn
+ * that verse's own chapter and verse numbers into wrong cross-references.
+ */
+function renderSynonymSense(sense: string): string {
+	const member = SYNONYM_MEMBER.exec(sense);
+	if (!member) return renderProse(sense);
+
+	const [, number, word, remainder] = member;
+	const linkedNumber = strongsRefTag('GREEK', Number.parseInt(number!, 10));
+	const gloss = remainder ? ` ${renderProse(remainder)}` : '';
+	return `<indent>${linkedNumber} ${escapeXml(word!)}${gloss}</indent>`;
+}
+
+function renderBody(rest: string, forceWordFamilyMode = false): string {
+	const senses = groupIntoSenses(rest, forceWordFamilyMode);
+	const render = forceWordFamilyMode ? renderSynonymSense : renderSense;
 	return senses
 		.map((sense, index) => {
-			if (index === 0) return renderSense(sense);
-			return `${isMajorBreak(sense) ? '<br/><br/>' : '<br/>'}${renderSense(sense)}`;
+			if (index === 0) return render(sense);
+			return `${isMajorBreak(sense) ? '<br/><br/>' : '<br/>'}${render(sense)}`;
 		})
 		.join('');
 }
@@ -506,7 +684,7 @@ async function main() {
 	const [inputPath, outputPath] = process.argv.slice(2);
 	if (!inputPath || !outputPath) {
 		console.error(
-			'usage: node scripts/convert-kautz-lexicon.ts <kautz-source.txt> <output.xml> ' +
+			'usage: node scripts/convert-kautz-lexicon.ts <kautz-source.html|.txt> <output.xml> ' +
 				'[--enrichment path] [--abbreviations path]'
 		);
 		process.exit(1);
@@ -523,18 +701,29 @@ async function main() {
 	const enrichment = await loadEnrichment(enrichmentPath);
 	console.log(`loaded ${enrichment.size} enrichment entries from ${enrichmentPath}`);
 
-	setAbbreviations(await loadAbbreviations(abbreviationsPath));
+	const source = await readFile(inputPath, 'utf8');
+	const isHtml = /^\s*</.test(source);
+	const lines = isHtml ? linesFromHtml(source) : linesFromPlainText(source);
+	console.log(`read ${lines.length} lines from ${inputPath} (${isHtml ? 'HTML' : 'plain text'})`);
+
+	if (isHtml && abbreviationsIndex === -1) {
+		setAbbreviations(extractAbbreviationsFromLines(lines));
+	} else {
+		setAbbreviations(await loadAbbreviations(abbreviationsPath));
+	}
 	console.log(`loaded ${Object.keys(abbreviations).length} abbreviation glossary entries`);
 
-	const source = await readFile(inputPath, 'utf8');
-	const entries = splitEntries(source);
-	console.log(`found ${entries.length} entries in the range 1-${MAX_GREEK_NUMBER}`);
+	const entries = splitEntries(lines);
+	console.log(
+		`found ${entries.length} entries in the range 1-${MAX_GREEK_NUMBER} and ${SYNONYM_MIN}-${SYNONYM_MAX}`
+	);
 
 	const xmlEntries: string[] = [];
 	let missingEnrichment = 0;
 
 	for (const { number, body } of entries) {
-		const info = enrichment.get(number);
+		const isSynonym = number >= SYNONYM_MIN && number <= SYNONYM_MAX;
+		const info = isSynonym ? SYNONYM_ENRICHMENT : enrichment.get(number);
 		if (!info) {
 			missingEnrichment += 1;
 			continue;
@@ -557,7 +746,7 @@ async function main() {
 				`<greek ${greekAttrs}/>`,
 				info.pronunciation ? `<pronunciation strongs="${escapeXml(info.pronunciation)}"/>` : '',
 				etymology ? `<strongs_derivation>${renderEtymology(etymology)}</strongs_derivation>` : '',
-				`<strongs_def>${renderBody(rest)}</strongs_def>`,
+				`<strongs_def>${renderBody(rest, isSynonym)}</strongs_def>`,
 				`</entry>`
 			]
 				.filter(Boolean)
@@ -571,17 +760,22 @@ async function main() {
 		);
 	}
 
+	const copyright = (isHtml && extractCopyrightFromLines(lines)) || 'Copyright © Gerhard Kautz';
 	const prologue =
-		'Griechisch-Deutsches Strong-Lexikon von Gerhard Kautz (Update 2026), konvertiert aus dem ' +
-		'Klartext-Original fuer den privaten Import. Copyright (c) Gerhard Kautz -- Weitergabe der ' +
-		'konvertierten Fassung nur mit gesonderter Genehmigung des Autors (gskautz@gmail.com).';
+		`${copyright} — Griechisch-Deutsches Strong-Lexikon von Gerhard Kautz, mit seiner Genehmigung ` +
+		'für diese Website und dieses Repository übernommen. Rückfragen an gskautz@gmail.com.';
 
 	const xml = [
 		`<?xml version='1.0' encoding='utf-8' standalone='yes'?>`,
 		`<strongsdictionary><prologue>${escapeXml(prologue)}</prologue><entries>`,
 		` ${xmlEntries.join('\n ')}`,
 		`</entries></strongsdictionary>`
-	].join('\n');
+	]
+		.join('\n')
+		.replaceAll(BOLD_OPEN, '<b>')
+		.replaceAll(BOLD_CLOSE, '</b>')
+		.replaceAll(ITALIC_OPEN, '<i>')
+		.replaceAll(ITALIC_CLOSE, '</i>');
 
 	await writeFile(outputPath, xml, 'utf8');
 	console.log(`wrote ${xmlEntries.length} entries to ${outputPath}`);

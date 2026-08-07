@@ -79,6 +79,14 @@ export async function* parseStrongsXml(input: SourceInput): ParseStream {
 					break;
 				}
 
+				case 'b':
+				case 'i':
+					// Also not in the original format: some sources use bold/italic typesetting as part
+					// of the definition's own meaning (e.g. distinguishing a headword from its gloss),
+					// which is worth keeping rather than flattening to plain text.
+					if (field) html[field] += `<${event.name}>`;
+					break;
+
 				case 'verseref': {
 					// Marks a Bible reference quoted inside a definition. It becomes a real link — a
 					// click jumps straight to the verse — that also shows that verse's text on hover
@@ -169,6 +177,11 @@ export async function* parseStrongsXml(input: SourceInput): ParseStream {
 
 			case 'abbr':
 				if (field) html[field] += '</abbr>';
+				break;
+
+			case 'b':
+			case 'i':
+				if (field) html[field] += `</${event.name}>`;
 				break;
 
 			case 'verseref':

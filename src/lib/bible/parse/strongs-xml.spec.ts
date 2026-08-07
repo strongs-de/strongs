@@ -170,6 +170,18 @@ describe('parseStrongsXml', () => {
 		);
 	});
 
+	it('turns <b> and <i> into bold/italic typesetting, for sources that carry that from the original', async () => {
+		const { entries } = await collect(
+			wrap(`<entry strongs="00001"><strongs>1</strongs>
+				<greek BETA="*A" unicode="Α" translit="A"/>
+				<strongs_def><b>d. Erbarmen</b>: mildert, was <i>unverschuldetes</i> Leid folgt</strongs_def></entry>`)
+		);
+
+		expect(entries[0]?.definitionHtml).toBe(
+			'<b>d. Erbarmen</b>: mildert, was <i>unverschuldetes</i> Leid folgt'
+		);
+	});
+
 	it('recognises a Hebrew dictionary from its inline elements', async () => {
 		const { entries } = await collect(
 			wrap(`<entry strongs="00430"><strongs>430</strongs>
