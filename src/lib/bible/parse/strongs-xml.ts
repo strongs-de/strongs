@@ -19,6 +19,9 @@
  *
  * Only markup this parser emits itself reaches the database, so the HTML is trusted by construction:
  * every scrap of text from the source is escaped on the way in.
+ *
+ * A `<prologue>` before `<entries>`, if present, is a rights notice for the whole dictionary rather
+ * than any one entry — it becomes a `license` event instead of part of an entry (see {@link ParseEvent}).
  */
 
 import { makeStrongId, type StrongLanguage } from '../strong.ts';
@@ -37,6 +40,8 @@ export async function* parseStrongsXml(input: SourceInput): ParseStream {
 	const html: Record<Field, string> = { definition: '', derivation: '', kjv: '' };
 	let inNumber = false;
 	let numberText = '';
+	let inPrologue = false;
+	let prologueText = '';
 	let entriesSeen = 0;
 	let skippedGaps = 0;
 	/** Text of an entry that sits outside any field, used to recognise the "Not Used" placeholders. */
@@ -63,6 +68,13 @@ export async function* parseStrongsXml(input: SourceInput): ParseStream {
 				case 'strongs':
 					inNumber = true;
 					numberText = '';
+					break;
+
+				case 'prologue':
+					// A rights notice for the whole dictionary, not any one entry — see the `license`
+					// event this yields on close, below.
+					inPrologue = true;
+					prologueText = '';
 					break;
 
 				case 'br':
@@ -164,6 +176,7 @@ export async function* parseStrongsXml(input: SourceInput): ParseStream {
 
 		if (event.type === 'text') {
 			if (inNumber) numberText += event.text;
+			else if (inPrologue) prologueText += escapeHtml(event.text);
 			else if (field) html[field] += escapeHtml(event.text);
 			else looseText += event.text;
 			continue;
@@ -173,6 +186,11 @@ export async function* parseStrongsXml(input: SourceInput): ParseStream {
 			case 'strongs':
 				inNumber = false;
 				number ??= toNumber(numberText);
+				break;
+
+			case 'prologue':
+				inPrologue = false;
+				if (prologueText) yield { type: 'license', licenseHtml: prologueText };
 				break;
 
 			case 'abbr':

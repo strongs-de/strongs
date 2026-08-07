@@ -102,6 +102,14 @@
 						</ul>
 					</section>
 				{/if}
+				{#if data.entry.licenseHtml}
+					<section>
+						<h2 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">
+							{t('strong.license')}
+						</h2>
+						<p class="text-stone-500 dark:text-stone-400">{data.entry.licenseHtml}</p>
+					</section>
+				{/if}
 			</div>
 		</details>
 	{/if}
@@ -336,6 +344,15 @@
 							</li>
 						{/each}
 					</ul>
+				</section>
+			{/if}
+
+			{#if data.entry?.licenseHtml}
+				<section>
+					<h2 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">
+						{t('strong.license')}
+					</h2>
+					<p class="text-xs text-stone-500 dark:text-stone-400">{data.entry.licenseHtml}</p>
 				</section>
 			{/if}
 		</aside>

@@ -702,7 +702,8 @@
 					"derivationHtml",
 					"kjvDefinitionHtml",
 					"seeAlso",
-					"language"
+					"language",
+					"licenseHtml"
 				],
 				"properties": {
 					"strong": { "type": "string" },
@@ -713,7 +714,8 @@
 					"derivationHtml": { "type": ["string", "null"] },
 					"kjvDefinitionHtml": { "type": ["string", "null"] },
 					"seeAlso": { "type": "array", "items": { "type": "string" } },
-					"language": { "type": "string", "enum": ["grc", "hbo"] }
+					"language": { "type": "string", "enum": ["grc", "hbo"] },
+					"licenseHtml": { "type": ["string", "null"], "description": "Rights notice of the lexicon this entry came from, e.g. a translated dictionary's copyright." }
 				}
 			},
 			"StrongGloss": {

@@ -760,10 +760,16 @@ async function main() {
 		);
 	}
 
-	const copyright = (isHtml && extractCopyrightFromLines(lines)) || 'Copyright © Gerhard Kautz';
-	const prologue =
-		`${copyright} — Griechisch-Deutsches Strong-Lexikon von Gerhard Kautz, mit seiner Genehmigung ` +
-		'für diese Website und dieses Repository übernommen. Rückfragen an gskautz@gmail.com.';
+	// Kautz' own manuscript prints this as "Copyright © Gerhard Kautz (Update 5/2026)" (extracted by
+	// extractCopyrightFromLines below, in case a future update changes the date), but his permission
+	// email quotes it abbreviated — "Mache es genauso wie im Original 2026: Copyright © G. Kautz
+	// (Update 5/2026)" — and that is the exact wording he asked to see displayed, so his own manuscript
+	// spelling is normalised to match it here.
+	const manuscriptCopyright = isHtml ? extractCopyrightFromLines(lines) : undefined;
+	const prologue = (manuscriptCopyright ?? 'Copyright © Gerhard Kautz (Update 5/2026)').replace(
+		'Gerhard Kautz',
+		'G. Kautz'
+	);
 
 	const xml = [
 		`<?xml version='1.0' encoding='utf-8' standalone='yes'?>`,

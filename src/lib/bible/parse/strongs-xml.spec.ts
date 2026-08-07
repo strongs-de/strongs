@@ -5,13 +5,15 @@ import type { ParsedLexiconEntry, ParseEvent } from './types.ts';
 async function collect(xml: string) {
 	const entries: ParsedLexiconEntry[] = [];
 	const warnings: string[] = [];
+	let licenseHtml: string | undefined;
 
 	for await (const event of parseStrongsXml(xml) as AsyncGenerator<ParseEvent>) {
 		if (event.type === 'lexiconEntry') entries.push(event.entry);
 		else if (event.type === 'warning') warnings.push(event.message);
+		else if (event.type === 'license') licenseHtml = event.licenseHtml;
 	}
 
-	return { entries, warnings };
+	return { entries, warnings, licenseHtml };
 }
 
 function wrap(entries: string): string {
@@ -20,6 +22,11 @@ function wrap(entries: string): string {
 }
 
 describe('parseStrongsXml', () => {
+	it('turns a <prologue> into a license event for the whole dictionary', async () => {
+		const { licenseHtml } = await collect(wrap(''));
+		expect(licenseHtml).toBe('Dictionary');
+	});
+
 	it('parses an entry copied from data/strongsgreek.xml', async () => {
 		const { entries } = await collect(
 			wrap(`<entry strongs="00026">
