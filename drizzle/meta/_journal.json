@@ -113,6 +113,13 @@
       "when": 1786183337346,
       "tag": "0015_refresh_highlight_palette",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1786192666464,
+      "tag": "0016_normalize_note_divs",
+      "breakpoints": true
     }
   ]
 }

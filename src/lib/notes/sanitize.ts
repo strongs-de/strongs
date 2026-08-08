@@ -10,7 +10,23 @@
  * smaller thing to get right than trying to spot what is dangerous.
  */
 
-const ALLOWED_TAGS = ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'ul', 'ol', 'li', 'blockquote'];
+// Chromium wraps new lines in a contenteditable field in attribute-free div elements. Keeping those
+// wrappers is equivalent to keeping paragraphs and prevents their markup from becoming visible text
+// after the note has gone through the server and the page is reloaded.
+const ALLOWED_TAGS = [
+	'p',
+	'div',
+	'br',
+	'strong',
+	'b',
+	'em',
+	'i',
+	'u',
+	'ul',
+	'ol',
+	'li',
+	'blockquote'
+];
 
 const TAG_PATTERN = new RegExp(`&lt;(/?)(${ALLOWED_TAGS.join('|')})\\s*/?&gt;`, 'gi');
 
