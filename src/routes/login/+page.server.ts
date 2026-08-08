@@ -11,6 +11,7 @@ import {
 	recordFailedLogin
 } from '$lib/server/auth/rate-limit';
 import { mailer } from '$lib/server/mail';
+import { emailVerificationMail } from '$lib/server/mail/templates';
 import { logger } from '$lib/server/logger';
 import {
 	createEmailVerification,
@@ -106,15 +107,7 @@ export const actions = {
 			try {
 				await mailer().send({
 					to: user.email,
-					subject: 'Akribos: Bitte bestätige deine E-Mail-Adresse',
-					text: [
-						'Du hast eine neue Aktivierungsmail für dein Konto bei Akribos angefordert.',
-						'',
-						`Bitte bestätige deine E-Mail-Adresse über diesen Link: ${link}`,
-						'',
-						'Der Link ist 24 Stunden gültig und kann nur einmal verwendet werden.',
-						'Wenn du das nicht warst, kannst du diese E-Mail ignorieren.'
-					].join('\n')
+					...emailVerificationMail(link, { resent: true })
 				});
 			} catch (error) {
 				logger.error({ err: error }, 'sending the verification mail failed');

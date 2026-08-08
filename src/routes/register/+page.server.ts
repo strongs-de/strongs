@@ -4,6 +4,7 @@ import { config } from '$lib/server/config';
 import { checkPasswordStrength, MIN_PASSWORD_LENGTH } from '$lib/server/auth/password';
 import { countRecent, LIMITS, recordAttempt } from '$lib/server/auth/rate-limit';
 import { mailer } from '$lib/server/mail';
+import { emailVerificationMail } from '$lib/server/mail/templates';
 import { logger } from '$lib/server/logger';
 import { createEmailVerification, createUser } from '$lib/server/repositories/users';
 import { updateReaderColumns } from '$lib/server/repositories/users';
@@ -57,18 +58,7 @@ export const actions = {
 		const link = new URL(`/register/verify/${token}`, config().ORIGIN).toString();
 
 		try {
-			await mailer().send({
-				to: result.user.email,
-				subject: 'Akribos: Bitte bestätige deine E-Mail-Adresse',
-				text: [
-					'Willkommen bei Akribos!',
-					'',
-					`Bitte bestätige deine E-Mail-Adresse über diesen Link: ${link}`,
-					'',
-					'Der Link ist 24 Stunden gültig und kann nur einmal verwendet werden.',
-					'Wenn du dieses Konto nicht angelegt hast, kannst du diese E-Mail ignorieren.'
-				].join('\n')
-			});
+			await mailer().send({ to: result.user.email, ...emailVerificationMail(link) });
 		} catch (error) {
 			// The account still exists; a mail failure must not block registration, only be logged.
 			logger.error({ err: error }, 'sending the verification mail failed');
