@@ -37,14 +37,15 @@ one verse with `verse_end = 17`, and the reader spans it across both rows so the
 
 ## Reference works
 
-| Kind                | Format               | Notes                                                                                                                                                   |
-| ------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Strong's dictionary | Strong's XML         | `data/strongsgreek.xml`; the same parser reads the openscriptures Hebrew file. Cross references inside definitions become links.                        |
-| Morphology          | Robinson TSP         | `data/books/*.TSP`. An **overlay**: it adds lemmas to a Greek text that is already imported, so pass `--target GNTTR` or pick the target in the wizard. |
-| Cross references    | CSV/TSV              | Two reference columns and an optional score: `Gen 1:1<TAB>Joh 1:1<TAB>23`.                                                                              |
-| Commentary          | CSV/Markdown or ThML | Reference and body per row, or CCEL-style ThML. Bodies are reduced to eleven formatting tags with no attributes.                                        |
-| Commentary          | Zefania XML          | `<dictionary type="x-commentary">` items with numeric `target`/`reflink mscope` references and one or more descriptions.                                |
-| Commentary          | CrossWire SWORD ZIP  | `RawCom`/`zCom`, `HREFCom` and `RawFiles` drivers (including v4 variants), read through CrossWire's `diatheke`.                                         |
+| Kind                         | Format               | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ---------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Strong's dictionary          | Strong's XML         | `data/strongsgreek.xml`; the same parser reads the openscriptures Hebrew file. Cross references inside definitions become links.                                                                                                                                                                                                                                                                                                              |
+| Strong's dictionary (German) | Strong's XML         | `data/stronggreek_de_kautz.xml`: Gerhard Kautz' German Greek lexicon, converted from his Word manuscript by `scripts/convert-kautz-lexicon.ts` (used with his permission — see the script's own doc comment). Imports as a separate resource; `lexicon_entries` has a composite key of `(resourceId, strong)`, so it coexists with the English dictionary rather than replacing it, and `resources.sortOrder` decides which one a page shows. |
+| Morphology                   | Robinson TSP         | `data/books/*.TSP`. An **overlay**: it adds lemmas to a Greek text that is already imported, so pass `--target GNTTR` or pick the target in the wizard.                                                                                                                                                                                                                                                                                       |
+| Cross references             | CSV/TSV              | Two reference columns and an optional score: `Gen 1:1<TAB>Joh 1:1<TAB>23`.                                                                                                                                                                                                                                                                                                                                                                    |
+| Commentary                   | CSV/Markdown or ThML | Reference and body per row, or CCEL-style ThML. Bodies are reduced to eleven formatting tags with no attributes.                                                                                                                                                                                                                                                                                                                              |
+| Commentary                   | Zefania XML          | `<dictionary type="x-commentary">` items with numeric `target`/`reflink mscope` references and one or more descriptions.                                                                                                                                                                                                                                                                                                                      |
+| Commentary                   | CrossWire SWORD ZIP  | `RawCom`/`zCom`, `HREFCom` and `RawFiles` drivers (including v4 variants), read through CrossWire's `diatheke`.                                                                                                                                                                                                                                                                                                                               |
 
 A directory is read as one resource, files in name order — which is how the 27 TSP files become a single
 morphology overlay:
@@ -69,6 +70,10 @@ pnpm data:import --target GNTTR data/books
 About two minutes in total: 109,428 verses and 750,000 tagged words.
 
 `pnpm db:seed` is something different — a small fixture for the end-to-end tests, not real data.
+
+`data/stronggreek_de_kautz.xml` (see the table above) is deliberately left out of that sequence: Kautz
+asked to see a layout preview before it goes live, so importing it into production is a separate,
+manual step for whoever runs that seeding, not something to fold in automatically.
 
 ## Reading the warnings
 

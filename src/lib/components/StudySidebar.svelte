@@ -41,6 +41,8 @@
 			kjvDefinitionHtml: string | null;
 			seeAlso: string[];
 			language: 'grc' | 'hbo';
+			licenseHtml: string | null;
+			usageNotesHtml: string | null;
 		} | null;
 		alternative: string | null;
 		statistics: { occurrences: number; verseCount: number };
@@ -259,6 +261,32 @@
 							{@html payload.entry.derivationHtml}
 						</div>
 					</section>
+				{/if}
+
+				{#if payload.entry.licenseHtml}
+					<section class="mb-4">
+						<h3 class="mb-1 text-xs font-semibold tracking-wide text-stone-500 uppercase">
+							{t('strong.license')}
+						</h3>
+						<p class="text-xs text-stone-500 dark:text-stone-400">{payload.entry.licenseHtml}</p>
+					</section>
+				{/if}
+
+				{#if payload.entry.usageNotesHtml}
+					<details class="mb-4 rounded-lg border border-stone-200 p-3 dark:border-stone-700">
+						<summary
+							class="cursor-pointer text-xs font-semibold tracking-wide text-stone-500 uppercase"
+						>
+							{t('strong.usageNotes')}
+						</summary>
+						<div
+							class="lexicon mt-2 text-xs text-stone-500 dark:text-stone-400"
+							use:verseHoverPopover={{ bibleId: resourceIds[0] ?? null }}
+						>
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+							{@html payload.entry.usageNotesHtml}
+						</div>
+					</details>
 				{/if}
 
 				{#if payload.glosses.length > 0}

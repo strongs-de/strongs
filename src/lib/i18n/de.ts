@@ -88,6 +88,8 @@ export const de = {
 	'strong.pronunciation': 'Aussprache',
 	'strong.definition': 'Bedeutung',
 	'strong.derivation': 'Herkunft',
+	'strong.license': 'Rechtehinweis',
+	'strong.usageNotes': 'Hinweise zum Lexikon & Literaturverzeichnis',
 	'strong.grammar': 'Grammatik',
 	'strong.occurrences': 'Vorkommen',
 	'strong.occurrencesCount': '{count} Vorkommen in {verses} Versen',

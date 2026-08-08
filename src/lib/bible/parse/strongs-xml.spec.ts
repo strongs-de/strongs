@@ -5,13 +5,17 @@ import type { ParsedLexiconEntry, ParseEvent } from './types.ts';
 async function collect(xml: string) {
 	const entries: ParsedLexiconEntry[] = [];
 	const warnings: string[] = [];
+	let licenseHtml: string | undefined;
+	let usageNotesHtml: string | undefined;
 
 	for await (const event of parseStrongsXml(xml) as AsyncGenerator<ParseEvent>) {
 		if (event.type === 'lexiconEntry') entries.push(event.entry);
 		else if (event.type === 'warning') warnings.push(event.message);
+		else if (event.type === 'license') licenseHtml = event.licenseHtml;
+		else if (event.type === 'usageNotes') usageNotesHtml = event.usageNotesHtml;
 	}
 
-	return { entries, warnings };
+	return { entries, warnings, licenseHtml, usageNotesHtml };
 }
 
 function wrap(entries: string): string {
@@ -20,6 +24,22 @@ function wrap(entries: string): string {
 }
 
 describe('parseStrongsXml', () => {
+	it('turns a <prologue> into a license event for the whole dictionary', async () => {
+		const { licenseHtml } = await collect(wrap(''));
+		expect(licenseHtml).toBe('Dictionary');
+	});
+
+	it('turns a <usage_notes> into a usageNotes event, markup and all', async () => {
+		const { usageNotesHtml } = await collect(
+			`<?xml version="1.0" encoding="utf-8"?>
+<strongsdictionary><prologue>Dictionary</prologue><usage_notes>See <abbr title="Gräzität">Gräz.</abbr> below.<br/>Second paragraph.</usage_notes><entries></entries></strongsdictionary>`
+		);
+
+		expect(usageNotesHtml).toBe(
+			'See <abbr title="Gräzität">Gräz.</abbr> below.<br/>Second paragraph.'
+		);
+	});
+
 	it('parses an entry copied from data/strongsgreek.xml', async () => {
 		const { entries } = await collect(
 			wrap(`<entry strongs="00026">
@@ -167,6 +187,18 @@ describe('parseStrongsXml', () => {
 
 		expect(entries[0]?.definitionHtml).toBe(
 			'Wortfamilie:<br/><span class="wf-entry">related word</span>'
+		);
+	});
+
+	it('turns <b> and <i> into bold/italic typesetting, for sources that carry that from the original', async () => {
+		const { entries } = await collect(
+			wrap(`<entry strongs="00001"><strongs>1</strongs>
+				<greek BETA="*A" unicode="Α" translit="A"/>
+				<strongs_def><b>d. Erbarmen</b>: mildert, was <i>unverschuldetes</i> Leid folgt</strongs_def></entry>`)
+		);
+
+		expect(entries[0]?.definitionHtml).toBe(
+			'<b>d. Erbarmen</b>: mildert, was <i>unverschuldetes</i> Leid folgt'
 		);
 	});
 

@@ -94,7 +94,8 @@
 											"sortOrder": 1,
 											"hasStrongs": true,
 											"hasMorphology": false,
-											"licenseHtml": "<p>Public domain.</p>"
+											"licenseHtml": "<p>Public domain.</p>",
+											"usageNotesHtml": null
 										}
 									]
 								}
@@ -581,7 +582,8 @@
 					"sortOrder",
 					"hasStrongs",
 					"hasMorphology",
-					"licenseHtml"
+					"licenseHtml",
+					"usageNotesHtml"
 				],
 				"properties": {
 					"id": { "type": "string", "description": "Resource id, used as the `bible`/`resources`/`bibles` parameter elsewhere in this API." },
@@ -594,7 +596,8 @@
 					"sortOrder": { "type": "integer" },
 					"hasStrongs": { "type": "boolean" },
 					"hasMorphology": { "type": "boolean" },
-					"licenseHtml": { "type": ["string", "null"] }
+					"licenseHtml": { "type": ["string", "null"] },
+					"usageNotesHtml": { "type": ["string", "null"], "description": "A lexicon's own \"how to read this\" preface, e.g. a translated dictionary's usage notes." }
 				}
 			},
 			"VerseSegment": {
@@ -702,7 +705,9 @@
 					"derivationHtml",
 					"kjvDefinitionHtml",
 					"seeAlso",
-					"language"
+					"language",
+					"licenseHtml",
+					"usageNotesHtml"
 				],
 				"properties": {
 					"strong": { "type": "string" },
@@ -713,7 +718,9 @@
 					"derivationHtml": { "type": ["string", "null"] },
 					"kjvDefinitionHtml": { "type": ["string", "null"] },
 					"seeAlso": { "type": "array", "items": { "type": "string" } },
-					"language": { "type": "string", "enum": ["grc", "hbo"] }
+					"language": { "type": "string", "enum": ["grc", "hbo"] },
+					"licenseHtml": { "type": ["string", "null"], "description": "Rights notice of the lexicon this entry came from, e.g. a translated dictionary's copyright." },
+					"usageNotesHtml": { "type": ["string", "null"], "description": "The lexicon's own \"how to read this\" preface, e.g. Kautz' \"Hinweise zur Benützung des Lexikons\"." }
 				}
 			},
 			"StrongGloss": {

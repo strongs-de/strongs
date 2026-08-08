@@ -117,7 +117,15 @@ export type ParseEvent =
 	| { type: 'commentaryEntry'; entry: ParsedCommentaryEntry }
 	| { type: 'warning'; message: string }
 	/** Reports progress for long sources; `total` may be absent when it is not known up front. */
-	| { type: 'progress'; done: number; total?: number; message?: string };
+	| { type: 'progress'; done: number; total?: number; message?: string }
+	/** A rights notice that isn't tied to a single entry, e.g. a Strong's dictionary's `<prologue>`.
+	 *  Kept separate from `metadata` because a lexicon source has no id/name/abbrev/language of its
+	 *  own to report — those are already decided from import options or the first entry. */
+	| { type: 'license'; licenseHtml: string }
+	/** A dictionary's own "how to read this" preface, e.g. a Strong's dictionary's `<usage_notes>`.
+	 *  Kept separate from `license` since it explains reading conventions rather than rights, and a
+	 *  page may want to show one without the other. */
+	| { type: 'usageNotes'; usageNotesHtml: string };
 
 export type ParseStream = AsyncGenerator<ParseEvent, void, undefined>;
 

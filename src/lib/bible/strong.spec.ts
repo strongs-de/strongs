@@ -19,8 +19,10 @@ describe('parseStrongId', () => {
 	});
 
 	it('rejects numbers beyond the end of each dictionary', () => {
+		// Greek's ceiling is 6020, not the canonical dictionary's own 5624: see the MAX_NUMBER comment.
 		expect(parseStrongId('G5624')).not.toBeNull();
-		expect(parseStrongId('G5625')).toBeNull();
+		expect(parseStrongId('G6020')).not.toBeNull();
+		expect(parseStrongId('G6021')).toBeNull();
 		expect(parseStrongId('H8674')).not.toBeNull();
 		expect(parseStrongId('H8675')).toBeNull();
 		expect(parseStrongId('G0')).toBeNull();

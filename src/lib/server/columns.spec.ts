@@ -23,7 +23,8 @@ function resource(id: string): ReadableResource {
 		sortOrder: 100,
 		hasStrongs: false,
 		hasMorphology: false,
-		licenseHtml: null
+		licenseHtml: null,
+		usageNotesHtml: null
 	};
 }
 

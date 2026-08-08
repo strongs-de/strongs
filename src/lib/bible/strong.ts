@@ -13,8 +13,14 @@ export type StrongLanguage = 'hebrew' | 'greek';
 
 export type StrongId = string;
 
-/** Highest number in each dictionary, used to reject nonsense input early. */
-const MAX_NUMBER: Record<StrongLanguage, number> = { hebrew: 8674, greek: 5624 };
+/**
+ * Highest number in each dictionary, used to reject nonsense input early. Greek's ceiling is not the
+ * canonical dictionary's own top number (5624) but 6020: Gerhard Kautz' German lexicon adds a synonym
+ * appendix numbered 5801-6020 (5625/5626 are two placeholder gaps in between, never assigned), and its
+ * entries cross-reference each other and the main dictionary as "Synonyme siehe: NNNN" — those need to
+ * resolve to real, clickable ids rather than 404 just because they sit past the original ceiling.
+ */
+const MAX_NUMBER: Record<StrongLanguage, number> = { hebrew: 8674, greek: 6020 };
 
 const PREFIX: Record<StrongLanguage, string> = { hebrew: 'H', greek: 'G' };
 

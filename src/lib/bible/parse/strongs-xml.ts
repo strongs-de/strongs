@@ -19,6 +19,11 @@
  *
  * Only markup this parser emits itself reaches the database, so the HTML is trusted by construction:
  * every scrap of text from the source is escaped on the way in.
+ *
+ * A `<prologue>` before `<entries>`, if present, is a rights notice for the whole dictionary rather
+ * than any one entry — it becomes a `license` event instead of part of an entry (see {@link ParseEvent}).
+ * A `<usage_notes>` alongside it is the dictionary's own "how to read this" preface, and becomes a
+ * `usageNotes` event the same way; it may contain the same `<br/>`/`<abbr>` markup a definition can.
  */
 
 import { makeStrongId, type StrongLanguage } from '../strong.ts';
@@ -37,6 +42,10 @@ export async function* parseStrongsXml(input: SourceInput): ParseStream {
 	const html: Record<Field, string> = { definition: '', derivation: '', kjv: '' };
 	let inNumber = false;
 	let numberText = '';
+	let inPrologue = false;
+	let prologueText = '';
+	let inUsageNotes = false;
+	let usageNotesHtml = '';
 	let entriesSeen = 0;
 	let skippedGaps = 0;
 	/** Text of an entry that sits outside any field, used to recognise the "Not Used" placeholders. */
@@ -65,10 +74,25 @@ export async function* parseStrongsXml(input: SourceInput): ParseStream {
 					numberText = '';
 					break;
 
+				case 'prologue':
+					// A rights notice for the whole dictionary, not any one entry — see the `license`
+					// event this yields on close, below.
+					inPrologue = true;
+					prologueText = '';
+					break;
+
+				case 'usage_notes':
+					// A dictionary's own reading guide, not any one entry — see the `usageNotes` event
+					// this yields on close, below.
+					inUsageNotes = true;
+					usageNotesHtml = '';
+					break;
+
 				case 'br':
 					// Not in the original Strong's format, but some sources structure a definition into
 					// numbered senses that need to stay on their own line rather than run together.
 					if (field) html[field] += '<br/>';
+					else if (inUsageNotes) usageNotesHtml += '<br/>';
 					break;
 
 				case 'abbr': {
@@ -76,8 +100,17 @@ export async function* parseStrongsXml(input: SourceInput): ParseStream {
 					// abbreviations throughout and want to gloss them inline, native-tooltip style.
 					const title = attribute(event.attributes, 'title');
 					if (field) html[field] += `<abbr title="${escapeHtml(title ?? '')}">`;
+					else if (inUsageNotes) usageNotesHtml += `<abbr title="${escapeHtml(title ?? '')}">`;
 					break;
 				}
+
+				case 'b':
+				case 'i':
+					// Also not in the original format: some sources use bold/italic typesetting as part
+					// of the definition's own meaning (e.g. distinguishing a headword from its gloss),
+					// which is worth keeping rather than flattening to plain text.
+					if (field) html[field] += `<${event.name}>`;
+					break;
 
 				case 'verseref': {
 					// Marks a Bible reference quoted inside a definition. It becomes a real link — a
@@ -156,6 +189,8 @@ export async function* parseStrongsXml(input: SourceInput): ParseStream {
 
 		if (event.type === 'text') {
 			if (inNumber) numberText += event.text;
+			else if (inPrologue) prologueText += escapeHtml(event.text);
+			else if (inUsageNotes) usageNotesHtml += escapeHtml(event.text);
 			else if (field) html[field] += escapeHtml(event.text);
 			else looseText += event.text;
 			continue;
@@ -167,8 +202,24 @@ export async function* parseStrongsXml(input: SourceInput): ParseStream {
 				number ??= toNumber(numberText);
 				break;
 
+			case 'prologue':
+				inPrologue = false;
+				if (prologueText) yield { type: 'license', licenseHtml: prologueText };
+				break;
+
+			case 'usage_notes':
+				inUsageNotes = false;
+				if (usageNotesHtml) yield { type: 'usageNotes', usageNotesHtml };
+				break;
+
 			case 'abbr':
 				if (field) html[field] += '</abbr>';
+				else if (inUsageNotes) usageNotesHtml += '</abbr>';
+				break;
+
+			case 'b':
+			case 'i':
+				if (field) html[field] += `</${event.name}>`;
 				break;
 
 			case 'verseref':
