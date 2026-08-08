@@ -10,20 +10,24 @@
  *
  * The preferred source is his own Word manuscript (richer than the plain-text/HTML mirrors published
  * at sermon-online.com: it is the only one that still carries bold/italic runs, and it also contains
- * the copyright line, the abbreviation glossary and his usage-notes preface, so nothing has to be
- * supplied separately). Convert it to HTML first — `pandoc` preserves paragraph-per-line structure and
- * `<strong>`/`<em>` runs, which is exactly what this script expects:
+ * the copyright line, the abbreviation glossary, his usage-notes preface and his bibliography, so
+ * nothing has to be supplied separately). Convert it to HTML first — `pandoc` preserves paragraph-per-
+ * line structure and `<strong>`/`<em>` runs, which is exactly what this script expects:
  *
  *   pandoc -f docx -t html --wrap=preserve -o data/private/kautz-source.html data/private/kautz.docx
  *   node scripts/convert-kautz-lexicon.ts data/private/kautz-source.html data/stronggreek_de_kautz.xml
  *
  * A plain-text source (the sermon-online.com mirror) also still works, just without bold/italic, the
- * abbreviation glossary (pass `--abbreviations` to supply one separately) or the usage notes.
+ * abbreviation glossary (pass `--abbreviations` to supply one separately), the usage notes or the
+ * bibliography.
  *
  * His "2. Hinweise zur Benützung des Lexikons" section — the reading guide explaining the "I.) II.)
- * 1.) 2.)" numbering and the Gräz./LXX/Synonyme/Wortfamilie/Ggs. labels — becomes a `<usage_notes>`
- * element next to `<prologue>`, so the site can point readers at it instead of leaving them to infer
- * the conventions from the entries alone; see {@link extractUsageNotesFromLines}.
+ * 1.) 2.)" numbering and the Gräz./LXX/Synonyme/Wortfamilie/Ggs. labels — and his "3. Die für die
+ * Bearbeitung des Lexikons verwendete Fachliteratur" bibliography (the ~80 works his "(37,1)"-style
+ * citations throughout definitions point at, which he asked to have credited) both become one
+ * `<usage_notes>` element next to `<prologue>`, so the site can point readers at both instead of
+ * leaving them to infer the conventions from the entries alone or the citations uncredited; see
+ * {@link extractUsageNotesFromLines} and {@link extractBibliographyFromLines}.
  *
  * Kautz' source has no Greek unicode headwords, only German transliteration, so this borrows the
  * lemma, BETA code, SBL transliteration and pronunciation from the existing public-domain
@@ -503,6 +507,59 @@ function extractUsageNotesFromLines(lines: string[]): string | undefined {
 		: undefined;
 }
 
+/** Kautz' "3. Die für die Bearbeitung des Lexikons verwendete Fachliteratur" bibliography sits right
+ *  after the usage notes and right before the abbreviation glossary — the ~80 numbered works his
+ *  "(37,1)"-style citations throughout definitions point at, which he asked to have credited alongside
+ *  the usage notes rather than left implicit in those citation numbers. */
+const BIBLIOGRAPHY_START = USAGE_NOTES_END;
+const BIBLIOGRAPHY_END = ABBREVIATIONS_START;
+
+/** A real bibliography entry starts "(1) ", "(2) ", … — digits immediately followed by a closing paren
+ *  and a space. The section's own intro illustrates its citation-number notation with two examples in
+ *  that same shape ("(1,1256): …", "(10/IV/314): …") that must NOT be mistaken for entries: both have a
+ *  comma or slash between the digits and the paren, so this pattern doesn't match them. */
+const BIBLIOGRAPHY_ENTRY = /^\(\d{1,3}\)\s/;
+
+/** Paragraph starts within the bibliography section's short intro, reflowed the same way as
+ *  {@link USAGE_NOTES_PARAGRAPH_STARTS} — the intro's own two citation-number examples are complete
+ *  lines in the source already, so each also opens its own paragraph rather than running on. */
+const BIBLIOGRAPHY_INTRO_PARAGRAPH_STARTS = [/^z\.B\. bedeutet:/, /^oder:/, /^\(\d{1,3}[,/]/];
+
+/** Extracts Kautz' bibliography as an intro paragraph (explaining his "(37,1)"-style citation numbers)
+ *  followed by the numbered works themselves, each its own line in the source already so — unlike the
+ *  intro or the usage notes — no reflow is needed, just one `<indent>` block per entry. `undefined` if
+ *  the manuscript doesn't have the section, same as {@link extractUsageNotesFromLines}. */
+function extractBibliographyFromLines(lines: string[]): string | undefined {
+	const startIndex = lines.findIndex((line) => stripMarkers(line).trim() === BIBLIOGRAPHY_START);
+	const endIndex = lines.findIndex((line) => stripMarkers(line).trim() === BIBLIOGRAPHY_END);
+	if (startIndex === -1 || endIndex === -1 || endIndex <= startIndex) return undefined;
+
+	const introParagraphs: string[] = [];
+	const entries: string[] = [];
+
+	for (const raw of lines.slice(startIndex + 1, endIndex)) {
+		const trimmed = stripMarkers(raw).trim();
+		if (!trimmed) continue;
+
+		if (BIBLIOGRAPHY_ENTRY.test(trimmed)) {
+			entries.push(trimmed);
+			continue;
+		}
+
+		const startsNewParagraph =
+			introParagraphs.length === 0 ||
+			BIBLIOGRAPHY_INTRO_PARAGRAPH_STARTS.some((pattern) => pattern.test(trimmed));
+		if (startsNewParagraph) introParagraphs.push(trimmed);
+		else introParagraphs[introParagraphs.length - 1] += ` ${trimmed}`;
+	}
+
+	if (entries.length === 0) return undefined;
+
+	const intro = introParagraphs.map((paragraph) => wrapAbbreviations(paragraph)).join('<br/><br/>');
+	const list = entries.map((entry) => `<indent>${wrapAbbreviations(entry)}</indent>`).join('<br/>');
+	return intro ? `${intro}<br/><br/>${list}` : list;
+}
+
 /** Wraps every recurring Kautz abbreviation ("Gräz.", "Subst.Fem.", "ua." …) in a native tooltip. */
 function wrapAbbreviationTokens(text: string, placeholder: (tag: string) => string): string {
 	let out = '';
@@ -908,11 +965,25 @@ async function main() {
 	const usageNotes = isHtml ? extractUsageNotesFromLines(lines) : undefined;
 	if (usageNotes)
 		console.log('extracted the usage-notes section ("Hinweise zur Benützung des Lexikons")');
+	const bibliography = isHtml ? extractBibliographyFromLines(lines) : undefined;
+	if (bibliography)
+		console.log(
+			'extracted the bibliography ("Die für die Bearbeitung des Lexikons verwendete Fachliteratur")'
+		);
+	// Both sit under one disclosure on the site (see strong.usageNotes in de.ts), so they are combined
+	// into the same `<usage_notes>` element here rather than each getting their own — Kautz asked for
+	// the bibliography to be credited "alongside" the usage notes, not as a separate section.
+	const usageNotesAndBibliography = [
+		usageNotes,
+		bibliography ? `<b>Literaturverzeichnis</b><br/><br/>${bibliography}` : ''
+	]
+		.filter(Boolean)
+		.join('<br/><br/>');
 
 	const xml = [
 		`<?xml version='1.0' encoding='utf-8' standalone='yes'?>`,
 		`<strongsdictionary><prologue>${escapeXml(prologue)}</prologue>`,
-		usageNotes ? `<usage_notes>${usageNotes}</usage_notes>` : '',
+		usageNotesAndBibliography ? `<usage_notes>${usageNotesAndBibliography}</usage_notes>` : '',
 		`<entries>`,
 		` ${xmlEntries.join('\n ')}`,
 		`</entries></strongsdictionary>`
