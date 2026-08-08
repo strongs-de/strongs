@@ -69,6 +69,18 @@ Text und Highlight-Zustand an `openAt()`; so werden nicht hunderte Menüs und Fo
 gerendert. Highlights werden optimistisch in `streamChapters` aktualisiert, Listenmarkierungen im
 reaktiven `marks`-Set.
 
+Private Kommentare hängen eindeutig an Benutzer, Vers und Bibelressource (`verse_comments`); pro
+Kombination existiert höchstens einer. Sie werden mit den endlos nachgeladenen Kapiteln geladen und
+erscheinen innerhalb ihrer `.verse-comment-row` unterhalb des Verses. `CommentToggle.svelte` steht am
+Versende, wird nur für einen gespeicherten Kommentar gerendert und blendet diesen ein oder aus. Neue
+Reader-Kommentare werden ausschließlich über das `VerseMenu` begonnen. Ein leer gespeicherter
+Kommentar wird gelöscht; gespeicherte Kommentare sind nach dem Laden zunächst zugeklappt. Kommentare
+an Verslisteneinträgen bleiben dagegen im Kontext
+ihrer Liste in `verse_list_items.note_html`; beide Oberflächen verwenden `CommentBubble.svelte` und
+wechseln erst nach einem Klick von der Lese- in die Editoransicht.
+Der gemeinsame `NoteEditor.svelte` speichert mit Strg/Cmd+Enter und meldet Escape über `onCancel` an
+die Bubble; bei einem noch leeren Reader-Entwurf entfernt diese Rückmeldung auch die temporäre Ansicht.
+
 ## Daten, Suche und Sicherheit
 
 Die kanonischen 66 Bücher und Referenzregeln liegen in Code unter `src/lib/bible/`. `verses.segments`

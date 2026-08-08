@@ -1,7 +1,7 @@
 /**
- * Verse lists and their notes.
+ * Verse lists and their comments.
  *
- * A list is an ordered set of verses, each of which may carry a note. Notes are sanitised HTML from a
+ * A list is an ordered set of verses, each of which may carry a comment. Comments are sanitised HTML from a
  * small editor rather than the CKEditor build the old site shipped, and a list can be shared by
  * turning on an unguessable slug.
  */

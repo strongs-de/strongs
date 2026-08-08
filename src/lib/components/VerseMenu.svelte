@@ -45,6 +45,8 @@
 	let copied = $state<'text' | 'link' | null>(null);
 	let activeStyleId = $state<string | null>(null);
 	let onHighlightChange: ((styleId: string | null) => void) | undefined;
+	let commentResource: { id: string; name: string } | null = $state(null);
+	let onAddComment: (() => void) | undefined;
 
 	/**
 	 * `highlight` is the style currently on this verse, if any (null for none); `onChange` fires
@@ -57,13 +59,17 @@
 		verseNumber: number,
 		next: VerseContext,
 		highlight: string | null,
-		onChange: (styleId: string | null) => void
+		onChange: (styleId: string | null) => void,
+		resource: { id: string; name: string } | null,
+		addComment: (() => void) | undefined
 	): void {
 		context = next;
 		verse = verseNumber;
 		copied = null;
 		activeStyleId = highlight;
 		onHighlightChange = onChange;
+		commentResource = resource;
+		onAddComment = addComment;
 		menu?.openAt(anchor);
 	}
 
@@ -155,6 +161,20 @@
 					</form>
 				{/each}
 			</div>
+		{/if}
+
+		{#if signedIn && commentResource}
+			<hr />
+			<button
+				type="button"
+				role="menuitem"
+				onclick={() => {
+					onAddComment?.();
+					menu?.close();
+				}}
+			>
+				{t('comments.addForTranslation', { translation: commentResource.name })}
+			</button>
 		{/if}
 
 		<hr />

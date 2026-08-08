@@ -2,7 +2,7 @@
 	<title>Über — Akribos</title>
 	<meta
 		name="description"
-		content="Akribos: mehrere Bibelübersetzungen und Kommentare parallel lesen, Strong-Nummern im Urtext nachschlagen, eigene Verslisten und Notizen führen — mit offener API für Entwickler."
+		content="Akribos: mehrere Bibelübersetzungen und Kommentare parallel lesen, Strong-Nummern im Urtext nachschlagen, eigene Verslisten und Kommentare führen — mit offener API für Entwickler."
 	/>
 </svelte:head>
 
@@ -43,9 +43,9 @@
 	</section>
 
 	<section class="mb-8">
-		<h2 class="mb-2 text-lg font-semibold">Eigene Verslisten und Notizen</h2>
+		<h2 class="mb-2 text-lg font-semibold">Eigene Verslisten und Kommentare</h2>
 		<p class="text-stone-700 dark:text-stone-300">
-			Mit einem kostenlosen Konto lassen sich Verse in eigenen Listen sammeln und mit Notizen
+			Mit einem kostenlosen Konto lassen sich Verse in eigenen Listen sammeln und mit Kommentaren
 			versehen — praktisch für Bibelstudium, Predigtvorbereitung oder einfach, um Lieblingsstellen
 			wiederzufinden. Eine Liste kann über einen Link geteilt werden, ohne dass die Empfänger selbst
 			ein Konto benötigen.
@@ -57,7 +57,7 @@
 		<p class="text-stone-700 dark:text-stone-300">
 			Wer selbst Software bauen möchte, kann über eine öffentliche API auf Bibeltexte, das
 			Strong-Lexikon, Kommentare und die Suche zugreifen — mit einem eigenen API-Schlüssel auch auf
-			die eigenen Verslisten und Notizen. Details dazu stehen auf der
+			die eigenen Verslisten und Kommentare. Details dazu stehen auf der
 			<a class="text-accent-600 hover:underline dark:text-accent-400" href="/api">API-Seite</a>.
 		</p>
 	</section>

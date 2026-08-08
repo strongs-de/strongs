@@ -13,7 +13,7 @@ import {
 	updateReaderFontScale
 } from '$lib/server/repositories/users';
 import { createVerseList, listVerseLists } from '$lib/server/repositories/verse-lists';
-import { listUserNotes } from '$lib/server/repositories/chapter-notes';
+import { listUserNotes } from '$lib/server/repositories/verse-comments';
 import {
 	countApiKeys,
 	createApiKey,

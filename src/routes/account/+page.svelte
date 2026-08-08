@@ -39,7 +39,7 @@
 		}
 	}
 
-	let newColor = $state('#fde68a');
+	let newColor = $state('#FFF1C6');
 
 	type Section = 'lists' | 'profileSecurity' | 'appearance';
 
@@ -157,19 +157,23 @@
 										<div>
 											<a
 												class="font-semibold text-accent-600 hover:underline dark:text-accent-400"
-												href={note.kind === 'chapter' && note.verse === null
-													? referencePath({ book: note.book, chapter: note.chapter })
+												href={note.kind === 'translation'
+													? referencePath({
+															book: note.book,
+															chapter: note.chapter,
+															verse: note.verse
+														})
 													: `/lists/${note.listId}#note-${note.id}`}
 											>
 												{formatReference({
 													book: note.book,
 													chapter: note.chapter,
-													...(note.verse !== null ? { verse: note.verse } : {})
+													verse: note.verse
 												})}
 											</a>
 											<p class="mt-0.5 text-xs text-stone-500 dark:text-stone-400">
-												{note.kind === 'chapter'
-													? t('lists.chapterNote')
+												{note.kind === 'translation'
+													? t('comments.translation', { translation: note.resourceName ?? '' })
 													: t('lists.verseNote', { list: note.listTitle ?? '' })}
 											</p>
 										</div>
@@ -180,7 +184,7 @@
 											{dateFormat.format(new Date(note.updatedAt))}
 										</time>
 									</div>
-									<!-- Both note types are sanitised when saved. -->
+									<!-- Both comment types are sanitised when saved. -->
 									<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 									<div class="note-preview mt-3 text-sm leading-relaxed">{@html note.html}</div>
 								</li>
@@ -444,6 +448,7 @@
 								<span
 									class="size-6 shrink-0 rounded-full border border-stone-300 dark:border-stone-600"
 									style="background-color: {style.color}"
+									data-color={style.color.toLowerCase()}
 									aria-hidden="true"
 								></span>
 								<form

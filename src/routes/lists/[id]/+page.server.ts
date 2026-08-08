@@ -15,7 +15,7 @@ import {
 } from '$lib/server/repositories/verse-lists';
 
 /**
- * A verse list with its notes.
+ * A verse list with its comments.
  *
  * Every action re-checks ownership through `findVerseList({ id, userId })`, so a list id from another
  * account is simply not found.
