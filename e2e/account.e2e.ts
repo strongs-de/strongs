@@ -247,7 +247,7 @@ test('the verse menu creates a list and adds the verse in one step', async ({ pa
 
 	// The point of the menu: no list has to exist first.
 	await page.goto('/Joh3');
-	await page.locator('#Joh3_16').getByRole('link', { name: 'Vers Johannes 3,16' }).click();
+	await page.locator('#Joh3_16 a.verse-number').click();
 	await page.getByRole('menuitem', { name: 'Neue Liste mit diesem Vers' }).click();
 
 	await gotoLists(page);
@@ -260,18 +260,18 @@ test('a signed-in reader can highlight a verse with a colour and clear it', asyn
 	await register(page, uniqueEmail());
 
 	await page.goto('/Joh3');
-	await page.locator('#Joh3_16').getByRole('link', { name: 'Vers Johannes 3,16' }).click();
+	await page.locator('#Joh3_16 a.verse-number').click();
 
 	const swatches = page.locator('.swatches .swatch');
 	await expect(swatches).toHaveCount(10);
 	await swatches.first().click();
 
 	const verse = page.locator('[data-verse-key="43:3:16"]').first();
-	await expect(verse).toHaveCSS('background-color', 'rgb(253, 230, 138)');
+	await expect(verse).toHaveCSS('background-color', 'rgb(255, 241, 198)');
 
 	// The colour survives a reload, not just the optimistic UI update.
 	await page.reload();
-	await expect(verse).toHaveCSS('background-color', 'rgb(253, 230, 138)');
+	await expect(verse).toHaveCSS('background-color', 'rgb(255, 241, 198)');
 
 	// The account links to a complete list for this colour, and the same data is available through
 	// the personal API using the style id from that link.
@@ -281,7 +281,7 @@ test('a signed-in reader can highlight a verse with a colour and clear it', asyn
 	const href = await showVerses.getAttribute('href');
 	const styleId = href!.split('/').at(-1)!;
 	const highlights = await page.evaluate(() =>
-		fetch(`/api/v1/highlights?color=${encodeURIComponent('#fde68a')}&resource=SEEDDE`).then(
+		fetch(`/api/v1/highlights?color=${encodeURIComponent('#FFF1C6')}&resource=SEEDDE`).then(
 			(response) => response.json()
 		)
 	);
@@ -294,13 +294,13 @@ test('a signed-in reader can highlight a verse with a colour and clear it', asyn
 
 	// Picking the same swatch again clears the highlight instead of re-applying it.
 	await page.goto('/Joh3');
-	await page.locator('#Joh3_16').getByRole('link', { name: 'Vers Johannes 3,16' }).click();
+	await page.locator('#Joh3_16 a.verse-number').click();
 	await expect(swatches.first()).toHaveAttribute('aria-pressed', 'true');
 	await swatches.first().click();
-	await expect(verse).not.toHaveCSS('background-color', 'rgb(253, 230, 138)');
+	await expect(verse).not.toHaveCSS('background-color', 'rgb(255, 241, 198)');
 
 	await page.reload();
-	await expect(verse).not.toHaveCSS('background-color', 'rgb(253, 230, 138)');
+	await expect(verse).not.toHaveCSS('background-color', 'rgb(255, 241, 198)');
 });
 
 test('the verse menu ticks and unticks an existing list', async ({ page }) => {
@@ -311,7 +311,7 @@ test('the verse menu ticks and unticks an existing list', async ({ page }) => {
 	await page.getByRole('button', { name: 'Neue Versliste' }).click();
 
 	await page.goto('/Joh3');
-	const verse = page.locator('#Joh3_16').getByRole('link', { name: 'Vers Johannes 3,16' });
+	const verse = page.locator('#Joh3_16 a.verse-number');
 
 	await verse.click();
 	await page.getByRole('menuitem', { name: 'Merkverse' }).click();
@@ -321,13 +321,14 @@ test('the verse menu ticks and unticks an existing list', async ({ page }) => {
 	await page.reload();
 	await verse.click();
 	await page.getByRole('menuitem', { name: 'Merkverse' }).click();
+	await expect(page.locator('#Joh3_16 .verse-number.in-list')).toHaveCount(0);
 	await page.reload();
 	await expect(page.locator('#Joh3_16 .verse-number.in-list')).toHaveCount(0);
 });
 
 test('the verse menu offers signing in rather than a list', async ({ page }) => {
 	await page.goto('/Joh3');
-	await page.locator('#Joh3_16').getByRole('link', { name: 'Vers Johannes 3,16' }).click();
+	await page.locator('#Joh3_16 a.verse-number').click();
 
 	await expect(page.getByRole('menuitem', { name: 'Vers kopieren' })).toBeVisible();
 	await expect(page.getByRole('menuitem', { name: 'Zum Speichern anmelden' })).toBeVisible();
