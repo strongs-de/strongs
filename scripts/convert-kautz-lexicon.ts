@@ -619,10 +619,79 @@ function renderWortfamilieWord(sense: string): string {
 }
 
 /**
+ * Closed-class German function words, plus Kautz' own recurring definition-verbs ("bezieht sich",
+ * "bezeichnet", "betont", …): German capitalizes nouns regardless of where they sit in a sentence, so a
+ * capitalized noun tells you nothing about position — but it only ever capitalizes an article, pronoun,
+ * preposition, conjunction or finite verb when that word starts a sentence. Seeing one of these,
+ * capitalized, signals a sentence just began. Used by {@link findGlossBreak}.
+ */
+const SENTENCE_STARTERS = new Set(
+	`der die das den dem des ein eine einen einem einer eines er sie es wir ihr ich du
+	dieses diese dieser diesem diesen jener jene jenes jenen
+	nicht und oder aber sondern doch obwohl obgleich trotzdem jedoch dennoch
+	im in an auf unter über von vom bei beim mit nach aus zu zum zur für gegen ohne um durch während
+	zwischen wegen trotz statt vor
+	wenn weil dass ob als wie so nur auch schon noch ganz sehr meist meistens oft manchmal immer nie
+	kann können muss müssen soll sollen will wollen wird werden wurde wurden war waren ist sind hat haben hatte
+	was wer wen wem wessen etwas jemand jemanden jemandem sich mich dich ihn ihm uns euch
+	bezieht bezeichnet betont beschreibt drückt kennzeichnet legt meint kontrolliert schließt
+	bedeutet beinhaltet gebraucht hebt reicht steht zeigt weist deutet betrifft enthält umfasst
+	kommt geht gilt gibt liegt entspricht unterscheidet ergänzt ergibt verwendet bezogen
+	charakterisiert bringt führt folgt dient wechselt spricht handelt beschränkt`
+		.split(/\s+/)
+		.filter(Boolean)
+);
+
+const LEADING_ARTICLE_ABBR = new Set(['d.', '(d.)']);
+
+/**
+ * Kautz sometimes opens a roman-numeral sense with a short gloss (the plain translation), directly
+ * followed — with no punctuation of its own, just a space — by a full explanatory sentence, e.g. entry
+ * 1656's "I.) d. Erbarmen Bezieht sich auf das Elend…". His own manuscript puts a paragraph break there;
+ * {@link splitGlossFromExplanation} restores it. Returns the word index in `words` where that sentence
+ * starts, or `null` if this sense doesn't have that shape — either it really is just one short gloss
+ * with nothing else, or the split point can't be found with confidence, in which case leaving the prose
+ * untouched beats guessing wrong.
+ */
+function findGlossBreak(words: string[]): number | null {
+	if (words.length === 0) return null;
+	const start = LEADING_ARTICLE_ABBR.has(words[0]!.toLowerCase()) ? 1 : 0;
+	for (let i = start + 1; i < words.length; i += 1) {
+		const bare = words[i]!.replace(/^[.,;:()]+|[.,;:()]+$/g, '').toLowerCase();
+		if (/^[A-ZÄÖÜ]/.test(words[i]!) && SENTENCE_STARTERS.has(bare)) {
+			// Folding more than ~10 words into the "gloss" means we likely walked past a sentence starter
+			// this list doesn't know, not that the gloss is genuinely that long.
+			return i > 10 ? null : i;
+		}
+	}
+	return null;
+}
+
+/** Splits a roman-numeral sense's text (with the "I.) " marker already removed) into its opening gloss
+ *  and the explanatory sentence that follows, if {@link findGlossBreak} finds one; otherwise returns the
+ *  whole thing as the gloss with no explanation. */
+function splitGlossFromExplanation(afterMarker: string): { gloss: string; explanation: string } {
+	const tokens = [...afterMarker.matchAll(/\S+/g)];
+	const words = tokens.map((token) => token[0]!);
+	const breakIndex = findGlossBreak(words);
+	if (breakIndex === null) return { gloss: afterMarker, explanation: '' };
+
+	const splitAt = tokens[breakIndex]!.index!;
+	return {
+		gloss: afterMarker.slice(0, splitAt).trim(),
+		explanation: afterMarker.slice(splitAt).trim()
+	};
+}
+
+const ROMAN_SENSE_MARKER = /^([IVXLCDM]+\.?\))\s*/;
+
+/**
  * Renders one already-merged sense. Beyond generic inline "Strong Nr. N" mentions, two labelled forms get
  * their number list linkified: "Synonyme siehe: …" and the inline form of "Wortfamilie: …" (a plain
  * comma-separated list of numbers, as opposed to the block form with one `number transliteration` line
- * per related word, which is delegated to {@link renderWortfamilieWord}).
+ * per related word, which is delegated to {@link renderWortfamilieWord}). A roman-numeral sense also gets
+ * its gloss split from a directly-attached explanatory sentence, if any (see
+ * {@link splitGlossFromExplanation}).
  */
 function renderSense(sense: string): string {
 	const labelledList = /^(Synonyme siehe|Wortfamilie):\s*([\d,\s]+)$/i.exec(sense);
@@ -630,6 +699,13 @@ function renderSense(sense: string): string {
 
 	if (/^Wortfamilie:$/i.test(sense)) return escapeXml(sense);
 	if (/^0*\d{1,4}\s+\S/.test(sense)) return `<indent>${renderWortfamilieWord(sense)}</indent>`;
+
+	const roman = ROMAN_SENSE_MARKER.exec(sense);
+	if (roman) {
+		const { gloss, explanation } = splitGlossFromExplanation(sense.slice(roman[0].length));
+		if (explanation)
+			return `${renderProse(`${roman[1]} ${gloss}`)}<br/>${renderProse(explanation)}`;
+	}
 
 	return renderProse(sense);
 }
