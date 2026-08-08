@@ -22,7 +22,10 @@ import {
 } from '$lib/server/columns';
 import { loadChapter } from '$lib/server/repositories/chapter';
 import { loadReferenceResources } from '$lib/server/repositories/reference-resources';
-import { loadChapterNote, saveChapterNote } from '$lib/server/repositories/chapter-notes';
+import {
+	loadChapterVerseComments,
+	saveVerseComment
+} from '$lib/server/repositories/verse-comments';
 import {
 	bookCoverage,
 	chapterCount,
@@ -153,11 +156,15 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 	const marked = locals.user
 		? await markedVersesByList(db, locals.user.id, reference.book, reference.chapter)
 		: [];
-	const notesVisible = cookies.get('chapter-notes-visible') === '1';
-	const chapterNote =
-		locals.user && notesVisible
-			? await loadChapterNote(db, locals.user.id, reference.book, reference.chapter)
-			: null;
+	const verseComments = locals.user
+		? await loadChapterVerseComments(
+				db,
+				locals.user.id,
+				selectedBibles,
+				reference.book,
+				reference.chapter
+			)
+		: [];
 	const highlightStyles = locals.user ? await listHighlightStyles(db, locals.user.id) : [];
 	const highlights = locals.user
 		? await loadChapterHighlights(db, locals.user.id, reference.book, reference.chapter)
@@ -204,8 +211,7 @@ export async function load({ params, cookies, url, setHeaders, locals }) {
 		markedVerses: marked,
 		highlightStyles,
 		highlights,
-		notesVisible: locals.user !== null && notesVisible,
-		chapterNote
+		verseComments
 	};
 }
 
@@ -295,31 +301,24 @@ export const actions = {
 		return { success: true };
 	},
 
-	toggleNotes: async ({ cookies, locals }) => {
-		if (!locals.user) redirect(303, '/login');
-		const visible = cookies.get('chapter-notes-visible') === '1';
-		cookies.set('chapter-notes-visible', visible ? '0' : '1', {
-			path: '/',
-			maxAge: 60 * 60 * 24 * 365,
-			httpOnly: false,
-			sameSite: 'lax'
-		});
-		return { success: true };
-	},
-
-	saveChapterNote: async ({ request, locals }) => {
+	saveVerseComment: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
 		const form = await request.formData();
 		const reference = parseReference(String(form.get('reference') ?? ''));
-		if (!reference) return fail(400, { error: 'reference' });
-		await saveChapterNote(
+		const resourceId = String(form.get('resourceId') ?? '');
+		if (!reference?.verse) return fail(400, { error: 'reference' });
+		const bibles = await listBibles(getDb());
+		if (!bibles.some((bible) => bible.id === resourceId)) {
+			return fail(400, { error: 'resource' });
+		}
+		const html = await saveVerseComment(
 			getDb(),
 			locals.user.id,
-			reference.book,
-			reference.chapter,
+			{ book: reference.book, chapter: reference.chapter, verse: reference.verse },
+			resourceId,
 			String(form.get('note') ?? '')
 		);
-		return { saved: true };
+		return { saved: true, html };
 	},
 
 	adjustFontSize: async ({ request, cookies, locals }) => {

@@ -37,7 +37,7 @@ async function register(page: import('@playwright/test').Page, email: string): P
 /** Verse lists live under their own section of the settings dashboard now, not a page of their own. */
 async function gotoLists(page: import('@playwright/test').Page): Promise<void> {
 	await page.goto('/account');
-	await page.getByRole('button', { name: 'Verslisten & Notizen' }).click();
+	await page.getByRole('button', { name: 'Verslisten & Kommentare' }).click();
 }
 
 test('registration, sign out and sign in again', async ({ page }) => {
@@ -95,6 +95,22 @@ test('a reader gets a default highlight palette, can rename a colour and add one
 
 	const rows = page.locator('form[action="?/renameHighlightStyle"]');
 	await expect(rows).toHaveCount(10);
+	expect(
+		await rows
+			.locator('xpath=preceding-sibling::span[@data-color]')
+			.evaluateAll((swatches) => swatches.map((swatch) => (swatch as HTMLElement).dataset.color))
+	).toEqual([
+		'#fff1c6',
+		'#d6edcf',
+		'#c5e3f4',
+		'#f8c2c2',
+		'#f8d6c1',
+		'#e5e7eb',
+		'#fbcfe8',
+		'#e9d5ff',
+		'#99f6e4',
+		'#c7d2fe'
+	]);
 
 	await rows.first().getByRole('textbox').fill('Verheißungen');
 	await rows.first().getByRole('button', { name: 'Speichern' }).click();
@@ -129,7 +145,7 @@ test('a wrong password is refused', async ({ page }) => {
 test('a verse list keeps its verses and notes', async ({ page }) => {
 	await register(page, uniqueEmail());
 
-	// Create a list from the settings dashboard's "Verslisten & Notizen" section.
+	// Create a list from the settings dashboard's "Verslisten & Kommentare" section.
 	await gotoLists(page);
 	await page.getByPlaceholder('Neue Versliste').fill('Meine Studienliste');
 	await page.getByRole('button', { name: 'Neue Versliste' }).click();
@@ -141,69 +157,67 @@ test('a verse list keeps its verses and notes', async ({ page }) => {
 	await expect(page.getByRole('link', { name: 'Johannes 3,16' })).toBeVisible();
 	await expect(page.getByText('Denn also hat Gott', { exact: false })).toBeVisible();
 
-	// Write a note and save it. The click is scoped to the note's own form, since the rename form has a
-	// button with the same label.
+	// An empty list comment starts as a small bubble beside the verse and expands only on demand.
+	await page.getByRole('button', { name: 'Kommentar hinzufügen' }).click();
 	const noteForm = page.locator('form[action="?/saveNote"]');
-	const editor = noteForm.getByRole('textbox', { name: 'Notiz' });
+	const editor = noteForm.getByRole('textbox', { name: 'Kommentar' });
 	await editor.click();
 	await editor.fill('Der bekannteste Vers');
 	await noteForm.getByRole('button', { name: 'Speichern' }).click();
 
 	// The note survives a reload.
 	await page.reload();
-	await expect(page.getByRole('textbox', { name: 'Notiz' })).toContainText('Der bekannteste Vers');
+	await expect(page.getByRole('button', { name: 'Kommentar bearbeiten' })).toHaveCount(0);
+	await page.getByRole('button', { name: 'Kommentar anzeigen' }).click();
+	const savedComment = page.getByRole('button', { name: 'Kommentar bearbeiten' });
+	await expect(savedComment).toContainText('Der bekannteste Vers');
+	await savedComment.click();
+	await expect(page.getByRole('textbox', { name: 'Kommentar' })).toContainText(
+		'Der bekannteste Vers'
+	);
 });
 
-test('chapter notes follow the visible chapter while scrolling', async ({ page }) => {
+test('reader comments belong to one verse and translation and become editable on click', async ({
+	page
+}) => {
 	await register(page, uniqueEmail());
-
-	// Chapter 2's note is seeded through the action directly rather than through the editor: flowing
-	// text (the only layout now) keeps every loaded chapter's note editor in the DOM but hides all but
-	// the current one, and chapter 2 here is short enough that the reader's own eager next-chapter
-	// preload can flip the visible chapter away from it before the editor is reachable.
-	const seedResponse = await page.request.post('/1Mo2?/saveChapterNote', {
-		headers: { origin: 'http://localhost:4173' },
-		form: { reference: '1Mo2', note: 'Notiz für Kapitel zwei' }
-	});
-	expect(seedResponse.ok()).toBeTruthy();
-	await page
-		.context()
-		.addCookies([{ name: 'chapter-notes-visible', value: '1', url: 'http://localhost:4173' }]);
-
-	await page.goto('/1Mo1');
-	const firstTextColumn = page.locator('.flow-column').first();
-	const visibleNote = page.locator('.flow-note > div:not(.hidden-note)');
-	await expect(visibleNote.locator('.note-chapter-title')).toHaveText('1.Mose 1');
-	await expect(page.locator('[data-chapter-key="1:2"]').first()).toBeAttached();
-	await page.waitForTimeout(120);
-
-	// A single scroll dispatch can land inside the app's own ~80ms window for suppressing scroll
-	// events it caused itself (see `suppressProgrammaticFlowScroll` in the reader), which the chapter
-	// preload triggered by switching to flowing text can still be running through this soon after.
-	// Polling — scroll, dispatch, check — rather than doing it once retries past that window instead
-	// of racing it.
-	//
-	// The target offset (4px, well inside the reader's own 12px "close enough to the top" threshold)
-	// is deliberately not 12 itself: `scrollTop` rounds to the nearest layout pixel, so aiming exactly
-	// at the boundary can converge one pixel short of it forever instead of crossing it.
-	await expect
-		.poll(() =>
-			firstTextColumn.evaluate((element) => {
-				const chapter = element.querySelector<HTMLElement>('[data-chapter-key="1:2"]');
-				if (!chapter) return Number.POSITIVE_INFINITY;
-				const distance =
-					chapter.getBoundingClientRect().top - element.getBoundingClientRect().top - 4;
-				element.scrollTop += distance;
-				element.dispatchEvent(new Event('scroll'));
-				return chapter.getBoundingClientRect().top - element.getBoundingClientRect().top;
-			})
-		)
-		.toBeLessThanOrEqual(12);
-
-	await expect(visibleNote.locator('.note-chapter-title')).toHaveText('1.Mose 2');
-	await expect(visibleNote.locator('[contenteditable="true"]')).toContainText(
-		'Notiz für Kapitel zwei'
+	await page.goto('/Joh3,16');
+	const firstTranslation = page.locator('.flow-column').first();
+	await expect(firstTranslation.getByRole('button', { name: 'Kommentar hinzufügen' })).toHaveCount(
+		0
 	);
+	await firstTranslation.locator('a.verse-number', { hasText: /^16$/ }).click();
+	await page.getByRole('menuitem', { name: /Kommentar für .* hinzufügen/ }).click();
+
+	let form = firstTranslation.locator('form[action="?/saveVerseComment"]');
+	await form.getByRole('textbox', { name: 'Kommentar' }).press('Escape');
+	await expect(firstTranslation.locator('.verse-comment-row.with-comment')).toHaveCount(0);
+
+	await firstTranslation.locator('a.verse-number', { hasText: /^16$/ }).click();
+	await page.getByRole('menuitem', { name: /Kommentar für .* hinzufügen/ }).click();
+	form = firstTranslation.locator('form[action="?/saveVerseComment"]');
+	await form.getByRole('textbox', { name: 'Kommentar' }).fill('Nur für diese Übersetzung');
+	await form.getByRole('textbox', { name: 'Kommentar' }).press('Control+Enter');
+	await expect(firstTranslation.locator('.verse-comment-row.with-comment')).toBeVisible();
+
+	// The second translation does not inherit the first translation's comment.
+	await expect(page.locator('.flow-column').nth(1).locator('.comment-bubble')).toHaveCount(0);
+	await page.reload();
+	const commentRow = page
+		.locator('.flow-column')
+		.first()
+		.locator('.verse-comment-row.with-comment');
+	await expect(commentRow).toHaveCount(0);
+	await page.getByRole('button', { name: 'Kommentar anzeigen' }).first().click();
+	await expect(commentRow).toBeVisible();
+	const saved = page.getByRole('button', { name: 'Kommentar bearbeiten' });
+	await expect(saved).toContainText('Nur für diese Übersetzung');
+	await saved.click();
+	const reopenedEditor = page.getByRole('textbox', { name: 'Kommentar' });
+	await expect(reopenedEditor).toContainText('Nur für diese Übersetzung');
+	await reopenedEditor.press('Escape');
+	await expect(reopenedEditor).toHaveCount(0);
+	await expect(page.getByRole('button', { name: 'Kommentar bearbeiten' })).toBeVisible();
 });
 
 test('a shared list is readable without an account', async ({ page, browser }) => {

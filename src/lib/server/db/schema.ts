@@ -457,9 +457,9 @@ export const verseListItems = pgTable(
 	]
 );
 
-/** A private rich-text note attached to a whole chapter, shown as an optional reader column. */
-export const chapterNotes = pgTable(
-	'chapter_notes',
+/** One private rich-text comment per user, verse and Bible translation. */
+export const verseComments = pgTable(
+	'verse_comments',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
 		userId: uuid('user_id')
@@ -467,14 +467,32 @@ export const chapterNotes = pgTable(
 			.references(() => users.id, { onDelete: 'cascade' }),
 		bookId: integer('book_id').notNull(),
 		chapter: integer('chapter').notNull(),
-		noteHtml: text('note_html'),
+		verse: integer('verse').notNull(),
+		resourceId: text('resource_id')
+			.notNull()
+			.references(() => resources.id, { onDelete: 'cascade' }),
+		/** Sanitised rich text. */
+		commentHtml: text('comment_html').notNull(),
 		...timestamps
 	},
 	(table) => [
-		uniqueIndex('chapter_notes_reference_idx').on(table.userId, table.bookId, table.chapter),
-		index('chapter_notes_user_idx').on(table.userId, table.updatedAt),
-		check('chapter_notes_book_id_check', sql`${table.bookId} between 1 and 66`),
-		check('chapter_notes_chapter_check', sql`${table.chapter} between 1 and 200`)
+		uniqueIndex('verse_comments_reference_idx').on(
+			table.userId,
+			table.resourceId,
+			table.bookId,
+			table.chapter,
+			table.verse
+		),
+		index('verse_comments_user_idx').on(table.userId, table.updatedAt),
+		index('verse_comments_chapter_idx').on(
+			table.userId,
+			table.bookId,
+			table.chapter,
+			table.resourceId
+		),
+		check('verse_comments_book_id_check', sql`${table.bookId} between 1 and 66`),
+		check('verse_comments_chapter_check', sql`${table.chapter} between 1 and 200`),
+		check('verse_comments_verse_check', sql`${table.verse} between 1 and 250`)
 	]
 );
 
@@ -626,6 +644,6 @@ export type Session = typeof sessions.$inferSelect;
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type VerseList = typeof verseLists.$inferSelect;
 export type VerseListItem = typeof verseListItems.$inferSelect;
-export type ChapterNote = typeof chapterNotes.$inferSelect;
+export type VerseComment = typeof verseComments.$inferSelect;
 export type ImportJob = typeof importJobs.$inferSelect;
 export type BackupJob = typeof backupJobs.$inferSelect;

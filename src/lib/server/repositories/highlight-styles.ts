@@ -16,15 +16,15 @@ export const MAX_STYLES = 30;
  * background behind dark text.
  */
 const DEFAULT_COLORS = [
-	'#fde68a', // yellow
-	'#a7f3d0', // green
-	'#bfdbfe', // blue
-	'#fbcfe8', // pink
-	'#fed7aa', // orange
-	'#e9d5ff', // purple
-	'#fecaca', // red
-	'#99f6e4', // teal
+	'#FFF1C6', // yellow
+	'#D6EDCF', // green
+	'#C5E3F4', // blue
+	'#F8C2C2', // red
+	'#F8D6C1', // orange
 	'#e5e7eb', // gray
+	'#fbcfe8', // pink
+	'#e9d5ff', // purple
+	'#99f6e4', // teal
 	'#c7d2fe' // indigo
 ];
 

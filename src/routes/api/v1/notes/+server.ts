@@ -1,11 +1,11 @@
 import { json } from '@sveltejs/kit';
 import { getDb } from '$lib/server/db';
-import { listUserNotes } from '$lib/server/repositories/chapter-notes';
+import { listUserNotes } from '$lib/server/repositories/verse-comments';
 import { resolveApiIdentity } from '$lib/server/api/identity';
 import { apiError } from '$lib/server/api/errors';
 
 /**
- * The caller's own notes — both chapter notes and verse-list item notes — requires a session or a
+ * The caller's own comments — both translation and verse-list comments — requires a session or a
  * `personal`-scope API key.
  */
 export async function GET({ locals }) {
@@ -14,7 +14,7 @@ export async function GET({ locals }) {
 		return apiError(
 			403,
 			'personal_scope_required',
-			'Reading notes needs a signed-in session or a personal-scope API key.'
+			'Reading comments needs a signed-in session or a personal-scope API key.'
 		);
 	}
 

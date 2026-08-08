@@ -14,7 +14,7 @@
 	<title>API — Akribos</title>
 	<meta
 		name="description"
-		content="Public API for Akribos: bible text, lexicon, search, verse lists and notes."
+		content="Public API for Akribos: bible text, lexicon, search, verse lists and comments."
 	/>
 </svelte:head>
 
@@ -24,7 +24,7 @@
 	<section class="mb-8">
 		<p class="text-stone-700 dark:text-stone-300">
 			Read-only access to the content Akribos itself is built on: bible translations, the Strong's
-			lexicon, commentaries and search, plus a signed-in reader's own verse lists and notes.
+			lexicon, commentaries and search, plus a signed-in reader's own verse lists and comments.
 			Everything lives under <code>/api/v1</code>.
 		</p>
 		<Button href="/api/docs" variant="primary" class="mt-4"
@@ -49,7 +49,7 @@
 		</p>
 		<ul class="mt-2 space-y-1 text-sm">
 			<li><code>public</code> — bible text, lexicon, commentaries, search</li>
-			<li><code>personal</code> — the above, plus the key owner's own verse lists and notes</li>
+			<li><code>personal</code> — the above, plus the key owner's own verse lists and comments</li>
 		</ul>
 	</section>
 
@@ -134,7 +134,7 @@
 			<div>
 				<p class="font-mono text-sm font-medium">GET /api/v1/lists/{'{id}'}</p>
 				<p class="mt-1 text-sm text-stone-600 dark:text-stone-300">
-					A verse list's items and notes — readable by its owner, or by anyone once its owner has
+					A verse list's items and comments — readable by its owner, or by anyone once its owner has
 					turned public sharing on. Optional <code>bible</code> picks which translation's text is attached
 					to each verse.
 				</p>
@@ -143,7 +143,8 @@
 			<div>
 				<p class="font-mono text-sm font-medium">GET /api/v1/notes</p>
 				<p class="mt-1 text-sm text-stone-600 dark:text-stone-300">
-					The caller's own chapter and verse notes. Requires a signed-in session or a
+					The caller's own translation-specific and verse-list comments. Requires a signed-in
+					session or a
 					<code>personal</code>-scope key.
 				</p>
 			</div>
@@ -153,10 +154,10 @@
 	<section>
 		<h2 class="mb-2 text-lg font-semibold">What's not here yet</h2>
 		<p class="text-stone-700 dark:text-stone-300">
-			This first version is read-only: creating or editing a list, adding a verse, or writing a note
-			all still happen through the site itself, not through the API. Akribos' own frontend does not
-			yet read through these endpoints either — today it uses the same repository code directly,
-			without an HTTP round trip.
+			This first version is read-only: creating or editing a list, adding a verse, or writing a
+			comment all still happen through the site itself, not through the API. Akribos' own frontend
+			does not yet read through these endpoints either — today it uses the same repository code
+			directly, without an HTTP round trip.
 		</p>
 	</section>
 </main>
