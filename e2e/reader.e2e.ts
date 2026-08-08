@@ -18,9 +18,27 @@ async function useCommentaryColumn(page: Page): Promise<void> {
 	]);
 }
 
-test('the root redirects into the reader', async ({ page }) => {
+async function loginAsAdmin(page: Page): Promise<void> {
+	await page.goto('/login');
+	await page.getByLabel('E-Mail-Adresse').fill('admin@example.com');
+	await page.getByLabel('Passwort').fill('seed-admin-password');
+	await page.getByRole('button', { name: 'Anmelden' }).click();
+}
+
+test('the root shows the landing page to signed-out visitors', async ({ page }) => {
+	const response = await page.goto('/');
+
+	expect(response?.status()).toBe(200);
+	await expect(page).toHaveURL(/\/$/);
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('Lies den Text');
+});
+
+test('the root resumes the reader for a signed-in user', async ({ page }) => {
+	await loginAsAdmin(page);
+	await page.goto('/Joh3');
 	await page.goto('/');
-	await expect(page).toHaveURL(/\/Joh1$/);
+
+	await expect(page).toHaveURL(/\/Joh3$/);
 });
 
 test('Impressum and Datenschutz are reachable only from the global menu', async ({ page }) => {
@@ -59,7 +77,7 @@ test('the about page loads with a visible heading', async ({ page }) => {
 
 	expect(response?.status()).toBe(200);
 	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-	await expect(page.getByRole('heading', { level: 1 })).toContainText('Akribos');
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('Lies den Text');
 });
 
 test('the search field opens a keyboard-accessible Bible book chooser', async ({ page }) => {
@@ -487,7 +505,7 @@ test('a quoted phrase matches the exact sequence', async ({ page }) => {
 test('a word typed into the search box that is not a reference goes to search', async ({
 	page
 }) => {
-	await page.goto('/');
+	await page.goto('/Joh1');
 	await page.getByRole('searchbox').fill('Licht');
 	await page.getByRole('searchbox').press('Enter');
 
@@ -495,7 +513,7 @@ test('a word typed into the search box that is not a reference goes to search', 
 });
 
 test('a reference typed into the search box goes to the chapter', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('/Joh1');
 	await page.getByRole('searchbox').fill('1Mo 1,3');
 	await page.getByRole('searchbox').press('Enter');
 
@@ -693,6 +711,7 @@ test('a reference percent-encoded as Latin-1 does not crash the page', async ({ 
 test('the homepage link clears the remembered chapter instead of bouncing back to it', async ({
 	page
 }) => {
+	await loginAsAdmin(page);
 	await page.goto('/Joh3');
 	await expect(page).toHaveURL(/\/Joh3$/);
 
