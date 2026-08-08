@@ -9,6 +9,9 @@ describe('sanitizeNoteHtml', () => {
 		expect(sanitizeNoteHtml('<ul><li>eins</li><li>zwei</li></ul>')).toBe(
 			'<ul><li>eins</li><li>zwei</li></ul>'
 		);
+		expect(sanitizeNoteHtml('<div>erste Zeile</div><div>zweite Zeile</div>')).toBe(
+			'<div>erste Zeile</div><div>zweite Zeile</div>'
+		);
 	});
 
 	it('removes scripts', () => {

@@ -196,8 +196,12 @@ test('reader comments belong to one verse and translation and become editable on
 	await firstTranslation.locator('a.verse-number', { hasText: /^16$/ }).click();
 	await page.getByRole('menuitem', { name: /Kommentar für .* hinzufügen/ }).click();
 	form = firstTranslation.locator('form[action="?/saveVerseComment"]');
-	await form.getByRole('textbox', { name: 'Kommentar' }).fill('Nur für diese Übersetzung');
-	await form.getByRole('textbox', { name: 'Kommentar' }).press('Control+Enter');
+	const editor = form.getByRole('textbox', { name: 'Kommentar' });
+	await editor.evaluate((element) => {
+		element.innerHTML = '<div>Nur für diese Übersetzung</div><div>Zweite Zeile</div>';
+		element.dispatchEvent(new InputEvent('input', { bubbles: true }));
+	});
+	await editor.press('Control+Enter');
 	await expect(firstTranslation.locator('.verse-comment-row.with-comment')).toBeVisible();
 
 	// The second translation does not inherit the first translation's comment.
@@ -211,7 +215,10 @@ test('reader comments belong to one verse and translation and become editable on
 	await page.getByRole('button', { name: 'Kommentar anzeigen' }).first().click();
 	await expect(commentRow).toBeVisible();
 	const saved = page.getByRole('button', { name: 'Kommentar bearbeiten' });
-	await expect(saved).toContainText('Nur für diese Übersetzung');
+	await expect(saved.locator('.comment-html > div')).toHaveText([
+		'Nur für diese Übersetzung',
+		'Zweite Zeile'
+	]);
 	await saved.click();
 	const reopenedEditor = page.getByRole('textbox', { name: 'Kommentar' });
 	await expect(reopenedEditor).toContainText('Nur für diese Übersetzung');
