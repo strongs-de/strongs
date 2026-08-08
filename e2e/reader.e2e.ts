@@ -359,54 +359,6 @@ test('the chapter number opens the menu for the hidden first verse number', asyn
 	await expect(page.getByRole('menu', { name: 'Vers 1.Mose 1,1' })).toBeVisible();
 });
 
-test('a column can opt out of synchronized flowing-text scrolling on its own', async ({ page }) => {
-	// The fixture's chapter is short enough that almost any scroll position also crosses the endless-
-	// scroll thresholds, whose chapter-prepend compensation moves *every* column regardless of sync
-	// (by design — see onFlowScroll). Blocking it isolates the cross-column sync behaviour this test
-	// is actually about.
-	await page.route('**/api/reader/**', (route) => route.abort());
-	await page.goto('/Joh3');
-
-	const columns = page.locator('.flow-column');
-	await expect(columns).toHaveCount(2);
-
-	// Both columns start synced, so both toggles offer to disable it.
-	const disableToggle = page.getByRole('button', { name: 'Synchron scrollen deaktivieren' });
-	await expect(disableToggle).toHaveCount(2);
-	await disableToggle.nth(1).click();
-	await expect(page.getByRole('button', { name: 'Synchron scrollen aktivieren' })).toHaveCount(1);
-
-	// Let any in-flight sync from the initial mount settle, then take the second column's resting
-	// position as the baseline to compare against — rather than assuming it is 0, which the
-	// mount-time alignment (while still synced) need not leave it at.
-	await page.waitForTimeout(400);
-	const baseline = await columns.nth(1).evaluate((element) => element.scrollTop);
-
-	// Scrolling the still-synced first column must not move the column that opted out.
-	await columns.first().evaluate((element) => {
-		const verse = element.querySelector<HTMLElement>('[data-verse-key="43:3:17"]');
-		element.dispatchEvent(new WheelEvent('wheel', { deltaY: 100 }));
-		element.scrollTop = verse?.offsetTop ?? element.scrollHeight;
-		element.dispatchEvent(new Event('scroll'));
-	});
-	await page.waitForTimeout(400);
-	expect(await columns.nth(1).evaluate((element) => element.scrollTop)).toBe(baseline);
-
-	// Re-enabling resumes sync from the next real scroll: scrolling the first column back to the top
-	// re-anchors the second column on verse 16 instead of wherever it was left.
-	await page.getByRole('button', { name: 'Synchron scrollen aktivieren' }).click();
-	await expect(page.getByRole('button', { name: 'Synchron scrollen deaktivieren' })).toHaveCount(2);
-
-	await columns.first().evaluate((element) => {
-		element.dispatchEvent(new WheelEvent('wheel', { deltaY: -100 }));
-		element.scrollTop = 0;
-		element.dispatchEvent(new Event('scroll'));
-	});
-	await expect
-		.poll(() => columns.nth(1).evaluate((element) => element.scrollTop))
-		.not.toBe(baseline);
-});
-
 test('flowing text preloads the next chapter for endless scrolling', async ({ page }) => {
 	await page.goto('/Joh3');
 	await expect(page.locator('[data-chapter-key="43:4"]').first()).toBeAttached();

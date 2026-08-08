@@ -85,7 +85,7 @@
 	<section class="mb-8">
 		<h2 class="mb-2 text-lg font-semibold">Verslisten</h2>
 		<p class="text-stone-700 dark:text-stone-300">
-			Mit einem Konto kannst du Verse sammeln und mit Notizen versehen — über den Stern neben der
+			Mit einem Konto kannst du Verse sammeln und kommentieren — über das Menü an der Versnummer
 			Versnummer. Eine Liste lässt sich über einen Link freigeben, ohne dass die Empfänger ein Konto
 			brauchen.
 		</p>

@@ -11,23 +11,34 @@
 	 */
 	let {
 		itemId,
+		resourceId,
 		html = null,
 		action = '?/saveNote',
 		reference,
+		autofocus = false,
 		placeholder = t('lists.notePlaceholder'),
-		onSaved
+		onSaved,
+		onCancel
 	}: {
 		itemId?: string;
+		resourceId?: string;
 		html?: string | null;
 		action?: string;
 		reference?: string;
+		autofocus?: boolean;
 		placeholder?: string;
 		onSaved?: (html: string) => void;
+		onCancel?: () => void;
 	} = $props();
 
+	let form: HTMLFormElement | undefined = $state();
 	let editor: HTMLDivElement | undefined = $state();
 	let dirty = $state(false);
 	let saved = $state(false);
+
+	$effect(() => {
+		if (autofocus && editor) editor.focus();
+	});
 
 	function format(command: 'bold' | 'italic' | 'insertUnorderedList') {
 		// execCommand is deprecated but remains the only broadly supported way to do this without
@@ -36,9 +47,20 @@
 		editor?.focus();
 		dirty = true;
 	}
+
+	function onKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape') {
+			event.preventDefault();
+			onCancel?.();
+		} else if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+			event.preventDefault();
+			form?.requestSubmit();
+		}
+	}
 </script>
 
 <form
+	bind:this={form}
 	method="POST"
 	{action}
 	use:enhance={({ formData }) => {
@@ -56,6 +78,7 @@
 	}}
 >
 	{#if itemId}<input type="hidden" name="itemId" value={itemId} />{/if}
+	{#if resourceId}<input type="hidden" name="resourceId" value={resourceId} />{/if}
 	{#if reference}<input type="hidden" name="reference" value={reference} />{/if}
 	<!-- Filled in by the submit handler above; the fallback covers a submit without JavaScript. -->
 	<input type="hidden" name="note" value={html ?? ''} />
@@ -104,6 +127,7 @@
 		aria-label={t('lists.note')}
 		data-placeholder={placeholder}
 		oninput={() => (dirty = true)}
+		onkeydown={onKeydown}
 		class="note-editor min-h-16 rounded-md border border-stone-200 bg-white px-3 py-2 text-sm
 		       focus:border-accent-500 focus:outline-none dark:border-stone-800 dark:bg-stone-950"
 	>

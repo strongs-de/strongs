@@ -5,7 +5,7 @@ import { nextChapter, previousChapter } from '$lib/bible/reference';
 import { resolveColumns } from '$lib/server/columns';
 import { getDb } from '$lib/server/db';
 import { loadChapter } from '$lib/server/repositories/chapter';
-import { loadChapterNote } from '$lib/server/repositories/chapter-notes';
+import { loadChapterVerseComments } from '$lib/server/repositories/verse-comments';
 import { loadReferenceResources } from '$lib/server/repositories/reference-resources';
 import { listBibles, listReaderResources } from '$lib/server/repositories/resources';
 import { loadChapterHighlights } from '$lib/server/repositories/verse-highlights';
@@ -27,17 +27,16 @@ export async function GET({ params, cookies, locals, setHeaders }) {
 	const [bibles, readerResources] = await Promise.all([listBibles(db), listReaderResources(db)]);
 	const columnIds = resolveColumns(cookies, readerResources, locals.user?.readerColumns);
 	const bibleIds = columnIds.filter((id) => bibles.some((bible) => bible.id === id));
-	const notesVisible = cookies.get('chapter-notes-visible') === '1';
-	const [chapter, referenceResources, chapterNote, highlights] = await Promise.all([
+	const [chapter, referenceResources, verseComments, highlights] = await Promise.all([
 		loadChapter(db, { resourceIds: bibleIds, book, chapter: chapterNumber }),
 		loadReferenceResources(db, {
 			resourceIds: columnIds,
 			book,
 			chapter: chapterNumber
 		}),
-		locals.user && notesVisible
-			? loadChapterNote(db, locals.user.id, book, chapterNumber)
-			: Promise.resolve(null),
+		locals.user
+			? loadChapterVerseComments(db, locals.user.id, bibleIds, book, chapterNumber)
+			: Promise.resolve([]),
 		locals.user
 			? loadChapterHighlights(db, locals.user.id, book, chapterNumber)
 			: Promise.resolve([])
@@ -59,7 +58,7 @@ export async function GET({ params, cookies, locals, setHeaders }) {
 		fullTitle: `${bookName(book)} ${chapterNumber}`,
 		shortBookName: bookShortName(book),
 		chapter: { ...chapter, headings: [...chapter.headings.entries()] },
-		chapterNote,
+		verseComments,
 		highlights,
 		referenceResources,
 		columns: columnIds.map((id) => ({

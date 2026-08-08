@@ -2,9 +2,11 @@
 	import { page } from '$app/state';
 	import { formatReference, referencePath } from '$lib/bible/reference';
 	import { t } from '$lib/i18n';
+	import { SvelteSet } from 'svelte/reactivity';
 	import Button from '$lib/components/Button.svelte';
 	import Card from '$lib/components/Card.svelte';
-	import NoteEditor from '$lib/components/NoteEditor.svelte';
+	import CommentBubble from '$lib/components/CommentBubble.svelte';
+	import CommentToggle from '$lib/components/CommentToggle.svelte';
 	import VerseText from '$lib/components/VerseText.svelte';
 
 	let { data } = $props();
@@ -14,6 +16,21 @@
 	);
 
 	let copied = $state(false);
+	const expandedComments = new SvelteSet<string>();
+	const draftComments = new SvelteSet<string>();
+
+	function commentVisible(item: (typeof data.items)[number]): boolean {
+		return draftComments.has(item.id) || Boolean(item.noteHtml && expandedComments.has(item.id));
+	}
+
+	function toggleComment(item: (typeof data.items)[number]) {
+		if (expandedComments.has(item.id)) {
+			expandedComments.delete(item.id);
+			draftComments.delete(item.id);
+		} else {
+			expandedComments.add(item.id);
+		}
+	}
 
 	async function copyShareUrl(): Promise<void> {
 		if (!shareUrl) return;
@@ -80,6 +97,7 @@
 	{:else}
 		<ol class="space-y-4">
 			{#each data.items as item (item.id)}
+				{@const visibleComment = commentVisible(item)}
 				<li
 					id="note-{item.id}"
 					class="rounded-xl border border-stone-200 p-4 dark:border-stone-800"
@@ -111,11 +129,36 @@
 
 					{#if item.segments}
 						<p class="scripture-sized mb-3 font-serif leading-relaxed">
-							<VerseText segments={item.segments} />
+							<VerseText segments={item.segments} />{#if item.noteHtml}<CommentToggle
+									hasComment
+									active={visibleComment}
+									onclick={() => toggleComment(item)}
+								/>{/if}
 						</p>
 					{/if}
+					{#if !item.noteHtml && !visibleComment}
+						<button
+							type="button"
+							class="mb-1 text-xs text-stone-500 hover:text-accent-700 dark:hover:text-accent-300"
+							onclick={() => draftComments.add(item.id)}
+						>
+							{t('comments.add')}
+						</button>
+					{/if}
 
-					<NoteEditor itemId={item.id} html={item.noteHtml} />
+					{#if visibleComment}
+						<CommentBubble
+							itemId={item.id}
+							html={item.noteHtml}
+							startEditing={draftComments.has(item.id)}
+							onSaved={(html) => {
+								item.noteHtml = html || null;
+								draftComments.delete(item.id);
+								expandedComments.add(item.id);
+							}}
+							onClose={() => draftComments.delete(item.id)}
+						/>
+					{/if}
 				</li>
 			{/each}
 		</ol>

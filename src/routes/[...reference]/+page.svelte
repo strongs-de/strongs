@@ -10,11 +10,12 @@
 	import { verseHoverPopover } from '$lib/actions/verse-hover-popover';
 	import { t } from '$lib/i18n';
 	import ColumnPicker from '$lib/components/ColumnPicker.svelte';
+	import CommentBubble from '$lib/components/CommentBubble.svelte';
+	import CommentToggle from '$lib/components/CommentToggle.svelte';
 	import StudySidebar from '$lib/components/StudySidebar.svelte';
 	import TranslationDialog from '$lib/components/TranslationDialog.svelte';
 	import VerseMenu from '$lib/components/VerseMenu.svelte';
 	import VerseText from '$lib/components/VerseText.svelte';
-	import NoteEditor from '$lib/components/NoteEditor.svelte';
 
 	let { data } = $props();
 
@@ -69,8 +70,7 @@
 	const canAddColumn = $derived(
 		data.columns.length < data.maxColumns && unusedResources.length > 0
 	);
-	const visibleColumnCount = $derived(data.columns.length + (data.notesVisible ? 1 : 0));
-	const notesColumnIndex = $derived(data.columns.length);
+	const visibleColumnCount = $derived(data.columns.length);
 	const chosenResourceIds = $derived(data.columns.map((column) => column.resource.id));
 
 	function openTranslationDialog(index: number) {
@@ -170,12 +170,7 @@
 	 *  even `repeat()` split) applies untouched. `minmax(0, …)` matches the original bare `1fr` tracks
 	 *  so a narrow custom width can still shrink below its content's own minimum, exactly like before. */
 	const columnTrack = $derived(
-		columnWidths
-			? columnWidths.map((width) => `minmax(0, ${width}fr)`).join(' ') +
-					(data.notesVisible ? ` minmax(0, ${1 / data.columns.length}fr)` : '')
-			: data.notesVisible
-				? `repeat(${visibleColumnCount}, minmax(0, 1fr))`
-				: undefined
+		columnWidths ? columnWidths.map((width) => `minmax(0, ${width}fr)`).join(' ') : undefined
 	);
 	/** The desktop header bar sets `grid-template-columns` inline rather than through a class, so it
 	 *  cannot lean on the CSS variable's own fallback and needs the equivalent literal spelled out. */
@@ -188,10 +183,7 @@
 	 *  splitters also need a small gap-dependent offset. */
 	const columnBoundaries = $derived.by(() => {
 		const fractions = columnWidths ?? equalColumnWidths();
-		// Both branches of `fractions` already sum to 1 across the real columns as a group (an equal
-		// split of N columns is N × 1/N); the notes column, when visible, then adds one more same-sized
-		// unit, matching how `columnTrack` appends it as a further `1fr` after that group.
-		const totalUnits = 1 + (data.notesVisible ? 1 / data.columns.length : 0);
+		const totalUnits = 1;
 		const gapCount = visibleColumnCount - 1;
 		const boundaries: { percent: number; offsetRem: number }[] = [];
 		let cumulative = 0;
@@ -304,7 +296,8 @@
 		chapter: number,
 		verse: number,
 		verseEnd: number | null,
-		segments: Parameters<typeof segmentsToText>[0]
+		segments: Parameters<typeof segmentsToText>[0],
+		resource: { id: string; name: string }
 	) {
 		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
 			return;
@@ -328,7 +321,9 @@
 				text: segmentsToText(segments)
 			},
 			highlightByKey.get(`${book}:${chapter}:${verse}`)?.styleId ?? null,
-			(styleId) => updateStreamHighlight(book, chapter, verse, styleId)
+			(styleId) => updateStreamHighlight(book, chapter, verse, styleId),
+			resource,
+			() => openVerseComment(book, chapter, verse, resource.id)
 		);
 	}
 
@@ -450,7 +445,7 @@
 		fullTitle: string;
 		shortBookName: string;
 		chapter: typeof data.chapter;
-		chapterNote: string | null;
+		verseComments: typeof data.verseComments;
 		referenceResources: typeof data.referenceResources;
 		highlights: typeof data.highlights;
 		navigation: {
@@ -465,7 +460,7 @@
 			fullTitle: data.fullTitle,
 			shortBookName: data.shortBookName,
 			chapter: data.chapter,
-			chapterNote: data.chapterNote,
+			verseComments: data.verseComments,
 			referenceResources: data.referenceResources,
 			highlights: data.highlights,
 			navigation: data.navigation
@@ -473,6 +468,56 @@
 	}
 
 	let streamChapters = $state<StreamChapter[]>([initialStreamChapter()]);
+	/** Empty editors opened through the verse menu but not saved yet. */
+	const draftCommentKeys = new SvelteSet<string>();
+	/** Existing comments explicitly expanded through the icon at the end of their verse. */
+	const expandedCommentKeys = new SvelteSet<string>();
+
+	function verseCommentKey(book: number, chapter: number, verse: number, resourceId: string) {
+		return `${book}:${chapter}:${verse}:${resourceId}`;
+	}
+
+	function openVerseComment(book: number, chapter: number, verse: number, resourceId: string) {
+		const key = verseCommentKey(book, chapter, verse, resourceId);
+		expandedCommentKeys.add(key);
+		draftCommentKeys.add(key);
+	}
+
+	function toggleVerseComment(key: string) {
+		if (expandedCommentKeys.has(key)) {
+			expandedCommentKeys.delete(key);
+			draftCommentKeys.delete(key);
+		} else {
+			expandedCommentKeys.add(key);
+		}
+	}
+
+	function verseCommentAt(stream: StreamChapter, resourceId: string, verse: number) {
+		return stream.verseComments.find(
+			(comment) => comment.resourceId === resourceId && comment.verse === verse
+		);
+	}
+
+	function updateVerseComment(
+		stream: StreamChapter,
+		resourceId: string,
+		verse: number,
+		html: string
+	) {
+		const current = verseCommentAt(stream, resourceId, verse);
+		if (html) {
+			if (current) current.html = html;
+			else stream.verseComments.push({ resourceId, verse, html });
+		} else if (current) {
+			stream.verseComments.splice(stream.verseComments.indexOf(current), 1);
+		}
+		expandedCommentKeys.add(
+			verseCommentKey(stream.reference.book, stream.reference.chapter, verse, resourceId)
+		);
+		draftCommentKeys.delete(
+			verseCommentKey(stream.reference.book, stream.reference.chapter, verse, resourceId)
+		);
+	}
 
 	/** Every highlighted verse across every loaded chapter, keyed like `data-verse-key`. */
 	const highlightByKey = $derived(
@@ -935,33 +980,6 @@
 				>
 					{visibleStreamChapter?.fullTitle ?? data.fullTitle}
 				</h1>
-				{#if data.user}
-					<form method="POST" action="?/toggleNotes" use:enhance>
-						<button
-							type="submit"
-							title={data.notesVisible ? t('reader.hideNotes') : t('reader.showNotes')}
-							aria-label={data.notesVisible ? t('reader.hideNotes') : t('reader.showNotes')}
-							class="notes-toggle"
-							class:active={data.notesVisible}
-							aria-pressed={data.notesVisible}
-						>
-							<svg
-								viewBox="0 0 20 20"
-								class="size-4"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="1.5"
-								aria-hidden="true"
-							>
-								<path
-									d="M5 3.75h10A1.25 1.25 0 0 1 16.25 5v10A1.25 1.25 0 0 1 15 16.25H5A1.25 1.25 0 0 1 3.75 15V5A1.25 1.25 0 0 1 5 3.75Z"
-								/>
-								<path d="M7 7h6M7 10h6M7 13h3.5" stroke-linecap="round" />
-							</svg>
-							<span class="hidden sm:inline">{t('reader.notesColumn')}</span>
-						</button>
-					</form>
-				{/if}
 			</div>
 
 			<!-- Column headers double as the translation picker. The bar sticks as one piece; a single
@@ -1006,28 +1024,6 @@
 						/>
 					</div>
 				{/each}
-				{#if data.notesVisible}
-					<div class="flex min-h-8 items-center justify-between gap-2 px-2">
-						<span class="truncate text-sm font-semibold text-stone-700 dark:text-stone-200">
-							{t('reader.notesColumn')}
-						</span>
-						<form method="POST" action="?/toggleNotes" use:enhance class="flex items-center">
-							<button
-								type="submit"
-								class="inline-flex size-7 items-center justify-center rounded text-stone-400
-								       hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800
-								       dark:hover:text-stone-200"
-								aria-label={t('reader.hideNotes')}
-							>
-								<svg viewBox="0 0 20 20" class="size-4" fill="currentColor" aria-hidden="true">
-									<path
-										d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"
-									/>
-								</svg>
-							</button>
-						</form>
-					</div>
-				{/if}
 			</div>
 			<form bind:this={reorderForm} method="POST" action="?/moveColumn" use:enhance class="hidden">
 				<input bind:this={reorderFromInput} type="hidden" name="from" />
@@ -1114,24 +1110,6 @@
 							{/if}
 						</span>
 					{/each}
-					{#if data.notesVisible}
-						<button
-							type="button"
-							role="tab"
-							id="mobile-tab-{notesColumnIndex}"
-							aria-selected={mobileColumn === notesColumnIndex}
-							aria-controls="mobile-tabpanel-{notesColumnIndex}"
-							tabindex={mobileColumn === notesColumnIndex ? 0 : -1}
-							class="mobile-tab shrink-0 rounded-full px-3 py-1 text-sm"
-							class:bg-accent-600={mobileColumn === notesColumnIndex}
-							class:text-white={mobileColumn === notesColumnIndex}
-							class:bg-stone-100={mobileColumn !== notesColumnIndex}
-							class:dark:bg-stone-800={mobileColumn !== notesColumnIndex}
-							onclick={() => (mobileColumn = notesColumnIndex)}
-						>
-							{t('lists.note')}
-						</button>
-					{/if}
 				</div>
 
 				{#if canAddColumn}
@@ -1207,7 +1185,6 @@
 								></span>
 							</div>
 						{/each}
-						{#if data.notesVisible}<div></div>{/if}
 					</div>
 
 					{#if mobileColumn < data.columns.length}
@@ -1262,97 +1239,128 @@
 											{@const mark = highlightByKey.get(
 												`${stream.reference.book}:${stream.reference.chapter}:${cell.verse}`
 											)}
-											<p
-												class="flow-verse"
-												data-verse-key={`${stream.reference.book}:${stream.reference.chapter}:${cell.verse}`}
-												data-verse-end={cell.verseEnd ?? cell.verse}
-												id={columnIndex === 0
-													? `${stream.shortBookName}${stream.reference.chapter}_${cell.verse}`
-													: undefined}
-												class:highlighted={stream.reference.book === data.reference.book &&
-													stream.reference.chapter === data.reference.chapter &&
-													data.reference.verse !== undefined &&
-													cell.verse <= data.reference.verse &&
-													(cell.verseEnd ?? cell.verse) >= data.reference.verse}
-												style:background-color={mark?.color}
-											>
-												<span class="verse-lead">
-													{#if cell.verse === firstVerse}
-														<a
-															class="flow-chapter-number"
-															class:in-list={stream.reference.book === data.reference.book &&
-																stream.reference.chapter === data.reference.chapter &&
-																inAnyList.has(cell.verse)}
-															title={stream.fullTitle}
-															href={referencePath({
-																book: stream.reference.book,
-																chapter: stream.reference.chapter,
-																verse: cell.verse
-															})}
-															aria-haspopup="menu"
-															aria-label={t('verse.menu', {
-																reference: formatReference(
-																	{
-																		book: stream.reference.book,
-																		chapter: stream.reference.chapter,
-																		verse: cell.verse
-																	},
-																	{ style: 'full' }
-																)
-															})}
-															onclick={(event) =>
-																onVerseNumberClick(
-																	event,
-																	stream.reference.book,
-																	stream.reference.chapter,
-																	cell.verse,
-																	cell.verseEnd,
-																	cell.segments
-																)}
-														>
-															{stream.reference.chapter}
-														</a>
-													{/if}
-													{#if cell.verse !== 1 || cell.verse !== firstVerse}
-														<a
-															class="verse-number"
-															class:in-list={stream.reference.book === data.reference.book &&
-																stream.reference.chapter === data.reference.chapter &&
-																inAnyList.has(cell.verse)}
-															href={referencePath({
-																book: stream.reference.book,
-																chapter: stream.reference.chapter,
-																verse: cell.verse
-															})}
-															aria-haspopup="menu"
-															aria-label={t('verse.menu', {
-																reference: formatReference(
-																	{
-																		book: stream.reference.book,
-																		chapter: stream.reference.chapter,
-																		verse: cell.verse
-																	},
-																	{ style: 'full' }
-																)
-															})}
-															onclick={(event) =>
-																onVerseNumberClick(
-																	event,
-																	stream.reference.book,
-																	stream.reference.chapter,
-																	cell.verse,
-																	cell.verseEnd,
-																	cell.segments
-																)}
-														>
-															{cell.verse}{#if cell.verseEnd && cell.verseEnd > cell.verse}-{cell.verseEnd}{/if}
-														</a>
-													{/if}<span
+											{@const comment = verseCommentAt(stream, column.resource.id, cell.verse)}
+											{@const commentKey = verseCommentKey(
+												stream.reference.book,
+												stream.reference.chapter,
+												cell.verse,
+												column.resource.id
+											)}
+											{@const commentVisible =
+												draftCommentKeys.has(commentKey) ||
+												Boolean(comment && expandedCommentKeys.has(commentKey))}
+											<div class="verse-comment-row" class:with-comment={commentVisible}>
+												<p
+													class="flow-verse"
+													data-verse-key={`${stream.reference.book}:${stream.reference.chapter}:${cell.verse}`}
+													data-verse-end={cell.verseEnd ?? cell.verse}
+													id={columnIndex === 0
+														? `${stream.shortBookName}${stream.reference.chapter}_${cell.verse}`
+														: undefined}
+													class:highlighted={stream.reference.book === data.reference.book &&
+														stream.reference.chapter === data.reference.chapter &&
+														data.reference.verse !== undefined &&
+														cell.verse <= data.reference.verse &&
+														(cell.verseEnd ?? cell.verse) >= data.reference.verse}
+													style:background-color={mark?.color}
+												>
+													<span class="verse-lead">
+														{#if cell.verse === firstVerse}
+															<a
+																class="flow-chapter-number"
+																class:in-list={stream.reference.book === data.reference.book &&
+																	stream.reference.chapter === data.reference.chapter &&
+																	inAnyList.has(cell.verse)}
+																title={stream.fullTitle}
+																href={referencePath({
+																	book: stream.reference.book,
+																	chapter: stream.reference.chapter,
+																	verse: cell.verse
+																})}
+																aria-haspopup="menu"
+																aria-label={t('verse.menu', {
+																	reference: formatReference(
+																		{
+																			book: stream.reference.book,
+																			chapter: stream.reference.chapter,
+																			verse: cell.verse
+																		},
+																		{ style: 'full' }
+																	)
+																})}
+																onclick={(event) =>
+																	onVerseNumberClick(
+																		event,
+																		stream.reference.book,
+																		stream.reference.chapter,
+																		cell.verse,
+																		cell.verseEnd,
+																		cell.segments,
+																		{ id: column.resource.id, name: column.resource.abbrev }
+																	)}
+															>
+																{stream.reference.chapter}
+															</a>
+														{/if}
+														{#if cell.verse !== 1 || cell.verse !== firstVerse}
+															<a
+																class="verse-number"
+																class:in-list={stream.reference.book === data.reference.book &&
+																	stream.reference.chapter === data.reference.chapter &&
+																	inAnyList.has(cell.verse)}
+																href={referencePath({
+																	book: stream.reference.book,
+																	chapter: stream.reference.chapter,
+																	verse: cell.verse
+																})}
+																aria-haspopup="menu"
+																aria-label={t('verse.menu', {
+																	reference: formatReference(
+																		{
+																			book: stream.reference.book,
+																			chapter: stream.reference.chapter,
+																			verse: cell.verse
+																		},
+																		{ style: 'full' }
+																	)
+																})}
+																onclick={(event) =>
+																	onVerseNumberClick(
+																		event,
+																		stream.reference.book,
+																		stream.reference.chapter,
+																		cell.verse,
+																		cell.verseEnd,
+																		cell.segments,
+																		{ id: column.resource.id, name: column.resource.abbrev }
+																	)}
+															>
+																{cell.verse}{#if cell.verseEnd && cell.verseEnd > cell.verse}-{cell.verseEnd}{/if}
+															</a>
+														{/if}<span
+															class="verse-text"
+															lang={column.resource.language}
+															dir={column.resource.direction}
+															><VerseText
+																segments={leadSegments}
+																onStrongClick={(strong, word) =>
+																	openStrong(
+																		strong,
+																		word,
+																		cell.verse,
+																		stream.reference.book,
+																		stream.reference.chapter
+																	)}
+																activeStrong={activeStrong?.strong ?? null}
+															/></span
+														></span
+													><span
 														class="verse-text"
 														lang={column.resource.language}
 														dir={column.resource.direction}
-														><VerseText
-															segments={leadSegments}
+													>
+														<VerseText
+															segments={remainingSegments}
 															onStrongClick={(strong, word) =>
 																openStrong(
 																	strong,
@@ -1362,27 +1370,33 @@
 																	stream.reference.chapter
 																)}
 															activeStrong={activeStrong?.strong ?? null}
-														/></span
-													></span
-												><span
-													class="verse-text"
-													lang={column.resource.language}
-													dir={column.resource.direction}
-												>
-													<VerseText
-														segments={remainingSegments}
-														onStrongClick={(strong, word) =>
-															openStrong(
-																strong,
-																word,
-																cell.verse,
-																stream.reference.book,
-																stream.reference.chapter
-															)}
-														activeStrong={activeStrong?.strong ?? null}
+														/>
+													</span>
+													{#if data.user && comment}
+														<CommentToggle
+															hasComment
+															active={commentVisible}
+															onclick={() => toggleVerseComment(commentKey)}
+														/>
+													{/if}
+												</p>
+												{#if commentVisible}
+													<CommentBubble
+														action="?/saveVerseComment"
+														reference={formatReference({
+															book: stream.reference.book,
+															chapter: stream.reference.chapter,
+															verse: cell.verse
+														})}
+														resourceId={column.resource.id}
+														html={comment?.html}
+														startEditing={draftCommentKeys.has(commentKey)}
+														onSaved={(html) =>
+															updateVerseComment(stream, column.resource.id, cell.verse, html)}
+														onClose={() => draftCommentKeys.delete(commentKey)}
 													/>
-												</span>
-											</p>
+												{/if}
+											</div>
 										{:else if column.resource.kind === 'commentary'}
 											{@const entries = commentaryAt(
 												stream.referenceResources,
@@ -1453,32 +1467,6 @@
 							{/if}
 						</div>
 					{/each}
-					{#if data.notesVisible}
-						<aside
-							class="flow-column flow-note"
-							class:hidden-on-mobile={mobileColumn !== notesColumnIndex}
-							role={isMobileViewport ? 'tabpanel' : undefined}
-							id={isMobileViewport ? `mobile-tabpanel-${notesColumnIndex}` : undefined}
-							aria-labelledby={isMobileViewport ? `mobile-tab-${notesColumnIndex}` : undefined}
-							aria-hidden={isMobileViewport && mobileColumn !== notesColumnIndex}
-						>
-							{#each streamChapters as stream (`note:${stream.reference.book}:${stream.reference.chapter}`)}
-								<div
-									class:hidden-note={`${stream.reference.book}:${stream.reference.chapter}` !==
-										(visibleChapterKey || `${data.reference.book}:${data.reference.chapter}`)}
-								>
-									<h2 class="note-chapter-title">{stream.fullTitle}</h2>
-									<NoteEditor
-										action="?/saveChapterNote"
-										reference="{stream.shortBookName}{stream.reference.chapter}"
-										html={stream.chapterNote}
-										placeholder={t('lists.chapterNotePlaceholder')}
-										onSaved={(html) => (stream.chapterNote = html)}
-									/>
-								</div>
-							{/each}
-						</aside>
-					{/if}
 				</div>
 
 				<!-- Each flow column scrolls endlessly on its own, so there is no natural "end of chapter"
@@ -1528,41 +1516,6 @@
 />
 
 <style>
-	.notes-toggle {
-		display: inline-flex;
-		height: 2.25rem;
-		align-items: center;
-		gap: 0.5rem;
-		padding-inline: 0.625rem;
-		border-radius: 0.5rem;
-		background: var(--color-stone-100);
-		color: var(--color-stone-600);
-		font-size: 0.75rem;
-		font-weight: 500;
-		transition:
-			color 130ms ease,
-			background 130ms ease;
-	}
-
-	.notes-toggle:hover {
-		background: var(--color-stone-200);
-	}
-	.notes-toggle.active {
-		background: var(--color-accent-100);
-		color: var(--color-accent-800);
-	}
-	:global(.dark) .notes-toggle {
-		background: rgb(255 255 255 / 0.06);
-		color: var(--color-stone-300);
-	}
-	:global(.dark) .notes-toggle:hover {
-		background: rgb(255 255 255 / 0.1);
-	}
-	:global(.dark) .notes-toggle.active {
-		background: color-mix(in oklab, var(--color-accent-800) 35%, transparent);
-		color: var(--color-accent-200);
-	}
-
 	/* Straddles the boundary halfway down the reading area. Only the handle itself takes pointer
 	   events, so the transparent overlay around it never blocks text selection or scrolling. */
 	.column-resize-handle {
@@ -1628,15 +1581,6 @@
 	}
 
 	@media (min-width: 640px) and (max-width: 1280px), (update: slow), (monochrome) {
-		.notes-toggle {
-			height: 2.75rem;
-			border: 1px solid var(--color-stone-400);
-			background: var(--surface-raised);
-			color: var(--color-stone-800);
-			font-size: 0.8125rem;
-			font-weight: 650;
-		}
-
 		.column-resize-handle span {
 			width: 1rem;
 			height: 2.25rem;
@@ -1813,6 +1757,21 @@
 		hyphens: auto;
 	}
 
+	.verse-comment-row:not(.with-comment) {
+		display: contents;
+	}
+
+	.verse-comment-row.with-comment {
+		display: block;
+		margin-block: 0.8rem;
+		text-align: left;
+	}
+
+	.verse-comment-row.with-comment .flow-verse {
+		display: block;
+		margin-bottom: 0.65rem;
+	}
+
 	.verse-lead {
 		white-space: nowrap;
 	}
@@ -1850,26 +1809,6 @@
 		font-family: var(--font-serif);
 		font-size: calc(1.08rem * var(--reader-font-scale, 1));
 		line-height: 1.65;
-	}
-
-	.flow-note {
-		padding: 0.8rem;
-	}
-
-	.hidden-note {
-		display: none;
-	}
-
-	.note-chapter-title {
-		margin-bottom: 0.6rem;
-		font-family: var(--font-serif);
-		font-size: 1rem;
-		font-weight: 650;
-		color: var(--color-stone-700);
-	}
-
-	:global(.dark) .note-chapter-title {
-		color: var(--color-stone-200);
 	}
 
 	.loading-chapter {
