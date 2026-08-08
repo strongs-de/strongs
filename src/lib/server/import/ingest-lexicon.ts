@@ -40,6 +40,8 @@ export async function ingestLexicon(
 	/** Set by a `license` event, which — coming from a `<prologue>` before `<entries>` — always
 	 *  arrives before the first `lexiconEntry` and so is ready by the time {@link ensureResource} runs. */
 	let licenseHtml: string | undefined;
+	/** Set by a `usageNotes` event; same timing guarantee as {@link licenseHtml} above. */
+	let usageNotesHtml: string | undefined;
 
 	const ensureResource = async (entry: ParsedLexiconEntry) => {
 		if (resourceId) return;
@@ -61,6 +63,7 @@ export async function ingestLexicon(
 				canon: language === 'grc' ? 'nt' : 'ot',
 				direction: language === 'hbo' ? 'rtl' : 'ltr',
 				licenseHtml: licenseHtml ?? null,
+				usageNotesHtml: usageNotesHtml ?? null,
 				sourceFormat: options.sourceFormat,
 				sourceFile: options.sourceFile ?? null,
 				status: 'importing'
@@ -129,6 +132,10 @@ export async function ingestLexicon(
 
 			case 'license':
 				licenseHtml = event.licenseHtml;
+				break;
+
+			case 'usageNotes':
+				usageNotesHtml = event.usageNotesHtml;
 				break;
 
 			default:

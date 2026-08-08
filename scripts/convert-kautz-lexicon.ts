@@ -10,15 +10,20 @@
  *
  * The preferred source is his own Word manuscript (richer than the plain-text/HTML mirrors published
  * at sermon-online.com: it is the only one that still carries bold/italic runs, and it also contains
- * the copyright line and the abbreviation glossary, so nothing has to be supplied separately). Convert
- * it to HTML first — `pandoc` preserves paragraph-per-line structure and `<strong>`/`<em>` runs, which
- * is exactly what this script expects:
+ * the copyright line, the abbreviation glossary and his usage-notes preface, so nothing has to be
+ * supplied separately). Convert it to HTML first — `pandoc` preserves paragraph-per-line structure and
+ * `<strong>`/`<em>` runs, which is exactly what this script expects:
  *
  *   pandoc -f docx -t html --wrap=preserve -o data/private/kautz-source.html data/private/kautz.docx
  *   node scripts/convert-kautz-lexicon.ts data/private/kautz-source.html data/stronggreek_de_kautz.xml
  *
- * A plain-text source (the sermon-online.com mirror) also still works, just without bold/italic and
- * without the abbreviation glossary (pass `--abbreviations` to supply one separately in that case).
+ * A plain-text source (the sermon-online.com mirror) also still works, just without bold/italic, the
+ * abbreviation glossary (pass `--abbreviations` to supply one separately) or the usage notes.
+ *
+ * His "2. Hinweise zur Benützung des Lexikons" section — the reading guide explaining the "I.) II.)
+ * 1.) 2.)" numbering and the Gräz./LXX/Synonyme/Wortfamilie/Ggs. labels — becomes a `<usage_notes>`
+ * element next to `<prologue>`, so the site can point readers at it instead of leaving them to infer
+ * the conventions from the entries alone; see {@link extractUsageNotesFromLines}.
  *
  * Kautz' source has no Greek unicode headwords, only German transliteration, so this borrows the
  * lemma, BETA code, SBL transliteration and pronunciation from the existing public-domain
@@ -444,6 +449,60 @@ function extractCopyrightFromLines(lines: string[]): string | undefined {
 	return line ? stripMarkers(line).trim() : undefined;
 }
 
+/** The heading text that opens and closes Kautz' "2. Hinweise zur Benützung des Lexikons" section —
+ *  his own guide to reading the dictionary (the "I.) II.) 1.) 2.)" numbering, the Gräz./LXX/Synonyme/
+ *  Wortfamilie labels, etc.) — so it can be sliced out and surfaced next to the definition on the site,
+ *  same as {@link ABBREVIATIONS_START}/{@link ABBREVIATIONS_END} above. */
+const USAGE_NOTES_START = '2. Hinweise zur Benützung des Lexikons';
+const USAGE_NOTES_END = '3. Die für die Bearbeitung des Lexikons verwendete Fachliteratur';
+
+/** Recognises where a new paragraph starts within the usage-notes section. Kautz hard-wraps every line
+ *  there like the dictionary body itself, with no blank line marking a real paragraph break, so — same
+ *  workaround as {@link extractAbbreviationsFromLines} needing this project's own reading of his section
+ *  headings — this project's own reading of his paragraph openings stands in for one. Unlike the
+ *  abbreviation glossary or a dictionary entry, this text is fixed and read once, not per Strong's
+ *  number, so a short list tied to his specific wording is proportionate rather than a general parser. */
+const USAGE_NOTES_PARAGRAPH_STARTS = [
+	/^Um das Lexikon/,
+	/^für Strong Nr\./,
+	/^Das Lexikon ist alphabetisch/,
+	/^Nach einer Leerzeile folgen/,
+	/^In Klammern:/,
+	/^Dann folgt eine Angabe/,
+	/^Hinter der Abkürzung:/,
+	/^Mit Hilfe der Strong/,
+	/^Nach einer weiteren Leerzeile/,
+	/^Jede Hauptbedeutung/,
+	/^Schließlich wird/,
+	/^Korrektur- und Verbesserungsvorschläge/,
+	/^Korrekturvorschläge senden/
+];
+
+/** Extracts Kautz' usage-notes section as HTML paragraphs, glossing his abbreviations the same way a
+ *  definition does (see {@link wrapAbbreviations}) — `undefined` if the manuscript doesn't have the
+ *  section (e.g. a plain-text source, which never reaches this far since it has no headings to find). */
+function extractUsageNotesFromLines(lines: string[]): string | undefined {
+	const startIndex = lines.findIndex((line) => stripMarkers(line).trim() === USAGE_NOTES_START);
+	const endIndex = lines.findIndex((line) => stripMarkers(line).trim() === USAGE_NOTES_END);
+	if (startIndex === -1 || endIndex === -1 || endIndex <= startIndex) return undefined;
+
+	const paragraphs: string[] = [];
+	for (const raw of lines.slice(startIndex + 1, endIndex)) {
+		const trimmed = stripMarkers(raw).trim();
+		if (!trimmed) continue;
+
+		const startsNewParagraph =
+			paragraphs.length === 0 ||
+			USAGE_NOTES_PARAGRAPH_STARTS.some((pattern) => pattern.test(trimmed));
+		if (startsNewParagraph) paragraphs.push(trimmed);
+		else paragraphs[paragraphs.length - 1] += ` ${trimmed}`;
+	}
+
+	return paragraphs.length > 0
+		? paragraphs.map((paragraph) => wrapAbbreviations(paragraph)).join('<br/><br/>')
+		: undefined;
+}
+
 /** Wraps every recurring Kautz abbreviation ("Gräz.", "Subst.Fem.", "ua." …) in a native tooltip. */
 function wrapAbbreviationTokens(text: string, placeholder: (tag: string) => string): string {
 	let out = '';
@@ -846,13 +905,19 @@ async function main() {
 		'Gerhard Kautz',
 		'G. Kautz'
 	);
+	const usageNotes = isHtml ? extractUsageNotesFromLines(lines) : undefined;
+	if (usageNotes)
+		console.log('extracted the usage-notes section ("Hinweise zur Benützung des Lexikons")');
 
 	const xml = [
 		`<?xml version='1.0' encoding='utf-8' standalone='yes'?>`,
-		`<strongsdictionary><prologue>${escapeXml(prologue)}</prologue><entries>`,
+		`<strongsdictionary><prologue>${escapeXml(prologue)}</prologue>`,
+		usageNotes ? `<usage_notes>${usageNotes}</usage_notes>` : '',
+		`<entries>`,
 		` ${xmlEntries.join('\n ')}`,
 		`</entries></strongsdictionary>`
 	]
+		.filter(Boolean)
 		.join('\n')
 		.replaceAll(BOLD_OPEN, '<b>')
 		.replaceAll(BOLD_CLOSE, '</b>')

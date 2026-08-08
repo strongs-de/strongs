@@ -23,6 +23,7 @@ export type ReadableResource = Pick<
 	| 'hasStrongs'
 	| 'hasMorphology'
 	| 'licenseHtml'
+	| 'usageNotesHtml'
 >;
 
 const CACHE_TTL_MS = 30_000;
@@ -49,7 +50,8 @@ export async function listResources(db: Database): Promise<ReadableResource[]> {
 			sortOrder: resources.sortOrder,
 			hasStrongs: resources.hasStrongs,
 			hasMorphology: resources.hasMorphology,
-			licenseHtml: resources.licenseHtml
+			licenseHtml: resources.licenseHtml,
+			usageNotesHtml: resources.usageNotesHtml
 		})
 		.from(resources)
 		.where(and(eq(resources.isPublic, true), eq(resources.status, 'ready')))

@@ -71,6 +71,9 @@ export const resources = pgTable(
 		hasMorphology: boolean('has_morphology').notNull().default(false),
 		/** Rendered under each column; holds the rights notice a licence requires. */
 		licenseHtml: text('license_html'),
+		/** A dictionary's own "how to read this" preface, e.g. Kautz' "Hinweise zur Benützung des
+		 *  Lexikons" — shown collapsed next to a lexicon entry rather than repeated inline everywhere. */
+		usageNotesHtml: text('usage_notes_html'),
 		sourceFormat: text('source_format'),
 		/** Path of the archived upload inside UPLOAD_DIR, so an import can be repeated. */
 		sourceFile: text('source_file'),

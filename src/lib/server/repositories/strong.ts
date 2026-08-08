@@ -26,6 +26,8 @@ export type StrongEntry = {
 	language: 'grc' | 'hbo';
 	/** Rights notice of the lexicon this entry came from, e.g. a translated dictionary's copyright. */
 	licenseHtml: string | null;
+	/** The lexicon's own "how to read this" preface, e.g. Kautz' "Hinweise zur Benützung des Lexikons". */
+	usageNotesHtml: string | null;
 };
 
 export type StrongGloss = {
@@ -69,7 +71,8 @@ export async function loadStrongEntry(
 			kjvDefinitionHtml: lexiconEntries.kjvDefinitionHtml,
 			seeAlso: lexiconEntries.seeAlso,
 			language: lexiconEntries.language,
-			licenseHtml: resources.licenseHtml
+			licenseHtml: resources.licenseHtml,
+			usageNotesHtml: resources.usageNotesHtml
 		})
 		.from(lexiconEntries)
 		.innerJoin(resources, eq(resources.id, lexiconEntries.resourceId))

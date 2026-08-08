@@ -110,6 +110,22 @@
 						<p class="text-stone-500 dark:text-stone-400">{data.entry.licenseHtml}</p>
 					</section>
 				{/if}
+				{#if data.entry.usageNotesHtml}
+					<details class="rounded-lg border border-stone-200 p-3 dark:border-stone-800">
+						<summary
+							class="cursor-pointer text-xs font-semibold tracking-wide text-stone-500 uppercase"
+						>
+							{t('strong.usageNotes')}
+						</summary>
+						<div
+							class="lexicon mt-2 text-stone-500 dark:text-stone-400"
+							use:verseHoverPopover={{ bibleId: data.primaryBibleId }}
+						>
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+							{@html data.entry.usageNotesHtml}
+						</div>
+					</details>
+				{/if}
 			</div>
 		</details>
 	{/if}
@@ -354,6 +370,23 @@
 					</h2>
 					<p class="text-xs text-stone-500 dark:text-stone-400">{data.entry.licenseHtml}</p>
 				</section>
+			{/if}
+
+			{#if data.entry?.usageNotesHtml}
+				<details class="rounded-lg border border-stone-200 p-3 dark:border-stone-800">
+					<summary
+						class="cursor-pointer text-xs font-semibold tracking-wide text-stone-500 uppercase"
+					>
+						{t('strong.usageNotes')}
+					</summary>
+					<div
+						class="lexicon mt-2 text-xs text-stone-500 dark:text-stone-400"
+						use:verseHoverPopover={{ bibleId: data.primaryBibleId }}
+					>
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						{@html data.entry.usageNotesHtml}
+					</div>
+				</details>
 			{/if}
 		</aside>
 	</div>
