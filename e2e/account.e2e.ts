@@ -46,11 +46,10 @@ test('registration, sign out and sign in again', async ({ page }) => {
 	await expect(page.getByRole('heading', { name: 'Einstellungen' })).toBeVisible();
 
 	await page.getByRole('button', { name: 'Abmelden' }).click();
-	// Signing out lands on the reader, so the check is that the session is gone, not the address.
-	// Anmelden lives in the consolidated user menu now.
-	await page.getByRole('button', { name: 'Konto-Menü' }).click();
-	await expect(page.getByRole('menuitem', { name: 'Anmelden' })).toBeVisible();
+	await expect(page).toHaveURL(/\/$/);
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('Lies den Text');
 
+	// The public landing page proves the session is gone; protected pages must still redirect.
 	await page.goto('/account');
 	await expect(page).toHaveURL(/\/login/);
 
