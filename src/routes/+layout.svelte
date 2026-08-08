@@ -31,18 +31,25 @@
 		if (reader && readerLocation.reference) return formatReference(readerLocation.reference);
 		return (page.data.title as string | undefined) ?? '';
 	});
+	const standalonePage = $derived(
+		page.url.pathname === '/about' || (page.url.pathname === '/' && !data.user)
+	);
 </script>
 
 <svelte:head><link rel="icon" href="/icon.png" /></svelte:head>
 
-<div class="flex min-h-full flex-col" style="--reader-font-scale: {data.readerFontScale / 100}">
-	<SiteHeader
-		{query}
-		previous={reader?.previous ? referencePath(reader.previous) : null}
-		next={reader?.next ? referencePath(reader.next) : null}
-		user={data?.user ?? null}
-		readerPreferences={reader ? { fontScale: data.readerFontScale } : null}
-	/>
-
+{#if standalonePage}
 	{@render children()}
-</div>
+{:else}
+	<div class="flex min-h-full flex-col" style="--reader-font-scale: {data.readerFontScale / 100}">
+		<SiteHeader
+			{query}
+			previous={reader?.previous ? referencePath(reader.previous) : null}
+			next={reader?.next ? referencePath(reader.next) : null}
+			user={data?.user ?? null}
+			readerPreferences={reader ? { fontScale: data.readerFontScale } : null}
+		/>
+
+		{@render children()}
+	</div>
+{/if}

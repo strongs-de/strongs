@@ -3,6 +3,7 @@ import { config } from '$lib/server/config';
 import { getDb } from '$lib/server/db';
 import { countRecent, recordFailedLogin } from '$lib/server/auth/rate-limit';
 import { mailer } from '$lib/server/mail';
+import { passwordResetMail } from '$lib/server/mail/templates';
 import { createPasswordReset, findUserByEmail } from '$lib/server/repositories/users';
 import { logger } from '$lib/server/logger';
 
@@ -29,18 +30,7 @@ export const actions = {
 			const link = new URL(`/password-reset/${token}`, config().ORIGIN).toString();
 
 			try {
-				await mailer().send({
-					to: user.email,
-					subject: 'Akribos: Passwort zurücksetzen',
-					text: [
-						'Du hast angefordert, dein Passwort bei Akribos zurückzusetzen.',
-						'',
-						`Öffne dazu diesen Link: ${link}`,
-						'',
-						'Der Link ist eine Stunde gültig und kann nur einmal verwendet werden.',
-						'Wenn du das nicht warst, kannst du diese E-Mail ignorieren.'
-					].join('\n')
-				});
+				await mailer().send({ to: user.email, ...passwordResetMail(link) });
 			} catch (error) {
 				// A mail failure must not reveal that the address exists, so it is logged and swallowed.
 				logger.error({ err: error }, 'sending the password reset mail failed');

@@ -41,6 +41,11 @@ Der zentrale Reader ist `src/routes/[...reference]/+page.svelte`; sein Server-Lo
 liegen in der gleichnamigen `+page.server.ts`. Die REST-Nachladung für Endless Scrolling erfolgt über
 `src/routes/api/reader/[book]/[chapter]/+server.ts`.
 
+Die Root-Route `/` zeigt nicht angemeldeten Besuchern die Marketing-Landingpage. Angemeldete Leser
+werden dort unmittelbar zu ihrer im `location`-Cookie gespeicherten letzten Lesestelle weitergeleitet,
+mit Johannes 1 als Fallback. `/about` bleibt als direkte Adresse derselben Landingpage erhalten. Weil
+das Root-Verhalten vom Session-Cookie abhängt, darf die Antwort nicht öffentlich gecacht werden.
+
 Der Reader zeigt jede Ressource in einer eigenen `.flow-column`. Alle geladenen Kapitel stehen in
 `streamChapters`; DOM-Schlüssel sind `book:chapter` beziehungsweise für Verse `book:chapter:verse`.
 `flowColumns` enthält die Scrollcontainer in Spaltenreihenfolge. Ein Kapitel vor oder hinter dem
